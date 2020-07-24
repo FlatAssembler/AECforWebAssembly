@@ -6,7 +6,9 @@ struct test { // When the debugger doesn't work, "cassert" doesn't help a lot.
 
 void tokenizerTests() {
   std::vector<test> tests(
-      {{"5+5", "['5','+','5']"},
+      {{"\"/*Comment inside a string*/\"",
+        "['\"/*Comment inside a string*/\"']"},
+       {"5+5", "['5','+','5']"},
        {"5+5=10", "['5','+','5','=','10']"},
        {"structureName.structureMember/3.14159265359",
         "['structureName','.','structureMember','/','3.14159265359']"},
@@ -16,8 +18,10 @@ void tokenizerTests() {
         "['a',':=','a','+','1',';','b',':=','b','-','1',';']"},
        {"/*This should be tokenized into\nan empty string*/", "[]"},
        {"a/*Randomly\ninserted\ncomment.*/+/*Another\nrandom\ncomment*/b",
-        "['a','+','b']"}});
-  for (int i = 0; i < tests.size(); i++) {
+        "['a','+','b']"},
+       {"array_name:={1,1+1,1+1+1}", "['array_name',':=','{','1',',','1','+','"
+                                     "1',',','1','+','1','+','1','}']"}});
+  for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));
     if (result != tests[i].expectedResult) {
@@ -52,8 +56,11 @@ void simpleParserTests() {
         "1) 0 (?: (< (+ 2 2) 4) (- 0 1) (- 0 3))))"},
        {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)",
         "(?: (> (+ 2 2) 5) (?: (< (+ 3 3) 7) 1 (- 0 2)) (?: (< (- (+ 2 2) 4) "
-        "1) 0 (?: (< (+ 2 2) 4) (- 0 1) (- 0 3))))"}});
-  for (int i = 0; i < tests.size(); i++) {
+        "1) 0 (?: (< (+ 2 2) 4) (- 0 1) (- 0 3))))"},
+       {"some_array[i+1]", "(some_array (+ i 1))"},
+       {"array_pointer:={1,1+1,1+1+1}",
+        "(:= array_pointer ({} 1 (+ 1 1) (+ (+ 1 1) 1)))"}});
+  for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
             .getLispExpression();

@@ -14,7 +14,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
   bool areWeInAString = false, areWeInAComment = false;
   string stringDelimiter, commentDelimiter;
   try {
-    for (int i = 0; i < input.size(); i++) {
+    for (unsigned int i = 0; i < input.size(); i++) {
 #ifndef NDEBUG
       std::cerr << "DEBUG: Now we are tokenizing the character #" << i << ": '"
                 << input[i] << "'." << std::endl;
@@ -150,7 +150,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         iterator--;
         tokenizedExpression.erase(iterator + 1);
       }
-    for (int i = 1; i < tokenizedExpression.size(); i++)
+    for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
       if ((tokenizedExpression[i].text ==
                "(" or // Mark the names of functions...
            tokenizedExpression[i].text ==
@@ -161,7 +161,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         tokenizedExpression[i - 1].text += tokenizedExpression[i].text;
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }
-    for (int i = 1; i < tokenizedExpression.size(); i++)
+    for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
       if (tokenizedExpression[i].text == "=" and
           tokenizedExpression[i - 1].text ==
               ":") // The ":=" assignment operator.
@@ -169,7 +169,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         tokenizedExpression[i - 1].text = ":=";
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }
-  } catch (std::regex_error error) {
+  } catch (std::regex_error &error) {
     std::cerr << "Internal compiler error in tokenizer: " << error.what() << ":"
               << error.code() << std::endl;
     return std::vector<TreeNode>();

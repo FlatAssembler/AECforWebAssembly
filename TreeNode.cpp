@@ -29,7 +29,7 @@ public:
     std::string ret = "[";
     if (!tokenizedString.size())
       return "[]";
-    for (int i = 0; i < tokenizedString.size(); i++)
+    for (unsigned int i = 0; i < tokenizedString.size(); i++)
       if (i != tokenizedString.size() - 1)
         ret += "'" + tokenizedString[i].text + "',";
       else
@@ -50,7 +50,7 @@ public:
                                       ? (text.substr(0, text.size() - 1))
                                       : (text)) +
                                  " ";
-    for (int i = 0; i < children.size(); i++)
+    for (unsigned int i = 0; i < children.size(); i++)
       if (i == children.size() - 1)
         LispExpression += children[i].getLispExpression() + ")";
       else

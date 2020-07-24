@@ -7,12 +7,12 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                Associativity associativity) {
   using std::regex;
   using std::regex_match;
-  for (int i = associativity == left ? 0 : input.size() - 1;
-       associativity == left ? i < input.size() : i >= 0;
+  for (int i = associativity == left ? 0 : int(input.size()) - 1;
+       associativity == left ? i < int(input.size()) : i >= 0;
        i += associativity == left ? 1 : -1) {
     if (std::count(operators.begin(), operators.end(), input[i].text) and
         !input[i].children.size()) {
-      if (!i or i == input.size() - 1) {
+      if (!i or i == int(input.size()) - 1) {
         std::cerr << "Line " << input[i].lineNumber << ", Column "
                   << input[i].columnNumber
                   << ", Parser error: The binary operator \"" << input[i].text
@@ -50,13 +50,17 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
 }
 
 std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
+#ifndef NDEBUG
+  std::cerr << "DEBUG: Beginning to parse the array of tokens: "
+            << JSONifyArrayOfTokens(input) << std::endl;
+#endif
   auto parsedExpression = input;
-  for (int i = 0; i < parsedExpression.size(); i++)
+  for (unsigned int i = 0; i < parsedExpression.size(); i++)
     if (parsedExpression[i].text.back() == '(' and
         !parsedExpression[i].children.size()) {
-      int firstParenthesis = i;
-      int nextParenthesis = i + 1;
-      int counterOfOpenParentheses = 1;
+      unsigned int firstParenthesis = i;
+      unsigned int nextParenthesis = i + 1;
+      unsigned int counterOfOpenParentheses = 1;
       while (counterOfOpenParentheses) {
         if (nextParenthesis >= parsedExpression.size()) {
           std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
@@ -72,7 +76,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
         nextParenthesis++;
       }
       std::vector<TreeNode> nodesThatTheRecursionDealsWith;
-      for (int i = firstParenthesis + 1; i < nextParenthesis - 1;
+      for (unsigned int i = firstParenthesis + 1; i < nextParenthesis - 1;
            i++) // Don't include the parentheses in the expression passed to the
                 // recursion, otherwise you will end up in an infinite loop.
         nodesThatTheRecursionDealsWith.push_back(parsedExpression[i]);
@@ -109,9 +113,121 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
             nodesThatTheRecursionDealsWith.end());
       }
     }
+  for (unsigned int i = 0; i < parsedExpression.size(); i++)
+    if (parsedExpression[i].text.back() == '[' and
+        parsedExpression[i].children.size() == 0) // Array indices
+    {
+      unsigned int nameOfTheArray = i;
+      unsigned int counterOfArrayNames = 1;
+      unsigned int closedBracket = nameOfTheArray + 1;
+      while (counterOfArrayNames) {
+        if (closedBracket >= parsedExpression.size()) {
+          std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
+                    << parsedExpression[i].columnNumber
+                    << ", Parser error: The index of the array \""
+                    << parsedExpression[i].text.substr(
+                           0, parsedExpression[i].text.size() - 1)
+                    << "\" is not closed by \"]\"." << std::endl;
+          break;
+        }
+        if (parsedExpression[closedBracket].text == "]")
+          counterOfArrayNames--;
+        if (parsedExpression[closedBracket].text.back() == '[')
+          counterOfArrayNames++;
+        closedBracket++;
+      }
+      closedBracket--;
+      std::vector<TreeNode> nodesThatTheRecursionDealsWith;
+      for (unsigned int i = nameOfTheArray + 1; i < closedBracket;
+           i++) // Again, it's important not to include brackets in the array
+                // that's passed to the recursion.
+        nodesThatTheRecursionDealsWith.push_back(parsedExpression[i]);
+      nodesThatTheRecursionDealsWith =
+          parseExpression(nodesThatTheRecursionDealsWith);
+      if (nodesThatTheRecursionDealsWith.size() == 0) {
+        std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
+                  << parsedExpression[i].columnNumber
+                  << ", Parser error: Array index of the array \""
+                  << parsedExpression[i].text.substr(
+                         0, parsedExpression[i].text.size() -
+                                1) // Don't print the '[' character at the end
+                                   // of the array name (as the array name is
+                                   // visible to the parser).
+                  << "\" is empty!" << std::endl;
+        break;
+      }
+      if (nodesThatTheRecursionDealsWith.size() > 1) {
+        std::cerr << "Line " << nodesThatTheRecursionDealsWith[1].lineNumber
+                  << ", Column "
+                  << nodesThatTheRecursionDealsWith[1].columnNumber
+                  << ", Parser error: Unexpected token \""
+                  << nodesThatTheRecursionDealsWith[1].text << "\"!"
+                  << std::endl;
+      }
+      parsedExpression[i].children.insert(
+          parsedExpression[i].children.begin(),
+          nodesThatTheRecursionDealsWith.begin(),
+          nodesThatTheRecursionDealsWith.end());
+      parsedExpression.erase(
+          parsedExpression.begin() + nameOfTheArray +
+              1, // It's important to exclude the name of the array from the
+                 // portion about to be erased.
+          parsedExpression.begin() + closedBracket +
+              1 // And it's also important to include the closing bracket into
+                // the portion about to be erased.
+      );
+    }
+  for (unsigned int i = 0; i < parsedExpression.size(); i++)
+    if (parsedExpression[i].text == "{") // Array initializer
+    {
+      unsigned int openCurlyBrace = i;
+      unsigned int closedCurlyBrace = i + 1;
+      unsigned int curlyBracesCounter = 1;
+      while (curlyBracesCounter) {
+        if (closedCurlyBrace >= parsedExpression.size()) {
+          std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
+                    << parsedExpression[i].columnNumber
+                    << ", Parser error: The curly brace \"{\" isn't closed!"
+                    << std::endl;
+          break;
+        }
+        if (parsedExpression[closedCurlyBrace].text == "}")
+          curlyBracesCounter--;
+        if (parsedExpression[closedCurlyBrace].text == "{")
+          curlyBracesCounter++;
+        closedCurlyBrace++;
+      }
+      closedCurlyBrace--;
+      std::vector<TreeNode> nodesThatTheRecursionDealsWith(
+          parsedExpression.begin() + openCurlyBrace + 1,
+          parsedExpression.begin() +
+              closedCurlyBrace); // We aren't in JavaScript, let's use the
+                                 // features of C++, such as the iterator range
+                                 // constructors...
+      nodesThatTheRecursionDealsWith =
+          parseExpression(nodesThatTheRecursionDealsWith);
+      nodesThatTheRecursionDealsWith.erase(
+          std::remove_if(nodesThatTheRecursionDealsWith.begin(),
+                         nodesThatTheRecursionDealsWith.end(),
+                         [](TreeNode node) { return node.text == ","; }),
+          nodesThatTheRecursionDealsWith.end()); //...and lambda functions.
+#ifndef NDEBUG
+      std::cerr << "DEBUG: After std::remove_if, we are dealing with: "
+                << JSONifyArrayOfTokens(nodesThatTheRecursionDealsWith)
+                << std::endl;
+#endif
+      parsedExpression[openCurlyBrace].children.insert(
+          parsedExpression[openCurlyBrace].children.begin(),
+          nodesThatTheRecursionDealsWith.begin(),
+          nodesThatTheRecursionDealsWith.end());
+      parsedExpression.erase(parsedExpression.begin() + openCurlyBrace + 1,
+                             parsedExpression.begin() + closedCurlyBrace + 1);
+      parsedExpression[openCurlyBrace].text = "{}";
+    }
   for (int i = parsedExpression.size() - 1; i >= 0;
        i--) // The unary "-" operator.
-    if (parsedExpression[i].text == "-" and i != parsedExpression.size() - 1 and
+    if (parsedExpression[i].text == "-" and
+        i != int(parsedExpression.size()) - 1 and
         parsedExpression[i].children.size() == 0 and
         (!i or
          (!std::regex_match(parsedExpression[i - 1].text,
@@ -129,14 +245,14 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       {{"*", "/"}, {"-", "+"}, {"<", ">", "="}, {"and"}, {"or"}});
   parsedExpression =
       applyBinaryOperators(parsedExpression, {"."}, Associativity::right);
-  for (int i = 0; i < leftAssociativeBinaryOperators.size(); i++)
+  for (unsigned int i = 0; i < leftAssociativeBinaryOperators.size(); i++)
     parsedExpression = applyBinaryOperators(parsedExpression,
                                             leftAssociativeBinaryOperators[i],
                                             Associativity::left);
   for (int i = parsedExpression.size() - 1; i >= 0;
        i--) // The ternary conditional "?:" operator (it's right-associative).
     if (parsedExpression[i].text == ":") {
-      if (i == parsedExpression.size() - 1) {
+      if (i == int(parsedExpression.size()) - 1) {
         std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
                   << parsedExpression[i].columnNumber
                   << ", Parser error: The ternary operator \"?:\" has less "
@@ -205,6 +321,10 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
     }
   parsedExpression =
       applyBinaryOperators(parsedExpression, {":="}, Associativity::right);
+#ifndef NDEBUG
+  std::cerr << "DEBUG: Returning the array: "
+            << JSONifyArrayOfTokens(parsedExpression) << std::endl;
+#endif
   return parsedExpression;
 }
 
