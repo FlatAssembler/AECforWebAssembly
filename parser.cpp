@@ -328,6 +328,28 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   return parsedExpression;
 }
 
+std::vector<TreeNode> TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
+	auto inputWithParenthesesParsed=parseExpression(input);
+	if (input.size()<2) {
+		std::cerr <<"Line " <<inputWithParenthesesParsed[0].lineNumber <<", Column " <<inputWithParenthesesParsed[0].columnNumber <<", Parser error: Unexpected token \"" <<inputWithParenthesesParsed[0].text <<"\"!" <<std::endl;
+		return inputWithParenthesesParsed;
+	}
+	for (unsigned i=0; i<inputWithParenthesesParsed.size(); i++)
+		if (inputWithParenthesesParsed[i].text==":=") //Initial assignments.
+		{
+			TreeNode nodeWithVariableName=inputWithParenthesesParsed[i].children[0]; //Let's assume the parser has done a good job thus far.
+			TreeNode NodeWithAssignment=inputWithParenthesesParsed[i].children[1];
+			TreeNode temporaryNode=TreeNode(":=",inputWithParenthesesParsed[i].lineNumber,inputWithParenthesesParsed[i].columnNumber);
+			temporaryNode.children.push_back(NodeWithAssignment);
+			nodeWithVariableName.children.push_back(temporaryNode);
+			inputWithParenthesesParsed[i]=nodeWithVariableName;
+		}
+	inputWithParenthesesParsed.erase(std::remove_if(inputWithParenthesesParsed.begin(),inputWithParenthesesParsed.end(),[](TreeNode node){return node.text==",";}),inputWithParenthesesParsed.end());
+	inputWithParenthesesParsed[0].children.insert(inputWithParenthesesParsed[0].children.begin(),inputWithParenthesesParsed.begin()+1,inputWithParenthesesParsed.end());
+	inputWithParenthesesParsed.erase(inputWithParenthesesParsed.begin()+1,inputWithParenthesesParsed.end());
+	return inputWithParenthesesParsed;
+}
+
 std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
   throw std::string("Parser is not yet implemented!");
 }
