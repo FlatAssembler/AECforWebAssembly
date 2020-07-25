@@ -368,10 +368,26 @@ TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
 
 std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
   typedef std::vector<TreeNode> TreeNodes;
+#ifndef NDEBUG // Well, constructors and all those object-oriented things in C++
+               // are only useful if you know what you're doing. If you don't,
+               // you are shooting yourself in the foot, like I did here.
+  if (input.size()) {
+    std::cerr << "DEBUG: Basic data type sizes are:\n";
+    for (auto i = input[0].basicDataTypeSizes.begin();
+         i != input[0].basicDataTypeSizes.end(); i++)
+      std::cerr << "DEBUG: " << i->first << "\t" << i->second << '\n';
+    std::flush(std::cerr);
+  }
+#endif
   for (unsigned i = 0; i < input.size(); i++)
     if (input[i].basicDataTypeSizes.count(input[i].text) and
         input[i].children.empty()) { // Declaration of a variable of a basic
                                      // type (Integer32...).
+#ifndef NDEBUG
+      std::cerr << "DEBUG: Parsing a variable declaration at line "
+                << input[i].lineNumber << " of the type " << input[i].text
+                << "." << std::endl;
+#endif
       unsigned int typeName = i;
       unsigned int semicolon = i + 1;
       while (true) {
@@ -429,7 +445,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << ", Parser error: Unexpected end of file!" << std::endl;
         return input;
       }
-      if (input[i].text.back() != '(' or input[i].text.size() == 1) {
+      if (input[i + 1].text.back() != '(' or input[i + 1].text.size() == 1) {
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
                   << ", Parser error: Expected a function name instead of \""
@@ -459,7 +475,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   input.begin() + endOfFunctionSignature);
       TreeNodes argument;
       for (unsigned int i = 0; i < functionArguments.size() + 1; i++) {
-        if (functionArguments[i].text == "," or i == functionArguments.size()) {
+        if (i == functionArguments.size() or functionArguments[i].text == ",") {
           input[functionName].children.push_back(
               parseVariableDeclaration(argument)[0]);
         } else
@@ -572,7 +588,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << "\"!" << std::endl;
       input.erase(
           input.begin() + i,
-          (iteratorPointingToTheNextSemicolon->text == ";")
+          (iteratorPointingToTheNextSemicolon != input.end())
               ? iteratorPointingToTheNextSemicolon + 1
               : iteratorPointingToTheNextSemicolon); // If there is a semicolon
                                                      // terminating the

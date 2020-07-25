@@ -29,13 +29,13 @@ public:
          iterator != basicDataTypeSizes.end(); iterator++)
       if (iterator->first.find("Pointer") == std::string::npos)
         basicDataTypeSizes[iterator->first + "Pointer"] =
-            4; // WebAssembly is 32-bit (pointers being 32 bits or 4 bytes
-               // long), unless somebody switches to the 64-bit mode (which is
-               // rarely done).
+            4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
+               // being 32 bits or 4 bytes long), unless somebody switches to
+               // the 64-bit mode (which is rarely done).
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {
-    TreeNode();
+    *this = TreeNode();
     text = newText;
     lineNumber = newLine;
     columnNumber = newColumn;

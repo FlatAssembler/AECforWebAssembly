@@ -114,9 +114,38 @@ void parsingVariableDeclarationsTests() {
   }
 }
 
+void parserTests() {
+  std::vector<test> tests(
+      {{"Integer32 some_array[80*23],array_width:=80,array_height:=23;",
+        "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
+        "(:= 23)))"},
+       {"Function log(CharPointer string) Which Returns Nothing Is External;",
+        "(Function (log (CharPointer string)) (Returns Nothing) External)"},
+       {"Function foo(Integer32 a:=0) Which Returns Nothing Does //Nonsense "
+        "code, but useful to see if the parser is capable of parsing simple "
+        "functions.\n"
+        "Integer32 b;\n"
+        "b:=a+1;\n"
+        "EndFunction",
+        "(Function (foo (Integer32 (a (:= 0)))) (Returns Nothing) (Does "
+        "(Integer32 b) (:= b (+ a 1))))"}});
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
+                             .getLispExpression();
+    if (result != tests[i].expectedResult) {
+      std::cerr << "Internal compiler error: Parser test failed: \""
+                << tests[i].input << "\" parses into \"" << result
+                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
+                << std::endl;
+      std::exit(1);
+    }
+  }
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
   interpreterTests();
   parsingVariableDeclarationsTests();
+  parserTests();
 }
