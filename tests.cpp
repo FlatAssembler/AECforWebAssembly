@@ -75,40 +75,43 @@ void simpleParserTests() {
 }
 
 void interpreterTests() {
-	std::vector<test> tests({{"1+2*3","7"},
-							 {"(1+2)*3","9"},
-							 {"(2+2=4)?2:0","2"},
-							 {"mod(5,2)","1"},
-							 {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)+('A'+2='C'?0:-1)","0"}});
-	for (unsigned int i = 0; i < tests.size(); i++) {
-	    std::string result = std::to_string(
-	        TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
-	            .interpretAsACompileTimeConstant());
-	    if (result != tests[i].expectedResult) {
-	      std::cerr << "Internal compiler error: Interpreter test failed: \""
-	                << tests[i].input << "\" interprets into \"" << result
-	                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
-	                << std::endl;
-	      std::exit(1);
-	    }
-	  }
+  std::vector<test> tests(
+      {{"1+2*3", "7"},
+       {"(1+2)*3", "9"},
+       {"(2+2=4)?2:0", "2"},
+       {"mod(5,2)", "1"},
+       {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)+('A'+2='C'?0:-1)", "0"}});
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    std::string result = std::to_string(
+        TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
+            .interpretAsACompileTimeConstant());
+    if (result != tests[i].expectedResult) {
+      std::cerr << "Internal compiler error: Interpreter test failed: \""
+                << tests[i].input << "\" interprets into \"" << result
+                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
+                << std::endl;
+      std::exit(1);
+    }
+  }
 }
 
 void parsingVariableDeclarationsTests() {
-	std::vector<test> tests({{"Integer32 some_array[80*23],array_width:=80,array_height:=23",
-							  "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height (:= 23)))"}});
-		for (unsigned int i = 0; i < tests.size(); i++) {
-		    std::string result =
-		        TreeNode::parseVariableDeclaration(TreeNode::tokenize(tests[i].input))[0]
-		            .getLispExpression();
-		    if (result != tests[i].expectedResult) {
-		      std::cerr << "Internal compiler error: Parser test failed: \""
-		                << tests[i].input << "\" parses into \"" << result
-		                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
-		                << std::endl;
-		      std::exit(1);
-		    }
-		  }
+  std::vector<test> tests(
+      {{"Integer32 some_array[80*23],array_width:=80,array_height:=23",
+        "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
+        "(:= 23)))"}});
+  for (unsigned int i = 0; i < tests.size(); i++) {
+    std::string result = TreeNode::parseVariableDeclaration(
+                             TreeNode::tokenize(tests[i].input))[0]
+                             .getLispExpression();
+    if (result != tests[i].expectedResult) {
+      std::cerr << "Internal compiler error: Parser test failed: \""
+                << tests[i].input << "\" parses into \"" << result
+                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
+                << std::endl;
+      std::exit(1);
+    }
+  }
 }
 
 void runTests() {

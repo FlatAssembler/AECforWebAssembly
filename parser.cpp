@@ -328,28 +328,259 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   return parsedExpression;
 }
 
-std::vector<TreeNode> TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
-	auto inputWithParenthesesParsed=parseExpression(input);
-	if (input.size()<2) {
-		std::cerr <<"Line " <<inputWithParenthesesParsed[0].lineNumber <<", Column " <<inputWithParenthesesParsed[0].columnNumber <<", Parser error: Unexpected token \"" <<inputWithParenthesesParsed[0].text <<"\"!" <<std::endl;
-		return inputWithParenthesesParsed;
-	}
-	for (unsigned i=0; i<inputWithParenthesesParsed.size(); i++)
-		if (inputWithParenthesesParsed[i].text==":=") //Initial assignments.
-		{
-			TreeNode nodeWithVariableName=inputWithParenthesesParsed[i].children[0]; //Let's assume the parser has done a good job thus far.
-			TreeNode NodeWithAssignment=inputWithParenthesesParsed[i].children[1];
-			TreeNode temporaryNode=TreeNode(":=",inputWithParenthesesParsed[i].lineNumber,inputWithParenthesesParsed[i].columnNumber);
-			temporaryNode.children.push_back(NodeWithAssignment);
-			nodeWithVariableName.children.push_back(temporaryNode);
-			inputWithParenthesesParsed[i]=nodeWithVariableName;
-		}
-	inputWithParenthesesParsed.erase(std::remove_if(inputWithParenthesesParsed.begin(),inputWithParenthesesParsed.end(),[](TreeNode node){return node.text==",";}),inputWithParenthesesParsed.end());
-	inputWithParenthesesParsed[0].children.insert(inputWithParenthesesParsed[0].children.begin(),inputWithParenthesesParsed.begin()+1,inputWithParenthesesParsed.end());
-	inputWithParenthesesParsed.erase(inputWithParenthesesParsed.begin()+1,inputWithParenthesesParsed.end());
-	return inputWithParenthesesParsed;
+std::vector<TreeNode>
+TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
+  auto inputWithParenthesesParsed = parseExpression(input);
+  if (input.size() < 2) {
+    std::cerr << "Line " << inputWithParenthesesParsed[0].lineNumber
+              << ", Column " << inputWithParenthesesParsed[0].columnNumber
+              << ", Parser error: Unexpected token \""
+              << inputWithParenthesesParsed[0].text << "\"!" << std::endl;
+    return inputWithParenthesesParsed;
+  }
+  for (unsigned i = 0; i < inputWithParenthesesParsed.size(); i++)
+    if (inputWithParenthesesParsed[i].text == ":=") // Initial assignments.
+    {
+      TreeNode nodeWithVariableName =
+          inputWithParenthesesParsed[i]
+              .children[0]; // Let's assume the parser has done a good job thus
+                            // far.
+      TreeNode NodeWithAssignment = inputWithParenthesesParsed[i].children[1];
+      TreeNode temporaryNode =
+          TreeNode(":=", inputWithParenthesesParsed[i].lineNumber,
+                   inputWithParenthesesParsed[i].columnNumber);
+      temporaryNode.children.push_back(NodeWithAssignment);
+      nodeWithVariableName.children.push_back(temporaryNode);
+      inputWithParenthesesParsed[i] = nodeWithVariableName;
+    }
+  inputWithParenthesesParsed.erase(
+      std::remove_if(inputWithParenthesesParsed.begin(),
+                     inputWithParenthesesParsed.end(),
+                     [](TreeNode node) { return node.text == ","; }),
+      inputWithParenthesesParsed.end());
+  inputWithParenthesesParsed[0].children.insert(
+      inputWithParenthesesParsed[0].children.begin(),
+      inputWithParenthesesParsed.begin() + 1, inputWithParenthesesParsed.end());
+  inputWithParenthesesParsed.erase(inputWithParenthesesParsed.begin() + 1,
+                                   inputWithParenthesesParsed.end());
+  return inputWithParenthesesParsed;
 }
 
 std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
-  throw std::string("Parser is not yet implemented!");
+  typedef std::vector<TreeNode> TreeNodes;
+  for (unsigned i = 0; i < input.size(); i++)
+    if (input[i].basicDataTypeSizes.count(input[i].text) and
+        input[i].children.empty()) { // Declaration of a variable of a basic
+                                     // type (Integer32...).
+      unsigned int typeName = i;
+      unsigned int semicolon = i + 1;
+      while (true) {
+        if (semicolon >= input.size()) {
+          std::cerr << "Line " << input[typeName].lineNumber << ", Column "
+                    << input[typeName].columnNumber
+                    << ", Parser error: Expected a semi-colon to end the "
+                       "variable declaration of type "
+                    << input[typeName].text << "!" << std::endl;
+          break;
+        }
+        if (input[semicolon].text == ";")
+          break;
+        semicolon++;
+      }
+      TreeNodes nodesThatTheRecursionDealsWith(input.begin() + typeName,
+                                               input.begin() + semicolon);
+      nodesThatTheRecursionDealsWith =
+          parseVariableDeclaration(nodesThatTheRecursionDealsWith);
+      input[typeName] = nodesThatTheRecursionDealsWith[0];
+      input.erase(input.begin() + typeName + 1, input.begin() + semicolon);
+    } else if (input[i].text == "InstantiateStructure" and
+               input[i].children.empty()) {
+      if (i == input.size() - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: Unexpected end of file!" << std::endl;
+        return input;
+      }
+      unsigned int typeName = i;
+      unsigned int semicolon = i + 1;
+      while (true) {
+        if (semicolon >= input.size()) {
+          std::cerr << "Line " << input[typeName].lineNumber << ", Column "
+                    << input[typeName].columnNumber
+                    << ", Parser error: Expected a semi-colon to end the "
+                       "variable declaration of type "
+                    << input[typeName + 1].text << "!" << std::endl;
+          break;
+        }
+        if (input[semicolon].text == ";")
+          break;
+        semicolon++;
+      }
+      TreeNodes nodesThatTheRecursionDealsWith(input.begin() + typeName + 1,
+                                               input.begin() + semicolon);
+      nodesThatTheRecursionDealsWith =
+          parseVariableDeclaration(nodesThatTheRecursionDealsWith);
+      input[typeName].children.push_back(nodesThatTheRecursionDealsWith[0]);
+      input.erase(input.begin() + typeName + 1, input.begin() + semicolon);
+    } else if (input[i].text == "Function") {
+      if (i == input.size() - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: Unexpected end of file!" << std::endl;
+        return input;
+      }
+      if (input[i].text.back() != '(' or input[i].text.size() == 1) {
+        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                  << input[i + 1].columnNumber
+                  << ", Parser error: Expected a function name instead of \""
+                  << input[i + 1].text << "\"!" << std::endl;
+        return input;
+      }
+      unsigned int functionName = i + 1;
+      unsigned int endOfFunctionSignature = i + 2;
+      unsigned int counterOfParentheses = 1;
+      while (counterOfParentheses) {
+        if (endOfFunctionSignature >= input.size()) {
+          std::cerr << "Line " << input[functionName].lineNumber
+                    << ", Column: " << input[functionName].columnNumber
+                    << ", Parser error: Parenthesis in \""
+                    << input[functionName].text << "\" not closed!";
+          break;
+        }
+        if (input[endOfFunctionSignature].text == ")")
+          counterOfParentheses--;
+        if (input[endOfFunctionSignature].text.back() == '(')
+          counterOfParentheses++;
+        endOfFunctionSignature++;
+      }
+      TreeNodes functionArguments(input.begin() + functionName + 1,
+                                  input.begin() + endOfFunctionSignature - 1);
+      input.erase(input.begin() + functionName + 1,
+                  input.begin() + endOfFunctionSignature);
+      TreeNodes argument;
+      for (unsigned int i = 0; i < functionArguments.size() + 1; i++) {
+        if (functionArguments[i].text == "," or i == functionArguments.size()) {
+          input[functionName].children.push_back(
+              parseVariableDeclaration(argument)[0]);
+        } else
+          argument.push_back(functionArguments[i]);
+      }
+      if (functionName > input.size() - 5) {
+        std::cerr
+            << "Line " << input[functionName].lineNumber << ", Column "
+            << input[functionName].columnNumber
+            << ", Parser error: Expected a function declaration of the format "
+               "\"Function function_name(argument list) Which Returns "
+               "type_name Does\" or \"Function function_name(argument list) "
+               "Which Returns type_name Is External;\"!"
+            << std::endl;
+        return input;
+      }
+      if (input[functionName + 1].text != "Which") {
+        std::cerr << "Line " << input[functionName + 1].lineNumber
+                  << ", Column " << input[functionName + 1].columnNumber
+                  << ", Parser error: Expected \"Which\" instead of \""
+                  << input[functionName + 1].text << "\"!" << std::endl;
+        return input;
+      }
+      if (input[functionName + 2].text != "Returns") {
+        std::cerr << "Line " << input[functionName + 2].lineNumber
+                  << ", Column " << input[functionName + 2].columnNumber
+                  << ", Parser error: Expected \"Returns\" instead of \""
+                  << input[functionName + 2].text << "\"!" << std::endl;
+        return input;
+      }
+      input[functionName - 1].children.push_back(input[functionName]);
+      input[functionName + 2].children.push_back(input[functionName + 3]);
+      input[functionName - 1].children.push_back(input[functionName + 2]);
+      if (input[functionName + 4].text == "Is") // External function
+      {
+        if (input[functionName + 5].text != "External") {
+          std::cerr << "Line " << input[functionName + 5].lineNumber
+                    << ", Column " << input[functionName + 5].columnNumber
+                    << ", Parser error: Expected \"External\" instead of \""
+                    << input[functionName + 5].text << "\"!" << std::endl;
+          return input;
+        }
+        if (input[functionName + 6].text != ";") {
+          std::cerr << "Line " << input[functionName + 6].lineNumber
+                    << ", Column " << input[functionName + 6].columnNumber
+                    << ", Parser error: Expected \";\" instead of \""
+                    << input[functionName + 5].text << "\"!" << std::endl;
+          return input;
+        }
+        input[functionName - 1].children.push_back(input[functionName + 5]);
+        input.erase(
+            input.begin() + functionName,
+            input.begin() + functionName +
+                7); // Delete all up to, and including, the semicolon ";".
+      } else if (input[functionName + 4].text ==
+                 "Does") // Function implemented in this file (right here).
+      {
+        unsigned int endOfTheFunction = functionName + 5;
+        while (true) {
+          if (endOfTheFunction >= input.size()) {
+            std::cerr << "Line " << input[functionName + 4].lineNumber
+                      << ", Column " << input[functionName + 5].columnNumber
+                      << ", Parser error: The end of the function is not "
+                         "marked with \"EndFunction\"."
+                      << std::endl;
+            break;
+          }
+          if (input[endOfTheFunction].text == "EndFunction")
+            break;
+          endOfTheFunction++;
+        }
+        TreeNodes nodesThatTheRecursionDealsWith(
+            input.begin() + functionName + 5, input.begin() + endOfTheFunction);
+        nodesThatTheRecursionDealsWith = parse(nodesThatTheRecursionDealsWith);
+        input[functionName + 4].children.insert(
+            input[functionName + 4].children.begin(),
+            nodesThatTheRecursionDealsWith.begin(),
+            nodesThatTheRecursionDealsWith.end());
+        input[functionName - 1].children.push_back(input[functionName + 4]);
+        input.erase(input.begin() + functionName,
+                    input.begin() + endOfTheFunction +
+                        1); // Because now it's all supposed to be the children
+                            // of the "Function" node.
+      } else {
+        std::cerr << "Line " << input[functionName + 4].lineNumber
+                  << ", Column " << input[functionName + 4].columnNumber
+                  << ", Parser error: Expected either \"Is\" or \"Does\" "
+                     "instead of \""
+                  << input[functionName + 4].text << "\"." << std::endl;
+        return input;
+      }
+    } else { // Assume that what follows is an expression, presumably including
+             // a ":=".
+      auto iteratorPointingToTheNextSemicolon =
+          std::find_if(input.begin() + i, input.end(),
+                       [](TreeNode node) { return node.text == ";"; });
+      if (iteratorPointingToTheNextSemicolon == input.end())
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: The expression starting with \""
+                  << input[i].text << "\" is not ended in a semicolon!"
+                  << std::endl;
+      TreeNodes expression(input.begin() + i,
+                           iteratorPointingToTheNextSemicolon);
+      expression = parseExpression(expression);
+      if (expression.size() > 1)
+        std::cerr << "Line " << expression[1].lineNumber << ", Column "
+                  << expression[1].columnNumber
+                  << ", Parser error: Unexpected token \"" << expression[1].text
+                  << "\"!" << std::endl;
+      input.erase(
+          input.begin() + i,
+          (iteratorPointingToTheNextSemicolon->text == ";")
+              ? iteratorPointingToTheNextSemicolon + 1
+              : iteratorPointingToTheNextSemicolon); // If there is a semicolon
+                                                     // terminating the
+                                                     // expression, delete it
+                                                     // together with the
+                                                     // expression.
+      input.insert(input.begin() + i, expression.begin(), expression.end());
+      i += expression.size() - 1;
+    }
+  return input;
 }
