@@ -35,7 +35,8 @@ public:
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {
-    *this = TreeNode();
+    *this = TreeNode(); // For some weird reason, just "TreeNode()" won't do the
+                        // trick.
     text = newText;
     lineNumber = newLine;
     columnNumber = newColumn;

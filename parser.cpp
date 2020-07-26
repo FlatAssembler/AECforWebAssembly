@@ -423,7 +423,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         if (semicolon >= input.size()) {
           std::cerr << "Line " << input[typeName].lineNumber << ", Column "
                     << input[typeName].columnNumber
-                    << ", Parser error: Expected a semi-colon to end the "
+                    << ", Parser error: Expected a semicolon to end the "
                        "variable declaration of type "
                     << input[typeName + 1].text << "!" << std::endl;
           break;
@@ -478,6 +478,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         if (i == functionArguments.size() or functionArguments[i].text == ",") {
           input[functionName].children.push_back(
               parseVariableDeclaration(argument)[0]);
+          argument = TreeNodes();
         } else
           argument.push_back(functionArguments[i]);
       }
@@ -567,6 +568,93 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << input[functionName + 4].text << "\"." << std::endl;
         return input;
       }
+    } else if (input[i].text == "While" and input[i].children.empty()) {
+      auto iteratorOfTheLoopToken =
+          std::find_if(input.begin(), input.end(),
+                       [](TreeNode node) { return node.text == "Loop"; });
+      if (iteratorOfTheLoopToken == input.end())
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: There is a \"While\" token without its "
+                     "corresponding \"Loop\" token!"
+                  << std::endl;
+      TreeNodes condition(input.begin() + i + 1, iteratorOfTheLoopToken);
+      condition = parseExpression(condition);
+      if (condition.size() == 0) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: No expression between \"While\" and "
+                     "\"Loop\" tokens!"
+                  << std::endl;
+        condition.push_back(
+            TreeNode("0", input[i].lineNumber, input[i].columnNumber));
+      }
+      if (condition.size() > 1)
+        std::cerr << "Line " << condition[1].lineNumber << ", Column "
+                  << condition[1].columnNumber
+                  << ", Parser error: Unexpected token \"" << condition[1].text
+                  << "\"" << std::endl;
+      input[i].children.push_back(condition[0]);
+      if (iteratorOfTheLoopToken ==
+          input.end()) // If there is no "Loop" token...
+      {
+        input.erase(input.begin() + i + 1, input.end());
+        return input;
+      }
+      auto iteratorOfTheEndWhileToken = iteratorOfTheLoopToken;
+      unsigned int counterOfWhileLoops = 1;
+      do {
+        iteratorOfTheEndWhileToken++;
+        if (iteratorOfTheEndWhileToken == input.end())
+          break;
+        if (iteratorOfTheEndWhileToken->text == "While")
+          counterOfWhileLoops++;
+        if (iteratorOfTheEndWhileToken->text == "EndWhile")
+          counterOfWhileLoops--;
+      } while (counterOfWhileLoops);
+      if (iteratorOfTheEndWhileToken == input.end())
+        std::cerr << "Line " << iteratorOfTheLoopToken->lineNumber
+                  << ", Column " << iteratorOfTheLoopToken->columnNumber
+                  << ", Parser error: There is a \"Loop\" token without a "
+                     "corresponding \"EndWhile\" token."
+                  << std::endl;
+      TreeNodes nodesThatTheRecursionDealsWith(iteratorOfTheLoopToken + 1,
+                                               iteratorOfTheEndWhileToken);
+      nodesThatTheRecursionDealsWith = parse(nodesThatTheRecursionDealsWith);
+      iteratorOfTheLoopToken->children.insert(
+          iteratorOfTheLoopToken->children.begin(),
+          nodesThatTheRecursionDealsWith.begin(),
+          nodesThatTheRecursionDealsWith.end());
+      input[i].children.push_back(*iteratorOfTheLoopToken);
+      input.erase(
+          input.begin() + i + 1,
+          iteratorOfTheEndWhileToken == input.end()
+              ? iteratorOfTheEndWhileToken
+              : iteratorOfTheEndWhileToken +
+                    1); // If the "EndWhile" token exists, delete it now.
+    } else if (input[i].text == "Return" and input[i].children.empty()) {
+      auto iteratorOfTheSemicolon =
+          std::find_if(input.begin() + i, input.end(),
+                       [](TreeNode node) { return node.text == ";"; });
+      if (iteratorOfTheSemicolon == input.end())
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: The return statement is not terminated "
+                     "with a semicolon."
+                  << std::endl;
+      TreeNodes expression(input.begin() + i + 1, iteratorOfTheSemicolon);
+      expression = parseExpression(expression);
+      if (expression.size() > 1)
+        std::cerr << "Line " << expression[1].lineNumber << ", Column "
+                  << expression[1].columnNumber
+                  << ", Parser error: Unexpected token \"" << expression[1].text
+                  << "\"" << std::endl;
+      if (expression.size())
+        input[i].children.push_back(
+            expression[0]); // The function can return nothing at all!
+      input.erase(input.begin() + i + 1, (iteratorOfTheSemicolon == input.end())
+                                             ? iteratorOfTheSemicolon
+                                             : iteratorOfTheSemicolon + 1);
     } else { // Assume that what follows is an expression, presumably including
              // a ":=".
       auto iteratorPointingToTheNextSemicolon =

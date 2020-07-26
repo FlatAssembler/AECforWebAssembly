@@ -121,14 +121,27 @@ void parserTests() {
         "(:= 23)))"},
        {"Function log(CharPointer string) Which Returns Nothing Is External;",
         "(Function (log (CharPointer string)) (Returns Nothing) External)"},
-       {"Function foo(Integer32 a:=0) Which Returns Nothing Does //Nonsense "
+       {"Function foo(Integer32 a:=0, Integer32 c) Which Returns Nothing Does "
+        "//Nonsense "
         "code, but useful to see if the parser is capable of parsing simple "
         "functions.\n"
         "Integer32 b;\n"
         "b:=a+1;\n"
         "EndFunction",
-        "(Function (foo (Integer32 (a (:= 0)))) (Returns Nothing) (Does "
-        "(Integer32 b) (:= b (+ a 1))))"}});
+        "(Function (foo (Integer32 (a (:= 0))) (Integer32 c)) (Returns "
+        "Nothing) (Does "
+        "(Integer32 b) (:= b (+ a 1))))"},
+       {"Function factorial(Integer32 n) Which Returns Integer64 Does "
+        "Integer32 counter:=1,result:=1;"
+        "While counter<n or counter=n Loop "
+        "result:=result*counter;"
+        "EndWhile "
+        "Return result;"
+        "EndFunction",
+        "(Function (factorial (Integer32 n)) (Returns Integer64) (Does "
+        "(Integer32 (counter (:= 1)) (result (:= 1))) (While (or (< counter n) "
+        "(= counter n)) (Loop (:= result (* result counter)))) (Return "
+        "result)))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
