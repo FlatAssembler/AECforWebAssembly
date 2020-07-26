@@ -651,10 +651,168 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << "\"" << std::endl;
       if (expression.size())
         input[i].children.push_back(
-            expression[0]); // The function can return nothing at all!
+            expression[0]); // The function can return nothing at all, the
+                            // parser must not segfault then!
       input.erase(input.begin() + i + 1, (iteratorOfTheSemicolon == input.end())
                                              ? iteratorOfTheSemicolon
                                              : iteratorOfTheSemicolon + 1);
+    } else if (input[i].text == "If" and input[i].children.empty()) {
+      auto iteratorPointingToTheThenToken =
+          std::find_if(input.begin() + i, input.end(),
+                       [](TreeNode node) { return node.text == "Then"; });
+      if (iteratorPointingToTheThenToken == input.end())
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: There is a \"If\" without a "
+                     "corresponding \"Then\"!"
+                  << std::endl;
+      TreeNodes condition(input.begin() + i + 1,
+                          iteratorPointingToTheThenToken);
+      condition = parseExpression(condition);
+      if (condition.empty()) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: No expression between \"If\" and "
+                     "\"Then\" tokens!"
+                  << std::endl;
+        condition.push_back(
+            TreeNode("0", input[i].lineNumber, input[i].columnNumber));
+      }
+      if (condition.size() > 1)
+        std::cerr << "Line " << condition[1].lineNumber << ", Column "
+                  << condition[1].columnNumber
+                  << ", Parser error: Unexpected token \"" << condition[1].text
+                  << "\"!" << std::endl;
+      input[i].children.push_back(condition.front());
+      if (iteratorPointingToTheThenToken ==
+          input.end()) // If there is no "Then"...
+      {
+        input.erase(input.begin() + i + 1, input.end());
+        return input;
+      }
+      auto iteratorPointingToTheEndIfToken = iteratorPointingToTheThenToken;
+      int counterOfIfBranches = 1;
+      do {
+        iteratorPointingToTheEndIfToken++;
+        if (iteratorPointingToTheEndIfToken == input.end()) {
+          std::cerr << "Line " << iteratorPointingToTheThenToken->lineNumber
+                    << ", Column "
+                    << iteratorPointingToTheThenToken->columnNumber
+                    << ", Parser error: There is a \"Then\" token without the "
+                       "corresponding \"EndIf\" token!"
+                    << std::endl;
+          break;
+        }
+        if (iteratorPointingToTheEndIfToken->text == "EndIf")
+          counterOfIfBranches--;
+        if (iteratorPointingToTheEndIfToken->text == "If")
+          counterOfIfBranches++; // Don't look for "Then" tokens, because they
+                                 // also come after the "ElseIf" statements.
+      } while (counterOfIfBranches);
+      auto iteratorPointingToTheElseIfToken = iteratorPointingToTheThenToken;
+      counterOfIfBranches = 0;
+      while (iteratorPointingToTheElseIfToken <
+             iteratorPointingToTheEndIfToken) {
+        if (!counterOfIfBranches and
+            iteratorPointingToTheElseIfToken->text == "ElseIf")
+          break; // If the "ElseIf" is referring to the "If" token at
+                 // "input[i]", rather than to some nested "If" (which it does if
+                 // "counterOfIfBranches" is non-zero).
+        if (iteratorPointingToTheElseIfToken->text == "If")
+          counterOfIfBranches++;
+        if (iteratorPointingToTheElseIfToken->text == "EndIf")
+          counterOfIfBranches--;
+        iteratorPointingToTheElseIfToken++;
+      }
+      if (iteratorPointingToTheElseIfToken <
+          iteratorPointingToTheEndIfToken) { // If there is an "ElseIf"
+                                             // referring to this "If".
+        TreeNodes nodesThatTheRecursionDealsWith(
+            iteratorPointingToTheThenToken + 1,
+            iteratorPointingToTheElseIfToken);
+        nodesThatTheRecursionDealsWith = parse(nodesThatTheRecursionDealsWith);
+        iteratorPointingToTheThenToken->children.insert(
+            iteratorPointingToTheThenToken->children.begin(),
+            nodesThatTheRecursionDealsWith.begin(),
+            nodesThatTheRecursionDealsWith.end());
+        input[i].children.push_back(*iteratorPointingToTheThenToken);
+        iteratorPointingToTheElseIfToken->text = "Else";
+        nodesThatTheRecursionDealsWith =
+            TreeNodes(iteratorPointingToTheElseIfToken,
+                      iteratorPointingToTheEndIfToken == input.end()
+                          ? iteratorPointingToTheEndIfToken
+                          : iteratorPointingToTheEndIfToken + 1);
+        nodesThatTheRecursionDealsWith[0].text = "If";
+        nodesThatTheRecursionDealsWith = parse(nodesThatTheRecursionDealsWith);
+        iteratorPointingToTheElseIfToken->children.insert(
+            iteratorPointingToTheElseIfToken->children.begin(),
+            nodesThatTheRecursionDealsWith.begin(),
+            nodesThatTheRecursionDealsWith.end());
+        input[i].children.push_back(
+            *iteratorPointingToTheElseIfToken); // Will appear as the "Else"
+                                                // token to the compiler.
+        input.erase(
+            input.begin() + i + 1,
+            iteratorPointingToTheEndIfToken == input.end()
+                ? input.end()
+                : iteratorPointingToTheEndIfToken +
+                      1); // If there is an "EndIf" token, delete it as well.
+      } else // No "ElseIf" token, but maybe there is an "Else" token. Let's
+             // search for it!
+      {
+        auto iteratorPointingToTheElseToken = iteratorPointingToTheThenToken;
+        counterOfIfBranches = 0;
+        while (iteratorPointingToTheElseToken <
+               iteratorPointingToTheEndIfToken) {
+          if (!counterOfIfBranches and
+              iteratorPointingToTheElseToken->text == "Else")
+            break;
+          if (iteratorPointingToTheElseToken->text == "If")
+            counterOfIfBranches++;
+          if (iteratorPointingToTheElseToken->text == "EndIf")
+            counterOfIfBranches--;
+          iteratorPointingToTheElseToken++;
+        }
+        if (iteratorPointingToTheElseToken <
+            iteratorPointingToTheEndIfToken) // If there is an "Else" token...
+        {
+          TreeNodes nodesThatTheRecursionDealsWith(
+              iteratorPointingToTheThenToken + 1,
+              iteratorPointingToTheElseToken);
+          nodesThatTheRecursionDealsWith =
+              parse(nodesThatTheRecursionDealsWith);
+          iteratorPointingToTheThenToken->children =
+              nodesThatTheRecursionDealsWith;
+          input[i].children.push_back(*iteratorPointingToTheThenToken);
+          nodesThatTheRecursionDealsWith =
+              TreeNodes(iteratorPointingToTheElseToken + 1,
+                        iteratorPointingToTheEndIfToken);
+          nodesThatTheRecursionDealsWith =
+              parse(nodesThatTheRecursionDealsWith);
+          iteratorPointingToTheElseToken->children =
+              nodesThatTheRecursionDealsWith;
+          input[i].children.push_back(*iteratorPointingToTheElseToken);
+          input.erase(input.begin() + i + 1,
+                      iteratorPointingToTheEndIfToken == input.end()
+                          ? input.end()
+                          : iteratorPointingToTheEndIfToken + 1);
+        } else { // There is neither an "Else" nor an "ElseIf" token, so we can
+                 // simply pass the tokens between (but not including) "Then" and
+                 // "EndIf" token.
+          TreeNodes nodesThatTheRecursionDealsWith(
+              iteratorPointingToTheThenToken + 1,
+              iteratorPointingToTheEndIfToken);
+          nodesThatTheRecursionDealsWith =
+              parse(nodesThatTheRecursionDealsWith);
+          iteratorPointingToTheThenToken->children =
+              nodesThatTheRecursionDealsWith;
+          input[i].children.push_back(*iteratorPointingToTheThenToken);
+          input.erase(input.begin() + i + 1,
+                      iteratorPointingToTheEndIfToken == input.end()
+                          ? input.end()
+                          : iteratorPointingToTheEndIfToken + 1);
+        }
+      }
     } else { // Assume that what follows is an expression, presumably including
              // a ":=".
       auto iteratorPointingToTheNextSemicolon =

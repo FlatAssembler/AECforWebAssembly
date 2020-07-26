@@ -132,16 +132,44 @@ void parserTests() {
         "Nothing) (Does "
         "(Integer32 b) (:= b (+ a 1))))"},
        {"Function factorial(Integer32 n) Which Returns Integer64 Does "
-        "Integer32 counter:=1,result:=1;"
+        "Integer64 counter:=1,result:=1;"
         "While counter<n or counter=n Loop "
         "result:=result*counter;"
         "EndWhile "
         "Return result;"
         "EndFunction",
         "(Function (factorial (Integer32 n)) (Returns Integer64) (Does "
-        "(Integer32 (counter (:= 1)) (result (:= 1))) (While (or (< counter n) "
+        "(Integer64 (counter (:= 1)) (result (:= 1))) (While (or (< counter n) "
         "(= counter n)) (Loop (:= result (* result counter)))) (Return "
-        "result)))"}});
+        "result)))"},
+       {"Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does "
+        "//Euclidean Algorithm\n"
+        "While not(b=0) Loop\n"
+        "If a>b Then\n"
+        "a:=a-b;\n"
+        "Else\n"
+        "b:=b-a;\n"
+        "EndIf\n"
+        "EndWhile\n"
+        "Return a;\n"
+        "EndFunction",
+        "(Function (gcd (Integer32 a) (Integer32 b)) (Returns Integer32) (Does "
+        "(While (not (= b 0)) (Loop (If (> a b) (Then (:= a (- a b))) "
+        "(Else (:= b (- b a)))))) (Return a)))"},
+       {"If a<b and a<c Then //This is semantically very wrong (an "
+        "if-statement outside of a function), but it should still parse.\n"
+        "If a>0 Then Return a; Else Return 0; EndIf\n"
+        "ElseIf b<a and b<c Then\n"
+        "If b>0 Then Return b; Else Return 0; EndIf\n"
+        "Else\n"
+        "If c>0 Then Return c; Else Return 0; EndIf\n"
+        "EndIf",
+        "(If (and (< a b) (< a c)) (Then "
+        "(If (> a 0) (Then (Return a)) (Else (Return 0)))) "
+        "(Else (If (and (< b a) (< b c)) (Then "
+        "(If (> b 0) (Then (Return b)) (Else (Return 0)))) "
+        "(Else "
+        "(If (> c 0) (Then (Return c)) (Else (Return 0)))))))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
