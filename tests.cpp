@@ -198,6 +198,27 @@ void testAssemblyCodeStructure() {
   }
 }
 
+void testTypeChecking() {
+  std::vector<test> tests({{"128;", "Integer64"},
+                           {"'A';", "Integer64"},
+                           {"3.14159265359;", "Decimal64"},
+                           {"0.142857;", "Decimal64"},
+                           {"1.;", "Decimal64"},
+                           {"55.;", "Decimal64"}});
+  for (unsigned i = 0; i < tests.size(); i++) {
+    std::string result =
+        TreeNode::parse(TreeNode::tokenize(tests[i].input))[0].getType(
+            CompilationContext());
+    if (result != tests[i].expectedResult) {
+      std::cerr << "Internal compiler error: Compiler test failed: \""
+                << tests[i].input << "\" compiles into something of the type "
+                << result << "\" instead of into something of the type \""
+                << tests[i].expectedResult << "\"!" << std::endl;
+      std::exit(1);
+    }
+  }
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
@@ -205,4 +226,5 @@ void runTests() {
   parsingVariableDeclarationsTests();
   parserTests();
   testAssemblyCodeStructure();
+  testTypeChecking();
 }

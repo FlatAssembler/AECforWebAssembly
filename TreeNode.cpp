@@ -1,4 +1,5 @@
 #include "AssemblyCode.cpp"
+#include "compilingContext.cpp"
 #include <iostream>
 #include <map>
 #include <regex>
@@ -116,4 +117,7 @@ public:
   }
   static std::vector<TreeNode>
   parseVariableDeclaration(std::vector<TreeNode> input);
+  AssemblyCode compile(CompilationContext context);
+  AssemblyCode compileAPointer(CompilationContext context);
+  std::string getType(CompilationContext context); // Integer32...
 };

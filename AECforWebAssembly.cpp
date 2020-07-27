@@ -1,4 +1,5 @@
 #define NDEBUG
+#include "compiler.cpp"
 #include "parser.cpp"
 #include "tests.cpp"
 #include "tokenizer.cpp"
