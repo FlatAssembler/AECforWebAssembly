@@ -716,8 +716,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         if (!counterOfIfBranches and
             iteratorPointingToTheElseIfToken->text == "ElseIf")
           break; // If the "ElseIf" is referring to the "If" token at
-                 // "input[i]", rather than to some nested "If" (which it does if
-                 // "counterOfIfBranches" is non-zero).
+                 // "input[i]", rather than to some nested "If" (which it does
+                 // if "counterOfIfBranches" is non-zero).
         if (iteratorPointingToTheElseIfToken->text == "If")
           counterOfIfBranches++;
         if (iteratorPointingToTheElseIfToken->text == "EndIf")
@@ -797,8 +797,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                           ? input.end()
                           : iteratorPointingToTheEndIfToken + 1);
         } else { // There is neither an "Else" nor an "ElseIf" token, so we can
-                 // simply pass the tokens between (but not including) "Then" and
-                 // "EndIf" token.
+                 // simply pass the tokens between (but not including) "Then"
+                 // and "EndIf" token.
           TreeNodes nodesThatTheRecursionDealsWith(
               iteratorPointingToTheThenToken + 1,
               iteratorPointingToTheEndIfToken);

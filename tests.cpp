@@ -183,10 +183,26 @@ void parserTests() {
   }
 }
 
+void testAssemblyCodeStructure() {
+  std::vector<test> tests({{"(i32.load\n\t(i32.const 32)\n)",
+                            "\t(i32.load\n\t\t(i32.const 32)\n\t)"}});
+  for (unsigned i = 0; i < tests.size(); i++) {
+    std::string result = AssemblyCode(tests[i].input).indentBy(1);
+    if (result != tests[i].expectedResult) {
+      std::cerr << "Internal compiler error: Pretty-printer test failed: \""
+                << tests[i].input << "\" prints into \"" << result
+                << "\" instead of to \"" << tests[i].expectedResult << "\"!"
+                << std::endl;
+      std::exit(1);
+    }
+  }
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
   interpreterTests();
   parsingVariableDeclarationsTests();
   parserTests();
+  testAssemblyCodeStructure();
 }
