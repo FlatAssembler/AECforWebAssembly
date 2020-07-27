@@ -47,7 +47,7 @@ struct AssemblyCode {
   }
   AssemblyCode operator+(char character) {
     std::string newCode = code;
-    code += character;
+    newCode += character;
     return AssemblyCode(newCode, assemblyType);
   }
   AssemblyCode &operator+=(char character) {
