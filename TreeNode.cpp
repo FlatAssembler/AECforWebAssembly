@@ -78,37 +78,37 @@ public:
         LispExpression += children[i].getLispExpression() + " ";
     return LispExpression;
   }
-  int interpretAsACompileTimeConstant() {
-    if (std::regex_match(text, std::regex("^\\d+$")))
-      return std::stoi(text);
+  int interpretAsACompileTimeIntegerConstant() {
+    if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+      return std::stoi(text, 0, 0);
     if (text == "+")
-      return children[0].interpretAsACompileTimeConstant() +
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() +
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "-")
-      return children[0].interpretAsACompileTimeConstant() -
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() -
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "*")
-      return children[0].interpretAsACompileTimeConstant() *
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() *
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "/")
-      return children[0].interpretAsACompileTimeConstant() /
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() /
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "?:")
-      return children[0].interpretAsACompileTimeConstant()
-                 ? children[1].interpretAsACompileTimeConstant()
-                 : children[2].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant()
+                 ? children[1].interpretAsACompileTimeIntegerConstant()
+                 : children[2].interpretAsACompileTimeIntegerConstant();
     if (text == "mod(")
-      return children[0].interpretAsACompileTimeConstant() %
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() %
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "<")
-      return children[0].interpretAsACompileTimeConstant() <
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() <
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == ">")
-      return children[0].interpretAsACompileTimeConstant() >
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() >
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "=")
-      return children[0].interpretAsACompileTimeConstant() ==
-             children[1].interpretAsACompileTimeConstant();
+      return children[0].interpretAsACompileTimeIntegerConstant() ==
+             children[1].interpretAsACompileTimeIntegerConstant();
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Interpreter error: \"" << text
               << "\" isn't a valid token in a compile-time integer constant."
