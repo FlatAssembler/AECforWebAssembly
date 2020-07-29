@@ -81,7 +81,9 @@ void interpreterTests() {
        {"(2+2=4)?2:0", "2"},
        {"mod(5,2)", "1"},
        {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)+('A'+2='C'?0:-1)", "0"},
-       {"0xff", "255"}});
+       {"0xff", "255"},
+       {"0x41='A' and 0xff=255", "1"},
+       {"0x42='A' or 0x2b=127", "0"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = std::to_string(
         TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
@@ -221,6 +223,43 @@ void testTypeChecking() {
   }
 }
 
+void testBitManipulations() {
+  if (getCharVectorRepresentationOfInteger64(255) !=
+      "\"\\ff\\00\\00\\00\\00\\00\\00\\00\"") {
+    std::cerr << "Internal compiler error: Bit manipulation test failed: \""
+              << getCharVectorRepresentationOfInteger64(255) << "\"!"
+              << std::endl;
+    std::exit(1);
+  }
+  if (getCharVectorRepresentationOfInteger64(-1) !=
+      "\"\\ff\\ff\\ff\\ff\\ff\\ff\\ff\\ff\"") {
+    std::cerr
+        << "Internal compiler error: Bit manipulation test failed. Your C++ "
+           "compiler appears not to use double-complement for negative "
+           "numbers. getCharVectorRepresentationOfInteger64(-1) gives \""
+        << getCharVectorRepresentationOfInteger64(-1) << "\"!" << std::endl;
+    std::exit(1);
+  }
+  if (getCharVectorRepresentationOfCharacter('A') != "\"\\41\"") {
+    std::cerr << "Internal compiler error: Bit manipulation test failed. Your "
+                 "C++ compiler appears not to use ASCII. "
+                 "getCharVectorRepresentationOfCharacter(\'A\') gives \""
+              << getCharVectorRepresentationOfCharacter('A') << "\"!"
+              << std::endl;
+    std::exit(1);
+  }
+  if (getCharVectorRepresentationOfDecimal64(double(1) / 3) !=
+      "\"\\55\\55\\55\\55\\55\\55\\d5\\3f\"") {
+    std::cerr << "Internal compiler error: Bit manipulation test failed. Your "
+                 "C++ compiler appears not to use IEEE754 standard for storing "
+                 "decimal numbers, like JavaScript Virtual Machine does. "
+                 "getCharVectorRepresentationOfDecimal64(double(1)/3) gives \""
+              << getCharVectorRepresentationOfDecimal64(double(1) / 3) << "\"!"
+              << std::endl;
+    std::exit(1);
+  }
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
@@ -229,4 +268,5 @@ void runTests() {
   parserTests();
   testAssemblyCodeStructure();
   testTypeChecking();
+  testBitManipulations();
 }

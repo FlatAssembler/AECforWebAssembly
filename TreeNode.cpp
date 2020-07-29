@@ -90,8 +90,22 @@ public:
     if (text == "*")
       return children[0].interpretAsACompileTimeIntegerConstant() *
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "/")
+    if (text == "/") {
+      if (children[1].interpretAsACompileTimeIntegerConstant() == 0) {
+        std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                  << ", Interpreter error: Division by zero in a compile-time "
+                     "integer constant!"
+                  << std::endl;
+        std::exit(1);
+      }
       return children[0].interpretAsACompileTimeIntegerConstant() /
+             children[1].interpretAsACompileTimeIntegerConstant();
+    }
+    if (text == "and")
+      return children[0].interpretAsACompileTimeIntegerConstant() and
+             children[1].interpretAsACompileTimeIntegerConstant();
+    if (text == "or")
+      return children[0].interpretAsACompileTimeIntegerConstant() or
              children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "?:")
       return children[0].interpretAsACompileTimeIntegerConstant()

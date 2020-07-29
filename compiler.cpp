@@ -1,4 +1,5 @@
 #include "TreeNode.cpp"
+#include "bitManipulations.cpp"
 
 AssemblyCode TreeNode::compile(CompilationContext context) {
   std::cerr << "Compiler is not yet implemented!" << std::endl;
