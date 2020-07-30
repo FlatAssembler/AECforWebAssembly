@@ -202,13 +202,20 @@ void testAssemblyCodeStructure() {
 }
 
 void testTypeChecking() {
-  std::vector<test> tests({{"128;", "Integer64"},
-                           {"'A';", "Integer64"},
-                           {"3.14159265359;", "Decimal64"},
-                           {"0.142857;", "Decimal64"},
-                           {"1.;", "Decimal64"},
-                           {"55.;", "Decimal64"},
-                           {"0x1Ff;", "Integer64"}});
+  std::vector<test> tests(
+      {{"128;", "Integer64"},
+       {"'A';", "Integer64"},
+       {"3.14159265359;", "Decimal64"},
+       {"0.142857;", "Decimal64"},
+       {"1.;", "Decimal64"},
+       {"55.;", "Decimal64"},
+       {"0x1Ff;", "Integer64"},
+       {"1+1;", "Integer64"},
+       {"Integer32(1)+Integer32(1);", "Integer32"},
+       {"3.14159265359-1.618033989;", "Decimal64"},
+       {"CharacterPointer(10)-CharacterPointer(0);", "Integer32"},
+       {"3.14159265359*1;", "Decimal64"},
+       {"1/2;", "Integer64"}});
   for (unsigned i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::parse(TreeNode::tokenize(tests[i].input))[0].getType(
