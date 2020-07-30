@@ -10,11 +10,18 @@ using namespace std;
 
 int main(int argc, char **argv) {
   using namespace std::regex_constants;
-  if (argc < 2 or
-      !regex_match(argv[1], regex("^\\w*\\.AEC$", ECMAScript | icase))) {
-    cerr << "Please invoke this program as follows:\n"
-         << argv[0] << " name_of_the_program.aec" << endl;
-    return -1;
+  try {
+    if (argc < 2 or
+        !regex_match(argv[1], regex("^\\w*\\.AEC$", ECMAScript | icase))) {
+      cerr << "Please invoke this program as follows:\n"
+           << argv[0] << " name_of_the_program.aec" << endl;
+      return -1;
+    }
+  } catch (regex_error &e) {
+    cerr << "Your C++ compiler doesn't appear to support regular expressions, "
+            "that this program makes heavy use of. Quitting now!"
+         << endl;
+    exit(-1);
   }
   cout << "Running the tests..." << endl;
   runTests();
