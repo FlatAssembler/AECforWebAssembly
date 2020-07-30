@@ -96,6 +96,27 @@ void interpreterTests() {
       std::exit(1);
     }
   }
+  struct decimalTest {
+    std::string input;
+    double expectedResult;
+  };
+  std::vector<decimalTest> decimalTests({{"5/2", 5. / 2},
+                                         {"sqrt(9)", 3},
+                                         {"pow(sin(pi/4),2)", 1. / 2},
+                                         {"log(e)", 1},
+                                         {"1.5+1.5", 3}});
+  for (unsigned int i = 0; i < decimalTests.size(); i++) {
+    double result =
+        TreeNode::parseExpression(TreeNode::tokenize(decimalTests[i].input))[0]
+            .interpretAsACompileTimeDecimalConstant();
+    if (abs(result - decimalTests[i].expectedResult) > 1. / 1000) {
+      std::cerr << "Internal compiler error: Interpreter test failed: \""
+                << decimalTests[i].input << "\" interprets into \"" << result
+                << "\" instead of to \"" << decimalTests[i].expectedResult
+                << "\"!" << std::endl;
+      std::exit(1);
+    }
+  }
 }
 
 void parsingVariableDeclarationsTests() {

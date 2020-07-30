@@ -1,5 +1,6 @@
 #include "AssemblyCode.cpp"
 #include "compilingContext.cpp"
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <regex>
@@ -142,6 +143,101 @@ public:
               << ", Interpreter error: \"" << text
               << "\" isn't a valid token in a compile-time integer constant."
               << std::endl;
+    return 0;
+  }
+  double interpretAsACompileTimeDecimalConstant() {
+    if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+      return std::stoi(text, 0, 0);
+    if (std::regex_match(text, std::regex("\\d+\\.\\d*")))
+      return std::stod(text);
+    if (text == "+")
+      return children[0].interpretAsACompileTimeDecimalConstant() +
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "-")
+      return children[0].interpretAsACompileTimeDecimalConstant() -
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "*")
+      return children[0].interpretAsACompileTimeDecimalConstant() *
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "/")
+      return children[0]
+                 .interpretAsACompileTimeDecimalConstant() / // Dividing a real
+                                                             // number by zero
+                                                             // in C++ won't
+                                                             // crash a program.
+                                                             // I don't know
+                                                             // what the
+                                                             // standard says,
+                                                             // but, in my
+                                                             // experience, it
+                                                             // results in
+                                                             // putting some
+                                                             // special value
+                                                             // (NaN or inf)
+                                                             // into the result.
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "and")
+      return children[0].interpretAsACompileTimeDecimalConstant() and
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "or")
+      return children[0].interpretAsACompileTimeDecimalConstant() or
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "?:")
+      return children[0].interpretAsACompileTimeDecimalConstant()
+                 ? children[1].interpretAsACompileTimeDecimalConstant()
+                 : children[2].interpretAsACompileTimeDecimalConstant();
+    if (text == "mod(" and
+        children.size() ==
+            2) // Let's give the users of the language the access to standard
+               // library functions when writing compile-time decimal constants.
+      return fmod(children[0].interpretAsACompileTimeDecimalConstant(),
+                  children[1].interpretAsACompileTimeDecimalConstant());
+    if (text == "sin(" and children.size() == 1)
+      return sin(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "cos(" and children.size() == 1)
+      return cos(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "tan(" and children.size() == 1)
+      return tan(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "sqrt(" and children.size() == 1)
+      return sqrt(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "atan(" and children.size() == 1)
+      return atan(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "atan2(" and children.size() == 2)
+      return atan2(children[0].interpretAsACompileTimeDecimalConstant(),
+                   children[1].interpretAsACompileTimeDecimalConstant());
+    if (text == "asin(" and children.size() == 1)
+      return asin(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "acos(" and children.size() == 1)
+      return acos(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "log(" and children.size() == 1)
+      return log(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "log2(" and children.size() == 1)
+      return log2(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "log10(" and children.size() == 1)
+      return log10(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "exp(" and children.size() == 1)
+      return exp(children[0].interpretAsACompileTimeDecimalConstant());
+    if (text == "pow(" and children.size() == 2)
+      return pow(children[0].interpretAsACompileTimeDecimalConstant(),
+                 children[1].interpretAsACompileTimeDecimalConstant());
+    if (text == "pi")
+      return M_PI;
+    if (text == "e")
+      return exp(1);
+    if (text == "<")
+      return children[0].interpretAsACompileTimeDecimalConstant() <
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == ">")
+      return children[0].interpretAsACompileTimeDecimalConstant() >
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "=")
+      return children[0].interpretAsACompileTimeDecimalConstant() ==
+             children[1].interpretAsACompileTimeDecimalConstant();
+    std::cerr
+        << "Line " << lineNumber << ", Column " << columnNumber
+        << ", Interpreter error: \"" << text
+        << "\" isn't a valid token in a compile-time decimal-number constant."
+        << std::endl;
     return 0;
   }
   static std::vector<TreeNode>

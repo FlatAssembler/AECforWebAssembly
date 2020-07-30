@@ -8,6 +8,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
 }
 
 AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
+  if (text == "ValueAt(")
+    return children[0].compile(context);
   std::cerr << "Compiler is not yet implemented!" << std::endl;
   exit(1);
   return AssemblyCode("()");
