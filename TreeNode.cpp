@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -14,6 +15,20 @@ class TreeNode {
   applyBinaryOperators(std::vector<TreeNode> input,
                        std::vector<std::string> operators,
                        Associativity associativity);
+
+protected:
+  std::set<std::string> getStringsInSubnodes() {
+    auto setToBeReturned = std::set<std::string>();
+    if (text.size() and text[0] == '"') {
+      setToBeReturned.insert(text);
+      return setToBeReturned;
+    }
+    for (auto child : children) {
+      auto stringsInChild = child.getStringsInSubnodes();
+      setToBeReturned.insert(stringsInChild.begin(), stringsInChild.end());
+    }
+    return setToBeReturned;
+  }
 
 public:
   std::map<std::string, int> basicDataTypeSizes;
