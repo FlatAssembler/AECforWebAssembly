@@ -215,7 +215,9 @@ void testTypeChecking() {
        {"3.14159265359-1.618033989;", "Decimal64"},
        {"CharacterPointer(10)-CharacterPointer(0);", "Integer32"},
        {"3.14159265359*1;", "Decimal64"},
-       {"1/2;", "Integer64"}});
+       {"1/2;", "Integer64"},
+       {"(5+5=10 and 2+2=4)?(3.14159265359):(0);", "Decimal64"},
+       {"5+5=10 and 2+2=4;", "Integer32"}});
   for (unsigned i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::parse(TreeNode::tokenize(tests[i].input))[0].getType(

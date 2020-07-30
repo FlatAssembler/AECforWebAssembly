@@ -98,6 +98,10 @@ std::string TreeNode::getType(CompilationContext context) {
   }
   if (context.variableTypes.count(text))
     return context.variableTypes[text];
+  if (text == "and" or text == "or" or text == "<" or text == ">" or
+      text == "=" or text == "not(")
+    return "Integer32"; // Because "if" and "br_if" in WebAssembly expect a
+                        // "i32", so let's adapt to that.
   if (std::regex_match(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?"))) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
@@ -132,6 +136,9 @@ std::string TreeNode::getType(CompilationContext context) {
               << "\" is not declared!" << std::endl;
     exit(1);
   }
-  std::cerr << "Compiler is not yet implemented!" << std::endl;
+  if (text == "?:")
+    return getStrongerType(lineNumber, columnNumber,
+                           children[1].getType(context),
+                           children[2].getType(context));
   return "Nothing";
 }
