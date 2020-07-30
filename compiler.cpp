@@ -1,6 +1,46 @@
 #include "TreeNode.cpp"
 #include "bitManipulations.cpp"
 
+AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
+  auto originalCode = node.compile(context);
+  const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
+                                   i64 = AssemblyCode::AssemblyType::i64,
+                                   f32 = AssemblyCode::AssemblyType::f32,
+                                   f64 = AssemblyCode::AssemblyType::f64,
+                                   null = AssemblyCode::AssemblyType::null;
+  if (originalCode.assemblyType == null) {
+    std::cerr
+        << "Line " << node.lineNumber << ", Column " << node.columnNumber
+        << ", Compiler error: Some part of the compiler attempted to convert \""
+        << node.text
+        << "\" to \"Integer32\", which makes no sense. This could be an "
+           "internal compiler error, or there could be something semantically "
+           "(though not grammatically) very wrong with your program."
+        << std::endl;
+    exit(1);
+  }
+  if (originalCode.assemblyType == i32)
+    return originalCode;
+  if (originalCode.assemblyType == i64)
+    return AssemblyCode(
+        "(i32.wrap_64\n" + std::string(originalCode.indentBy(1)) + "\n)", i32);
+  if (originalCode.assemblyType == f32)
+    return AssemblyCode(
+        "(i32.trunc_f32_s\n" + std::string(originalCode.indentBy(1)) + "\n)",
+        i32); // Makes little sense to me (that, when converting to an integer,
+              // the decimal part of the number is simply truncated), but that's
+              // how it is in the vast majority of programming languages.
+  if (originalCode.assemblyType == f64)
+    return AssemblyCode("(i32.trunc_f64_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        i32);
+  std::cerr << "Line " << node.lineNumber << ", Column " << node.columnNumber
+            << ", Compiler error: Internal compiler error, control reached the "
+               "end of the \"convertToInteger32\" function!"
+            << std::endl;
+  return AssemblyCode("()");
+}
+
 AssemblyCode TreeNode::compile(CompilationContext context) {
   std::cerr << "Compiler is not yet implemented!" << std::endl;
   exit(1);
@@ -10,7 +50,38 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
 AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
   if (text == "ValueAt(")
     return children[0].compile(context);
-  std::cerr << "Compiler is not yet implemented!" << std::endl;
+  if (context.localVariables.count(text) and text.back() != '[')
+    return AssemblyCode(
+        "(i32.sub\n\t(global.get $stack_pointer)\n\t(i32.const " +
+            std::to_string(context.localVariables[text]) + ")\n)",
+        AssemblyCode::AssemblyType::i32);
+  if (context.localVariables.count(text) and text.back() == '[')
+    return AssemblyCode(
+        "(i32.add\n\t(i32.sub \n\t\t(global.get "
+        "$stack_pointer)\n\t\t(i32.const " +
+            std::to_string(context.localVariables[text]) + ")\n\t)\n)" +
+            std::string(convertToInteger32(children[0], context).indentBy(1)) +
+            "\n)",
+        AssemblyCode::AssemblyType::i32);
+  if (context.globalVariables.count(text) and text.back() != '[')
+    return AssemblyCode("(i32.const " +
+                            std::to_string(context.globalVariables[text]) + ")",
+                        AssemblyCode::AssemblyType::i32);
+  if (context.globalVariables.count(text) and text.back() == '[')
+    return AssemblyCode(
+        "(i32.add\n\t(i32.const " +
+            std::to_string(context.globalVariables[text]) + ")\n" +
+            std::string(convertToInteger32(children[0], context).indentBy(1)) +
+            "\n)",
+        AssemblyCode::AssemblyType::i32);
+  std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+            << ", Compiler error: Some part of the compiler attempted to get "
+               "the assembly of the pointer to \""
+            << text
+            << "\", which makes no sense. This could be an internal compiler "
+               "error, or there could be something semantically (though not "
+               "grammatically) very wrong with your program."
+            << std::endl;
   exit(1);
   return AssemblyCode("()");
 }
