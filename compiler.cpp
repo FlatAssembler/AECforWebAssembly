@@ -104,6 +104,30 @@ std::string TreeNode::getType(CompilationContext context) {
       text == "=" or text == "not(")
     return "Integer32"; // Because "if" and "br_if" in WebAssembly expect a
                         // "i32", so let's adapt to that.
+  if (text == "mod(") {
+    if (children.size() != 2) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: \"mod(\" operator requires two integer "
+                   "arguments!"
+                << std::endl;
+      exit(1);
+    }
+    if (std::regex_search(children[0].getType(context),
+                          std::regex("^Decimal")) or
+        std::regex_search(children[1].getType(context),
+                          std::regex("^Decimal"))) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Unfortunately, WebAssembly (unlike x86 "
+                   "assembly) doesn't support computing remainings of division "
+                   "of decimal numbers, so we can't support that either "
+                   "outside of compile-time constants."
+                << std::endl;
+      exit(1);
+    }
+    return getStrongerType(lineNumber, columnNumber,
+                           children[0].getType(context),
+                           children[1].getType(context));
+  }
   if (std::regex_match(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?"))) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
