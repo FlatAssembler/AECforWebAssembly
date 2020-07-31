@@ -171,12 +171,13 @@ AssemblyCode convertTo(TreeNode node, std::string type,
           type,
           std::regex(
               "Pointer$"))) // When, in JavaScript Virtual Machine, you can't
-                            // push types of less than 4 bytes (32 bits) onto the
-                            // system stack, you need to convert those to
+                            // push types of less than 4 bytes (32 bits) onto
+                            // the system stack, you need to convert those to
                             // Integer32 (i32). Well, makes slightly more sense
                             // than the way it is in 64-bit x86 assembly, where
                             // you can put 16-bit values and 64-bit values onto
-                            // the system stack, but you can't put 32-bit values.
+                            // the system stack, but you can't put 32-bit
+                            // values.
     return convertToInteger32(node, context);
   if (type == "Integer64")
     return convertToInteger64(node, context);
@@ -331,9 +332,26 @@ std::string TreeNode::getType(CompilationContext context) {
   if (context.variableTypes.count(text))
     return context.variableTypes[text];
   if (text == "and" or text == "or" or text == "<" or text == ">" or
-      text == "=" or text == "not(")
+      text == "=" or text == "not(") {
+    if (children.empty()) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The operator \"" << text
+                << "\" has no operands. Aborting the compilation (or else we "
+                   "will segfault)!"
+                << std::endl;
+      exit(1);
+    }
+    if (children.size() < 2 and text != "not(") {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The binary operator \"" << text
+                << "\" has less than two operands. Aborting the compilation "
+                   "(or else we will segfault)!"
+                << std::endl;
+      exit(1);
+    }
     return "Integer32"; // Because "if" and "br_if" in WebAssembly expect a
                         // "i32", so let's adapt to that.
+  }
   if (text == "mod(") {
     if (children.size() != 2) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -364,11 +382,28 @@ std::string TreeNode::getType(CompilationContext context) {
               << "\" is not declared!" << std::endl;
     exit(1);
   }
-  if (text == "+" or text == "*" or text == "/")
+  if (text == "+" or text == "*" or text == "/") {
+    if (children.size() != 2) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The binary operator \"" << text
+                << "\" doesn't have exactly two operands. Aborting the "
+                   "compilation (or else we will segfault)!"
+                << std::endl;
+      exit(1);
+    }
     return getStrongerType(lineNumber, columnNumber,
                            children[0].getType(context),
                            children[1].getType(context));
+  }
   if (text == "-") {
+    if (children.size() != 2) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The binary operator \"" << text
+                << "\" doesn't have exactly two operands. Aborting the "
+                   "compilation (or else we will segfault)!"
+                << std::endl;
+      exit(1);
+    }
     if (std::regex_search(children[0].getType(context),
                           std::regex("Pointer$")) and
         std::regex_search(children[1].getType(context), std::regex("Pointer$")))
