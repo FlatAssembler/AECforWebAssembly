@@ -61,17 +61,19 @@ AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
     exit(1);
   }
   if (originalCode.assemblyType == i32)
-    return AssemblyCode("(i64.extend_i32\n" +
-                            std::string(originalCode.indentBy(1)) + "\n)",
-                        i64);
+    return AssemblyCode(
+        "(i64.extend_i32_s\n" + // If you don't put "_s", JavaScript Virtual
+                                // Machine is going to interpret the argument as
+                                // unsigned, leading to huge positive numbers
+                                // instead of negative ones.
+            std::string(originalCode.indentBy(1)) + "\n)",
+        i64);
   if (originalCode.assemblyType == i64)
     return originalCode;
   if (originalCode.assemblyType == f32)
-    return AssemblyCode(
-        "(i64.trunc_f32_s\n" + std::string(originalCode.indentBy(1)) + "\n)",
-        i64); // Makes little sense to me (that, when converting to an integer,
-              // the decimal part of the number is simply truncated), but that's
-              // how it is in the vast majority of programming languages.
+    return AssemblyCode("(i64.trunc_f32_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        i64);
   if (originalCode.assemblyType == f64)
     return AssemblyCode("(i64.trunc_f64_s\n" +
                             std::string(originalCode.indentBy(1)) + "\n)",
@@ -103,9 +105,13 @@ AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
     exit(1);
   }
   if (originalCode.assemblyType == i32)
-    return AssemblyCode("(f32.convert_i32_s\n" +
-                            std::string(originalCode.indentBy(1)) + "\n)",
-                        f32);
+    return AssemblyCode(
+        "(f32.convert_i32_s\n" + // Again, those who designed JavaScript Virtual
+                                 // Machine had a weird idea that integers should
+                                 // be unsigned unless somebody makes them
+                                 // explicitly signed via "_s".
+            std::string(originalCode.indentBy(1)) + "\n)",
+        f32);
   if (originalCode.assemblyType == i64)
     return AssemblyCode("(f32.convert_i64_s\n" +
                             std::string(originalCode.indentBy(1)) + "\n)",
