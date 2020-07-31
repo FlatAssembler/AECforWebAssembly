@@ -109,7 +109,7 @@ void interpreterTests() {
     double result =
         TreeNode::parseExpression(TreeNode::tokenize(decimalTests[i].input))[0]
             .interpretAsACompileTimeDecimalConstant();
-    if (abs(result - decimalTests[i].expectedResult) > 1. / 1000) {
+    if (std::fabs(result - decimalTests[i].expectedResult) > 1. / 1000) {
       std::cerr << "Internal compiler error: Interpreter test failed: \""
                 << decimalTests[i].input << "\" interprets into \"" << result
                 << "\" instead of to \"" << decimalTests[i].expectedResult
