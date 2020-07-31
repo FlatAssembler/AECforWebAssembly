@@ -193,7 +193,11 @@ void parserTests() {
         "(Else (If (and (< b a) (< b c)) (Then "
         "(If (> b 0) (Then (Return b)) (Else (Return 0)))) "
         "(Else "
-        "(If (> c 0) (Then (Return c)) (Else (Return 0)))))))"}});
+        "(If (> c 0) (Then (Return c)) (Else (Return 0)))))))"},
+       {"Structure Point Consists Of Decimal32 x,y,z;Integer16 "
+        "number_of_dimensions;EndStructure",
+        "(Structure Point (Of (Decimal32 x y z) (Integer16 "
+        "number_of_dimensions)))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();

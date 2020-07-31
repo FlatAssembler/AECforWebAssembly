@@ -813,6 +813,110 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                           : iteratorPointingToTheEndIfToken + 1);
         }
       }
+    } else if (input[i].text == "Structure" and input[i].children.empty()) {
+      if (i == input.size() - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: Structure name not specified!"
+                  << std::endl;
+        return input;
+      }
+      input[i].children.push_back(input[i + 1]);
+      input.erase(input.begin() + i +
+                  1); // Delete the structure name, because it's been copied to
+                      // the "input[i].children".
+      if (i == input.size() - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: Unexpected end of file!" << std::endl;
+        return input;
+      }
+      if (input[i + 1].text != "Consists") {
+        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                  << input[i + 1].columnNumber
+                  << ", Parser error: Expected \"Consists\" instead of \""
+                  << input[i + 1].text << "\"!" << std::endl;
+        return input;
+      }
+      input.erase(input.begin() + i + 1); // Delete "Consists" from the AST.
+      if (i == input.size() - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: Unexpected end of file!" << std::endl;
+        return input;
+      }
+      if (input[i + 1].text != "Of") {
+        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                  << input[i + 1].columnNumber
+                  << ", Parser error: Expected \"Of\" instead of \""
+                  << input[i + 1].text << "\"!" << std::endl;
+        return input;
+      }
+      auto iteratorPointingToTheEndStructureToken =
+          std::find_if(input.begin() + i + 1, input.end(), [](TreeNode node) {
+            return node.text == "EndStructure";
+          }); // Let's not deal with nested structures for now.
+      if (iteratorPointingToTheEndStructureToken == input.end())
+        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                  << input[i + 1].columnNumber
+                  << ", Parser error: There is an \"Of\" token without a "
+                     "corresponding \"EndStructure\" token."
+                  << std::endl;
+      TreeNodes structureMemberDeclaration;
+      auto iteratorPointingToTheNextSemicolon =
+          input.begin() + i + 2; // Right after the "Of" token.
+      while (iteratorPointingToTheNextSemicolon !=
+             iteratorPointingToTheEndStructureToken) {
+        if (iteratorPointingToTheNextSemicolon->text == ";") {
+          if (structureMemberDeclaration.empty())
+            continue; // If somebody has written something like ";;".
+          structureMemberDeclaration =
+              parseVariableDeclaration(structureMemberDeclaration);
+          if (structureMemberDeclaration.size() > 1)
+            std::cerr << "Line " << structureMemberDeclaration[1].lineNumber
+                      << ", Column "
+                      << structureMemberDeclaration[1].columnNumber
+                      << ", Parser error: Unexpected token \""
+                      << structureMemberDeclaration[1].text << "\"!"
+                      << std::endl;
+          if (!structureMemberDeclaration
+                   .empty()) // I am not sure if that's possible, but let's not
+                             // segfault then.
+            input[i + 1].children.push_back(
+                structureMemberDeclaration[0]); // Make the structure member
+                                                // declaration a child of the
+                                                // "Of" token.
+          structureMemberDeclaration =
+              TreeNodes(); // Delete the structure member declaration from the
+                           // AST.
+        } else
+          structureMemberDeclaration.push_back(
+              *iteratorPointingToTheNextSemicolon);
+        iteratorPointingToTheNextSemicolon++;
+      }
+      if (!structureMemberDeclaration.empty()) {
+        std::cerr << "Line " << structureMemberDeclaration.back().lineNumber
+                  << ", Column "
+                  << structureMemberDeclaration.back().columnNumber
+                  << ", Parser error: Expected a semicolon ';'!" << std::endl;
+        structureMemberDeclaration =
+            parseVariableDeclaration(structureMemberDeclaration);
+        if (structureMemberDeclaration.size() > 1)
+          std::cerr << "Line " << structureMemberDeclaration[1].lineNumber
+                    << ", Column " << structureMemberDeclaration[1].columnNumber
+                    << ", Parser error: Unexpected token \""
+                    << structureMemberDeclaration[1].text << "\"!" << std::endl;
+        if (!structureMemberDeclaration.empty())
+          input[i + 1].children.push_back(structureMemberDeclaration[0]);
+      }
+      input[i].children.push_back(
+          input[i + 1]); // Make the "Of" node a child of the "Structure" node.
+      input.erase(input.begin() + i + 1,
+                  iteratorPointingToTheEndStructureToken == input.end()
+                      ? input.end()
+                      : iteratorPointingToTheEndStructureToken +
+                            1); // If there is an "EndStructure" node, delete it
+                                // from the AST, together with the "Of" node.
     } else { // Assume that what follows is an expression, presumably including
              // a ":=".
       auto iteratorPointingToTheNextSemicolon =

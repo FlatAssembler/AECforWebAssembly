@@ -33,6 +33,8 @@ protected:
 
 public:
   std::map<std::string, int> basicDataTypeSizes;
+  std::map<std::string, AssemblyCode::AssemblyType>
+      mappingOfAECTypesToWebAssemblyTypes;
   std::vector<TreeNode> children;
   std::string text;
   int lineNumber, columnNumber;
@@ -49,7 +51,17 @@ public:
         basicDataTypeSizes[iterator->first + "Pointer"] =
             4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
                // being 32 bits or 4 bytes long), unless somebody switches to
-               // the 64-bit mode (which is rarely done).
+               // the 64-bit mode (which is almost never done).
+    mappingOfAECTypesToWebAssemblyTypes =
+        std::map<std::string, AssemblyCode::AssemblyType>(
+            {{"Integer32", AssemblyCode::AssemblyType::i32},
+             {"Integer64", AssemblyCode::AssemblyType::i64},
+             {"Decimal32", AssemblyCode::AssemblyType::f32},
+             {"Decimal64", AssemblyCode::AssemblyType::f64}});
+    for (auto pair : basicDataTypeSizes)
+      if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
+        mappingOfAECTypesToWebAssemblyTypes[pair.first] =
+            AssemblyCode::AssemblyType::i32;
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {
