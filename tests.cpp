@@ -197,7 +197,10 @@ void parserTests() {
        {"Structure Point Consists Of Decimal32 x,y,z;Integer16 "
         "number_of_dimensions;EndStructure",
         "(Structure Point (Of (Decimal32 x y z) (Integer16 "
-        "number_of_dimensions)))"}});
+        "number_of_dimensions)))"},
+       {"Structure empty_structure Consists Of EndStructure //Nonsense code, "
+        "but should not crash the parser.",
+        "(Structure empty_structure Of)"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
