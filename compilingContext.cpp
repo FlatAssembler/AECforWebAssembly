@@ -23,4 +23,7 @@ struct CompilationContext {
       globalVariables; // Where they are in the heap memory.
   std::map<std::string, int> localVariables; // Where they are on the stack.
   std::vector<function> functions;
+  int stackSizeOfThisFunction = 0;
+  int stackSizeOfThisScope = 0; // Variables declared inside while-loops...
+  std::string currentFunctionName;
 };

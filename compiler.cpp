@@ -29,7 +29,7 @@ AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
         "(i32.trunc_f32_s\n" + std::string(originalCode.indentBy(1)) + "\n)",
         i32); // Makes little sense to me (that, when converting to an integer,
               // the decimal part of the number is simply truncated), but that's
-              // how it is in the vast majority of programming languages.
+              // how it is done in the vast majority of programming languages.
   if (originalCode.assemblyType == f64)
     return AssemblyCode("(i32.trunc_f64_s\n" +
                             std::string(originalCode.indentBy(1)) + "\n)",
@@ -38,6 +38,161 @@ AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
             << ", Compiler error: Internal compiler error, control reached the "
                "end of the \"convertToInteger32\" function!"
             << std::endl;
+  exit(-1);
+  return AssemblyCode("()");
+}
+
+AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
+  auto originalCode = node.compile(context);
+  const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
+                                   i64 = AssemblyCode::AssemblyType::i64,
+                                   f32 = AssemblyCode::AssemblyType::f32,
+                                   f64 = AssemblyCode::AssemblyType::f64,
+                                   null = AssemblyCode::AssemblyType::null;
+  if (originalCode.assemblyType == null) {
+    std::cerr
+        << "Line " << node.lineNumber << ", Column " << node.columnNumber
+        << ", Compiler error: Some part of the compiler attempted to convert \""
+        << node.text
+        << "\" to \"Integer64\", which makes no sense. This could be an "
+           "internal compiler error, or there could be something semantically "
+           "(though not grammatically) very wrong with your program."
+        << std::endl;
+    exit(1);
+  }
+  if (originalCode.assemblyType == i32)
+    return AssemblyCode("(i64.extend_i32\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        i64);
+  if (originalCode.assemblyType == i64)
+    return originalCode;
+  if (originalCode.assemblyType == f32)
+    return AssemblyCode(
+        "(i64.trunc_f32_s\n" + std::string(originalCode.indentBy(1)) + "\n)",
+        i64); // Makes little sense to me (that, when converting to an integer,
+              // the decimal part of the number is simply truncated), but that's
+              // how it is in the vast majority of programming languages.
+  if (originalCode.assemblyType == f64)
+    return AssemblyCode("(i64.trunc_f64_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        i64);
+  std::cerr << "Line " << node.lineNumber << ", Column " << node.columnNumber
+            << ", Compiler error: Internal compiler error, control reached the "
+               "end of the \"convertToInteger64\" function!"
+            << std::endl;
+  exit(-1);
+  return AssemblyCode("()");
+}
+
+AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
+  auto originalCode = node.compile(context);
+  const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
+                                   i64 = AssemblyCode::AssemblyType::i64,
+                                   f32 = AssemblyCode::AssemblyType::f32,
+                                   f64 = AssemblyCode::AssemblyType::f64,
+                                   null = AssemblyCode::AssemblyType::null;
+  if (originalCode.assemblyType == null) {
+    std::cerr
+        << "Line " << node.lineNumber << ", Column " << node.columnNumber
+        << ", Compiler error: Some part of the compiler attempted to convert \""
+        << node.text
+        << "\" to \"Decimal32\", which makes no sense. This could be an "
+           "internal compiler error, or there could be something semantically "
+           "(though not grammatically) very wrong with your program."
+        << std::endl;
+    exit(1);
+  }
+  if (originalCode.assemblyType == i32)
+    return AssemblyCode("(f32.convert_i32_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f32);
+  if (originalCode.assemblyType == i64)
+    return AssemblyCode("(f32.convert_i64_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f32);
+  if (originalCode.assemblyType == f32)
+    return originalCode;
+  if (originalCode.assemblyType == f64)
+    return AssemblyCode("(f32.demote_f64\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f32);
+  std::cerr << "Line " << node.lineNumber << ", Column " << node.columnNumber
+            << ", Compiler error: Internal compiler error, control reached the "
+               "end of the \"convertToDecimal32\" function!"
+            << std::endl;
+  exit(-1);
+  return AssemblyCode("()");
+}
+
+AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
+  auto originalCode = node.compile(context);
+  const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
+                                   i64 = AssemblyCode::AssemblyType::i64,
+                                   f32 = AssemblyCode::AssemblyType::f32,
+                                   f64 = AssemblyCode::AssemblyType::f64,
+                                   null = AssemblyCode::AssemblyType::null;
+  if (originalCode.assemblyType == null) {
+    std::cerr
+        << "Line " << node.lineNumber << ", Column " << node.columnNumber
+        << ", Compiler error: Some part of the compiler attempted to convert \""
+        << node.text
+        << "\" to \"Decimal64\", which makes no sense. This could be an "
+           "internal compiler error, or there could be something semantically "
+           "(though not grammatically) very wrong with your program."
+        << std::endl;
+    exit(1);
+  }
+  if (originalCode.assemblyType == i32)
+    return AssemblyCode("(f64.convert_i32_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f64);
+  if (originalCode.assemblyType == i64)
+    return AssemblyCode("(f64.convert_i64_s\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f64);
+  if (originalCode.assemblyType == f32)
+    return AssemblyCode("(f64.promote_f32\n" +
+                            std::string(originalCode.indentBy(1)) + "\n)",
+                        f64);
+  if (originalCode.assemblyType == f64)
+    return originalCode;
+  std::cerr << "Line " << node.lineNumber << ", Column " << node.columnNumber
+            << ", Compiler error: Internal compiler error, control reached the "
+               "end of the \"convertToDecimal64\" function!"
+            << std::endl;
+  exit(-1);
+  return AssemblyCode("()");
+}
+
+AssemblyCode convertTo(TreeNode node, std::string type,
+                       CompilationContext context) {
+  if (type == "Character" or type == "Integer16" or type == "Integer32" or
+      std::regex_search(
+          type,
+          std::regex(
+              "Pointer$"))) // When, in JavaScript Virtual Machine, you can't
+                            // push types of less than 4 bytes (32 bits) onto the
+                            // system stack, you need to convert those to
+                            // Integer32 (i32). Well, makes slightly more sense
+                            // than the way it is in 64-bit x86 assembly, where
+                            // you can put 16-bit values and 64-bit values onto
+                            // the system stack, but you can't put 32-bit values.
+    return convertToInteger32(node, context);
+  if (type == "Integer64")
+    return convertToInteger64(node, context);
+  if (type == "Decimal32")
+    return convertToDecimal32(node, context);
+  if (type == "Decimal64")
+    return convertToDecimal64(node, context);
+  std::cerr << "Line " << node.lineNumber << ", Column " << node.columnNumber
+            << ", Compiler error: Some part of the compiler attempted to get "
+               "the assembly code for converting \""
+            << node.text << "\" into the type \"" << type
+            << "\", which doesn't make sense. This could be an internal "
+               "compiler error, or there could be something semantically "
+               "(though not grammatically) very wrong with your program."
+            << std::endl;
+  exit(-1);
   return AssemblyCode("()");
 }
 
@@ -53,24 +208,28 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
   if (context.localVariables.count(text) and text.back() != '[')
     return AssemblyCode(
         "(i32.sub\n\t(global.get $stack_pointer)\n\t(i32.const " +
-            std::to_string(context.localVariables[text]) + ")\n)",
+            std::to_string(context.localVariables[text]) + ") ;;" + text +
+            "\n)",
         AssemblyCode::AssemblyType::i32);
   if (context.localVariables.count(text) and text.back() == '[')
     return AssemblyCode(
         "(i32.add\n\t(i32.sub \n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
-            std::to_string(context.localVariables[text]) + ")\n\t)\n)" +
+            std::to_string(context.localVariables[text]) + ") ;;" + text +
+            "\n\t)\n)" +
             std::string(convertToInteger32(children[0], context).indentBy(1)) +
             "\n)",
         AssemblyCode::AssemblyType::i32);
   if (context.globalVariables.count(text) and text.back() != '[')
     return AssemblyCode("(i32.const " +
-                            std::to_string(context.globalVariables[text]) + ")",
+                            std::to_string(context.globalVariables[text]) +
+                            ") ;;" + text,
                         AssemblyCode::AssemblyType::i32);
   if (context.globalVariables.count(text) and text.back() == '[')
     return AssemblyCode(
         "(i32.add\n\t(i32.const " +
-            std::to_string(context.globalVariables[text]) + ")\n" +
+            std::to_string(context.globalVariables[text]) + ") ;;" + text +
+            "\n" +
             std::string(convertToInteger32(children[0], context).indentBy(1)) +
             "\n)",
         AssemblyCode::AssemblyType::i32);
@@ -189,7 +348,7 @@ std::string TreeNode::getType(CompilationContext context) {
                           std::regex("^Decimal"))) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: Unfortunately, WebAssembly (unlike x86 "
-                   "assembly) doesn't support computing remainings of division "
+                   "assembly) doesn't support computing remaining of division "
                    "of decimal numbers, so we can't support that either "
                    "outside of compile-time constants."
                 << std::endl;

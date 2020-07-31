@@ -97,16 +97,16 @@ public:
   int interpretAsACompileTimeIntegerConstant() {
     if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
       return std::stoi(text, 0, 0);
-    if (text == "+")
+    if (text == "+" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() +
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "-")
+    if (text == "-" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() -
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "*")
+    if (text == "*" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() *
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "/") {
+    if (text == "/" and children.size() == 0) {
       if (children[1].interpretAsACompileTimeIntegerConstant() == 0) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Interpreter error: Division by zero in a compile-time "
@@ -117,26 +117,26 @@ public:
       return children[0].interpretAsACompileTimeIntegerConstant() /
              children[1].interpretAsACompileTimeIntegerConstant();
     }
-    if (text == "and")
-      return children[0].interpretAsACompileTimeIntegerConstant() and
+    if (text == "and" and children.size() == 2)
+      return children[0].interpretAsACompileTimeIntegerConstant() bitand
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "or")
-      return children[0].interpretAsACompileTimeIntegerConstant() or
+    if (text == "or" and children.size() == 2)
+      return children[0].interpretAsACompileTimeIntegerConstant() bitor
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "?:")
+    if (text == "?:" and children.size() == 3)
       return children[0].interpretAsACompileTimeIntegerConstant()
                  ? children[1].interpretAsACompileTimeIntegerConstant()
                  : children[2].interpretAsACompileTimeIntegerConstant();
-    if (text == "mod(")
+    if (text == "mod(" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() %
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "<")
+    if (text == "<" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() <
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == ">")
+    if (text == ">" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() >
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "=")
+    if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() ==
              children[1].interpretAsACompileTimeIntegerConstant();
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -150,16 +150,16 @@ public:
       return std::stoi(text, 0, 0);
     if (std::regex_match(text, std::regex("\\d+\\.\\d*")))
       return std::stod(text);
-    if (text == "+")
+    if (text == "+" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() +
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "-")
+    if (text == "-" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() -
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "*")
+    if (text == "*" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() *
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "/")
+    if (text == "/" and children.size() == 2)
       return children[0]
                  .interpretAsACompileTimeDecimalConstant() / // Dividing a real
                                                              // number by zero
@@ -176,13 +176,13 @@ public:
                                                              // (NaN or inf)
                                                              // into the result.
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "and")
+    if (text == "and" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() and
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "or")
+    if (text == "or" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() or
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "?:")
+    if (text == "?:" and children.size() == 3)
       return children[0].interpretAsACompileTimeDecimalConstant()
                  ? children[1].interpretAsACompileTimeDecimalConstant()
                  : children[2].interpretAsACompileTimeDecimalConstant();
@@ -224,13 +224,13 @@ public:
       return M_PI;
     if (text == "e")
       return exp(1);
-    if (text == "<")
+    if (text == "<" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() <
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == ">")
+    if (text == ">" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() >
              children[1].interpretAsACompileTimeDecimalConstant();
-    if (text == "=")
+    if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() ==
              children[1].interpretAsACompileTimeDecimalConstant();
     std::cerr
