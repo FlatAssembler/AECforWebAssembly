@@ -107,9 +107,9 @@ AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
   if (originalCode.assemblyType == i32)
     return AssemblyCode(
         "(f32.convert_i32_s\n" + // Again, those who designed JavaScript Virtual
-                                 // Machine had a weird idea that integers should
-                                 // be unsigned unless somebody makes them
-                                 // explicitly signed via "_s".
+                                 // Machine had a weird idea that integers
+                                 // should be unsigned unless somebody makes
+                                 // them explicitly signed via "_s".
             std::string(originalCode.indentBy(1)) + "\n)",
         f32);
   if (originalCode.assemblyType == i64)
@@ -218,21 +218,40 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
             std::to_string(context.localVariables[text]) + ") ;;" + text +
             "\n)",
         AssemblyCode::AssemblyType::i32);
-  if (context.localVariables.count(text) and text.back() == '[')
+  if (context.localVariables.count(text) and text.back() == '[') {
+    if (children.empty()) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The array \""
+                << text.substr(0, text.size() - 1)
+                << "\" has no index in the AST. Aborting the compilation, or "
+                   "else the compiler will segfault!"
+                << std::endl;
+      exit(1);
+    }
     return AssemblyCode(
-        "(i32.add\n\t(i32.sub \n\t\t(global.get "
+        "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
             std::to_string(context.localVariables[text]) + ") ;;" + text +
             "\n\t)\n)" +
             std::string(convertToInteger32(children[0], context).indentBy(1)) +
             "\n)",
         AssemblyCode::AssemblyType::i32);
+  }
   if (context.globalVariables.count(text) and text.back() != '[')
     return AssemblyCode("(i32.const " +
                             std::to_string(context.globalVariables[text]) +
                             ") ;;" + text,
                         AssemblyCode::AssemblyType::i32);
-  if (context.globalVariables.count(text) and text.back() == '[')
+  if (context.globalVariables.count(text) and text.back() == '[') {
+    if (children.empty()) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The array \""
+                << text.substr(0, text.size() - 1)
+                << "\" has no index in the AST. Aborting the compilation, or "
+                   "else the compiler will segfault!"
+                << std::endl;
+      exit(1);
+    }
     return AssemblyCode(
         "(i32.add\n\t(i32.const " +
             std::to_string(context.globalVariables[text]) + ") ;;" + text +
@@ -240,6 +259,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
             std::string(convertToInteger32(children[0], context).indentBy(1)) +
             "\n)",
         AssemblyCode::AssemblyType::i32);
+  }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber
             << ", Compiler error: Some part of the compiler attempted to get "
                "the assembly of the pointer to \""
@@ -382,6 +402,10 @@ std::string TreeNode::getType(CompilationContext context) {
                            children[0].getType(context),
                            children[1].getType(context));
   }
+  if (text == "If" or text == "Then" or text == "Else" or text == "While" or
+      text == "Loop" or text == "Does") // Or else the compiler will claim those
+                                        // tokens are undeclared variables.
+    return "Nothing";
   if (std::regex_match(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?"))) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
@@ -418,6 +442,23 @@ std::string TreeNode::getType(CompilationContext context) {
     return getStrongerType(lineNumber, columnNumber,
                            children[0].getType(context),
                            children[1].getType(context));
+  }
+  if (text == ":=") {
+    if (children.size() < 2) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The assignment operator \":=\" has less "
+                   "than two operands. Aborting the compilation, or else the "
+                   "compiler will segfault."
+                << std::endl;
+      exit(1);
+    }
+    if (children[1].getType(context) == "Nothing") {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Attempting to assign something of the "
+                   "type \"Nothing\" to a variable. Aborting the compilation!"
+                << std::endl;
+    }
+    return children[0].getType(context);
   }
   auto potentialFunction =
       std::find_if(context.functions.begin(), context.functions.end(),

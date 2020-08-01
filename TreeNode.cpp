@@ -52,12 +52,14 @@ public:
             4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
                // being 32 bits or 4 bytes long), unless somebody switches to
                // the 64-bit mode (which is almost never done).
+    basicDataTypeSizes["Nothing"] = 0;
     mappingOfAECTypesToWebAssemblyTypes =
         std::map<std::string, AssemblyCode::AssemblyType>(
             {{"Integer32", AssemblyCode::AssemblyType::i32},
              {"Integer64", AssemblyCode::AssemblyType::i64},
              {"Decimal32", AssemblyCode::AssemblyType::f32},
-             {"Decimal64", AssemblyCode::AssemblyType::f64}});
+             {"Decimal64", AssemblyCode::AssemblyType::f64},
+             {"Nothing", AssemblyCode::AssemblyType::null}});
     for (auto pair : basicDataTypeSizes)
       if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
         mappingOfAECTypesToWebAssemblyTypes[pair.first] =
