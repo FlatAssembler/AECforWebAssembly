@@ -285,12 +285,36 @@ void testBitManipulations() {
         << getCharVectorRepresentationOfInteger64(-1) << "\"!" << std::endl;
     std::exit(1);
   }
+  if (getCharVectorRepresentationOfInteger32(-1) != "\"\\ff\\ff\\ff\\ff\"") {
+    std::cerr
+        << "Internal compiler error: Bit manipulation test failed. Your C++ "
+           "compiler appears not to use double-complement for negative "
+           "numbers. getCharVectorRepresentationOfInteger32(-1) gives \""
+        << getCharVectorRepresentationOfInteger32(-1) << "\"!" << std::endl;
+    std::exit(1);
+  }
   if (getCharVectorRepresentationOfCharacter('A') != "\"\\41\"") {
     std::cerr << "Internal compiler error: Bit manipulation test failed. Your "
                  "C++ compiler appears not to use ASCII. "
                  "getCharVectorRepresentationOfCharacter(\'A\') gives \""
               << getCharVectorRepresentationOfCharacter('A') << "\"!"
               << std::endl;
+    std::exit(1);
+  }
+  if (getCharVectorRepresentationOfInteger32(256) != "\"\\00\\01\\00\\00\"") {
+    std::cerr
+        << "Internal compiler error: Bit manipulation test failed. Your C++ "
+           "compiler appears not to use double-complement for negative "
+           "numbers. getCharVectorRepresentationOfInteger32(256) gives \""
+        << getCharVectorRepresentationOfInteger32(256) << "\"!" << std::endl;
+    std::exit(1);
+  }
+  if (getCharVectorRepresentationOfInteger32(4096) != "\"\\00\\10\\00\\00\"") {
+    std::cerr
+        << "Internal compiler error: Bit manipulation test failed. Your C++ "
+           "compiler appears not to use double-complement for negative "
+           "numbers. getCharVectorRepresentationOfInteger32(4096) gives \""
+        << getCharVectorRepresentationOfInteger32(4096) << "\"!" << std::endl;
     std::exit(1);
   }
   if (getCharVectorRepresentationOfDecimal64(double(1) / 3) !=

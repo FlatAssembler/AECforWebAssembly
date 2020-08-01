@@ -167,9 +167,11 @@ public:
                   "\t(data 0 (i32.const " +
                   std::to_string(context.globalVariables[variableName.text]) +
                   ") " +
-                  getCharVectorRepresentationOfDecimal32(
+                  getCharVectorRepresentationOfInteger32(
                       context.globalVariables.at(assignment.text)) +
-                  ")\n";
+                  ") ;;Hex of " +
+                  std::to_string(context.globalVariables.at(assignment.text)) +
+                  "\n";
             } else { // Simple assignment.
               if (childNode.text == "Character")
                 globalDeclarations +=
