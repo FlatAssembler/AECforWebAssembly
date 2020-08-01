@@ -1,4 +1,5 @@
 #include "AssemblyCode.cpp"
+#include "bitManipulations.cpp"
 #include "compilingContext.cpp"
 #include <cmath>
 #include <iostream>
@@ -35,6 +36,7 @@ public:
   std::map<std::string, int> basicDataTypeSizes;
   std::map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
+  std::set<std::string> AECkeywords;
   std::vector<TreeNode> children;
   std::string text;
   int lineNumber, columnNumber;
@@ -64,6 +66,22 @@ public:
       if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
         mappingOfAECTypesToWebAssemblyTypes[pair.first] =
             AssemblyCode::AssemblyType::i32;
+    AECkeywords = std::set<std::string>({"Function",  "Which",
+                                         "Returns",   "Nothing",
+                                         "Is",        "External",
+                                         "Does",      "EndFunction",
+                                         "If",        "Then",
+                                         "ElseIf",    "Else",
+                                         "EndIf",     "While",
+                                         "Loop",      "EndWhile",
+                                         "Structure", "Consists",
+                                         "Of",        "EndStructure",
+                                         "Character", "CharacterPointer",
+                                         "Integer16", "Integer16Pointer",
+                                         "Integer32", "Integer32Pointer",
+                                         "Integer64", "Integer64Pointer",
+                                         "Decimal32", "Decimal32Pointer",
+                                         "Decimal64", "Decimal64Pointer"});
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {

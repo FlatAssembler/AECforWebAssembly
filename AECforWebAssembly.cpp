@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   cout << "All characters read!" << endl;
   cout << "Tokenizing the program..." << endl;
   vector<TreeNode> tokenized = TreeNode::tokenize(rawInput);
-  cout << "Finished tokenizing the program!" << endl;
+  cout << "Finished tokenizing the program!\nParsing the program..." << endl;
   vector<TreeNode> parsed = TreeNode::parse(tokenized);
   cout << "Finished parsing the program!" << endl;
   TreeRootNode AST = TreeRootNode();

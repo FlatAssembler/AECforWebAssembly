@@ -23,7 +23,8 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
               input[i - 1].text,
               regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                     "\\d|_|[a-z]|[A-Z])*$)")) and
-          !input[i - 1].children.size() and input[i - 1].text.back() != '(') {
+          !input[i - 1].children.size() and input[i - 1].text.back() != '(' and
+          input[i - 1].text.front() != '"') {
         std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
                   << input[i - 1].columnNumber
                   << ", Parser error: Unexpected token \"" << input[i - 1].text
@@ -33,7 +34,8 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
               input[i + 1].text,
               regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                     "\\d|_|[a-z]|[A-Z])*$)")) and
-          !input[i + 1].children.size() and input[i - 1].text.back() != '(') {
+          !input[i + 1].children.size() and input[i - 1].text.back() != '(' and
+          input[i + 1].text.front() != '"') {
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
                   << ", Parser error: Unexpected token \"" << input[i - 1].text

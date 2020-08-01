@@ -200,7 +200,13 @@ void parserTests() {
         "number_of_dimensions)))"},
        {"Structure empty_structure Consists Of EndStructure //Nonsense code, "
         "but should not crash the parser.",
-        "(Structure empty_structure Of)"}});
+        "(Structure empty_structure Of)"},
+       {"Function random_function(CharacterPointer ptr) Which Returns Nothing "
+        "Does Integer32 first_array[3]:={1,2,3};CharacterPointer "
+        "helloWorldString:=\"Hello world!\";EndFunction",
+        "(Function (random_function (CharacterPointer ptr)) (Returns Nothing) "
+        "(Does (Integer32 (first_array 3 (:= ({} 1 2 3)))) (CharacterPointer "
+        "(helloWorldString (:= \"Hello world!\")))))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();

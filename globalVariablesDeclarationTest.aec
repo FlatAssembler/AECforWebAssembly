@@ -1,0 +1,10 @@
+/* This code does nothing, but the compiler should output syntactically
+ * valid assembly code for it.*/
+Character letterA:='A',letters[3]:={'a','b','c'};
+CharacterPointer helloWorldString:="Hello world!\n";
+Integer16 powersOfTwo[8]:={1,2,4,8,16,32,64,128,256};
+Decimal64 irrationalNumbers[3]:={pi,
+                                 e,
+                                 (sqrt(5)+1)/2 //Golden ratio (1.618033...)
+                                };
+Decimal32 rationalNumbers[3]:={3/2,pow(sin(pi/4),2),22/7};

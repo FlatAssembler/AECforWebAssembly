@@ -1,5 +1,8 @@
 #include <iostream>
+#include <regex>
 #include <sstream>
+
+#pragma once
 
 std::string
 reverseOrderOfBytes(std::string hexadecimal) // Because the JavaScript Virtual
