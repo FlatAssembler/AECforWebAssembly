@@ -269,6 +269,7 @@ public:
             functionDeclaration.defaultArgumentValues.push_back(
                 argument.children[0]
                     .children[0]
+                    .children[0]
                     .interpretAsACompileTimeDecimalConstant());
           else
             functionDeclaration.defaultArgumentValues.push_back(0);
@@ -318,10 +319,11 @@ public:
           globalDeclarations += "\n";
           globalDeclarations +=
               "\t\t(global.set $stack_pointer ;;Allocate the space for the "
-              "arguments of that function on the system stack.\n\t\t(i32.add "
-              "(global.get $stack_pointer) (i32.const " +
+              "arguments of that function on the system "
+              "stack.\n\t\t\t(i32.add\n"
+              "\t\t\t\t(global.get $stack_pointer)\n\t\t\t\t(i32.const " +
               std::to_string(contextOfThatFunction.stackSizeOfThisScope) +
-              ")))\n";
+              ")\n\t\t\t)\n\t\t)\n";
           for (unsigned int i = 0; i < functionDeclaration.argumentNames.size();
                i++) {
             if (functionDeclaration.argumentTypes[i] == "Character")
