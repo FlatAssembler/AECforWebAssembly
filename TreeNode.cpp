@@ -36,6 +36,8 @@ public:
   std::map<std::string, int> basicDataTypeSizes;
   std::map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
+  std::map<AssemblyCode::AssemblyType, std::string>
+      stringRepresentationOfWebAssemblyType;
   std::set<std::string> AECkeywords;
   std::vector<TreeNode> children;
   std::string text;
@@ -82,6 +84,13 @@ public:
                                          "Integer64", "Integer64Pointer",
                                          "Decimal32", "Decimal32Pointer",
                                          "Decimal64", "Decimal64Pointer"});
+    stringRepresentationOfWebAssemblyType =
+        std::map<AssemblyCode::AssemblyType, std::string>(
+            {{AssemblyCode::AssemblyType::i32, "i32"},
+             {AssemblyCode::AssemblyType::i64, "i64"},
+             {AssemblyCode::AssemblyType::f32, "f32"},
+             {AssemblyCode::AssemblyType::f64, "f64"},
+             {AssemblyCode::AssemblyType::null, "null"}});
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {

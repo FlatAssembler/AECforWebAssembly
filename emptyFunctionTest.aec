@@ -1,0 +1,12 @@
+Function printInteger(Integer32 int) Which Returns Integer32
+    Is External; //The JavaScript function that prints an integer and
+                 //returns the number of digits.
+Function empty_function(Character charArgument,
+                        Integer16 shortArgument,
+                        Integer32 intArgument,
+                        Integer64 longArgument,
+                        Decimal32 floatArgument,
+                        Decimal64 doubleArgument)
+         Which Returns Nothing Does
+    //It does nothing, but the compiler should still generate valid code.
+EndFunction

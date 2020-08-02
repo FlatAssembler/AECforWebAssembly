@@ -204,9 +204,26 @@ AssemblyCode convertTo(TreeNode node, std::string type,
 }
 
 AssemblyCode TreeNode::compile(CompilationContext context) {
-  std::cerr << "Compiler is not yet implemented!" << std::endl;
-  exit(1);
-  return AssemblyCode("()");
+  AssemblyCode::AssemblyType returnType =
+      mappingOfAECTypesToWebAssemblyTypes[getType(context)];
+  std::string assembly;
+  if (text == "Does" or text == "Then" or text == "Loop" or
+      text == "Else") // Blocks of code are stored by the parser as child nodes
+                      // of "Does", "Then", "Else" and "Loop".
+  {
+    for (auto childNode : children) {
+      assembly += std::string(childNode.compile(context));
+    }
+    assembly += "(global.set $stack_pointer (i32.sub (global.get "
+                "$stack_pointer) (i32.const " +
+                std::to_string(context.stackSizeOfThisScope) + ")))";
+  } else {
+    std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler error: No rule to compile the token \"" << text
+              << "\", quitting now!" << std::endl;
+    exit(1);
+  }
+  return AssemblyCode(assembly, returnType);
 }
 
 AssemblyCode TreeNode::compileAPointer(CompilationContext context) {

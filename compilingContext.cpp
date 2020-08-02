@@ -7,10 +7,10 @@ struct function {
   std::string returnType;
   std::vector<std::string> argumentTypes;
   std::vector<double> defaultArgumentValues;
+  std::vector<std::string> argumentNames;
 };
 
 struct CompilationContext {
-  int stackPointer = 0;
   int stackSize =
       4096; // The JavaScript (WebAssembly) Virtual Machine by default has only
             // 64KB of RAM, and you need to allocate it so that it grows

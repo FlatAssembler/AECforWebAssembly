@@ -46,6 +46,7 @@ public:
           }
           context.globalVariables[variableName.text] =
               context.globalVariablePointer;
+          context.variableTypes[variableName.text] = childNode.text;
           if (variableName.text.back() == '[')
             context.globalVariablePointer +=
                 basicDataTypeSizes[childNode.text] *
@@ -231,6 +232,128 @@ public:
               }
             }
           }
+        }
+      } else if (childNode.text == "Function") {
+        function functionDeclaration;
+        CompilationContext contextOfThatFunction = context;
+        if (childNode.children.size() != 3) {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Compiler error: The AST is corrupt, the \"Function\" "
+                       "node has less than 3 children, quitting now (or else "
+                       "the compiler will segfault)!"
+                    << std::endl;
+          exit(1);
+        }
+        functionDeclaration.name = childNode.children[0].text;
+        functionDeclaration.returnType = childNode.children[1].children[0].text;
+        for (TreeNode argument : childNode.children[0].children) {
+          functionDeclaration.argumentNames.push_back(
+              argument.children[0].text);
+          functionDeclaration.argumentTypes.push_back(argument.text);
+          contextOfThatFunction.variableTypes[argument.children[0].text] =
+              argument.text;
+          for (auto pair : contextOfThatFunction.localVariables)
+            pair.second +=
+                basicDataTypeSizes[argument.text]; // Push all the variables
+                                                   // further back on the stack.
+          contextOfThatFunction.stackSizeOfThisFunction +=
+              basicDataTypeSizes[argument.text];
+          contextOfThatFunction.stackSizeOfThisScope =
+              contextOfThatFunction.stackSizeOfThisFunction;
+          contextOfThatFunction.localVariables[argument.children[0].text] = 0;
+          if (argument.children[0]
+                  .children.size()) // If there is a default value.
+            functionDeclaration.defaultArgumentValues.push_back(
+                argument.children[0]
+                    .children[0]
+                    .interpretAsACompileTimeDecimalConstant());
+          else
+            functionDeclaration.defaultArgumentValues.push_back(0);
+        }
+        context.functions.push_back(functionDeclaration);
+        contextOfThatFunction.functions.push_back(functionDeclaration);
+        if (childNode.children[2].text == "External") {
+          globalDeclarations += "\t(import \"JavaScript\" \"" +
+                                functionDeclaration.name + "\" (func $" +
+                                functionDeclaration.name + " ";
+          for (std::string argumentType : functionDeclaration.argumentTypes)
+            globalDeclarations +=
+                "(param " +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[argumentType]] +
+                ") ";
+          if (functionDeclaration.returnType != "Nothing")
+            globalDeclarations +=
+                "(result " +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
+                                                             .returnType]] +
+                ")";
+          globalDeclarations += ")";
+        } else if (childNode.children[2].text == "Does") {
+          globalDeclarations += "\t(func $" + functionDeclaration.name + " ";
+          for (std::string argumentType : functionDeclaration.argumentTypes)
+            globalDeclarations +=
+                "(param " +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[argumentType]] +
+                ") ";
+          if (functionDeclaration.returnType != "Nothing")
+            globalDeclarations +=
+                "(result " +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
+                                                             .returnType]] +
+                ")";
+          globalDeclarations += "\n";
+          for (unsigned int i = 0; i < functionDeclaration.argumentNames.size();
+               i++) {
+            if (functionDeclaration.argumentTypes[i] == "Character")
+              globalDeclarations += "\t\t(i32.store_8 ";
+            else if (functionDeclaration.argumentTypes[i] == "Integer16")
+              globalDeclarations += "\t\t(i32.store_16 ";
+            else if (functionDeclaration.argumentTypes[i] == "Integer32" or
+                     std::regex_search(functionDeclaration.argumentTypes[i],
+                                       std::regex("Pointer$")))
+              globalDeclarations += "\t\t(i32.store ";
+            else if (functionDeclaration.argumentTypes[i] == "Integer64")
+              globalDeclarations += "\t\t(i64.store ";
+            else if (functionDeclaration.argumentTypes[i] == "Decimal32")
+              globalDeclarations += "\t\t(f32.store ";
+            else if (functionDeclaration.argumentTypes[i] == "Decimal64")
+              globalDeclarations += "\t\t(f64.store ";
+            else {
+              std::cerr << "Line " << childNode.children[2].lineNumber
+                        << ", Column " << childNode.children[2].columnNumber
+                        << ", Internal compiler error: The compiler got into a "
+                           "forbidden state, quitting now so that the compiler "
+                           "doesn't segfault!"
+                        << std::endl;
+              exit(1);
+            }
+            globalDeclarations +=
+                "\n" +
+                std::string(TreeNode(functionDeclaration.argumentNames[i],
+                                     childNode.children[2].lineNumber,
+                                     childNode.children[2].columnNumber)
+                                .compileAPointer(contextOfThatFunction)
+                                .indentBy(2)) +
+                "\n\t\t\t(local.get " + std::to_string(i) + "))\n";
+            globalDeclarations += childNode.children[2]
+                                      .compile(contextOfThatFunction)
+                                      .indentBy(1);
+            globalDeclarations += ")\n\t(export \"" + functionDeclaration.name +
+                                  "\" (func $" + functionDeclaration.name +
+                                  "))\n";
+          }
+        } else {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Internal compiler error: The compiler got into a "
+                       "forbidden state, quitting now before segfaulting!"
+                    << std::endl;
+          exit(1);
         }
       } else {
         std::cerr << "Line " << childNode.lineNumber << ", Column "
