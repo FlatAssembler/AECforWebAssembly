@@ -206,7 +206,13 @@ void parserTests() {
         "helloWorldString:=\"Hello world!\";EndFunction",
         "(Function (random_function (CharacterPointer ptr)) (Returns Nothing) "
         "(Does (Integer32 (first_array 3 (:= ({} 1 2 3)))) (CharacterPointer "
-        "(helloWorldString (:= \"Hello world!\")))))"}});
+        "(helloWorldString (:= \"Hello world!\")))))"},
+       {"Function empty_function_without_arguments() Which Returns Nothing "
+        "Does /*Nothing*/ EndFunction //Who would have thought something like "
+        "that would cause the earlier version of my parser to crash? It's "
+        "really hard to guess what are edge cases and what can trigger them.",
+        "(Function empty_function_without_arguments( (Returns Nothing) "
+        "Does)"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
