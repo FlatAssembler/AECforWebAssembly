@@ -15,4 +15,5 @@ EndFunction
 Function empty_function_returning_integer(
         Integer32 no_default_value)
     Which Returns Integer32 Does
-    EndFunction
+    //Returns 0, by default.
+EndFunction
