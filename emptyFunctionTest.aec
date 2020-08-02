@@ -10,3 +10,9 @@ Function empty_function(Character charArgument:='A',
          Which Returns Nothing Does
     //It does nothing, but the compiler should still generate valid code.
 EndFunction
+Function empty_function_without_arguments() Which Returns Nothing Does
+EndFunction
+Function empty_function_returning_integer(
+        Integer32 no_default_value)
+    Which Returns Integer32 Does
+    EndFunction

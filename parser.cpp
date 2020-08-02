@@ -333,6 +333,8 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
 std::vector<TreeNode>
 TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
   auto inputWithParenthesesParsed = parseExpression(input);
+  if (inputWithParenthesesParsed.empty())
+    return inputWithParenthesesParsed;
   if (input.size() < 2) {
     std::cerr << "Line " << inputWithParenthesesParsed[0].lineNumber
               << ", Column " << inputWithParenthesesParsed[0].columnNumber
@@ -478,8 +480,9 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       TreeNodes argument;
       for (unsigned int i = 0; i < functionArguments.size() + 1; i++) {
         if (i == functionArguments.size() or functionArguments[i].text == ",") {
-          input[functionName].children.push_back(
-              parseVariableDeclaration(argument)[0]);
+          argument = parseVariableDeclaration(argument);
+          if (!argument.empty())
+            input[functionName].children.push_back(argument[0]);
           argument = TreeNodes();
         } else
           argument.push_back(functionArguments[i]);

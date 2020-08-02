@@ -359,8 +359,16 @@ public:
                 "\n\t\t\t(local.get " + std::to_string(i) + ")\n\t\t)\n";
           }
           globalDeclarations +=
-              childNode.children[2].compile(contextOfThatFunction).indentBy(1);
-          globalDeclarations += ")\n\t(export \"" +
+              childNode.children[2].compile(contextOfThatFunction).indentBy(2) +
+              "\n";
+          if (functionDeclaration.returnType != "Nothing")
+            globalDeclarations +=
+                "\t\t(" +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
+                                                             .returnType]] +
+                ".const 0)\n";
+          globalDeclarations += "\t)\n\t(export \"" +
                                 functionDeclaration.name.substr(
                                     0, functionDeclaration.name.size() - 1) +
                                 "\" (func $" +
