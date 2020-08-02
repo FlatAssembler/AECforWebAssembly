@@ -253,6 +253,7 @@ public:
           functionDeclaration.argumentTypes.push_back(argument.text);
           contextOfThatFunction.variableTypes[argument.children[0].text] =
               argument.text;
+          contextOfThatFunction.localVariables[argument.children[0].text] = 0;
           for (auto &pair : contextOfThatFunction
                                 .localVariables) // The reference operator '&'
                                                  // is needed because... C++.
@@ -263,7 +264,6 @@ public:
               basicDataTypeSizes[argument.text];
           contextOfThatFunction.stackSizeOfThisScope =
               contextOfThatFunction.stackSizeOfThisFunction;
-          contextOfThatFunction.localVariables[argument.children[0].text] = 0;
           if (argument.children[0]
                   .children.size()) // If there is a default value.
             functionDeclaration.defaultArgumentValues.push_back(
@@ -353,8 +353,8 @@ public:
                                      childNode.children[2].lineNumber,
                                      childNode.children[2].columnNumber)
                                 .compileAPointer(contextOfThatFunction)
-                                .indentBy(2)) +
-                "\n\t\t\t(local.get " + std::to_string(i) + "))\n";
+                                .indentBy(3)) +
+                "\n\t\t\t(local.get " + std::to_string(i) + ")\n\t\t)\n";
           }
           globalDeclarations +=
               childNode.children[2].compile(contextOfThatFunction).indentBy(1);
