@@ -253,7 +253,9 @@ public:
           functionDeclaration.argumentTypes.push_back(argument.text);
           contextOfThatFunction.variableTypes[argument.children[0].text] =
               argument.text;
-          for (auto pair : contextOfThatFunction.localVariables)
+          for (auto &pair : contextOfThatFunction
+                                .localVariables) // The reference operator '&'
+                                                 // is needed because... C++.
             pair.second +=
                 basicDataTypeSizes[argument.text]; // Push all the variables
                                                    // further back on the stack.
@@ -275,8 +277,12 @@ public:
         contextOfThatFunction.functions.push_back(functionDeclaration);
         if (childNode.children[2].text == "External") {
           globalDeclarations += "\t(import \"JavaScript\" \"" +
-                                functionDeclaration.name + "\" (func $" +
-                                functionDeclaration.name + " ";
+                                functionDeclaration.name.substr(
+                                    0, functionDeclaration.name.size() - 1) +
+                                "\" (func $" +
+                                functionDeclaration.name.substr(
+                                    0, functionDeclaration.name.size() - 1) +
+                                " ";
           for (std::string argumentType : functionDeclaration.argumentTypes)
             globalDeclarations +=
                 "(param " +
@@ -290,9 +296,12 @@ public:
                     [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
                                                              .returnType]] +
                 ")";
-          globalDeclarations += ")";
+          globalDeclarations += "))\n";
         } else if (childNode.children[2].text == "Does") {
-          globalDeclarations += "\t(func $" + functionDeclaration.name + " ";
+          globalDeclarations += "\t(func $" +
+                                functionDeclaration.name.substr(
+                                    0, functionDeclaration.name.size() - 1) +
+                                " ";
           for (std::string argumentType : functionDeclaration.argumentTypes)
             globalDeclarations +=
                 "(param " +
@@ -307,12 +316,18 @@ public:
                                                              .returnType]] +
                 ")";
           globalDeclarations += "\n";
+          globalDeclarations +=
+              "\t\t(global.set $stack_pointer ;;Allocate the space for the "
+              "arguments of that function on the system stack.\n\t\t(i32.add "
+              "(global.get $stack_pointer) (i32.const " +
+              std::to_string(contextOfThatFunction.stackSizeOfThisScope) +
+              ")))\n";
           for (unsigned int i = 0; i < functionDeclaration.argumentNames.size();
                i++) {
             if (functionDeclaration.argumentTypes[i] == "Character")
-              globalDeclarations += "\t\t(i32.store_8 ";
+              globalDeclarations += "\t\t(i32.store8 ";
             else if (functionDeclaration.argumentTypes[i] == "Integer16")
-              globalDeclarations += "\t\t(i32.store_16 ";
+              globalDeclarations += "\t\t(i32.store16 ";
             else if (functionDeclaration.argumentTypes[i] == "Integer32" or
                      std::regex_search(functionDeclaration.argumentTypes[i],
                                        std::regex("Pointer$")))
@@ -340,13 +355,16 @@ public:
                                 .compileAPointer(contextOfThatFunction)
                                 .indentBy(2)) +
                 "\n\t\t\t(local.get " + std::to_string(i) + "))\n";
-            globalDeclarations += childNode.children[2]
-                                      .compile(contextOfThatFunction)
-                                      .indentBy(1);
-            globalDeclarations += ")\n\t(export \"" + functionDeclaration.name +
-                                  "\" (func $" + functionDeclaration.name +
-                                  "))\n";
           }
+          globalDeclarations +=
+              childNode.children[2].compile(contextOfThatFunction).indentBy(1);
+          globalDeclarations += ")\n\t(export \"" +
+                                functionDeclaration.name.substr(
+                                    0, functionDeclaration.name.size() - 1) +
+                                "\" (func $" +
+                                functionDeclaration.name.substr(
+                                    0, functionDeclaration.name.size() - 1) +
+                                "))\n";
         } else {
           std::cerr << "Line " << childNode.lineNumber << ", Column "
                     << childNode.columnNumber
