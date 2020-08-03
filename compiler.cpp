@@ -341,7 +341,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                   "\n\t\t)\n\t)\n)";
     else
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".add\n" +
+          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".sub\n" +
           convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +

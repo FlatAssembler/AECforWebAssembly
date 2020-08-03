@@ -28,7 +28,7 @@ Function integerDivision(Integer32 first,
         Return first/second;
 EndFunction
 
-Function decimalDivison(Integer32 first,
+Function decimalDivision(Integer32 first,
         Integer32 second)
     Which Returns Decimal32 Does
         Return Decimal32(first)/second; //"Decimal32(" here is the casting
