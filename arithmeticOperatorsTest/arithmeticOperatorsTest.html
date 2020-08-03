@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AEC-to-WebAssembly compiler - Arithmetic Operators Test</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+    <!--Copied from: https://www.w3schools.com/css/css_rwd_viewport.asp -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Arithmetic Operators Test</h1>
+    After I've written more than 3'000 lines of code of my AEC-to-WebAssembly
+    <a href="https://github.com/FlatAssembler/AECforWebAssembly">compiler</a>,
+    I'm finally able to write an AEC program which can be tested in a browser.
+    <br />
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer. After a few years (if not months), all JavaScript
+    environments will become as capable as they are, rather than like Internet
+    Explorer.<br /><br />
+    <form>
+      <!-- https://www.w3schools.com/html/html_forms.asp -->
+      <label for="firstNumber">First number:</label><br />
+      <input type="text" id="firstNumber" name="firstNumber" /><br />
+      <label for="secondNumber">Second number:</label><br />
+      <input type="text" id="secondNumber" name="secondNumber" /><br />
+    </form>
+    <button onclick="invokeAECfunctions()">Invoke AEC functions!</button><br />
+    <span id="format_as_code">
+      add(first,second)=<span id="addition"></span><br />
+      subtract(first,second)=<span id="subtraction"></span><br />
+      multiply(first,second)=<span id="multiplication"></span><br />
+      integerDivision(first,second)=<span id="integerDivision"></span><br />
+      decimalDivision(first,second)=<span id="decimalDivision"></span
+      ><br /> </span
+    ><br />
+    You can see the source code of the AEC program
+    <a
+      href="https://raw.githubusercontent.com/FlatAssembler/AECforWebAssembly/master/arithmeticOperatorsTest/arithmeticOperatorsTest.aec"
+      >here</a
+    >.
+    <script type="text/javascript">
+      /*
+        More-or-less copied from:
+        https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format
+    */
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 }); //Initially allocates
+      //1 page=64KB of RAM.
+      let importObject = {
+        JavaScript: { stack_pointer: stack_pointer, memory: memory },
+      };
+      let add, subtract, multiply, integerDivision, decimalDivision, exports;
+      fetch("arithmeticOperatorsTest.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          exports = results.instance.exports;
+          add = exports.add; //Not "add()", because we are referring to "add"
+          //as a function (function pointer), rather than
+          //its result!
+          subtract = exports.subtract;
+          multiply = exports.multiply;
+          integerDivision = exports.integerDivision;
+          decimalDivision = exports.decimalDivision;
+        });
+      function invokeAECfunctions() {
+        let first = parseInt(document.getElementById("firstNumber").value);
+        let second = parseInt(document.getElementById("secondNumber").value);
+        document.getElementById("addition").innerText = add(first, second);
+        document.getElementById("subtraction").innerText = subtract(
+          first,
+          second
+        );
+        document.getElementById("multiplication").innerText = multiply(
+          first,
+          second
+        );
+        document.getElementById("integerDivision").innerText = integerDivision(
+          first,
+          second
+        );
+        document.getElementById("decimalDivision").innerText = decimalDivision(
+          first,
+          second
+        );
+      }
+    </script>
+  </body>
+</html>
