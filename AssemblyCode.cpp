@@ -65,3 +65,9 @@ struct AssemblyCode {
     return *this;
   }
 };
+
+AssemblyCode operator+(std::string str, AssemblyCode assembly) {
+  AssemblyCode::AssemblyType assemblyType = assembly.assemblyType;
+  std::string code = str + assembly.code;
+  return AssemblyCode(code, assemblyType);
+}

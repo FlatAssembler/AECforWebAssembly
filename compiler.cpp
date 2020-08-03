@@ -204,20 +204,177 @@ AssemblyCode convertTo(TreeNode node, std::string type,
 }
 
 AssemblyCode TreeNode::compile(CompilationContext context) {
+  std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType =
-      mappingOfAECTypesToWebAssemblyTypes[getType(context)];
+      mappingOfAECTypesToWebAssemblyTypes[typeOfTheCurrentNode];
+  auto iteratorOfTheCurrentFunction =
+      std::find_if(context.functions.begin(), context.functions.end(),
+                   [=](function someFunction) {
+                     return someFunction.name == context.currentFunctionName;
+                   });
+  if (iteratorOfTheCurrentFunction == context.functions.end()) {
+    std::cerr
+        << "Line " << lineNumber << ", Column " << columnNumber
+        << ", Internal compiler error: The \"compile(CompilationContext)\" "
+           "function was called without setting the current function name, "
+           "aborting compilation (or else the compiler will segfault)!"
+        << std::endl;
+    exit(1);
+  }
+  function currentFunction = *iteratorOfTheCurrentFunction;
   std::string assembly;
   if (text == "Does" or text == "Then" or text == "Loop" or
       text == "Else") // Blocks of code are stored by the parser as child nodes
                       // of "Does", "Then", "Else" and "Loop".
   {
+    if (text != "Does")
+      context.stackSizeOfThisScope =
+          0; //"TreeRootNode" is supposed to set up the arguments in the scope
+             // before passing the recursion onto the "Does" node.
     for (auto childNode : children) {
-      assembly += std::string(childNode.compile(context));
+      if (childNode.text == "Nothing")
+        continue;
+      assembly += std::string(childNode.compile(context)) + "\n";
     }
     assembly += "(global.set $stack_pointer (i32.sub (global.get "
                 "$stack_pointer) (i32.const " +
                 std::to_string(context.stackSizeOfThisScope) + ")))";
-  } else {
+  } else if (context.variableTypes.count(text)) {
+    if (typeOfTheCurrentNode == "Character")
+      assembly +=
+          "(i32.load8_s\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer16")
+      assembly +=
+          "(i32.load16_s\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer32" or
+             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+      assembly += "(i32.load\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer64")
+      assembly += "(i64.load\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal32")
+      assembly += "(f32.load\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal64")
+      assembly += "(f64.load\n" + compileAPointer(context).indentBy(1) + "\n)";
+    else {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Internal compiler error: Compiler got into a forbidden "
+                   "state while compiling the token \""
+                << text << "\", aborting the compilation!" << std::endl;
+      exit(1);
+    }
+  } else if (std::regex_match(text,
+                              std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+    assembly += "(i64.const " + text + ")";
+  else if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
+    assembly += "(f64.const " + text + ")";
+  else if (text == "Return") {
+    assembly += "(return";
+    if (currentFunction.returnType == "Nothing")
+      assembly += ")";
+    else {
+      if (children.empty()) {
+        std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                  << ", Compiler error: It's not specified what to return from "
+                     "a function that's supposed to return \""
+                  << currentFunction.returnType
+                  << "\", aborting the compilation (or else the compiler will "
+                     "segfault)!"
+                  << std::endl;
+        exit(1);
+      }
+      assembly += "\n" +
+                  convertTo(children[0], currentFunction.returnType, context)
+                      .indentBy(1) +
+                  "\n)";
+    }
+  } else if (text == "+") {
+    if (std::regex_search(children[1].getType(context), std::regex("Pointer$")))
+      std::iter_swap(children.begin(), children.begin() + 1);
+    std::string firstType = children[0].getType(context);
+    std::string secondType = children[1].getType(context);
+    if (std::regex_search(
+            firstType,
+            std::regex(
+                "Pointer$"))) // Multiply the second operand by the numbers of
+                              // bytes the data type that the pointer points to
+                              // takes. That is, be compatible with pointers in
+                              // C and C++, rather than with pointers in
+                              // Assembly (which allows unaligned access).
+      assembly += "(i32.add\n" +
+                  std::string(children[0].compile(context).indentBy(1)) +
+                  "\n\t(i32.mul (i32.const " +
+                  std::to_string(basicDataTypeSizes[firstType.substr(
+                      0, firstType.size() - std::string("Pointer").size())]) +
+                  ")\n" + convertToInteger32(children[1], context).indentBy(2) +
+                  "\n\t\t)\n\t)\n)";
+    else
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".add\n" +
+          convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n" +
+          convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n)";
+  } else if (text == "-") {
+    std::string firstType = children[0].getType(context);
+    std::string secondType = children[1].getType(context);
+    if (!std::regex_search(firstType, std::regex("Pointer$")) and
+        std::regex_search(secondType, std::regex("Pointer$"))) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: What exactly does it mean to subtract a "
+                   "pointer from a number? Aborting the compilation!"
+                << std::endl;
+      exit(1);
+    } else if (std::regex_search(firstType, std::regex("Pointer$")) and
+               std::regex_search(
+                   secondType,
+                   std::regex("Pointer$"))) // Subtract two pointers as if they
+                                            // were two Integer32s.
+      assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
+                  "\n" + children[1].compile(context).indentBy(1) + "\n)";
+    else if (std::regex_search(firstType, std::regex("Pointer$")) and
+             !std::regex_search(secondType, std::regex("Pointer$")))
+      assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
+                  "\n\t(i32.mul (i32.const " +
+                  std::to_string(basicDataTypeSizes[firstType.substr(
+                      0, firstType.size() - std::string("Pointer").size())]) +
+                  ")\n" + children[1].compile(context).indentBy(2) +
+                  "\n\t\t)\n\t)\n)";
+    else
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".add\n" +
+          convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n" +
+          convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n)";
+  } else if (text == "*")
+    assembly +=
+        "(" + stringRepresentationOfWebAssemblyType[returnType] + ".mul\n" +
+        convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+        "\n" +
+        convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+        "\n)";
+  else if (text == "/") {
+    if (returnType == AssemblyCode::AssemblyType::i32 or
+        returnType == AssemblyCode::AssemblyType::i64)
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".div_s\n" +
+          convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n" +
+          convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n)";
+    else
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".div\n" +
+          convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n" +
+          convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+          "\n)";
+  } else if (text.back() == '(' and
+             basicDataTypeSizes.count(
+                 text.substr(0, text.size() - 1))) // The casting operator.
+    assembly +=
+        convertTo(children[0], text.substr(0, text.size() - 1), context);
+  else {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: No rule to compile the token \"" << text
               << "\", quitting now!" << std::endl;
@@ -420,8 +577,9 @@ std::string TreeNode::getType(CompilationContext context) {
                            children[1].getType(context));
   }
   if (text == "If" or text == "Then" or text == "Else" or text == "While" or
-      text == "Loop" or text == "Does") // Or else the compiler will claim those
-                                        // tokens are undeclared variables.
+      text == "Loop" or text == "Does" or
+      text == "Return") // Or else the compiler will claim those
+                        // tokens are undeclared variables.
     return "Nothing";
   if (std::regex_match(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?"))) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber

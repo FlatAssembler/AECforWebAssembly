@@ -1,0 +1,42 @@
+/* 
+ * After I've written 3'000 lines of code of my AEC-to-WebAssembly compiler,
+ * I should finally be able to compile some simple AEC programs so that they
+ * can run in a browser.
+ */
+
+Function add(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return first+second;
+EndFunction
+
+Function subtract(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return first-second;
+EndFunction
+
+Function multiply(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return first*second;
+EndFunction
+
+Function integerDivision(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return first/second;
+EndFunction
+
+Function decimalDivison(Integer32 first,
+        Integer32 second)
+    Which Returns Decimal32 Does
+        Return Decimal32(first)/second; //"Decimal32(" here is the casting
+                                        //operator, equivalent to the
+                                        //C casting operator "(float)"
+EndFunction
+
+Function emptyFunction() Which Returns Nothing Does
+    Nothing; //The compiler should no longer crash when compiling the
+             //no-operation statement ("Nothing").
+EndFunction

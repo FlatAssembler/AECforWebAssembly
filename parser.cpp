@@ -335,7 +335,9 @@ TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
   auto inputWithParenthesesParsed = parseExpression(input);
   if (inputWithParenthesesParsed.empty())
     return inputWithParenthesesParsed;
-  if (input.size() < 2) {
+  if (input.size() < 2 and
+      input[0].text != "Nothing") { //"Nothing" will be used as a no-operation
+                                    //statement, so don't complain about it.
     std::cerr << "Line " << inputWithParenthesesParsed[0].lineNumber
               << ", Column " << inputWithParenthesesParsed[0].columnNumber
               << ", Parser error: Unexpected token \""

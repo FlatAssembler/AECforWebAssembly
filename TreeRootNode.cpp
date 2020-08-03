@@ -276,6 +276,7 @@ public:
         }
         context.functions.push_back(functionDeclaration);
         contextOfThatFunction.functions.push_back(functionDeclaration);
+        contextOfThatFunction.currentFunctionName = functionDeclaration.name;
         if (childNode.children[2].text == "External") {
           globalDeclarations += "\t(import \"JavaScript\" \"" +
                                 functionDeclaration.name.substr(

@@ -16,7 +16,7 @@ struct CompilationContext {
             // 64KB of RAM, and you need to allocate it so that it grows
             // linearly (unlike on real machines, all the memory allocated to
             // some program running on the JavaScript Virtual Machine appears
-            // continuos to that program).
+            // continuous to that program).
   int globalVariablePointer = stackSize;
   std::map<std::string, std::string> variableTypes; // Integer32...
   std::map<std::string, int>
