@@ -25,16 +25,25 @@ EndFunction
 Function integerDivision(Integer32 first,
         Integer32 second)
     Which Returns Integer32 Does
-        Return not(second=0)?first/second:0; //Protect yourself from division
-                                             //by zero.
+        Return not(second=0)?
+                            first/second
+                            :
+                            0; //Protect yourself from division
+                               //by zero, by returning 0 then.
+                               //Doesn't make perfect sense, but
+                               //probably makes more sense than
+                               //crashing the program.
 EndFunction
 
 Function modulo(Integer32 first,
         Integer32 second)
     Which Returns Integer32 Does
-        Return not(second=0)?mod(first,second):first; //Have a better idea
-                                                      //what to do when the
-                                                      //second number is 0?
+        Return not(second=0)?
+                            mod(first,second)
+                            :
+                            first; //Have a better idea
+                                   //what to do when the
+                                   //second number is 0?
 EndFunction
 
 Function decimalDivision(Integer32 first,
@@ -48,17 +57,36 @@ EndFunction
 Function maximum(Integer32 first,
         Integer32 second)
     Which Returns Integer32 Does
-        Return (first>second)?first:second;
+        Return (first>second)?
+                             first
+                             :
+                             second;
 EndFunction
 
 Function minimum(Integer32 first,
         Integer32 second)
     Which Returns Integer32 Does
-        Return (first<second)?first:second;
+        Return (first<second)?
+                             first
+                             :
+                             second;
 EndFunction
 
 Function signum(Integer32 number) Which Returns Integer32 Does
-    Return (number<0)?-1:(number=0)?0:1;
+    /* 
+     * The ternary conditional operator "?:" is right-associative,
+     * as it is in C, C++ and JavaScript (unlike in PHP), which
+     * makes it easy to abbreviate else-if statements using it.
+     * And, as of time of writing this, I haven't yet implemented
+     * the "If" statement into the AEC-to-WebAssembly compiler.
+     */
+    Return (number<0)? //If the number is less than 0...
+                    -1 //signum of that number is -1...
+                     : //else...
+                     (number=0)? //if the number is 0...
+                               0 //signum of that number is 0.
+                               : //else...
+                               1; //The signum of that number is 1.
 EndFunction
 
 Function emptyFunction() Which Returns Nothing Does
