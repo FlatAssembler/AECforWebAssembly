@@ -40,8 +40,11 @@
       subtract(first,second)=<span id="subtraction"></span><br />
       multiply(first,second)=<span id="multiplication"></span><br />
       integerDivision(first,second)=<span id="integerDivision"></span><br />
-      decimalDivision(first,second)=<span id="decimalDivision"></span
-      ><br /> </span
+      decimalDivision(first,second)=<span id="decimalDivision"></span><br />
+      maximum(first,second)=<span id="maximum"></span><br />
+      minimum(first,second)=<span id="minimum"></span><br />
+      signum(first)=<span id="signumOfTheFirst"></span><br />
+      signum(second)=<span id="signumOfTheSecond"></span><br /> </span
     ><br />
     You can see the source code of the AEC program
     <a
@@ -62,19 +65,30 @@
       let importObject = {
         JavaScript: { stack_pointer: stack_pointer, memory: memory },
       };
-      let add, subtract, multiply, integerDivision, decimalDivision, exports;
+      let add,
+        subtract,
+        multiply,
+        integerDivision,
+        decimalDivision,
+        exports,
+        maximum,
+        minimum,
+        signum;
       fetch("arithmeticOperatorsTest.wasm")
         .then((response) => response.arrayBuffer())
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           exports = results.instance.exports;
           add = exports.add; //Not "add()", because we are referring to "add"
-          //as a function (function pointer), rather than
+          //as a function (assigning it to a function pointer), rather than
           //its result!
           subtract = exports.subtract;
           multiply = exports.multiply;
           integerDivision = exports.integerDivision;
           decimalDivision = exports.decimalDivision;
+          maximum = exports.maximum;
+          minimum = exports.minimum;
+          signum = exports.signum;
         });
       function invokeAECfunctions() {
         let first = parseInt(document.getElementById("firstNumber").value);
@@ -96,6 +110,10 @@
           first,
           second
         );
+        document.getElementById("maximum").innerText = maximum(first, second);
+        document.getElementById("minimum").innerText = minimum(first, second);
+        document.getElementById("signumOfTheFirst").innerText = signum(first);
+        document.getElementById("signumOfTheSecond").innerText = signum(second);
       }
     </script>
   </body>

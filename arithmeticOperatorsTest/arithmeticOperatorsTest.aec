@@ -25,7 +25,8 @@ EndFunction
 Function integerDivision(Integer32 first,
         Integer32 second)
     Which Returns Integer32 Does
-        Return first/second;
+        Return not(second=0)?first/second:0; //Protect yourself from division
+                                             //by zero.
 EndFunction
 
 Function decimalDivision(Integer32 first,
@@ -34,6 +35,22 @@ Function decimalDivision(Integer32 first,
         Return Decimal32(first)/second; //"Decimal32(" here is the casting
                                         //operator, equivalent to the
                                         //C casting operator "(float)"
+EndFunction
+
+Function maximum(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return (first>second)?first:second;
+EndFunction
+
+Function minimum(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return (first<second)?first:second;
+EndFunction
+
+Function signum(Integer32 number) Which Returns Integer32 Does
+    Return (number<0)?-1:(number=0)?0:1;
 EndFunction
 
 Function emptyFunction() Which Returns Nothing Does

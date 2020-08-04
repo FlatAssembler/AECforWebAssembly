@@ -157,7 +157,11 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
                "[") and //...and arrays with ending '(' or '['
           regex_match(
               tokenizedExpression[i - 1].text.substr(0, 1), //...for the parser.
-              regex("_|[a-z]|[A-Z]"))) {
+              regex("_|[a-z]|[A-Z]")) and
+          tokenizedExpression[i - 1].text != "If" and
+          tokenizedExpression[i - 1].text != "ElseIf" and
+          tokenizedExpression[i - 1].text != "While" and
+          tokenizedExpression[i - 1].text != "Return") {
         tokenizedExpression[i - 1].text += tokenizedExpression[i].text;
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }

@@ -23,7 +23,7 @@ AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
     return originalCode;
   if (originalCode.assemblyType == i64)
     return AssemblyCode(
-        "(i32.wrap_64\n" + std::string(originalCode.indentBy(1)) + "\n)", i32);
+        "(i32.wrap_i64\n" + std::string(originalCode.indentBy(1)) + "\n)", i32);
   if (originalCode.assemblyType == f32)
     return AssemblyCode(
         "(i32.trunc_f32_s\n" + std::string(originalCode.indentBy(1)) + "\n)",
@@ -203,6 +203,10 @@ AssemblyCode convertTo(TreeNode node, std::string type,
   return AssemblyCode("()");
 }
 
+std::string getStrongerType(int, int, std::string,
+                            std::string); // When C++ doesn't support function
+                                          // hoisting, like JavaScript does.
+
 AssemblyCode TreeNode::compile(CompilationContext context) {
   std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType =
@@ -239,7 +243,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     assembly += "(global.set $stack_pointer (i32.sub (global.get "
                 "$stack_pointer) (i32.const " +
                 std::to_string(context.stackSizeOfThisScope) + ")))";
-  } else if (context.variableTypes.count(text)) {
+  } else if (text.front() == '"')
+    assembly += "(i32.const " + std::to_string(context.globalVariables[text]) +
+                ") ;;Pointer to " + text;
+  else if (context.variableTypes.count(text)) {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
           "(i32.load8_s\n" + compileAPointer(context).indentBy(1) + "\n)";
@@ -369,9 +376,64 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
-  } else if (text.back() == '(' and
-             basicDataTypeSizes.count(
-                 text.substr(0, text.size() - 1))) // The casting operator.
+  } else if (text == "<" or text == ">") {
+    std::string firstType = children[0].getType(context);
+    std::string secondType = children[1].getType(context);
+    std::string strongerType;
+    if (std::regex_search(firstType, std::regex("Pointer$")) and
+        std::regex_search(secondType, std::regex("Pointer$")))
+      strongerType =
+          "Integer32"; // Let's allow people to shoot themselves in the foot by
+                       // comparing pointers of different types.
+    else
+      strongerType =
+          getStrongerType(lineNumber, columnNumber, firstType, secondType);
+    AssemblyCode::AssemblyType assemblyType =
+        mappingOfAECTypesToWebAssemblyTypes[strongerType];
+    if (assemblyType == AssemblyCode::AssemblyType::i32 or
+        assemblyType == AssemblyCode::AssemblyType::i64)
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[assemblyType] +
+          (text == "<" ? ".lt_s\n" : ".gt_s\n") +
+          convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
+          convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+    else
+      assembly +=
+          "(" + stringRepresentationOfWebAssemblyType[assemblyType] +
+          (text == "<" ? ".lt\n" : ".gt\n") +
+          convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
+          convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  } else if (text == "=") {
+    std::string firstType = children[0].getType(context);
+    std::string secondType = children[1].getType(context);
+    std::string strongerType;
+    if (std::regex_search(firstType, std::regex("Pointer$")) and
+        std::regex_search(secondType, std::regex("Pointer$")))
+      strongerType = "Integer32";
+    else
+      strongerType =
+          getStrongerType(lineNumber, columnNumber, firstType, secondType);
+    AssemblyCode::AssemblyType assemblyType =
+        mappingOfAECTypesToWebAssemblyTypes[strongerType];
+    assembly +=
+        "(" + stringRepresentationOfWebAssemblyType[assemblyType] + ".eq\n" +
+        convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
+        convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  } else if (text == "?:")
+    assembly +=
+        "(if (result " + stringRepresentationOfWebAssemblyType[returnType] +
+        ")\n" + convertToInteger32(children[0], context).indentBy(1) +
+        "\n\t(then\n" +
+        convertTo(children[1], typeOfTheCurrentNode, context).indentBy(2) +
+        "\n\t)\n\t(else\n" +
+        convertTo(children[2], typeOfTheCurrentNode, context).indentBy(2) +
+        "\n\t)\n)";
+  else if (text == "not(")
+    assembly += "(i32.xor (i32.const 0xffffffff)\n" +
+                convertToInteger32(children[0], context).indentBy(1) + "\n)";
+  else if (text.back() == '(' and
+           basicDataTypeSizes.count(
+               text.substr(0, text.size() - 1))) // The casting operator.
     assembly +=
         convertTo(children[0], text.substr(0, text.size() - 1), context);
   else {
