@@ -429,8 +429,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
         convertTo(children[2], typeOfTheCurrentNode, context).indentBy(2) +
         "\n\t)\n)";
   else if (text == "not(")
-    assembly += "(i32.xor (i32.const 0xffffffff)\n" +
+    assembly += "(i32.eqz\n" +
                 convertToInteger32(children[0], context).indentBy(1) + "\n)";
+  else if (text == "mod(")
+    assembly +=
+        "(" + stringRepresentationOfWebAssemblyType[returnType] + ".rem_s\n" +
+        convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+        "\n" +
+        convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+        "\n)";
   else if (text.back() == '(' and
            basicDataTypeSizes.count(
                text.substr(0, text.size() - 1))) // The casting operator.

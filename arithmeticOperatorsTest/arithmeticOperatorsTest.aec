@@ -29,6 +29,14 @@ Function integerDivision(Integer32 first,
                                              //by zero.
 EndFunction
 
+Function modulo(Integer32 first,
+        Integer32 second)
+    Which Returns Integer32 Does
+        Return not(second=0)?mod(first,second):first; //Have a better idea
+                                                      //what to do when the
+                                                      //second number is 0?
+EndFunction
+
 Function decimalDivision(Integer32 first,
         Integer32 second)
     Which Returns Decimal32 Does

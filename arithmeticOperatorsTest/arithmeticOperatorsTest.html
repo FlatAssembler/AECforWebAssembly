@@ -40,6 +40,7 @@
       subtract(first,second)=<span id="subtraction"></span><br />
       multiply(first,second)=<span id="multiplication"></span><br />
       integerDivision(first,second)=<span id="integerDivision"></span><br />
+      modulo(first,second)=<span id="modulo"></span><br />
       decimalDivision(first,second)=<span id="decimalDivision"></span><br />
       maximum(first,second)=<span id="maximum"></span><br />
       minimum(first,second)=<span id="minimum"></span><br />
@@ -73,7 +74,8 @@
         exports,
         maximum,
         minimum,
-        signum;
+        signum,
+        modulo;
       fetch("arithmeticOperatorsTest.wasm")
         .then((response) => response.arrayBuffer())
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
@@ -89,6 +91,7 @@
           maximum = exports.maximum;
           minimum = exports.minimum;
           signum = exports.signum;
+          modulo = exports.modulo;
         });
       function invokeAECfunctions() {
         let first = parseInt(document.getElementById("firstNumber").value);
@@ -114,6 +117,7 @@
         document.getElementById("minimum").innerText = minimum(first, second);
         document.getElementById("signumOfTheFirst").innerText = signum(first);
         document.getElementById("signumOfTheSecond").innerText = signum(second);
+        document.getElementById("modulo").innerText = modulo(first, second);
       }
     </script>
   </body>
