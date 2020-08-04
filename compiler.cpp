@@ -438,6 +438,17 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
         "\n" +
         convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
         "\n)";
+  else if (text == "invertBits(")
+    assembly += "(i32.xor (i32.const -1)\n" +
+                convertToInteger32(children[0], context).indentBy(1) + "\n)";
+  else if (text == "and")
+    assembly += "(i32.and\n" +
+                convertToInteger32(children[0], context).indentBy(1) + "\n" +
+                convertToInteger32(children[1], context).indentBy(1) + "\n)";
+  else if (text == "or")
+    assembly += "(i32.or\n" +
+                convertToInteger32(children[0], context).indentBy(1) + "\n" +
+                convertToInteger32(children[1], context).indentBy(1) + "\n)";
   else if (text.back() == '(' and
            basicDataTypeSizes.count(
                text.substr(0, text.size() - 1))) // The casting operator.
@@ -601,7 +612,7 @@ std::string TreeNode::getType(CompilationContext context) {
   if (context.variableTypes.count(text))
     return context.variableTypes[text];
   if (text == "and" or text == "or" or text == "<" or text == ">" or
-      text == "=" or text == "not(") {
+      text == "=" or text == "not(" or text == "invertBits(") {
     if (children.empty()) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: The operator \"" << text
@@ -610,7 +621,7 @@ std::string TreeNode::getType(CompilationContext context) {
                 << std::endl;
       exit(1);
     }
-    if (children.size() < 2 and text != "not(") {
+    if (children.size() < 2 and text != "not(" and text != "invertBits(") {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: The binary operator \"" << text
                 << "\" has less than two operands. Aborting the compilation "

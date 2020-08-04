@@ -89,6 +89,13 @@ Function signum(Integer32 number) Which Returns Integer32 Does
                                1; //The signum of that number is 1.
 EndFunction
 
+Function xor(Integer32 first,
+             Integer32 second)
+     Which Returns Integer32 Does
+        //I hope people will like the way I named the bit-operators.
+        Return (first and invertBits(second)) or (invertBits(first) and second);
+EndFunction
+
 Function emptyFunction() Which Returns Nothing Does
     Nothing; //The compiler should no longer crash when compiling the
              //no-operation statement ("Nothing").

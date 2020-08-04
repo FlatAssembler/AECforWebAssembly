@@ -161,7 +161,9 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
           tokenizedExpression[i - 1].text != "If" and
           tokenizedExpression[i - 1].text != "ElseIf" and
           tokenizedExpression[i - 1].text != "While" and
-          tokenizedExpression[i - 1].text != "Return") {
+          tokenizedExpression[i - 1].text != "Return" and
+          tokenizedExpression[i - 1].text != "and" and
+          tokenizedExpression[i - 1].text != "or") {
         tokenizedExpression[i - 1].text += tokenizedExpression[i].text;
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }

@@ -45,7 +45,8 @@
       maximum(first,second)=<span id="maximum"></span><br />
       minimum(first,second)=<span id="minimum"></span><br />
       signum(first)=<span id="signumOfTheFirst"></span><br />
-      signum(second)=<span id="signumOfTheSecond"></span><br /> </span
+      signum(second)=<span id="signumOfTheSecond"></span><br />
+      xor(first,second)=<span id="xor"></span><br /></span
     ><br />
     You can see the source code of the AEC program
     <a
@@ -75,7 +76,8 @@
         maximum,
         minimum,
         signum,
-        modulo;
+        modulo,
+        xor;
       fetch("arithmeticOperatorsTest.wasm")
         .then((response) => response.arrayBuffer())
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
@@ -92,6 +94,7 @@
           minimum = exports.minimum;
           signum = exports.signum;
           modulo = exports.modulo;
+          xor = exports.xor;
         });
       function invokeAECfunctions() {
         let first = parseInt(document.getElementById("firstNumber").value);
@@ -118,6 +121,7 @@
         document.getElementById("signumOfTheFirst").innerText = signum(first);
         document.getElementById("signumOfTheSecond").innerText = signum(second);
         document.getElementById("modulo").innerText = modulo(first, second);
+        document.getElementById("xor").innerText = xor(first, second);
       }
     </script>
   </body>
