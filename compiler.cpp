@@ -269,6 +269,88 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                 << text << "\", aborting the compilation!" << std::endl;
       exit(1);
     }
+  } else if (text == ":=") {
+    TreeNode rightSide;
+    if (children[1].text == ":=") // Expressions such as "a:=b:=0" or similar.
+      rightSide = children[1].children[0];
+    else
+      rightSide = children[1];
+    if (typeOfTheCurrentNode == "Character")
+      assembly += "(i32.store8\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToInteger32(rightSide, context) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer16")
+      assembly += "(i32.store16\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToInteger32(rightSide, context) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer32" or
+             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+      assembly += "(i32.store\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToInteger32(rightSide, context) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer64")
+      assembly += "(i64.store\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToInteger64(rightSide, context) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal32")
+      assembly += "(f32.store\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToDecimal32(rightSide, context) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal64")
+      assembly += "(f64.store\n" +
+                  children[0].compileAPointer(context).indentBy(1) + "\n" +
+                  convertToDecimal64(rightSide, context) + "\n)";
+    else {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Internal compiler error: The compiler got into a "
+                   "forbidden state while compiling the token \""
+                << text << "\", aborting the compilation!" << std::endl;
+      exit(1);
+    }
+  } else if (text == "If") {
+    if (children.size() < 2) {
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler error: Corrupt AST, the \"If\" node has less than 2 "
+             "child nodes. Aborting the compilation (or else we will segfault)!"
+          << std::endl;
+      exit(1);
+    }
+    if (children[1].text != "Then") {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Corrupt AST, the second child of the "
+                   "\"If\" node isn't named \"Then\". Aborting the compilation "
+                   "(or else we will probably segfault)!"
+                << std::endl;
+      exit(1);
+    }
+    if (children.size() >= 3 and children[2].text != "Else") {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Corrupt AST, the third child of the "
+                   "\"If\" node is not named \"Else\", aborting the "
+                   "compilation (or else we will probably segfault)!"
+                << std::endl;
+      exit(1);
+    }
+    assembly += "(if\n" + convertToInteger32(children[0], context).indentBy(1) +
+                "\n\t(then\n" + children[1].compile(context).indentBy(2) +
+                "\n\t)" +
+                ((children.size() == 3)
+                     ? "\n\t(else\n" +
+                           children[2].compile(context).indentBy(2) + "\n\t)\n)"
+                     : AssemblyCode("\n)"));
+  } else if (text == "While") {
+    if (children.size() < 2 or children[1].text != "Loop") {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Corrupt AST, aborting (or else we will "
+                   "segfault)!"
+                << std::endl;
+      exit(1);
+    }
+    assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n" +
+                convertToInteger32(children[0], context).indentBy(4) +
+                "\n\t\t\t)\n\t\t)" + children[1].compile(context).indentBy(2) +
+                "\n\t\t(br 0)\n\t)\n)";
   } else if (std::regex_match(text,
                               std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     assembly += "(i64.const " + text + ")";
@@ -486,9 +568,10 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
         "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
             std::to_string(context.localVariables[text]) + ") ;;" + text +
-            "\n\t)\n)" +
-            std::string(convertToInteger32(children[0], context).indentBy(1)) +
-            "\n)",
+            "\n\t)\n\t(i32.mul\n\t\t(i32.const" +
+            std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
+            std::string(convertToInteger32(children[0], context).indentBy(2)) +
+            "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
   if (context.globalVariables.count(text) and text.back() != '[')
@@ -509,9 +592,10 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
     return AssemblyCode(
         "(i32.add\n\t(i32.const " +
             std::to_string(context.globalVariables[text]) + ") ;;" + text +
-            "\n" +
-            std::string(convertToInteger32(children[0], context).indentBy(1)) +
-            "\n)",
+            "\n\t(i32.mul\n\t\t(i32.const " +
+            std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
+            std::string(convertToInteger32(children[0], context).indentBy(2)) +
+            "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber

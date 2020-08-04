@@ -1,0 +1,65 @@
+/*
+ * Can you think of a better way to test whether while-loops and
+ * if-statements work than implementing Euclid's algorithm and Fibonacci
+ * sequence?
+ */
+
+Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
+    //So, this will be the Euclid's algorithm. But, first, let's deal with
+    //the edge cases.
+    If a<0 Then
+        a:=a*-1; //Write in such a way that it will expose as many potential
+                 //bugs in the compiler as you can.
+    EndIf
+    If b<0 Then
+        b:=b/-1;
+    EndIf
+    If a=0 or b=0 Then
+        Return 0;
+    EndIf
+    //And now goes the 2'300 years-old algorithm:
+    While not(b=0) Loop
+        If a>b Then
+            a:=mod(a,b);
+        Else
+            If a=0 Then
+                Return b;
+            EndIf
+            b:=mod(b,a);
+        EndIf
+    EndWhile
+    Return a;
+EndFunction
+
+Decimal64 memoisation[100]:={0,1},i; //When local variables haven't yet
+                                     //been implemented, I need to use
+                                     //global variables. Also, I'll be
+                                     //using floating-point numbers,
+                                     //because a lack of precision is way
+                                     //better than overflow in this case,
+                                     //I think.
+
+Function fib(Integer32 n) Which Returns Decimal64 Does
+    If n<0 or n>99 Then
+        Return -1; //As some sort of sign of error.
+    EndIf
+    If memoisation[n] Then //If it's already been calculated,
+        Return memoisation[n]; //simply return it.
+    EndIf
+    i:=1; //Find where the memoisation ends...
+    While memoisation[i] and i<n Loop
+        i:=i+1;
+    EndWhile
+    //Now calculate using what's already been calculated...
+    While i<n or i=n Loop
+        If i=0 Then
+            memoisation[i]:=0;
+        ElseIf i=1 Then //Not needed, but it should compile correctly.
+            memoisation[i]:=1;
+        Else
+            memoisation[i]:=memoisation[i-1]+memoisation[i-2];
+        EndIf
+        i:=i+1;
+    EndWhile
+    Return memoisation[n];
+EndFunction
