@@ -238,7 +238,82 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     for (auto childNode : children) {
       if (childNode.text == "Nothing")
         continue;
-      assembly += std::string(childNode.compile(context)) + "\n";
+      else if (basicDataTypeSizes.count(childNode.text)) {
+        // Local variables declaration.
+        for (TreeNode variableName : childNode.children) {
+          if (variableName.text.back() != '[') { // If it's not an array.
+            context.localVariables[variableName.text] = 0;
+            for (auto &pair : context.localVariables)
+              pair.second += basicDataTypeSizes[childNode.text];
+            context.variableTypes[variableName.text] = childNode.text;
+            context.stackSizeOfThisFunction +=
+                basicDataTypeSizes[childNode.text];
+            context.stackSizeOfThisScope += basicDataTypeSizes[childNode.text];
+            assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
+                        "$stack_pointer) (i32.const " +
+                        std::to_string(basicDataTypeSizes[childNode.text]) +
+                        ")) ;;Allocating the space for the local variable \"" +
+                        variableName.text + "\".\n)\n";
+            if (variableName.children.size() and
+                variableName.children[0].text ==
+                    ":=") // Initial assignment to local variables.
+            {
+              TreeNode assignmentNode = variableName.children[0];
+              assignmentNode.children.insert(assignmentNode.children.begin(),
+                                             variableName);
+              assembly += assignmentNode.compile(context) + "\n";
+            }
+          } else { // If that's a local array declaration.
+            int arraySizeInBytes =
+                basicDataTypeSizes[childNode.text] *
+                variableName.children[0]
+                    .interpretAsACompileTimeIntegerConstant();
+            context.localVariables[variableName.text] = 0;
+            for (auto &pair : context.localVariables)
+              pair.second += arraySizeInBytes;
+            context.variableTypes[variableName.text] = childNode.text;
+            context.stackSizeOfThisFunction += arraySizeInBytes;
+            context.stackSizeOfThisScope += arraySizeInBytes;
+            assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
+                        "$stack_pointer) (i32.const " +
+                        std::to_string(arraySizeInBytes) +
+                        ")) ;;Allocating the space for the local array \"" +
+                        variableName.text + "\".\n)\n";
+            if (variableName.children.size() == 2 and
+                variableName.children[1].text == ":=" and
+                variableName.children[1].children[0].text ==
+                    "{}") // Initial assignments of local arrays.
+            {
+              TreeNode initialisationList =
+                  variableName.children[1].children[0];
+              for (unsigned int i = 0; i < initialisationList.children.size();
+                   i++) {
+                TreeNode element = initialisationList.children[i];
+                TreeNode assignmentNode(
+                    ":=", variableName.children[1].lineNumber,
+                    variableName.children[1].columnNumber);
+                TreeNode whereToAssignTheElement(
+                    variableName.text, variableName.lineNumber,
+                    variableName
+                        .columnNumber); // Damn, can you think up a language in
+                                        // which writing stuff like this isn't
+                                        // as tedious and error-prone as it is
+                                        // in C++ or JavaScript? Maybe some
+                                        // language in which you can switch
+                                        // between a C-like syntax and a
+                                        // Lisp-like syntax at will?
+                whereToAssignTheElement.children.push_back(TreeNode(
+                    std::to_string(i), variableName.children[0].lineNumber,
+                    variableName.children[1].columnNumber));
+                assignmentNode.children.push_back(whereToAssignTheElement);
+                assignmentNode.children.push_back(element);
+                assembly += assignmentNode.compile(context) + "\n";
+              }
+            }
+          }
+        }
+      } else
+        assembly += std::string(childNode.compile(context)) + "\n";
     }
     assembly += "(global.set $stack_pointer (i32.sub (global.get "
                 "$stack_pointer) (i32.const " +
@@ -278,28 +353,28 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     if (typeOfTheCurrentNode == "Character")
       assembly += "(i32.store8\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToInteger32(rightSide, context) + "\n)";
+                  convertToInteger32(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer16")
       assembly += "(i32.store16\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToInteger32(rightSide, context) + "\n)";
+                  convertToInteger32(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer32" or
              std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
       assembly += "(i32.store\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToInteger32(rightSide, context) + "\n)";
+                  convertToInteger32(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer64")
       assembly += "(i64.store\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToInteger64(rightSide, context) + "\n)";
+                  convertToInteger64(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Decimal32")
       assembly += "(f32.store\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToDecimal32(rightSide, context) + "\n)";
+                  convertToDecimal32(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Decimal64")
       assembly += "(f64.store\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
-                  convertToDecimal64(rightSide, context) + "\n)";
+                  convertToDecimal64(rightSide, context).indentBy(1) + "\n)";
     else {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Internal compiler error: The compiler got into a "
@@ -357,6 +432,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
   else if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
     assembly += "(f64.const " + text + ")";
   else if (text == "Return") {
+    assembly += "(global.set $stack_pointer (i32.sub (global.get "
+                "$stack_pointer) (i32.const " +
+                std::to_string(context.stackSizeOfThisFunction) +
+                "))) ;;Cleaning up the system stack before returning.\n";
+    for (auto &pair : context.localVariables)
+      pair.second -= context.stackSizeOfThisFunction;
     assembly += "(return";
     if (currentFunction.returnType == "Nothing")
       assembly += ")";
@@ -536,7 +617,55 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                text.substr(0, text.size() - 1))) // The casting operator.
     assembly +=
         convertTo(children[0], text.substr(0, text.size() - 1), context);
-  else {
+  else if (std::count_if(context.functions.begin(), context.functions.end(),
+                         [=](function someFunction) {
+                           return someFunction.name == text;
+                         })) {
+    function functionToBeCalled = *find_if(
+        context.functions.begin(), context.functions.end(),
+        [=](function someFunction) { return someFunction.name == text; });
+    assembly += "(call $" + text.substr(0, text.size() - 1) + "\n";
+    for (unsigned int i = 0; i < children.size(); i++) {
+      if (i >= functionToBeCalled.argumentTypes.size()) {
+        std::cerr
+            << "Line " << children[i].lineNumber << ", Column "
+            << children[i].columnNumber
+            << ", Compiler error: Too many arguments passed to the function \""
+            << text << "\" (it expects "
+            << functionToBeCalled.argumentTypes.size()
+            << " arguments). Aborting the compilation (or else the compiler "
+               "will segfault)!"
+            << std::endl;
+        exit(1);
+      }
+      assembly +=
+          convertTo(children[i], functionToBeCalled.argumentTypes[i], context)
+              .indentBy(1) +
+          "\n";
+    }
+    for (unsigned int i = children.size();
+         i < functionToBeCalled.defaultArgumentValues.size(); i++) {
+      if (!functionToBeCalled.defaultArgumentValues[i])
+        std::cerr
+            << "Line " << lineNumber << ", Column " << columnNumber
+            << ", Compiler warning: The argument #" << i + 1 << " (called \""
+            << functionToBeCalled.argumentNames[i]
+            << "\") of the function named \"" << text
+            << "\" isn't being passed to that function, nor does it have some "
+               "default value. Your program will very likely crash because of "
+               "that!"
+            << std::endl; // JavaScript doesn't even warn about such errors,
+                          // while C++ refuses to compile a program then. I
+                          // suppose I should take a middle ground here.
+      assembly +=
+          convertTo(TreeNode(std::to_string(
+                                 functionToBeCalled.defaultArgumentValues[i]),
+                             lineNumber, columnNumber),
+                    functionToBeCalled.argumentTypes[i], context)
+              .indentBy(1);
+    }
+    assembly += ")";
+  } else {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: No rule to compile the token \"" << text
               << "\", quitting now!" << std::endl;
@@ -568,7 +697,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
         "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
             std::to_string(context.localVariables[text]) + ") ;;" + text +
-            "\n\t)\n\t(i32.mul\n\t\t(i32.const" +
+            "\n\t)\n\t(i32.mul\n\t\t(i32.const " +
             std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
             std::string(convertToInteger32(children[0], context).indentBy(2)) +
             "\n\t)\n)",
@@ -594,7 +723,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
             std::to_string(context.globalVariables[text]) + ") ;;" + text +
             "\n\t(i32.mul\n\t\t(i32.const " +
             std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
-            std::string(convertToInteger32(children[0], context).indentBy(2)) +
+            std::string(convertToInteger32(children[0], context).indentBy(3)) +
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
