@@ -22,10 +22,16 @@ EndFunction
 Decimal64 memoisationOfFibonacci[200]:={0,1};
 
 Function fib(Integer32 n) Which Returns Decimal64 Does
-//Let's now test whether the recursion works.
+    //Let's now test whether the recursion works.
     If n<0 or n>199 Then
         Return -1; //As a sign of error.
     ElseIf not(memoisationOfFibonacci[n]=0) Then
+    /*
+     * Simply putting "If memoisationOfFibonacci[n]=0 Then" causes the
+     * JavaScript Virtual Machine to abort the program with error message
+     * that a certain float is out of range of i32 and can't be converted
+     * to it.
+     */
         Return memoisationOfFibonacci[n];
     ElseIf n=0 Then
         Return 0;
@@ -39,7 +45,8 @@ Function fact(Integer32 n) Which Returns Decimal64 Does
     If n<0 Then
         Return -1;
     EndIf
-    Decimal64 fact; //Just to make sure no form of declaring local variables is left untested.
+    Decimal64 fact; //Just to make sure no form of declaring local variables
+                    //is left untested.
     fact:=1;
     Integer32 i;
     i:=1;
@@ -48,4 +55,8 @@ Function fact(Integer32 n) Which Returns Decimal64 Does
         i:=i+1;
     EndWhile
     Return fact;
+EndFunction
+
+Function empty_function() Which Returns Nothing Does
+    Nothing; //Let's put this simple edge-case test into every test suite.
 EndFunction

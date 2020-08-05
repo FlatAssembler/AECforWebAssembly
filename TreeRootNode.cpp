@@ -316,6 +316,10 @@ public:
                 stringRepresentationOfWebAssemblyType
                     [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
                                                              .returnType]] +
+                ") (local $return_value " +
+                stringRepresentationOfWebAssemblyType
+                    [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
+                                                             .returnType]] +
                 ")";
           globalDeclarations += "\n";
           globalDeclarations +=

@@ -346,9 +346,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     }
   } else if (text == ":=") {
     TreeNode rightSide;
-    if (children[1].text == ":=") // Expressions such as "a:=b:=0" or similar.
+    if (children[1].text == ":=") { // Expressions such as "a:=b:=0" or similar.
+      assembly += children[1].compile(context) + "\n";
       rightSide = children[1].children[0];
-    else
+    } else
       rightSide = children[1];
     if (typeOfTheCurrentNode == "Character")
       assembly += "(i32.store8\n" +
@@ -432,16 +433,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
   else if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
     assembly += "(f64.const " + text + ")";
   else if (text == "Return") {
-    assembly += "(global.set $stack_pointer (i32.sub (global.get "
-                "$stack_pointer) (i32.const " +
-                std::to_string(context.stackSizeOfThisFunction) +
-                "))) ;;Cleaning up the system stack before returning.\n";
-    for (auto &pair : context.localVariables)
-      pair.second -= context.stackSizeOfThisFunction;
-    assembly += "(return";
-    if (currentFunction.returnType == "Nothing")
-      assembly += ")";
-    else {
+    if (currentFunction.returnType != "Nothing") {
       if (children.empty()) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Compiler error: It's not specified what to return from "
@@ -452,11 +444,26 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                   << std::endl;
         exit(1);
       }
-      assembly += "\n" +
-                  convertTo(children[0], currentFunction.returnType, context)
-                      .indentBy(1) +
-                  "\n)";
+      TreeNode valueToBeReturned = children[0];
+      if (valueToBeReturned.text == ":=") {
+        assembly += valueToBeReturned.compile(context);
+        valueToBeReturned = valueToBeReturned.children[0];
+      }
+      assembly += "(local.set $return_value\n";
+      assembly +=
+          convertTo(valueToBeReturned, currentFunction.returnType, context)
+              .indentBy(1) +
+          "\n)\n";
     }
+    assembly += "(global.set $stack_pointer (i32.sub (global.get "
+                "$stack_pointer) (i32.const " +
+                std::to_string(context.stackSizeOfThisFunction) +
+                "))) ;;Cleaning up the system stack before returning.\n";
+    assembly += "(return";
+    if (currentFunction.returnType == "Nothing")
+      assembly += ")";
+    else
+      assembly += " (local.get $return_value))";
   } else if (text == "+") {
     if (std::regex_search(children[1].getType(context), std::regex("Pointer$")))
       std::iter_swap(children.begin(), children.begin() + 1);
