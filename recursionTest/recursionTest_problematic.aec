@@ -1,0 +1,61 @@
+/*
+ * I'll implement some recursive algorithms, to see whether the recursion
+ * works as expected.
+ */
+
+Function sumFirst(Integer32 n) Which Returns Integer32 Does
+    //First, let's test whether local variables are implemented correctly.
+    If n<0 or n>199 Then
+        Return -1; //A sign of error.
+    EndIf
+    Integer32 localArray[200]:={0,1,3},i:=3;
+    If localArray[n] or n=0 Then
+        Return localArray[n];
+    EndIf
+    While i<n or i=n Loop
+        localArray[i]:=localArray[i-1]+i;
+        i:=i+1;
+    EndWhile
+    Return localArray[n];
+EndFunction
+
+Decimal64 memoisationOfFibonacci[200]:={0,1};
+
+Function fib(Integer32 n) Which Returns Decimal64 Does
+    //Let's now test whether the recursion works.
+    If n<0 or n>199 Then
+        Return -1; //As a sign of error.
+    ElseIf not(memoisationOfFibonacci[n]=0) Then
+    /*
+     * Simply putting "If memoisationOfFibonacci[n]=0 Then" causes the
+     * JavaScript Virtual Machine to abort the program with error message
+     * that a certain float is out of range of i32 and can't be converted
+     * to it.
+     */
+        Return memoisationOfFibonacci[n];
+    ElseIf n=0 Then
+        Return 0;
+    Else
+        Return memoisationOfFibonacci[n]:=fib(n-1)+fib(n-2); //This appears to trigger some weird bug in the compiler.
+    EndIf
+EndFunction
+
+Function fact(Integer32 n) Which Returns Decimal64 Does
+    If n<0 Then
+        Return -1;
+    EndIf
+    Decimal64 fact; //Just to make sure no form of declaring local variables
+                    //is left untested.
+    fact:=1;
+    Integer32 i;
+    i:=1;
+    While i<n or i=n Loop
+        fact:=fact*i;
+        i:=i+1;
+    EndWhile
+    Return fact;
+EndFunction
+
+Function empty_function() Which Returns Nothing Does
+    Nothing; //Let's put this simple edge-case test into every test suite.
+EndFunction
