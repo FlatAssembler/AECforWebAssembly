@@ -52,7 +52,8 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
           stringDelimiter = input.substr(i, 1);
           tokenizedExpression.push_back(
               TreeNode(input.substr(i, 1), currentLine, currentColumn));
-        }
+        } else
+          tokenizedExpression.back().text.push_back(input[i]);
       } else if (input.size() - i > 2 and
                  (input.substr(i, 2) == "//" or input.substr(i, 2) == "/*") and
                  !areWeInAString and !areWeInAComment) {

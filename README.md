@@ -1,3 +1,3 @@
 # AEC for WebAssembly
 
-This is my attempt to port the [ArithmeticExpressionCompiler](https://github.com/FlatAssembler/ArithmeticExpressionCompiler) language to WebAssembly (the JavaScript bytecode). Right now, it's in the very early stages of development. I am also trying to learn C++, which is allegedly a significantly better language than JavaScript is (the first version of ArithmeticExpressionCompiler is written in JavaScript) when it comes to writing compilers. So far, I've only managed to compile some simple algorithms.
+This is my attempt to port the [ArithmeticExpressionCompiler](https://github.com/FlatAssembler/ArithmeticExpressionCompiler) language to WebAssembly (the JavaScript bytecode). Right now, it's about as powerful as the original compiler (targetting x86 assembly).
