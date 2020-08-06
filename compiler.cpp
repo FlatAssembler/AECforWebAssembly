@@ -1,7 +1,8 @@
 #include "TreeNode.cpp"
 #include "bitManipulations.cpp"
 
-AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
+AssemblyCode convertToInteger32(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -42,7 +43,8 @@ AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
+AssemblyCode convertToInteger64(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -86,7 +88,8 @@ AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
+AssemblyCode convertToDecimal32(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -130,7 +133,8 @@ AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
+AssemblyCode convertToDecimal64(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -170,8 +174,8 @@ AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertTo(TreeNode node, std::string type,
-                       CompilationContext context) {
+AssemblyCode convertTo(const TreeNode node, const std::string type,
+                       const CompilationContext context) {
   if (type == "Character" or type == "Integer16" or type == "Integer32" or
       std::regex_search(
           type,
@@ -207,10 +211,10 @@ std::string getStrongerType(int, int, std::string,
                             std::string); // When C++ doesn't support function
                                           // hoisting, like JavaScript does.
 
-AssemblyCode TreeNode::compile(CompilationContext context) {
+AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType =
-      mappingOfAECTypesToWebAssemblyTypes[typeOfTheCurrentNode];
+      mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   auto iteratorOfTheCurrentFunction =
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function someFunction) {
@@ -244,14 +248,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
           if (variableName.text.back() != '[') { // If it's not an array.
             context.localVariables[variableName.text] = 0;
             for (auto &pair : context.localVariables)
-              pair.second += basicDataTypeSizes[childNode.text];
+              pair.second += basicDataTypeSizes.at(childNode.text);
             context.variableTypes[variableName.text] = childNode.text;
             context.stackSizeOfThisFunction +=
-                basicDataTypeSizes[childNode.text];
-            context.stackSizeOfThisScope += basicDataTypeSizes[childNode.text];
+                basicDataTypeSizes.at(childNode.text);
+            context.stackSizeOfThisScope +=
+                basicDataTypeSizes.at(childNode.text);
             assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
                         "$stack_pointer) (i32.const " +
-                        std::to_string(basicDataTypeSizes[childNode.text]) +
+                        std::to_string(basicDataTypeSizes.at(childNode.text)) +
                         ")) ;;Allocating the space for the local variable \"" +
                         variableName.text + "\".\n)\n";
             if (variableName.children.size() and
@@ -265,7 +270,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
             }
           } else { // If that's a local array declaration.
             int arraySizeInBytes =
-                basicDataTypeSizes[childNode.text] *
+                basicDataTypeSizes.at(childNode.text) *
                 variableName.children[0]
                     .interpretAsACompileTimeIntegerConstant();
             context.localVariables[variableName.text] = 0;
@@ -347,10 +352,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
   } else if (text == ":=") {
     TreeNode rightSide;
     if (children[1].text == ":=") { // Expressions such as "a:=b:=0" or similar.
+      TreeNode tmp = children[1]; // In case the "compile" changes the TreeNode
+                                  // (which the GNU C++ compiler should forbid,
+                                  // but apparently doesn't).
       assembly += children[1].compile(context) + "\n";
-      rightSide = children[1].children[0];
+      rightSide = tmp.children[0];
     } else
       rightSide = children[1];
+    assembly += ";;Assigning " + rightSide.getLispExpression() + " to " +
+                children[0].getLispExpression() + ".\n";
     if (typeOfTheCurrentNode == "Character")
       assembly += "(i32.store8\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
@@ -446,9 +456,19 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
       }
       TreeNode valueToBeReturned = children[0];
       if (valueToBeReturned.text == ":=") {
-        assembly += valueToBeReturned.compile(context);
-        valueToBeReturned = valueToBeReturned.children[0];
+        TreeNode tmp =
+            valueToBeReturned; // The C++ compiler is supposed to forbid
+                               // side-effects in the "compile" method, since
+                               // it's declared as "const", but apparently it
+                               // doesn't. It seems to me there is some bug both
+                               // in my code and in GNU C++ compiler (which is
+                               // supposed to warn me about it).
+        assembly += valueToBeReturned.compile(context) + "\n";
+        valueToBeReturned = tmp.children[0];
       }
+      assembly +=
+          ";;Setting for returning: " + valueToBeReturned.getLispExpression() +
+          "\n";
       assembly += "(local.set $return_value\n";
       assembly +=
           convertTo(valueToBeReturned, currentFunction.returnType, context)
@@ -465,6 +485,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     else
       assembly += " (local.get $return_value))";
   } else if (text == "+") {
+    std::vector<TreeNode> children =
+        this->children; // So that compiler doesn't complain about iter_swap
+                        // being called in a constant function.
     if (std::regex_search(children[1].getType(context), std::regex("Pointer$")))
       std::iter_swap(children.begin(), children.begin() + 1);
     std::string firstType = children[0].getType(context);
@@ -480,13 +503,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
       assembly += "(i32.add\n" +
                   std::string(children[0].compile(context).indentBy(1)) +
                   "\n\t(i32.mul (i32.const " +
-                  std::to_string(basicDataTypeSizes[firstType.substr(
-                      0, firstType.size() - std::string("Pointer").size())]) +
+                  std::to_string(basicDataTypeSizes.at(firstType.substr(
+                      0, firstType.size() - std::string("Pointer").size()))) +
                   ")\n" + convertToInteger32(children[1], context).indentBy(2) +
                   "\n\t\t)\n\t)\n)";
     else
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".add\n" +
+          "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
+          ".add\n" +
           convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
@@ -512,20 +536,21 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
              !std::regex_search(secondType, std::regex("Pointer$")))
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
                   "\n\t(i32.mul (i32.const " +
-                  std::to_string(basicDataTypeSizes[firstType.substr(
-                      0, firstType.size() - std::string("Pointer").size())]) +
+                  std::to_string(basicDataTypeSizes.at(firstType.substr(
+                      0, firstType.size() - std::string("Pointer").size()))) +
                   ")\n" + children[1].compile(context).indentBy(2) +
                   "\n\t\t)\n\t)\n)";
     else
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".sub\n" +
+          "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
+          ".sub\n" +
           convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
   } else if (text == "*")
     assembly +=
-        "(" + stringRepresentationOfWebAssemblyType[returnType] + ".mul\n" +
+        "(" + stringRepresentationOfWebAssemblyType.at(returnType) + ".mul\n" +
         convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
         "\n" +
         convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
@@ -534,14 +559,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
     if (returnType == AssemblyCode::AssemblyType::i32 or
         returnType == AssemblyCode::AssemblyType::i64)
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".div_s\n" +
+          "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
+          ".div_s\n" +
           convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
     else
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[returnType] + ".div\n" +
+          "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
+          ".div\n" +
           convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
@@ -559,17 +586,17 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
       strongerType =
           getStrongerType(lineNumber, columnNumber, firstType, secondType);
     AssemblyCode::AssemblyType assemblyType =
-        mappingOfAECTypesToWebAssemblyTypes[strongerType];
+        mappingOfAECTypesToWebAssemblyTypes.at(strongerType);
     if (assemblyType == AssemblyCode::AssemblyType::i32 or
         assemblyType == AssemblyCode::AssemblyType::i64)
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[assemblyType] +
+          "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) +
           (text == "<" ? ".lt_s\n" : ".gt_s\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
     else
       assembly +=
-          "(" + stringRepresentationOfWebAssemblyType[assemblyType] +
+          "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) +
           (text == "<" ? ".lt\n" : ".gt\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
@@ -584,14 +611,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
       strongerType =
           getStrongerType(lineNumber, columnNumber, firstType, secondType);
     AssemblyCode::AssemblyType assemblyType =
-        mappingOfAECTypesToWebAssemblyTypes[strongerType];
+        mappingOfAECTypesToWebAssemblyTypes.at(strongerType);
     assembly +=
-        "(" + stringRepresentationOfWebAssemblyType[assemblyType] + ".eq\n" +
+        "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) + ".eq\n" +
         convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
         convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "?:")
     assembly +=
-        "(if (result " + stringRepresentationOfWebAssemblyType[returnType] +
+        "(if (result " + stringRepresentationOfWebAssemblyType.at(returnType) +
         ")\n" + convertToInteger32(children[0], context).indentBy(1) +
         "\n\t(then\n" +
         convertTo(children[1], typeOfTheCurrentNode, context).indentBy(2) +
@@ -603,7 +630,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                 convertToInteger32(children[0], context).indentBy(1) + "\n)";
   else if (text == "mod(")
     assembly +=
-        "(" + stringRepresentationOfWebAssemblyType[returnType] + ".rem_s\n" +
+        "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
+        ".rem_s\n" +
         convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
         "\n" +
         convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
@@ -681,7 +709,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
   return AssemblyCode(assembly, returnType);
 }
 
-AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
+AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
   if (text == "ValueAt(")
     return children[0].compile(context);
   if (context.localVariables.count(text) and text.back() != '[')
@@ -705,7 +733,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
         "$stack_pointer)\n\t\t(i32.const " +
             std::to_string(context.localVariables[text]) + ") ;;" + text +
             "\n\t)\n\t(i32.mul\n\t\t(i32.const " +
-            std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
+            std::to_string(basicDataTypeSizes.at(getType(context))) + ")\n" +
             std::string(convertToInteger32(children[0], context).indentBy(2)) +
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
@@ -729,7 +757,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
         "(i32.add\n\t(i32.const " +
             std::to_string(context.globalVariables[text]) + ") ;;" + text +
             "\n\t(i32.mul\n\t\t(i32.const " +
-            std::to_string(basicDataTypeSizes[getType(context)]) + ")\n" +
+            std::to_string(basicDataTypeSizes.at(getType(context))) + ")\n" +
             std::string(convertToInteger32(children[0], context).indentBy(3)) +
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
@@ -779,7 +807,7 @@ std::string getStrongerType(int lineNumber, int columnNumber,
   return firstType;
 }
 
-std::string TreeNode::getType(CompilationContext context) {
+std::string TreeNode::getType(CompilationContext context) const {
   if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
   if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
