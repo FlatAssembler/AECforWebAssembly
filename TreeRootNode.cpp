@@ -22,6 +22,7 @@ public:
     auto allTheStrings = getStringsInSubnodes();
     for (auto string : allTheStrings) {
       context.globalVariables[string] = context.globalVariablePointer;
+      context.variableTypes[string] = "CharacterPointer";
       if (string.back() != '"')
         string += '"';
       globalDeclarations += "\t(data 0 (i32.const " +

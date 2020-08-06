@@ -213,6 +213,15 @@ std::string getStrongerType(int, int, std::string,
 
 AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
+  if (!mappingOfAECTypesToWebAssemblyTypes.count(typeOfTheCurrentNode)) {
+    std::cerr
+        << "Line " << lineNumber << ", Column " << columnNumber
+        << ", Internal compiler error: The function \"getType\" returned \""
+        << typeOfTheCurrentNode
+        << "\", which is an invalid name of type. Aborting the compilation!"
+        << std::endl;
+    exit(1);
+  }
   AssemblyCode::AssemblyType returnType =
       mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   auto iteratorOfTheCurrentFunction =
@@ -700,7 +709,36 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               .indentBy(1);
     }
     assembly += ")";
-  } else {
+  } else if (text == "ValueAt(") {
+    if (typeOfTheCurrentNode == "Character")
+      assembly +=
+          "(i32.load8_s\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer16")
+      assembly +=
+          "(i32.load16_s\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer32" or
+             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+      assembly +=
+          "(i32.load\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Integer64")
+      assembly +=
+          "(i64.load\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal32")
+      assembly +=
+          "(f32.load\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else if (typeOfTheCurrentNode == "Decimal64")
+      assembly +=
+          "(f64.load\n" + children[0].compile(context).indentBy(1) + "\n)";
+    else {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Internal compiler error: The compiler got into a "
+                   "forbidden state while compiling \"ValueAt\", aborting!"
+                << std::endl;
+      exit(1);
+    }
+  } else if (text == "AddressOf(")
+    return children[0].compileAPointer(context);
+  else {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: No rule to compile the token \"" << text
               << "\", quitting now!" << std::endl;
@@ -849,16 +887,27 @@ std::string TreeNode::getType(CompilationContext context) const {
           << std::endl;
       exit(1);
     }
-    if (std::regex_search(text, std::regex("Pointer$")) == false) {
+    if (std::regex_search(children[0].getType(context),
+                          std::regex("Pointer$")) == false) {
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Compiler error: The argument to \"ValueAt\" is not a pointer!"
           << std::endl;
       exit(1);
     }
+    return children[0].getType(context).substr(
+        0, children[0].getType(context).size() - std::string("Pointer").size());
   }
   if (context.variableTypes.count(text))
     return context.variableTypes[text];
+  if (text[0] == '"') {
+    std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Internal compiler error: A pointer to the string " << text
+              << " is being attempted to compile before the string itself has "
+                 "been compiled, aborting the compilation!"
+              << std::endl;
+    exit(1);
+  }
   if (text == "and" or text == "or" or text == "<" or text == ">" or
       text == "=" or text == "not(" or text == "invertBits(") {
     if (children.empty()) {

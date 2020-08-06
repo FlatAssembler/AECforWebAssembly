@@ -46,7 +46,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
               TreeNode(string(), currentLine, currentColumn));
           currentColumn++;
           areWeInAString = false;
-        } else {
+        } else if (!areWeInAString) {
           currentColumn++;
           areWeInAString = true;
           stringDelimiter = input.substr(i, 1);
