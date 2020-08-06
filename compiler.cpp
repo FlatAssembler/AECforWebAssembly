@@ -515,7 +515,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   std::to_string(basicDataTypeSizes.at(firstType.substr(
                       0, firstType.size() - std::string("Pointer").size()))) +
                   ")\n" + convertToInteger32(children[1], context).indentBy(2) +
-                  "\n\t\t)\n\t)\n)";
+                  "\n\t)\n)";
     else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
