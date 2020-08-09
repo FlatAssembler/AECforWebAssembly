@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html>
+  <head>
+    <title>AEC-to-WebAssembly compiler - Analog Clock</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+        font-size:12px;
+        white-space: pre;
+        width:587px;
+        background:#111111;
+        color:#EEEEEE;
+        height:357px;
+        display: block;
+        overflow: scroll;
+      }
+      h1 {
+        text-align: center;
+      }
+      #center {
+        margin-left:auto;
+        margin-right:auto;
+        width:570px;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Analog Clock</h1>
+    This is my attempt to port the <span style="font-family: monospace">analogClock.aec</span> from <a href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/blob/master/ArithmeticExpressionCompiler.zip?raw=true">Linux</a> to WebAssembly.<br/>
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer. After a few years (if not months), all JavaScript
+    environments will become as capable as they are, rather than like Internet
+    Explorer.<br /><br />
+    <div id="center">
+    AEC program output:<br/>
+    <span id="format_as_code"></span>
+    </div>
+    <br />
+    You can see the source code of the AEC program
+    <a
+      href="https://raw.githubusercontent.com/FlatAssembler/AECforWebAssembly/master/analogClock/analogClock.aec"
+      >here</a
+    >.
+    <script type="text/javascript">
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      let stringToBeLogged="";
+      function logString(ptr) {
+        let bytes=new Uint8Array(memory.buffer);
+        let str="";
+        while (bytes[ptr]){ 
+            str+=String.fromCharCode(bytes[ptr]);
+            ptr++;
+        }
+        stringToBeLogged+=str;
+        if (stringToBeLogged[stringToBeLogged.length-1]=='\n')
+        {
+            console.log(stringToBeLogged);
+            stringToBeLogged="";
+        }
+      }
+      function logInteger(integer) {
+        stringToBeLogged+=integer+"";
+      }
+      let importObject = {
+        JavaScript: { stack_pointer: stack_pointer, memory: memory, logString: logString, logInteger: logInteger}
+      };
+      let getAddressOfOutput,updateClockToTime;
+      fetch("analogClock.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          exports = results.instance.exports;
+          getAddressOfOutput=exports.getAddressOfOutput;
+          updateClockToTime=exports.updateClockToTime;
+          updateClock();
+      });
+      function updateClock() {
+        let now=new Date();
+        updateClockToTime(now.getHours(),now.getMinutes(),now.getSeconds());
+        let addressOfOutput=getAddressOfOutput();
+        let bytes=new Uint8Array(memory.buffer,addressOfOutput,80*23);
+        let string=new TextDecoder('utf8').decode(bytes);
+        document.getElementById("format_as_code").innerHTML=string;
+      }
+      setInterval(updateClock,1000);
+    </script>
+  </body>
+</html>
