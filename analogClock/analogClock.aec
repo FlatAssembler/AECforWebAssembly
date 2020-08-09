@@ -215,15 +215,15 @@ Function updateClockToTime(Integer32 hour,
     //Label "10"...
     y := centerY - (clockRadius - 1.5) * cos(10 * 360. / 12);
     output[y * windowWidth + centerX +
-           sin(10 * 360. / 12) * (clockRadius - 1.5)]     := '1';
+           sin(10 * 360. / 12) * (clockRadius - 1.5) + 1] := '1';
     output[y * windowWidth + centerX +
-           sin(10 * 360. / 12) * (clockRadius - 1.5) + 1] := '0';
+           sin(10 * 360. / 12) * (clockRadius - 1.5) + 2] := '0';
     //Label "11"...
     y := centerY - (clockRadius - 1.5) * cos(11 * 360. / 12);
     output[y * windowWidth + centerX +
-           sin(11 * 360. / 12) * (clockRadius - 1.5)]     := '1';
-    output[y * windowWidth + centerX +
            sin(11 * 360. / 12) * (clockRadius - 1.5) + 1] := '1';
+    output[y * windowWidth + centerX +
+           sin(11 * 360. / 12) * (clockRadius - 1.5) + 2] := '1';
     Integer32 j := 0;
     Decimal32 angle;
     While j < 3 Loop
