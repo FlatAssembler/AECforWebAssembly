@@ -223,15 +223,15 @@ Function updateClockToTime(Integer32 hour,
     //Label "4"...
     y := centerY - (clockRadius - 1) * cos(4 * 360. / 12);
     output[y * windowWidth + centerX +
-           sin(4 * 360. / 12) * (clockRadius - 1)] := '4';
+           sin(4 * 360. / 12) * (clockRadius - 1) + 1] := '4';
     colors[y * windowWidth + centerX +
-           sin(4 * 360. / 12) * (clockRadius - 1)] := redColor;
+           sin(4 * 360. / 12) * (clockRadius - 1) + 1] := redColor;
     //Label "5"...
     y := centerY - (clockRadius - 1) * cos(5 * 360. / 12);
     output[y * windowWidth + centerX +
-           sin(5 * 360. / 12) * (clockRadius - 1)] := '5';
+           sin(5 * 360. / 12) * (clockRadius - 1) + 1] := '5';
     colors[y * windowWidth + centerX +
-           sin(5 * 360. / 12) * (clockRadius - 1)] := redColor;
+           sin(5 * 360. / 12) * (clockRadius - 1) + 1] := redColor;
     //Label "7"...
     y := centerY - (clockRadius - 1) * cos(7 * 360. / 12);
     output[y * windowWidth + centerX +
