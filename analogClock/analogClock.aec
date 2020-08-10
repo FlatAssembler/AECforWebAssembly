@@ -9,10 +9,20 @@ Function logInteger(Integer32 int) Which Returns Nothing Is External;
 
 //Now let's define a character array that will be used both by JS and AEC.
 Character output[23 * 80];
+Integer32 colors[23 * 80]; //Integer32 can be used as pointer to pointer,
+                           //for a lack of a more appropriate type in the
+                           //current version of AEC.
 
 Function getAddressOfOutput() Which Returns CharacterPointer Does
     Return AddressOf(output[0]); //When I didn't implement the "extern"
                                  //keyword into my AEC compiler...
+EndFunction
+
+Function getAddressOfColors() Which Returns Integer32 Does
+    Return AddressOf(colors[0]); //AEC doesn't currently support
+                                 //pointers to pointers, but it's
+                                 //trivial to cast this to the
+                                 //correct type in JavaScript.
 EndFunction
 
 //Now, let's implement some mathematical functions. We can't use JavaScript
@@ -34,7 +44,7 @@ Function ln(Decimal32 x) Which Returns Decimal32 Does
 EndFunction
 
 Function exp(Decimal32 x) Which Returns Decimal32 Does
-    //Euler's algorithm from Mathematics 2...
+    //Euler's Algorithm from Mathematics 2...
     Decimal32 i := 0, y := 1, epsilon := x / PRECISION;
     While (epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop
         y := y + epsilon * y;
@@ -48,7 +58,7 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does
     Decimal32 max := 1000,
               min :=    0,
               i   := (min + max) / 2;
-    While (max-min)>1/PRECISION Loop
+    While (max - min) > 1 / PRECISION Loop
         If i * i > x Then
             max := i;
         Else
@@ -151,6 +161,8 @@ Function updateClockToTime(Integer32 hour,
     Integer32 windowWidth  := 80,
               windowHeight := 23,
               i            :=  0;
+    CharacterPointer lightGrayColor  := "#EEEEEE";
+    CharacterPointer lightGreenColor := "#CCFFCC";
     While i < windowWidth * windowHeight Loop //First, fill the window with 
                                               //spaces and newlines.
         If mod(i, windowWidth) = windowWidth - 1 Then
@@ -158,6 +170,7 @@ Function updateClockToTime(Integer32 hour,
         Else
             output[i] := ' ';
         EndIf
+        colors[i] := lightGrayColor;
         i := i + 1;
     EndWhile
     Integer32 centerX     :=     windowWidth / 2,
@@ -176,63 +189,96 @@ Function updateClockToTime(Integer32 hour,
                                                                //Theorem.
         If abs(distance - clockRadius) < 3. / 4 Then
             output[i] := '*';
+            colors[i]  := lightGreenColor;
         EndIf
         i := i + 1;
     EndWhile
+    CharacterPointer redColor := "#FFAAAA";
     //Label "12"...
     output[(centerY - clockRadius + 1) * windowWidth + centerX]     := '1';
     output[(centerY - clockRadius + 1) * windowWidth + centerX + 1] := '2';
+    colors[(centerY - clockRadius + 1) * windowWidth + centerX]     :=
+    colors[(centerY - clockRadius + 1) * windowWidth + centerX + 1] := redColor;
     //Label "6"...
     output[(centerY + clockRadius - 1) * windowWidth + centerX]     := '6';
+    colors[(centerY + clockRadius - 1) * windowWidth + centerX]     := redColor;
     //Label "3"...
     output[centerY * windowWidth + centerX + clockRadius - 1]       := '3';
+    colors[centerY * windowWidth + centerX + clockRadius - 1]       := redColor;
     //Label "9"...
     output[centerY * windowWidth + centerX - clockRadius + 1]       := '9';
+    colors[centerY * windowWidth + centerX - clockRadius + 1]       := redColor;
     //Label "1"...
     Integer32 y := centerY - (clockRadius - 1) * cos(360. / 12);
     output[y * windowWidth + centerX + sin(360./12) * (clockRadius - 1)]
           := '1';
+    colors[y * windowWidth + centerX + sin(360./12) * (clockRadius - 1)]
+          := redColor;
     //Label "2"...
     y := centerY - (clockRadius - 1.5) * cos(2 * 360. / 12);
     output[y * windowWidth  + centerX +
            sin(2 * 360. / 12) * (clockRadius - 1.5)] := '2';
+    colors[y * windowWidth  + centerX +
+           sin(2 * 360. / 12) * (clockRadius - 1.5)] := redColor;
     //Label "4"...
     y := centerY - (clockRadius - 1) * cos(4 * 360. / 12);
     output[y * windowWidth + centerX +
            sin(4 * 360. / 12) * (clockRadius - 1)] := '4';
+    colors[y * windowWidth + centerX +
+           sin(4 * 360. / 12) * (clockRadius - 1)] := redColor;
     //Label "5"...
     y := centerY - (clockRadius - 1) * cos(5 * 360. / 12);
     output[y * windowWidth + centerX +
            sin(5 * 360. / 12) * (clockRadius - 1)] := '5';
+    colors[y * windowWidth + centerX +
+           sin(5 * 360. / 12) * (clockRadius - 1)] := redColor;
     //Label "7"...
     y := centerY - (clockRadius - 1) * cos(7 * 360. / 12);
     output[y * windowWidth + centerX +
            sin(7 * 360. / 12) * (clockRadius - 1)] := '7';
+    colors[y * windowWidth + centerX +
+           sin(7 * 360. / 12) * (clockRadius - 1)] := redColor;
     //Label "8"...
     y := centerY - (clockRadius - 1) * cos(8 * 360. / 12);
     output[y * windowWidth + centerX +
            sin(8 * 360. / 12) * (clockRadius - 1)] := '8';
+    colors[y * windowWidth + centerX +
+           sin(8 * 360. / 12) * (clockRadius - 1)] := redColor;
     //Label "10"...
     y := centerY - (clockRadius - 1.5) * cos(10 * 360. / 12);
     output[y * windowWidth + centerX +
            sin(10 * 360. / 12) * (clockRadius - 1.5) + 1] := '1';
     output[y * windowWidth + centerX +
            sin(10 * 360. / 12) * (clockRadius - 1.5) + 2] := '0';
+    colors[y * windowWidth + centerX +
+           sin(10 * 360. / 12) * (clockRadius - 1.5) + 1] :=
+    colors[y * windowWidth + centerX +
+           sin(10 * 360. / 12) * (clockRadius - 1.5) + 2] := redColor;
     //Label "11"...
     y := centerY - (clockRadius - 1.5) * cos(11 * 360. / 12);
     output[y * windowWidth + centerX +
-           sin(11 * 360. / 12) * (clockRadius - 1.5) + 1] := '1';
+           sin(11 * 360. / 12) * (clockRadius - 1.5) + 1] :=
     output[y * windowWidth + centerX +
            sin(11 * 360. / 12) * (clockRadius - 1.5) + 2] := '1';
+    colors[y * windowWidth + centerX +
+           sin(11 * 360. / 12) * (clockRadius - 1.5) + 1] :=
+    colors[y * windowWidth + centerX +
+           sin(11 * 360. / 12) * (clockRadius - 1.5) + 2] := redColor;
     Integer32 j := 0;
     Decimal32 angle;
+    CharacterPointer blueColor   := "#AAAAFF";
+    CharacterPointer yellowColor := "#FFFFAA";
     While j < 3 Loop
+        CharacterPointer currentColor;
         If j = 0 Then
             angle := fmod(hour + minute / 60., 12) * (360. / 12);
+            currentColor := redColor;
         ElseIf j = 1 Then
             angle := minute * (360. / 60);
+            currentColor := yellowColor;
         Else
             angle := second * (360 / 60);
+            currentColor := blueColor;
         EndIf
         Decimal32 endOfTheHandX := centerX + sin(angle) *
                                    clockRadius /
@@ -313,17 +359,21 @@ Function updateClockToTime(Integer32 hour,
                 If (abs(upperBoundX - lowerBoundX)<1+1/PRECISION or
                     abs(upperBoundY - lowerBoundY)<1+1/PRECISION)
                    and output[i] = ' ' Then
-                    output[i] := currentSign;
+                    output[i] :=  currentSign;
+                    colors[i] := currentColor;
                 EndIf
                 If (abs(expectedX - x) < 3./4 or abs(expectedY - y) < 3./4)
                    and output[i] = ' ' Then
-                    output[i] := currentSign;
+                    output[i] :=  currentSign;
+                    colors[i] := currentColor;
                 EndIf
             EndIf
             i := i + 1;
         EndWhile
         j := j + 1;
     EndWhile
+    //Let's draw some ornaments.
+    CharacterPointer darkGreenColor := "#AAFFAA";
     i := 0;
     While i < windowWidth * windowHeight Loop
         y := i / windowWidth;
@@ -331,9 +381,10 @@ Function updateClockToTime(Integer32 hour,
         If abs(windowHeight - 2 * ln(1 + abs((x - centerX) / 2.)) - y)
             < 1 - abs(x - centerX) / (centerX * 95./112)
             and x > 1./2 * centerX and x < 3./2 * centerX
-            and output[i]=' ' Then //The logarithmic curve looks somewhat
-                                   //like a lemma of a flower.
-            output[i]:='x';
+            and output[i] = ' ' Then //The logarithmic curve looks somewhat
+                                     //like a lemma of a flower.
+            output[i] :=            'x';
+            colors[i] := darkGreenColor;
         EndIf
         i := i + 1;
     EndWhile
@@ -346,7 +397,8 @@ Function updateClockToTime(Integer32 hour,
         While i < windowWidth * windowHeight Loop
             If j < 2 and (output[i - windowWidth] = 'x' and
                 (output[i + 1] = 'x' or output[i - 1] = 'x')) Then
-                output[i] := 'x';
+                output[i] :=            'x';
+                colors[i] := darkGreenColor;
             ElseIf j=2 and (output[i + 1]=' ' and
                 output[i - windowWidth] = 'x') Then
                 output[i] := ' ';
@@ -358,23 +410,34 @@ Function updateClockToTime(Integer32 hour,
     //The digital clock in the corner...
     output[windowWidth * windowHeight - 2] := '0' + mod(second, 10);
     output[windowWidth * windowHeight - 3] := '0' + second / 10;
+    colors[windowWidth * windowHeight - 2] :=
+        colors[windowWidth * windowHeight - 3] := blueColor;
     output[windowWidth * windowHeight - 4] := ':';
     output[windowWidth * windowHeight - 5] := '0' + mod(minute, 10);
     output[windowWidth * windowHeight - 6] := '0' + minute / 10;
+    colors[windowWidth * windowHeight - 5] :=
+        colors[windowWidth * windowHeight - 6] := yellowColor;
     output[windowWidth * windowHeight - 7] := ':';
     output[windowWidth * windowHeight - 8] := '0' + mod(hour,10);
     output[windowWidth * windowHeight - 9] := '0' + hour / 10;
+    colors[windowWidth * windowHeight - 8] :=
+        colors[windowWidth * windowHeight - 9] := redColor;
     //My signature...
     CharacterPointer signature;
     signature := "Analog Clock for WASM\nMade in AEC by\nTeo Samarzija";
     i := windowWidth * (windowHeight - 3);
     j := 0;
+    CharacterPointer modraColor := "#AAFFFF"; //Sorry, I don't know how
+                                             //to say "modra" in English,
+                                             //and I am not wasting my time
+                                             //looking that up.
     While not(ValueAt(signature + j) = 0) Loop
         If ValueAt(signature + j) = '\n' Then
             i := (i / windowWidth + 1) * windowWidth;
         ElseIf not(ValueAt(signature + j) = 0) Then
-            output[i] := ValueAt(signature+j);
-            i := i + 1;
+            output[i] := ValueAt(signature + j);
+            colors[i] :=             modraColor;
+            i         :=                  i + 1;
         Else
             output[i] := ' ';
         EndIf

@@ -11,12 +11,11 @@
         font-family: "Lucida Console", monospace;
         font-size: 12px;
         white-space: pre;
-        width: 587px;
+        width: calc(80 * 7.2px);
         background: #111111;
         color: #eeeeee;
-        height: 357px;
+        height: calc(24 * 14.5px);
         display: block;
-        overflow: scroll;
       }
       h1 {
         text-align: center;
@@ -24,7 +23,7 @@
       #center {
         margin-left: auto;
         margin-right: auto;
-        width: 570px;
+        width: calc(80 * 7.2px);
       }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,7 +34,7 @@
     <span style="font-family: monospace;">analogClock.aec</span> from
     <a
       href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/blob/master/ArithmeticExpressionCompiler.zip?raw=true"
-      >Linux</a
+      >Linux and FreeDOS</a
     >
     to WebAssembly, using my new
     <a href="https://github.com/FlatAssembler/AECforWebAssembly">compiler</a
@@ -61,15 +60,18 @@
         0
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
-      let stringToBeLogged = "";
-      function logString(ptr) {
+      function getStringAtAddress(ptr) {
         let bytes = new Uint8Array(memory.buffer);
         let str = "";
         while (bytes[ptr]) {
           str += String.fromCharCode(bytes[ptr]);
           ptr++;
         }
-        stringToBeLogged += str;
+        return str;
+      }
+      let stringToBeLogged = "";
+      function logString(ptr) {
+        stringToBeLogged += getStringAtAddress(ptr);
         if (stringToBeLogged[stringToBeLogged.length - 1] == "\n") {
           console.log(stringToBeLogged);
           stringToBeLogged = "";
@@ -93,6 +95,7 @@
         .then((results) => {
           exports = results.instance.exports;
           getAddressOfOutput = exports.getAddressOfOutput;
+          getAddressOfColors = exports.getAddressOfColors;
           updateClockToTime = exports.updateClockToTime;
           updateClock();
         });
@@ -100,9 +103,18 @@
         let now = new Date();
         updateClockToTime(now.getHours(), now.getMinutes(), now.getSeconds());
         let addressOfOutput = getAddressOfOutput();
+        let addressOfColors = getAddressOfColors();
         let bytes = new Uint8Array(memory.buffer, addressOfOutput, 80 * 23);
-        let string = new TextDecoder("utf8").decode(bytes);
-        document.getElementById("format_as_code").innerHTML = string;
+        let colors = new Uint32Array(memory.buffer, addressOfColors, 80 * 23);
+        let str = "";
+        for (let i = 0; i < 80 * 23; i++)
+          str +=
+            '<span style="color:' +
+            getStringAtAddress(colors[i]) +
+            '">' +
+            String.fromCharCode(bytes[i]) +
+            "<\/span>";
+        document.getElementById("format_as_code").innerHTML = str;
       }
       setInterval(updateClock, 1000);
     </script>
