@@ -10,9 +10,9 @@
       #format_as_code {
         font-family: "Lucida Console", monospace;
         white-space: pre;
-        width:100%;
-        background:#EEEEEE;
-        height:75vh;
+        width: 100%;
+        background: #eeeeee;
+        height: 75vh;
         display: block;
         overflow: scroll;
       }
@@ -26,7 +26,10 @@
     <h1>Permutations Test</h1>
     After I've written about 4'000 lines of code of my AEC-to-WebAssembly
     <a href="https://github.com/FlatAssembler/AECforWebAssembly">compiler</a>, I
-    think I'm finally able to implement most of the program in AEC and only use JavaScript for helper functions. So, I'll try to write a program that prints all the permutations of the digits of a number, with most of the program written in AEC.
+    think I'm finally able to implement most of the program in AEC and only use
+    JavaScript for helper functions. So, I'll try to write a program that prints
+    all the permutations of the digits of a number, with most of the program
+    written in AEC.
     <br />
     <b>This only works in very modern browsers.</b> I'm not too interested in
     targeting archaic browsers here. This only works in Firefox 62 and newer or
@@ -37,8 +40,9 @@
       <label for="enterTheNumber">Enter the number:</label><br />
       <input type="text" id="enterTheNumber" name="enterTheNumber" /><br />
     </form>
-    <button onclick="invokeAECfunctions()">Invoke AEC program!</button><br /><br/>
-    AEC program output:<br/>
+    <button onclick="invokeAECfunctions()">Invoke AEC program!</button
+    ><br /><br />
+    AEC program output:<br />
     <span id="format_as_code"></span>
     <br />
     You can see the source code of the AEC program
@@ -53,24 +57,28 @@
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
       function printInt(integer) {
-        document.getElementById("format_as_code").innerHTML+=integer;
+        document.getElementById("format_as_code").innerHTML += integer;
       }
       function printString(ptr) {
-        let buffer=new Uint8Array(memory.buffer);
-        let str="";
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
         while (buffer[ptr]) {
-            str+=String.fromCharCode(buffer[ptr]);
-            ptr++;
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
         }
-        document.getElementById("format_as_code").innerHTML+=str;
+        document.getElementById("format_as_code").innerHTML += str;
       }
       function clearScreen() {
-        document.getElementById("format_as_code").innerHTML="";
+        document.getElementById("format_as_code").innerHTML = "";
       }
       let importObject = {
-        JavaScript: { stack_pointer: stack_pointer, memory: memory,
-                      printString: printString, clearScreen: clearScreen,
-                      printInt: printInt},
+        JavaScript: {
+          stack_pointer: stack_pointer,
+          memory: memory,
+          printString: printString,
+          clearScreen: clearScreen,
+          printInt: printInt,
+        },
       };
       let printPermutationsOfDigits;
       fetch("permutationsTest.wasm")
@@ -78,10 +86,12 @@
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           exports = results.instance.exports;
-          printPermutationsOfDigits=exports.printPermutationsOfDigits;
-      });
+          printPermutationsOfDigits = exports.printPermutationsOfDigits;
+        });
       function invokeAECfunctions() {
-        let originalNumber=parseInt(document.getElementById("enterTheNumber").value);
+        let originalNumber = parseInt(
+          document.getElementById("enterTheNumber").value
+        );
         printPermutationsOfDigits(originalNumber);
       }
     </script>
