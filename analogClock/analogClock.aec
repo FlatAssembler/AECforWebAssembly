@@ -154,6 +154,25 @@ Function fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does
     Return a-b*Integer32(a/b);
 EndFunction
 
+//Now, let's implement some string manipulation functions. We can't
+//call the methods of the JavaScript "String" class here.
+Function strlen(CharacterPointer ptr) Which Returns Integer32 Does
+    Return ValueAt(ptr) = 0 ?
+                                0
+                            :
+                                1 + strlen(ptr + 1);
+EndFunction
+Function strcat(CharacterPointer first, CharacterPointer second) Which
+    Returns Nothing Does
+    first := first + strlen(first);
+    While ValueAt(second) Loop
+        ValueAt(first) := ValueAt(second);
+        first          :=       first + 1;
+        second         :=      second + 1;
+    EndWhile
+    ValueAt(first) := 0;
+EndFunction
+
 Function updateClockToTime(Integer32 hour,
                            Integer32 minute,
                            Integer32 second)
@@ -423,21 +442,35 @@ Function updateClockToTime(Integer32 hour,
     colors[windowWidth * windowHeight - 8] :=
         colors[windowWidth * windowHeight - 9] := redColor;
     //My signature...
-    CharacterPointer signature;
-    signature := "Analog Clock for WASM\nMade in AEC by\nTeo Samarzija";
+    Character signature[100] := {0};
+    logString("Empty signature has length of: ");
+    logInteger(strlen(AddressOf(signature[0])));
+    logString("\n");
+    strcat(AddressOf(signature[0]), " Analog Clock for WebAssembly\n");
+    logString("The first row of the signature has length of: ");
+    logInteger(strlen(AddressOf(signature[0])));
+    logString("\n");
+    strcat(AddressOf(signature[0]), " Made in AEC by\n");
+    logString("The first two rows of signature have length: ");
+    logInteger(strlen(AddressOf(signature[0])));
+    logString("\n");
+    strcat(AddressOf(signature[0]), " Teo Samarzija");
+    logString("Signature has length of: ");
+    logInteger(strlen(AddressOf(signature[0])));
+    logString(" \n\n"); //Let's mark the last log of this function like this.
     i := windowWidth * (windowHeight - 3);
     j := 0;
     CharacterPointer modraColor := "#AAFFFF"; //Sorry, I don't know how
-                                             //to say "modra" in English,
-                                             //and I am not wasting my time
-                                             //looking that up.
-    While not(ValueAt(signature + j) = 0) Loop
-        If ValueAt(signature + j) = '\n' Then
+                                              //to say "modra" in English,
+                                              //and I am not wasting my time
+                                              //looking that up.
+    While not(signature[j] = 0) Loop
+        If signature[j] = '\n' Then
             i := (i / windowWidth + 1) * windowWidth;
-        ElseIf not(ValueAt(signature + j) = 0) Then
-            output[i] := ValueAt(signature + j);
-            colors[i] :=             modraColor;
-            i         :=                  i + 1;
+        ElseIf not(signature[j] = 0) Then
+            output[i] := signature[j];
+            colors[i] :=   modraColor;
+            i         :=        i + 1;
         Else
             output[i] := ' ';
         EndIf
