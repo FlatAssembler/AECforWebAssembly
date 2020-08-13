@@ -11,14 +11,16 @@ Function logInteger(Integer32 int) Which Returns Nothing Is External;
 Character output[23 * 80];
 Integer32 colors[23 * 80]; //Integer32 can be used as pointer to pointer,
                            //for a lack of a more appropriate type in the
-                           //current version of AEC.
+                           //current version of AEC. "colors" will point
+                           //to the CSS names of the colors of the specific
+                           //characters in "output".
 
 Function getAddressOfOutput() Which Returns CharacterPointer Does
     Return AddressOf(output[0]); //When I didn't implement the "extern"
                                  //keyword into my AEC compiler...
 EndFunction
 
-Function getAddressOfColors() Which Returns Integer32 Does
+Function getAddressOfColors() Which Returns Integer32Pointer Does
     Return AddressOf(colors[0]); //AEC doesn't currently support
                                  //pointers to pointers, but it's
                                  //trivial to cast this to the
@@ -29,6 +31,12 @@ EndFunction
 //"Math.sin" and similar because they are methods of the global "Math"
 //object, and there is, as far as I know, no way to import JavaScript
 //objects into WebAssembly (or some language that compiles into it).
+//I wonder whether this is what operating system development feels like.
+//In the OS development, the only code that's running on a virtual machine
+//is your own, and you can only use a debugger running outside of that
+//virtual machine. Here, quite some code runs on JavaScript Virtual Machine,
+//but the only code I can call is the code I've written myself in my own
+//programming language and some debugging functions (logString and logInteger).
 Decimal32 PRECISION := 512; //So that we can balance between speed and
                             //precision.
 Function ln(Decimal32 x) Which Returns Decimal32 Does
@@ -55,8 +63,8 @@ EndFunction
 
 Function sqrt(Decimal32 x) Which Returns Decimal32 Does
     //Binary Search Algorithm...
-    Decimal32 max := 1000,
-              min :=    0,
+    Decimal32 max := 80 * 24,
+              min :=       0,
               i   := (min + max) / 2;
     While (max - min) > 1 / PRECISION Loop
         If i * i > x Then
@@ -69,13 +77,17 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does
     Return i;
 EndFunction
 
+Function fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does
+    Return a - b * Integer32(a / b);
+EndFunction
+
 //Now, let's implement trigonometric and cyclometric functions.
-Decimal32 oneRadianInDegrees:=180/pi; //"180/pi" is a compile-time decimal
-                                      //constant (since we are assigning an
-                                      //initial value to a global variable),
-                                      //and, as such, we can use "pi" to
-                                      //refer to M_PI from the C library,
-                                      //it's available to the compiler.
+Decimal32 oneRadianInDegrees := 180 / pi; //"180/pi" is a compile-time decimal
+                                          //constant (since we are assigning an
+                                          //initial value to a global variable),
+                                          //and, as such, we can use "pi" to
+                                          //refer to M_PI from the C library,
+                                          //it's available to the compiler.
 
 Function arctan(Decimal32 x) Which Returns Decimal32 Does
     //Arcus tangens is equal to the integral of 1/(1+x^2), highschool math.
@@ -93,7 +105,7 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does
     EndIf
     If degrees>90 Then
         Decimal32 sinOfDegreesMinus90 := sin(degrees - 90);
-        If degrees < 180 Then
+        If fmod(degrees, 360) < 180 Then
             Return sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
         Else
             Return -sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
@@ -150,10 +162,6 @@ Function abs(Decimal32 x) Which Returns Decimal32 Does
                x;
 EndFunction
 
-Function fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does
-    Return a-b*Integer32(a/b);
-EndFunction
-
 //Now, let's implement some string manipulation functions. We can't
 //call the methods of the JavaScript "String" class here.
 Function strlen(CharacterPointer ptr) Which Returns Integer32 Does
@@ -162,6 +170,7 @@ Function strlen(CharacterPointer ptr) Which Returns Integer32 Does
                             :
                                 1 + strlen(ptr + 1);
 EndFunction
+
 Function strcat(CharacterPointer first, CharacterPointer second) Which
     Returns Nothing Does
     first := first + strlen(first);
@@ -173,6 +182,8 @@ Function strcat(CharacterPointer first, CharacterPointer second) Which
     ValueAt(first) := 0;
 EndFunction
 
+//And, finally, we can start porting the original AEC Analog Clock,
+//which was targeting x86, to WebAssembly.
 Function updateClockToTime(Integer32 hour,
                            Integer32 minute,
                            Integer32 second)
@@ -190,7 +201,7 @@ Function updateClockToTime(Integer32 hour,
             output[i] := ' ';
         EndIf
         colors[i] := lightGrayColor;
-        i := i + 1;
+        i         :=          i + 1;
     EndWhile
     Integer32 centerX     :=     windowWidth / 2,
               centerY     :=    windowHeight / 2,
@@ -208,7 +219,7 @@ Function updateClockToTime(Integer32 hour,
                                                                //Theorem.
         If abs(distance - clockRadius) < 3. / 4 Then
             output[i] := '*';
-            colors[i]  := lightGreenColor;
+            colors[i] := lightGreenColor;
         EndIf
         i := i + 1;
     EndWhile
@@ -375,8 +386,8 @@ Function updateClockToTime(Integer32 hour,
                                              'm'
                                          :
                                              's';
-                If (abs(upperBoundX - lowerBoundX)<1+1/PRECISION or
-                    abs(upperBoundY - lowerBoundY)<1+1/PRECISION)
+                If (abs(upperBoundX - lowerBoundX) < 1 + 1 / PRECISION or
+                    abs(upperBoundY - lowerBoundY) < 1 + 1 / PRECISION)
                    and output[i] = ' ' Then
                     output[i] :=  currentSign;
                     colors[i] := currentColor;
@@ -443,20 +454,23 @@ Function updateClockToTime(Integer32 hour,
         colors[windowWidth * windowHeight - 9] := redColor;
     //My signature...
     Character signature[100] := {0};
+    CharacterPointer signature := AddressOf(signature[0]);
+    //AEC, unlike C, always makes a clear distinction between
+    //arrays and pointers.
     logString("Empty signature has length of: ");
-    logInteger(strlen(AddressOf(signature[0])));
+    logInteger(strlen(signature));
     logString("\n");
-    strcat(AddressOf(signature[0]), " Analog Clock for WebAssembly\n");
+    strcat(signature, " Analog Clock for WebAssembly\n");
     logString("The first row of the signature has length of: ");
-    logInteger(strlen(AddressOf(signature[0])));
+    logInteger(strlen(signature));
     logString("\n");
-    strcat(AddressOf(signature[0]), " Made in AEC by\n");
+    strcat(signature, " Made in AEC by\n");
     logString("The first two rows of signature have length: ");
-    logInteger(strlen(AddressOf(signature[0])));
+    logInteger(strlen(signature));
     logString("\n");
-    strcat(AddressOf(signature[0]), " Teo Samarzija");
+    strcat(signature, " Teo Samarzija");
     logString("Signature has length of: ");
-    logInteger(strlen(AddressOf(signature[0])));
+    logInteger(strlen(signature));
     logString(" \n\n"); //Let's mark the last log of this function like this.
     i := windowWidth * (windowHeight - 3);
     j := 0;
