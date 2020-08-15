@@ -12,16 +12,23 @@ if (typeof require === "undefined") // NodeJS has a "require" object,
   (print || console.log)("Please run this program in NodeJS.");
 else {
   const FileSystem = require("fs");
-  const buffer = FileSystem.readFileSync("analogClock.wasm");
-  /*
-   * "Sync" means "do it in this thread, don't start a new thread".
-   */
+  let buffer;
+  try {
+    buffer = FileSystem.readFileSync("analogClock.wasm");
+    /*
+     * "Sync" means "do it in this thread, don't start a new thread".
+     */
+  } catch (error) {
+    console.log("Can't open \"analogClock.wasm\": ", error.code);
+    process.exit(1); // This is a way to exit a NodeJS program (doesn't work
+                     // in other JavaScript environments.
+  }
   if (!WebAssembly.validate(buffer)) { // Validate the WebAssembly, but
                                        // don't compile it yet.
     console.log(`The file "analogClock.wasm" doesn't appear to be a valid
 WebAssembly dynamic-link library with which this JavaScript code can link,
 quitting now!`);
-    Process.exitCode(1);
+    process.exit(1);
   }
   const stack_pointer =
       new WebAssembly.Global({value : 'i32', mutable : true}, 0);
@@ -40,7 +47,7 @@ quitting now!`);
     },
   };
   WebAssembly.instantiate(buffer, importObject).then((results) => {
-    // Now the WebAssembly binary has been recompiled to the format
+    // Now the WebAssembly binary has been converted to the format
     // compatible with NodeJS JavaScript Virtual Machine Machine and
     // stored in memory where the pointer "results" points to.
     const exports = results.instance.exports;
@@ -50,7 +57,7 @@ quitting now!`);
     const getAddressOfOutput = exports.getAddressOfOutput;
     const updateClockToTime = exports.updateClockToTime;
     let now = new Date();
-    // Now, let's finally the AEC program...
+    // Now, let's finally run the AEC program...
     updateClockToTime(now.getHours(), now.getMinutes(), now.getSeconds());
     // Now, the AEC program has finished (it runs in the same thread).
     let addressOfOutput = getAddressOfOutput(); // When I haven't
