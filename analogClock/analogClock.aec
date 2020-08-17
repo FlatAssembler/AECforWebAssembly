@@ -9,22 +9,17 @@ Function logInteger(Integer32 int) Which Returns Nothing Is External;
 
 //Now let's define a character array that will be used both by JS and AEC.
 Character output[23 * 80];
-Integer32 colors[23 * 80]; //Integer32 can be used as pointer to pointer,
-                           //for a lack of a more appropriate type in the
-                           //current version of AEC. "colors" will point
-                           //to the CSS names of the colors of the specific
-                           //characters in "output".
+CharacterPointer colors[23 * 80]; //Will contain pointers to the CSS names
+                                  //of colors of the characters in the
+                                  //"output".
 
 Function getAddressOfOutput() Which Returns CharacterPointer Does
     Return AddressOf(output[0]); //When I didn't implement the "extern"
                                  //keyword into my AEC compiler...
 EndFunction
 
-Function getAddressOfColors() Which Returns Integer32Pointer Does
-    Return AddressOf(colors[0]); //AEC doesn't currently support
-                                 //pointers to pointers, but it's
-                                 //trivial to cast this to the
-                                 //correct type in JavaScript.
+Function getAddressOfColors() Which Returns CharacterPointerPointer Does
+    Return AddressOf(colors[0]);
 EndFunction
 
 //Now, let's implement some mathematical functions. We can't use JavaScript

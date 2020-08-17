@@ -292,13 +292,18 @@ public:
                 stringRepresentationOfWebAssemblyType
                     [mappingOfAECTypesToWebAssemblyTypes[argumentType]] +
                 ") ";
-          if (functionDeclaration.returnType != "Nothing")
-            globalDeclarations +=
-                "(result " +
-                stringRepresentationOfWebAssemblyType
-                    [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
-                                                             .returnType]] +
-                ")";
+          if (functionDeclaration.returnType != "Nothing") {
+            if (std::regex_search(functionDeclaration.returnType,
+                                  std::regex("Pointer$")))
+              globalDeclarations += "(result i32)";
+            else
+              globalDeclarations +=
+                  "(result " +
+                  stringRepresentationOfWebAssemblyType
+                      [mappingOfAECTypesToWebAssemblyTypes[functionDeclaration
+                                                               .returnType]] +
+                  ")";
+          }
           globalDeclarations += "))\n";
         } else if (childNode.children[2].text == "Does") {
           globalDeclarations += "\t(func $" +

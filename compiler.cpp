@@ -209,17 +209,21 @@ std::string getStrongerType(int, int, std::string,
 
 AssemblyCode TreeNode::compile(CompilationContext context) {
   std::string typeOfTheCurrentNode = getType(context);
-  if (!mappingOfAECTypesToWebAssemblyTypes.count(typeOfTheCurrentNode)) {
-    std::cerr
-        << "Line " << lineNumber << ", Column " << columnNumber
-        << ", Internal compiler error: The function \"getType\" returned \""
-        << typeOfTheCurrentNode
-        << "\", which is an invalid name of type. Aborting the compilation!"
-        << std::endl;
-    exit(1);
+  AssemblyCode::AssemblyType returnType;
+  if (std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+    returnType = AssemblyCode::AssemblyType::i32;
+  else {
+    if (!mappingOfAECTypesToWebAssemblyTypes.count(typeOfTheCurrentNode)) {
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Internal compiler error: The function \"getType\" returned \""
+          << typeOfTheCurrentNode
+          << "\", which is an invalid name of type. Aborting the compilation!"
+          << std::endl;
+      exit(1);
+    }
+    returnType = mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   }
-  AssemblyCode::AssemblyType returnType =
-      mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   auto iteratorOfTheCurrentFunction =
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function someFunction) {
@@ -518,6 +522,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                               // takes. That is, be compatible with pointers in
                               // C and C++, rather than with pointers in
                               // Assembly (which allows unaligned access).
+    {
+      if (!basicDataTypeSizes.count(firstType.substr(
+              0, firstType.size() - std::string("Pointer").size()))) {
+        std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                  << ", Internal compiler error: The size of the type \""
+                  << firstType.substr(0, firstType.size() -
+                                             std::string("Pointer").size())
+                  << "\" is not specified in the compilation context. Aborting "
+                     "before we segfault."
+                  << std::endl;
+        std::exit(1);
+      }
       assembly += "(i32.add\n" +
                   std::string(children[0].compile(context).indentBy(1)) +
                   "\n\t(i32.mul (i32.const " +
@@ -525,7 +541,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
                       0, firstType.size() - std::string("Pointer").size()))) +
                   ")\n" + convertToInteger32(children[1], context).indentBy(2) +
                   "\n\t)\n)";
-    else
+    } else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
           ".add\n" +
@@ -551,13 +567,24 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
                   "\n" + children[1].compile(context).indentBy(1) + "\n)";
     else if (std::regex_search(firstType, std::regex("Pointer$")) and
-             !std::regex_search(secondType, std::regex("Pointer$")))
+             !std::regex_search(secondType, std::regex("Pointer$"))) {
+      if (!basicDataTypeSizes.count(firstType.substr(
+              0, firstType.size() - std::string("Pointer").size()))) {
+        std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                  << ", Internal compiler error: The size of the type \""
+                  << firstType.substr(0, firstType.size() -
+                                             std::string("Pointer").size())
+                  << "\" is not specified in the compilation context. Aborting "
+                     "before we segfault."
+                  << std::endl;
+        std::exit(1);
+      }
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
                   "\n\t(i32.mul (i32.const " +
                   std::to_string(basicDataTypeSizes.at(firstType.substr(
                       0, firstType.size() - std::string("Pointer").size()))) +
                   ")\n" + children[1].compile(context).indentBy(2) + "\n\t)\n)";
-    else
+    } else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
           ".sub\n" +
