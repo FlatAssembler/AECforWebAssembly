@@ -65,6 +65,8 @@ int main(int argc, char **argv) {
     cerr << "Can't open \"" << assemblyFileName << "\" for output!" << endl;
     return -1;
   }
+  assembly = regex_replace(assembly, regex("\\t"),
+                           "  "); // Replace all tabs with 2 spaces.
   assemblyFile << assembly << endl;
   assemblyFile.close();
   cout << "Assembly successfully saved, quitting now." << endl;

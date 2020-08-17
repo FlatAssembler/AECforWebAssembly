@@ -85,7 +85,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         currentColumn++;
         tokenizedExpression.push_back(
             TreeNode(string(), currentLine, currentColumn));
-      } else if (regex_match(input.substr(i, 1), regex("\\d|[a-z]|[A-Z]|_")) and
+      } else if ((std::isalnum(input[i]) or input[i] == '_') and
                  regex_match(
                      tokenizedExpression.back().text,
                      regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("

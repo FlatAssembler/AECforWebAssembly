@@ -366,6 +366,17 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                   // but apparently doesn't).
       assembly += children[1].compile(context) + "\n";
       rightSide = tmp.children[0];
+      if (children[1].children[0].getLispExpression() !=
+          rightSide.getLispExpression())
+        std::cerr
+            << "Line " << lineNumber << ", Column " << columnNumber
+            << ", Internal compiler error: It's been detected that some part "
+               "of the compiler has changed a part of the AST from "
+            << rightSide.getLispExpression() << " to "
+            << children[1].children[0].getLispExpression()
+            << ". This should be impossible. The compilation will continue, "
+               "but be warned it might produce wrong code because of this."
+            << std::endl;
     } else
       rightSide = children[1];
     assembly += ";;Assigning " + rightSide.getLispExpression() + " to " +
@@ -473,6 +484,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                // in my code and in GNU C++ compiler (which is
                                // supposed to warn me about it).
         assembly += valueToBeReturned.compile(context) + "\n";
+        if (tmp.getLispExpression() != valueToBeReturned.getLispExpression())
+          std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                    << ", Internal compiler error: Some part of the compiler "
+                       "has changed a part of the AST from "
+                    << tmp.getLispExpression() << " into "
+                    << valueToBeReturned.getLispExpression()
+                    << ", which shouldn't be possible. The compilation will "
+                       "continue, but be warned it might produce wrong code "
+                       "because of this."
+                    << std::endl;
         valueToBeReturned = tmp.children[0];
       }
       assembly +=
@@ -547,8 +568,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   "\n\t(i32.mul (i32.const " +
                   std::to_string(basicDataTypeSizes.at(firstType.substr(
                       0, firstType.size() - std::string("Pointer").size()))) +
-                  ")\n" + children[1].compile(context).indentBy(2) +
-                  "\n\t\t)\n\t)\n)";
+                  ")\n" + children[1].compile(context).indentBy(2) + "\n\t)\n)";
     else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
