@@ -1,8 +1,7 @@
 #include "TreeNode.cpp"
 #include "bitManipulations.cpp"
 
-AssemblyCode convertToInteger32(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -43,8 +42,7 @@ AssemblyCode convertToInteger32(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToInteger64(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -88,8 +86,7 @@ AssemblyCode convertToInteger64(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal32(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -133,8 +130,7 @@ AssemblyCode convertToDecimal32(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal64(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -174,8 +170,8 @@ AssemblyCode convertToDecimal64(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertTo(const TreeNode node, const std::string type,
-                       const CompilationContext context) {
+AssemblyCode convertTo(TreeNode node, std::string type,
+                       CompilationContext context) {
   if (type == "Character" or type == "Integer16" or type == "Integer32" or
       std::regex_search(
           type,
@@ -211,7 +207,7 @@ std::string getStrongerType(int, int, std::string,
                             std::string); // When C++ doesn't support function
                                           // hoisting, like JavaScript does.
 
-AssemblyCode TreeNode::compile(CompilationContext context) const {
+AssemblyCode TreeNode::compile(CompilationContext context) {
   std::string typeOfTheCurrentNode = getType(context);
   if (!mappingOfAECTypesToWebAssemblyTypes.count(typeOfTheCurrentNode)) {
     std::cerr
@@ -361,9 +357,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   } else if (text == ":=") {
     TreeNode rightSide;
     if (children[1].text == ":=") { // Expressions such as "a:=b:=0" or similar.
-      TreeNode tmp = children[1]; // In case the "compile" changes the TreeNode
-                                  // (which the GNU C++ compiler should forbid,
-                                  // but apparently doesn't).
+      TreeNode tmp = children[1]; // In case the "compile" changes the TreeNode.
       assembly += children[1].compile(context) + "\n";
       rightSide = tmp.children[0];
       if (children[1].children[0].getLispExpression() !=
@@ -476,13 +470,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       }
       TreeNode valueToBeReturned = children[0];
       if (valueToBeReturned.text == ":=") {
-        TreeNode tmp =
-            valueToBeReturned; // The C++ compiler is supposed to forbid
-                               // side-effects in the "compile" method, since
-                               // it's declared as "const", but apparently it
-                               // doesn't. It seems to me there is some bug both
-                               // in my code and in GNU C++ compiler (which is
-                               // supposed to warn me about it).
+        TreeNode tmp = valueToBeReturned;
         assembly += valueToBeReturned.compile(context) + "\n";
         if (tmp.getLispExpression() != valueToBeReturned.getLispExpression())
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -516,8 +504,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       assembly += " (local.get $return_value))";
   } else if (text == "+") {
     std::vector<TreeNode> children =
-        this->children; // So that compiler doesn't complain about iter_swap
-                        // being called in a constant function.
+        this->children; // To make sure we don't change the AST during
+                        // compiling.
     if (std::regex_search(children[1].getType(context), std::regex("Pointer$")))
       std::iter_swap(children.begin(), children.begin() + 1);
     std::string firstType = children[0].getType(context);
@@ -767,7 +755,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   return AssemblyCode(assembly, returnType);
 }
 
-AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
+AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
   if (text == "ValueAt(")
     return children[0].compile(context);
   if (context.localVariables.count(text) and text.back() != '[')
@@ -865,7 +853,7 @@ std::string getStrongerType(int lineNumber, int columnNumber,
   return firstType;
 }
 
-std::string TreeNode::getType(CompilationContext context) const {
+std::string TreeNode::getType(CompilationContext context) {
   if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
   if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
