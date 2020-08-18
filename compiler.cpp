@@ -1,7 +1,8 @@
 #include "TreeNode.cpp"
 #include "bitManipulations.cpp"
 
-AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
+AssemblyCode convertToInteger32(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -42,7 +43,8 @@ AssemblyCode convertToInteger32(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
+AssemblyCode convertToInteger64(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -86,7 +88,8 @@ AssemblyCode convertToInteger64(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
+AssemblyCode convertToDecimal32(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -130,7 +133,8 @@ AssemblyCode convertToDecimal32(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
+AssemblyCode convertToDecimal64(const TreeNode node,
+                                const CompilationContext context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -170,8 +174,8 @@ AssemblyCode convertToDecimal64(TreeNode node, CompilationContext context) {
   return AssemblyCode("()");
 }
 
-AssemblyCode convertTo(TreeNode node, std::string type,
-                       CompilationContext context) {
+AssemblyCode convertTo(const TreeNode node, const std::string type,
+                       const CompilationContext context) {
   if (type == "Character" or type == "Integer16" or type == "Integer32" or
       std::regex_search(
           type,
@@ -207,7 +211,7 @@ std::string getStrongerType(int, int, std::string,
                             std::string); // When C++ doesn't support function
                                           // hoisting, like JavaScript does.
 
-AssemblyCode TreeNode::compile(CompilationContext context) {
+AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType;
   if (std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
@@ -782,7 +786,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) {
   return AssemblyCode(assembly, returnType);
 }
 
-AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
+AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
   if (text == "ValueAt(")
     return children[0].compile(context);
   if (context.localVariables.count(text) and text.back() != '[')
@@ -847,8 +851,9 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) {
   return AssemblyCode("()");
 }
 
-std::string getStrongerType(int lineNumber, int columnNumber,
-                            std::string firstType, std::string secondType) {
+std::string getStrongerType(const int lineNumber, const int columnNumber,
+                            const std::string firstType,
+                            const std::string secondType) {
   if (firstType == "Nothing" or secondType == "Nothing") {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: Can't add, subtract, multiply or divide "
@@ -880,7 +885,7 @@ std::string getStrongerType(int lineNumber, int columnNumber,
   return firstType;
 }
 
-std::string TreeNode::getType(CompilationContext context) {
+std::string TreeNode::getType(const CompilationContext context) const {
   if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
   if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
@@ -934,7 +939,7 @@ std::string TreeNode::getType(CompilationContext context) {
         0, children[0].getType(context).size() - std::string("Pointer").size());
   }
   if (context.variableTypes.count(text))
-    return context.variableTypes[text];
+    return context.variableTypes.at(text);
   if (text[0] == '"') {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Internal compiler error: A pointer to the string " << text

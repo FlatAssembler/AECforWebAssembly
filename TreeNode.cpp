@@ -19,7 +19,7 @@ class TreeNode {
                        Associativity associativity);
 
 protected:
-  std::set<std::string> getStringsInSubnodes() {
+  std::set<std::string> getStringsInSubnodes() const {
     auto setToBeReturned = std::set<std::string>();
     if (text.size() and text[0] == '"') {
       setToBeReturned.insert(text);
@@ -118,9 +118,9 @@ public:
       std::vector<TreeNode> input); // See "parser.cpp" for the implementation.
   static std::vector<TreeNode> parseExpression(
       std::vector<TreeNode> input); // Made public for debugging purposes.
-  std::string
-  getLispExpression() { // Again, for debugging purposes (and maybe, some day, I
-                        // will want to compile my language to Lisp).
+  std::string getLispExpression()
+      const { // Again, for debugging purposes (and maybe, some day, I will want
+              // to compile my language to Lisp).
     if (children.size() == 0)
       return text;
     std::string LispExpression = "(" +
@@ -135,7 +135,7 @@ public:
         LispExpression += children[i].getLispExpression() + " ";
     return LispExpression;
   }
-  int interpretAsACompileTimeIntegerConstant() {
+  int interpretAsACompileTimeIntegerConstant() const {
     if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
       return std::stoi(text, 0, 0);
     if (text == "+" and children.size() == 2)
@@ -186,7 +186,7 @@ public:
               << std::endl;
     return 0;
   }
-  double interpretAsACompileTimeDecimalConstant() {
+  double interpretAsACompileTimeDecimalConstant() const {
     if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
       return std::stoi(text, 0, 0);
     if (std::regex_match(text, std::regex("\\d+\\.\\d*")))
@@ -283,7 +283,7 @@ public:
   }
   static std::vector<TreeNode>
   parseVariableDeclaration(std::vector<TreeNode> input);
-  AssemblyCode compile(CompilationContext context);
-  AssemblyCode compileAPointer(CompilationContext context);
-  std::string getType(CompilationContext context); // Integer32...
+  AssemblyCode compile(CompilationContext context) const;
+  AssemblyCode compileAPointer(CompilationContext context) const;
+  std::string getType(CompilationContext context) const; // Integer32...
 };
