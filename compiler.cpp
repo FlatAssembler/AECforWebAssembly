@@ -1068,7 +1068,7 @@ std::string TreeNode::getType(const CompilationContext context) const {
               << "\" is not declared!" << std::endl;
     exit(1);
   }
-  if (text == "?:")
+  if (text == "?:") {
     if (std::regex_search(children[1].getType(context),
                           std::regex("Pointer$")) and
         std::regex_search(children[2].getType(context), std::regex("Pointer$")))
@@ -1077,5 +1077,6 @@ std::string TreeNode::getType(const CompilationContext context) const {
       return getStrongerType(lineNumber, columnNumber,
                              children[1].getType(context),
                              children[2].getType(context));
+  }
   return "Nothing";
 }
