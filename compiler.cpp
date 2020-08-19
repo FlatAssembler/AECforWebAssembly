@@ -587,7 +587,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   "\n\t(i32.mul (i32.const " +
                   std::to_string(basicDataTypeSizes.at(firstType.substr(
                       0, firstType.size() - std::string("Pointer").size()))) +
-                  ")\n" + children[1].compile(context).indentBy(2) + "\n\t)\n)";
+                  ")\n" + convertToInteger32(children[1], context).indentBy(2) +
+                  "\n\t)\n)";
     } else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
@@ -857,7 +858,8 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
   if (firstType == "Nothing" or secondType == "Nothing") {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: Can't add, subtract, multiply or divide "
-                 "with something of the type \"Nothing\"!";
+                 "with something of the type \"Nothing\"!"
+              << std::endl;
     exit(1);
   }
   if (std::regex_search(firstType, std::regex("Pointer$")) and
@@ -868,9 +870,9 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
     return secondType;
   if (std::regex_search(firstType, std::regex("Pointer$")) and
       std::regex_search(secondType, std::regex("Pointer$"))) {
-    std::cerr
-        << "Line " << lineNumber << ", Column " << columnNumber
-        << ", Compiler error: Can't add, multiply or divide two pointers!";
+    std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler error: Can't add, multiply or divide two pointers!"
+              << std::endl;
   }
   if (firstType == "Decimal64" or secondType == "Decimal64")
     return "Decimal64";
@@ -1067,8 +1069,13 @@ std::string TreeNode::getType(const CompilationContext context) const {
     exit(1);
   }
   if (text == "?:")
-    return getStrongerType(lineNumber, columnNumber,
-                           children[1].getType(context),
-                           children[2].getType(context));
+    if (std::regex_search(children[1].getType(context),
+                          std::regex("Pointer$")) and
+        std::regex_search(children[2].getType(context), std::regex("Pointer$")))
+      return children[1].getType(context);
+    else
+      return getStrongerType(lineNumber, columnNumber,
+                             children[1].getType(context),
+                             children[2].getType(context));
   return "Nothing";
 }

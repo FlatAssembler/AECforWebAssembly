@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html>
+  <head>
+    <title>AEC-to-WebAssembly compiler - Dragon Curve</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      h1 {
+        text-align: center;
+      }
+      #canvas {
+        display:block;
+        width:500px;
+        height:500px;
+        background:black;
+        margin-left:auto;
+        margin-right:auto;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Dragon Curve</h1>
+    This is my attempt to build a graphical application in AEC using my new <a href="">AEC-to-WebAssembly compiler</a>.<br/>
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer. After a few years (if not months), all JavaScript
+    environments will become as capable as they are, rather than like Internet
+    Explorer.<br /><br />
+    <svg id="canvas">
+        <polygon id="triangularTurtle" points="-5,5 5,5 0,-5" stroke="white" stroke-width="1" transform="rotate(90)" fill="lightBlue"/>
+    </svg>
+    <br />
+    You can see the source code of the AEC program
+    <a
+      href="https://raw.githubusercontent.com/FlatAssembler/AECforWebAssembly/master/dragonCurve/dragonCurve.aec"
+      >here</a
+    >.
+    <script type="text/javascript">
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      function getStringAtAddress(ptr) {
+        let bytes = new Uint8Array(memory.buffer);
+        let str = "";
+        while (bytes[ptr]) {
+          str += String.fromCharCode(bytes[ptr]);
+          ptr++;
+        }
+        return str;
+      }
+      let canvas=document.getElementById("canvas");
+      function drawLine(x1,y1,x2,y2,color,width) {
+        console.log("Drawing a line between ("+x1+","+y1+") and ("+x2+","+y2+") of color \""+getStringAtAddress(color)+"\" and of width "+width+".");
+        let line=document.createElementNS(canvas.namespaceURI,"line");
+        line.setAttribute("x1",x1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y1",y1);
+        line.setAttribute("y2",y2);
+        line.setAttribute("stroke",getStringAtAddress(color));
+        line.setAttribute("stroke-width",width);
+        canvas.appendChild(line);
+      }
+      let turtle=document.getElementById("triangularTurtle");
+      function applyTurtleTransformation(translationX, translationY, rotateDegres) {
+        console.log("Moving the turtle to ("+translationX+","+translationY+").");
+        turtle.setAttribute("transform",
+        "translate("+(translationX)+" "+(translationY)+") rotate("+rotateDegres+")");
+        canvas.appendChild(turtle);
+        console.log("Successfully set the attribute \"transform\" of the turtle to \""+turtle.getAttribute("transform")+"\".");
+      }
+      let importObject = {
+        JavaScript: {
+          stack_pointer: stack_pointer,
+          memory: memory,
+          drawLine: drawLine,
+          applyTurtleTransformation: applyTurtleTransformation
+        },
+      };
+      let init,step;
+      fetch("dragonCurve.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          exports = results.instance.exports;
+          init=exports.init;
+          step=exports.step;
+          init();
+          setInterval(step, 50);
+      });
+    </script>
+  </body>
+</html>

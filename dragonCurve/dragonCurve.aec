@@ -1,0 +1,115 @@
+/*
+ * This will be my attempt to build a graphical application with AEC.
+ */
+
+//Let's import some JavaScript functions...
+Function drawLine(Integer32 x1,
+                  Integer32 y1,
+                  Integer32 x2,
+                  Integer32 y2,
+                  CharacterPointer color,
+                  Integer32 lineWidth) Which Returns Nothing Is External;
+Function applyTurtleTransformation(Integer32 translateX,
+                                   Integer32 translateY,
+                                   Integer32 rotateDegrees)
+    Which Returns Nothing Is External; //We won't use the turtle for actual
+                                       //drawing, but we will move it and
+                                       //rotate it.
+
+Integer32 directionX[4]    := { 0, 1, 0, -1},
+          directionY[4]    := {-1, 0, 1,  0},
+          currentX         := 15,
+          currentY         := 250,
+          currentDirection := 0,
+          lineLength       := 5,
+          lineWidth        := 2,
+          currentStep      := 0;
+
+Character path[16384], reversedPath[16384];
+
+//Again, we need to implement string manipulation functions. Like I've said,
+//even though this program will be running on JavaScript Virtual Machine, it
+//can't call the methods of the JavaScript "String" class.
+Function strlen(CharacterPointer str) Which Returns Integer32 Does
+    //We can't implement this recursively, like we did in earlier AEC
+    //programs, because we will be dealing with large strings which will
+    //cause stack overflow.
+    Integer32 length := 0;
+    While ValueAt(str + length) Loop
+        length := length + 1;
+    EndWhile
+    Return length;
+EndFunction
+
+Function strcpy(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    While ValueAt(src) Loop
+        ValueAt(dest) := ValueAt(src);
+        dest          :=     dest + 1;
+        src           :=      src + 1;
+    EndWhile
+    ValueAt(dest) := 0;
+EndFunction
+
+Function reverseString(CharacterPointer string) Which Returns Nothing Does
+    CharacterPointer pointerToLastCharacter := string + strlen(string) - 1;
+    While pointerToLastCharacter - string > 1 Loop
+        Character tmp                   := ValueAt(string);
+        ValueAt(string)                 := ValueAt(pointerToLastCharacter);
+        ValueAt(pointerToLastCharacter) := tmp;
+        string                          := string + 1;
+        pointerToLastCharacter          := pointerToLastCharacter - 1;
+    EndWhile
+EndFunction
+
+Function strcat(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    strcpy(dest + strlen(dest), src);
+EndFunction
+
+//This is the function that's supposed to be called by JavaScript as soon
+//as it is ready.
+Function init() Which Returns Nothing Does
+    CharacterPointer path         := AddressOf(path[0]);
+    CharacterPointer reversedPath := AddressOf(reversedPath[0]);
+    strcpy(path,"R");
+    Integer32 counter := 0;
+    While strlen(path) < 8192 Loop
+        strcpy(reversedPath, path);
+        If mod(counter, 4) = 0 Then
+            reverseString(reversedPath);
+        EndIf
+        strcat(path, reversedPath);
+        strcat(path, not(mod(counter,4))?"L":"LLL");
+        counter := counter + 1;
+    EndWhile
+EndFunction
+
+//This function is supposed to be periodically called by JavaScript:
+Function step() Which Returns Nothing Does
+    If currentStep < 8192 and currentX > 0 and currentX < 500
+       and currentY > 0 and currentY < 500 Then
+        Integer32 nextX := currentX + directionX[currentDirection] * lineLength,
+                  nextY := currentY + directionY[currentDirection] * lineLength;
+        drawLine(currentX, currentY, nextX, nextY,
+                 currentStep=0?
+                    "lightYellow"
+                 :path[currentStep]='R'?
+                    "red"
+                 :path[currentStep]='L'?
+                    "lightGreen"
+                 :  "lightBlue",
+                 lineWidth);
+        currentX    := nextX;
+        currentY    := nextY;
+        If path[currentStep]='R' Then
+            currentDirection := mod(currentDirection + 1, 4);
+        ElseIf not(currentDirection=0) and path[currentStep]='L' Then
+            currentDirection := currentDirection - 1;
+        ElseIf path[currentStep]='L' Then
+            currentDirection := 3;
+        EndIf
+        currentStep := currentStep + 1;
+        applyTurtleTransformation(currentX, currentY, currentDirection*90);
+    EndIf
+EndFunction
