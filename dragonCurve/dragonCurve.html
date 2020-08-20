@@ -14,6 +14,8 @@
         display: block;
         width: 500px;
         height: 500px;
+        max-width: 75%;
+        max-height: 75%;
         background: black;
         margin-left: auto;
         margin-right: auto;
@@ -32,7 +34,7 @@
     Chrome 69 and newer. After a few years (if not months), all JavaScript
     environments will become as capable as they are, rather than like Internet
     Explorer.<br /><br />
-    <svg id="canvas">
+    <svg id="canvas" viewbox="0 0 500 500">
       <polygon
         id="triangularTurtle"
         points="-5,5 5,5 0,-5"
@@ -90,25 +92,13 @@
         canvas.appendChild(line);
       }
       let turtle = document.getElementById("triangularTurtle");
-      function applyTurtleTransformation(
-        translationX,
-        translationY,
-        rotateDegres
-      ) {
+      function applyTurtleTransformation(svgDirective) {
         console.log(
-          "Moving the turtle to (" + translationX + "," + translationY + ")."
+          'Setting the "transform" attribute of the SVG object "triangularTurtle" to: ' +
+            getStringAtAddress(svgDirective)
         );
-        turtle.setAttribute(
-          "transform",
-          "translate(" +
-            translationX +
-            " " +
-            translationY +
-            ") rotate(" +
-            rotateDegres +
-            ")"
-        );
-        canvas.appendChild(turtle);
+        turtle.setAttribute("transform", getStringAtAddress(svgDirective));
+        canvas.appendChild(turtle); //Bring the turtle to front.
         console.log(
           'Successfully set the attribute "transform" of the turtle to "' +
             turtle.getAttribute("transform") +
