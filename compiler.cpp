@@ -330,8 +330,20 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             }
           }
         }
-      } else
-        assembly += std::string(childNode.compile(context)) + "\n";
+      } else {
+        if (childNode.text == ":=" or childNode.getType(context) == "Nothing")
+          assembly += std::string(childNode.compile(context)) + "\n";
+        else {
+          std::cerr
+              << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler error: Sorry about that, but WebAssembly doesn't "
+                 "support expressions which aren't assigned to anything (the "
+                 "assembler complains if you write something like that). The "
+                 "compilation is going to be aborted now."
+              << std::endl;
+          std::exit(1);
+        }
+      }
     }
     assembly += "(global.set $stack_pointer (i32.sub (global.get "
                 "$stack_pointer) (i32.const " +
@@ -873,6 +885,7 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: Can't add, multiply or divide two pointers!"
               << std::endl;
+    exit(1);
   }
   if (firstType == "Decimal64" or secondType == "Decimal64")
     return "Decimal64";
