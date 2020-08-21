@@ -1,5 +1,26 @@
 /*
- * This will be my attempt to build a graphical application with AEC.
+ * This will be my attempt to build a graphical application with AEC,
+ * specifically, one that will draw a discrete mathematical curve using SVG.
+ * A few years ago, I've made a similar program in JavaScript
+ * ( https://flatassembler.github.io/fraktal.html ). I've never before
+ * attempted to write a program that will draw the Dragon Curve in AEC,
+ * because there is no obvious way to do it using console graphics (and my
+ * old AEC compiler, targeting x86, was basically limited to console
+ * graphics). Also, to do that, I'll need to do a bit of string manipulation,
+ * and the old version of AEC didn't support string manipulation at all (The
+ * only data types available were Decimal32 and Decimal32Array, and there
+ * were no functions. It's because I wanted the code my compiler generates
+ * not to favor one operating system over another, and x86 OS-es do those
+ * things very differently). This version of AEC is about at good at string
+ * manipulation as C is without a standard library. JavaScript has many
+ * useful string manipulation functions, however, since they are actually
+ * methods of the "String" class, there is no standardized way to call them
+ * from a WebAssembly program, even though it's running on JavaScript
+ * Virtual Machine. That's because WebAssembly standard tries to be agnostic
+ * about other programming languages running on the same virtual machine,
+ * which may be a good thing (Why make it necessary for a JavaScript program
+ * to be running on the same virtual machine for any program that's compiled
+ * to WebAssembly to make sense?).
  */
 
 //Let's import some JavaScript functions...
@@ -16,8 +37,11 @@ Function applyTurtleTransformation(CharacterPointer svgDirective)
 
 Integer32 directionX[4]    := { 0, 1, 0, -1},
           directionY[4]    := {-1, 0, 1,  0},
-          currentX         := 15,
-          currentY         := 250,
+          currentX         := 10,
+          currentY         := 250 + 490 - 410, //When set on 250, the turtle
+                                               //reaches 410 and then turns
+                                               //back (I know this by
+                                               //experimenting).
           currentDirection := 0,
           lineLength       := 5,
           lineWidth        := 2,
@@ -93,9 +117,9 @@ EndFunction
 //This is the function that's supposed to be called by JavaScript as soon
 //as it is ready.
 Function init() Which Returns Nothing Does
-    CharacterPointer path         := AddressOf(path[0]);
+    CharacterPointer path         :=         AddressOf(path[0]);
     CharacterPointer reversedPath := AddressOf(reversedPath[0]);
-    strcpy(path,"R");
+    strcpy(path, "R");
     Integer32 counter := 0;
     While strlen(path) < 8192 Loop
         strcpy(reversedPath, path);
@@ -105,39 +129,42 @@ Function init() Which Returns Nothing Does
         strcat(path, reversedPath);
         strcat(path, not(mod(counter, 4))?
                         "L"
-                       :"LLL");
+                     :  "LLL");
         counter := counter + 1;
     EndWhile
 EndFunction
 
 //This function is supposed to be periodically called by JavaScript:
 Function step() Which Returns Nothing Does
-    If not(path[currentStep]=0) and currentX > 0 and currentX < 500
+    If not(path[currentStep] = 0) and currentX > 0 and currentX < 500
        and currentY > 0 and currentY < 500 Then
-        Integer32 nextX := currentX + directionX[currentDirection] * lineLength,
-                  nextY := currentY + directionY[currentDirection] * lineLength;
+        Integer32 nextX := currentX +
+                           directionX[currentDirection] * lineLength,
+                  nextY := currentY +
+                           directionY[currentDirection] * lineLength;
         drawLine(currentX, currentY, nextX, nextY,
-                 currentStep=0?
+                 currentStep = 0?
                     "lightYellow"
-                 :path[currentStep]='R'?
+                 :path[currentStep] = 'R'?
                     "red"
-                 :path[currentStep]='L'?
-                    "lightGreen"
-                 :  "lightBlue",
+                 :path[currentStep] = 'L'?
+                    "lightBlue"
+                 :  "lightYellow",
                  lineWidth);
         currentX    := nextX;
         currentY    := nextY;
-        If path[currentStep]='R' Then
+        If path[currentStep] = 'R' Then
             currentDirection := mod(currentDirection + 1, 4);
-        ElseIf not(currentDirection=0) and path[currentStep]='L' Then
+        ElseIf not(currentDirection = 0) and path[currentStep] = 'L' Then
             currentDirection := currentDirection - 1;
-        ElseIf path[currentStep]='L' Then
+        ElseIf path[currentStep] = 'L' Then
             currentDirection := 3;
         EndIf
         Integer32 tmp; //I had no idea WebAssembly would behave that way,
                        //that the assembler will complain about not storing
                        //the result of a function. This is very different
-                       //from x86 assembly.
+                       //from x86 assembly. So, I modified the compiler
+                       //to warn about that.
         currentStep := currentStep + 1;
         Character turtleTranformation[64]    := {0};
         CharacterPointer turtleTranformation := AddressOf(
