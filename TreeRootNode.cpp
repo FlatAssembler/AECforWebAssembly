@@ -414,7 +414,9 @@ public:
     globalDeclarations += ")"; // End of the "module" S-expression.
     return AssemblyCode(globalDeclarations);
   }
-  AssemblyCode compile(CompilationContext context) const {
+  AssemblyCode compile(CompilationContext context) const override {
+    context.stackSizeOfThisFunction = 0; // So that CLANG doesn't warn about not
+                                         // using "context".
     std::cerr << "Internal compiler error: Some part of the compiler attempted "
                  "to recursively call the compiler from the beginning (leading "
                  "to an infinite loop), quitting now!"
@@ -424,7 +426,8 @@ public:
         "()"); // So that the compiler doesn't throw a bunch of warnings about
                // the control reaching the end of a non-void function.
   }
-  AssemblyCode compileAPointer(CompilationContext context) const {
+  AssemblyCode compileAPointer(CompilationContext context) const override {
+    context.stackSizeOfThisFunction = 0;
     std::cerr << "Internal compiler error: Some part of the compiler attempted "
                  "to get the assembly of the pointer of a module, which "
                  "doesn't make sense. Quitting now!"
@@ -432,7 +435,7 @@ public:
     exit(1);
     return AssemblyCode("()");
   }
-  int interpretAsACompileTimeIntegerConstant() const {
+  int interpretAsACompileTimeIntegerConstant() const override {
     std::cerr
         << "Some part of the compiler attempted to convert a module to the "
            "compile time constant, which makes no sense. Quitting now!"
@@ -440,7 +443,7 @@ public:
     exit(1);
     return 0;
   }
-  double interpretAsACompileTimeDecimalConstant() const {
+  double interpretAsACompileTimeDecimalConstant() const override {
     return interpretAsACompileTimeIntegerConstant();
   }
 };
