@@ -135,7 +135,7 @@ public:
         LispExpression += children[i].getLispExpression() + " ";
     return LispExpression;
   }
-  int interpretAsACompileTimeIntegerConstant() const {
+  virtual int interpretAsACompileTimeIntegerConstant() const {
     if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
       return std::stoi(text, 0, 0);
     if (text == "+" and children.size() == 2)
@@ -186,7 +186,7 @@ public:
               << std::endl;
     return 0;
   }
-  double interpretAsACompileTimeDecimalConstant() const {
+  virtual double interpretAsACompileTimeDecimalConstant() const {
     if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
       return std::stoi(text, 0, 0);
     if (std::regex_match(text, std::regex("\\d+\\.\\d*")))
@@ -283,7 +283,7 @@ public:
   }
   static std::vector<TreeNode>
   parseVariableDeclaration(std::vector<TreeNode> input);
-  AssemblyCode compile(CompilationContext context) const;
-  AssemblyCode compileAPointer(CompilationContext context) const;
-  std::string getType(CompilationContext context) const; // Integer32...
+  virtual AssemblyCode compile(CompilationContext context) const;
+  virtual AssemblyCode compileAPointer(CompilationContext context) const;
+  virtual std::string getType(CompilationContext context) const; // Integer32...
 };

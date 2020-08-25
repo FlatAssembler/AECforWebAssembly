@@ -212,7 +212,15 @@ void parserTests() {
         "that would cause the earlier version of my parser to crash? It's "
         "really hard to guess what are edge cases and what can trigger them.",
         "(Function empty_function_without_arguments( (Returns Nothing) "
-        "Does)"}});
+        "Does)"},
+       {R"( //It actually makes a lot of sense to use multi-line strings
+             //in the tests, doesn't it?
+        If (a or b) and (c or d) Then //Something like this crashed
+                                      //a previous version of the parser.
+            Return (a + b) * (c + d);
+        EndIf
+        )",
+        "(If (and (or a b) (or c d)) (Then (Return (* (+ a b) (+ c d)))))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
