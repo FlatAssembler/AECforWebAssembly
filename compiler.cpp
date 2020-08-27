@@ -211,6 +211,27 @@ std::string getStrongerType(int, int, std::string,
                             std::string); // When C++ doesn't support function
                                           // hoisting, like JavaScript does.
 
+std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
+  std::string inlineAssembly = inlineAssemblyNode.text;
+  if (inlineAssembly.front() != '"' or inlineAssembly.back() != '"') {
+    std::cerr << "Line " << inlineAssemblyNode.lineNumber << ", Column "
+              << inlineAssemblyNode.columnNumber
+              << ", Compiler error: Inline assembly doesn't appear to be a "
+                 "string. Aborting the compilation (or we will produce "
+                 "syntactically incorrect assembly)."
+              << std::endl;
+    std::exit(1);
+  }
+  inlineAssembly = ";;Inline assembly begins.\n" +
+                   inlineAssembly.substr(1, inlineAssembly.size() - 2) +
+                   "\n;;Inline assembly ends.\n";
+  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\\\"), "\\");
+  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\n"), "\n");
+  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\t"), "\t");
+  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\\""), "\"");
+  return inlineAssembly;
+}
+
 AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType;
@@ -351,6 +372,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   } else if (text.front() == '"')
     assembly += "(i32.const " + std::to_string(context.globalVariables[text]) +
                 ") ;;Pointer to " + text;
+  else if ((text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
+            text == "asm_f32(" or text == "asm_f64(") and
+           children.size() == 1)
+    assembly += convertInlineAssemblyToAssembly(children[0]);
   else if (context.variableTypes.count(text)) {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
@@ -427,6 +452,19 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << text << "\", aborting the compilation!" << std::endl;
       exit(1);
     }
+    if (std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")) and
+        !std::regex_search(rightSide.getType(context), std::regex("Pointer$")))
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler warning: You are assigning a type \""
+                << rightSide.getType(context)
+                << "\" to a pointer, this is likely an error!" << std::endl;
+    if (!std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")) and
+        std::regex_search(rightSide.getType(context), std::regex("Pointer$")))
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler warning: You are assigning a pointer to a type \""
+          << typeOfTheCurrentNode << "\", this is likely an error!"
+          << std::endl;
   } else if (text == "If") {
     if (children.size() < 2) {
       std::cerr
@@ -901,6 +939,16 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
 }
 
 std::string TreeNode::getType(const CompilationContext context) const {
+  if (text == "asm(" and children.size() == 1)
+    return "Nothing";
+  if (text == "asm_i32(" and children.size() == 1)
+    return "Integer32";
+  if (text == "asm_i64(" and children.size() == 1)
+    return "Integer64";
+  if (text == "asm_f32(" and children.size() == 1)
+    return "Decimal32";
+  if (text == "asm_f64(" and children.size() == 1)
+    return "Decimal64";
   if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
   if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))

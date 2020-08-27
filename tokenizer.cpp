@@ -176,6 +176,18 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         tokenizedExpression[i - 1].text = ":=";
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }
+    for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
+      if (tokenizedExpression[i].text[0] == '"' and
+          tokenizedExpression[i - 1].text[0] ==
+              '"') // Concatenate two strings next to each other (as in C and
+                   // C++).
+      {
+        tokenizedExpression[i - 1].text =
+            tokenizedExpression[i - 1].text.substr(
+                0, tokenizedExpression[i - 1].text.size() - 1) +
+            tokenizedExpression[i].text.substr(1);
+        tokenizedExpression.erase(tokenizedExpression.begin() + i);
+      }
   } catch (std::regex_error &error) {
     std::cerr << "Internal compiler error in tokenizer: " << error.what() << ":"
               << error.code() << std::endl;
