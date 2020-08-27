@@ -34,7 +34,16 @@ Function izvijesti_JavaScript_o_nedostatku_memorije()
 Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
     CharacterPointer Does
     Integer32 nova_adresa_u_stranicama :=
-        asm_i32("(memory.grow\n"
+        asm_i32 //"asm_i32" kaze compileru da umetne asemblerski kod, i da
+                //pretpostavi da ce se nakon njega na sistemskom stogu
+                //nalaziti vrijednost tipa "i32". To ocito nije tocno ako
+                //netko prebaci JavaScript virtualnu masinu u 64-bitni
+                //nacin rada, ali nadam se da to nitko nece napraviti.
+                //Vjerojatnost da ce JavaScript virtualnoj masini trebati
+                //vise nego 4GB RAM-a je zanemariva, a vjerojatnost da ce
+                //se neki korisni programi srusiti zbog toga nije bas
+                //zanemariva.
+                ("(memory.grow\n"
                 "\t(local.get 0)\n" //Prvi (nulti) argument funkcije,
                                     //"brojStranica".
                 ")\n");
