@@ -225,10 +225,14 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   inlineAssembly = ";;Inline assembly begins.\n" +
                    inlineAssembly.substr(1, inlineAssembly.size() - 2) +
                    "\n;;Inline assembly ends.\n";
-  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\\\"), "\\");
-  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\n"), "\n");
-  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\t"), "\t");
-  inlineAssembly = std::regex_replace(inlineAssembly, std::regex("\\\""), "\"");
+  inlineAssembly =
+      std::regex_replace(inlineAssembly, std::regex(R"(\\\\)"), "\\");
+  inlineAssembly =
+      std::regex_replace(inlineAssembly, std::regex(R"(\\n)"), "\n");
+  inlineAssembly =
+      std::regex_replace(inlineAssembly, std::regex(R"(\\t)"), "\t");
+  inlineAssembly =
+      std::regex_replace(inlineAssembly, std::regex(R"(\\\")"), "\"");
   return inlineAssembly;
 }
 
@@ -949,6 +953,15 @@ std::string TreeNode::getType(const CompilationContext context) const {
     return "Decimal32";
   if (text == "asm_f64(" and children.size() == 1)
     return "Decimal64";
+  if (text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
+      text == "asm_f32(" or text == "asm_f64(") {
+    std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler error: The inline assembly operator \"" << text
+              << "\" has " << children.size()
+              << " operands (it should have 1). Its AST is: "
+              << getLispExpression() << std::endl;
+    std::exit(1);
+  }
   if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
   if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))

@@ -187,6 +187,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
                 0, tokenizedExpression[i - 1].text.size() - 1) +
             tokenizedExpression[i].text.substr(1);
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
+        i--;
       }
   } catch (std::regex_error &error) {
     std::cerr << "Internal compiler error in tokenizer: " << error.what() << ":"
