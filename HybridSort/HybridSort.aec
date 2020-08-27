@@ -119,9 +119,15 @@ Function hybrid_sort(Integer32 donja_granica,
                      Integer32 gornja_granica,
                      Integer32 dubina_rekurzije)
     Which Returns Nothing Does
+    If gornja_granica - donja_granica < 2 Then //Ako je niz duljine manje od
+                                               //2 (0 ili 1), znaci da je vec
+                                               //poredan, pa prekidamo
+                                               //izvodenje ovog potprograma.
+        Return;
+    EndIf
     Decimal32 razvrstanost := 0;
     Integer32 i := donja_granica;
-    While i < gornja_granica Loop
+    While i < gornja_granica - 1 Loop
         razvrstanost := razvrstanost +
             (ValueAt(originalni_niz + i) < ValueAt(originalni_niz + i + 1));
         i := i + 1;
@@ -291,7 +297,7 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
     izvijesti_o_pokretanju_QuickSorta(broj_pokretanja_QuickSorta);
     izvijesti_o_pokretanju_MergeSorta(broj_pokretanja_MergeSorta);
     Integer32 i := 0;
-    While i < velicina_niza Loop
+    While i < velicina_niza - 1 Loop
         If ValueAt(originalni_niz + i) > ValueAt(originalni_niz + i + 1) Then
             printString("Niz nije poredan!");
             Return; //Nemoj to ispisati vise puta.
