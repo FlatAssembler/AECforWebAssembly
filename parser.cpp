@@ -35,6 +35,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
               regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                     "\\d|_|[a-z]|[A-Z])*$)")) and
           !input[i + 1].children.size() and input[i - 1].text.back() != '(' and
+          input[i + 1].text.back() != '(' and
           input[i + 1].text.front() != '"') {
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
