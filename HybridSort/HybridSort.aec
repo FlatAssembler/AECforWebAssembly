@@ -142,7 +142,7 @@ Function hybrid_sort(Integer32 donja_granica,
         i := i + 1;
     EndWhile
     razvrstanost := razvrstanost /
-        ( (gornja_granica - donja_granica - 1) / 2) - 1;
+        ( (gornja_granica - donja_granica - 2) / 2.) - 1;
     //Formula koju je ispisao genetski algoritam za predvidanje koliko ce
     //usporedbi QuickSort napraviti:
 // https://github.com/FlatAssembler/ArithmeticExpressionCompiler/tree/master/QuickSort/Genetic_algorithm_for_deriving_the_formula
@@ -168,10 +168,10 @@ Function hybrid_sort(Integer32 donja_granica,
         2 * (gornja_granica - donja_granica) *
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
-    If razvrstanost = 1 Then
+    If razvrstanost = 1 or razvrstanost > 1 Then
         broj_vec_poredanih_podniza := broj_vec_poredanih_podniza + 1;
         Return;
-    ElseIf razvrstanost = -1 Then
+    ElseIf razvrstanost = -1 or razvrstanost < -1 Then
         broj_obrnuto_poredanih_podniza := broj_obrnuto_poredanih_podniza + 1;
         Integer32 i                    :=                      donja_granica;
         Integer32 j                    :=                 gornja_granica - 1;
