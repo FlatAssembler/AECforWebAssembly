@@ -17,6 +17,7 @@ Function kopiraj_niz_na_adresu(Integer32Pointer adresa)
     Which Returns Nothing Is External;
 Function printString(CharacterPointer str)
     Which Returns Nothing Is External;
+Function printInteger(Integer32 n) Which Returns Nothing Is External;
 Function pocni_mjerenje_vremena() Which Returns Nothing Is External;
 Function zavrsi_mjerenje_vremena() Which Returns Nothing Is External;
 Function izvijesti_o_obrnuto_poredanim_nizovima(Integer32 n)
@@ -72,7 +73,7 @@ Integer32 broj_obrnuto_poredanih_podniza,
 //Ne mozemo pozvati JavaScriptine matematicke funkcije, jer one su metode
 //globalnog objekta "Math", a ne postoji standardizirani nacin da se zovu
 //metode JavaScriptinih objekata iz WebAssemblyja.
-Decimal32 PRECISION := 128; //Ovdje mozemo balansirati izmedu brzine i
+Decimal32 PRECISION := 32; //Ovdje mozemo balansirati izmedu brzine i
                             //preciznosti.
 Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does
     //Prirodni logaritam je integral od 1/x u intervalu od 1 do x,
@@ -158,28 +159,64 @@ Function hybrid_sort(Integer32 donja_granica,
     If abs(razvrstanost) > 1 Then
         //To ne smije biti...
         printString("Apsolutna vrijednost razvrstanosti je veca od 1!");
+        printString("Relevantni dio niza iznosi:"); //Da se ne moram baktati s
+                                                    //debuggerima za JavaScript
+                                                    //virtualnu masinu ako dode
+                                                    //do problema.
+        i := donja_granica;
+        While i < gornja_granica Loop
+            printInteger(ValueAt(originalni_niz + i));
+            i := i + 1;
+        EndWhile
+        printString("Kraj relevantnog dijela niza!");
     EndIf
     If je_li_niz_vec_poredan and not(razvrstanost = 1 or razvrstanost > 1) Then
         //Opet ne smije biti...
         printString("Niz je poredan, a razvrstanost nije 1.");
+        printString("Relevantni dio niza iznosi:");
+        i := donja_granica;
+        While i < gornja_granica Loop
+            printInteger(ValueAt(originalni_niz + i));
+            i := i + 1;
+        EndWhile
+        printString("Kraj relevantnog dijela niza!");
     EndIf
     If
         not(je_li_niz_vec_poredan) and (razvrstanost = 1 or razvrstanost > 1)
     Then
         //Open ne smije biti...
         printString("Razvrstanost je 1, a niz nije poredan!");
+        printString("Relevantni dio niza iznosi:");
+        i := donja_granica;
+        While i < gornja_granica Loop
+            printInteger(ValueAt(originalni_niz + i));
+            i := i + 1;
+        EndWhile
+        printString("Kraj relevantnog dijela niza!");
     EndIf
     //Idemo dalje...
+    Decimal32 razvrstanost_na_potenciju[8] := {1}; //Formula ce se brze
+                                                   //izracunati ako ne
+                                                   //pozivamo "pow" gdje
+                                                   //ne treba (kad je
+                                                   //eksponent prirodan
+                                                   //broj).
+    i := 1;
+    While i < 8 Loop
+        razvrstanost_na_potenciju[i] :=
+            razvrstanost_na_potenciju[i - 1] * razvrstanost;
+        i := i + 1;
+    EndWhile
     //Formula koju je ispisao genetski algoritam za predvidanje koliko ce
     //usporedbi QuickSort napraviti:
 // https://github.com/FlatAssembler/ArithmeticExpressionCompiler/tree/master/QuickSort/Genetic_algorithm_for_deriving_the_formula
     Decimal32 polinom_pod_apsolutnom :=
-          2.38854   * pow(razvrstanost, 7)
-        - 0.284258  * pow(razvrstanost, 6)
-        - 1.87104   * pow(razvrstanost, 5) 
-        + 0.372637  * pow(razvrstanost, 4)
-        + 0.167242  * pow(razvrstanost, 3)
-        - 0.0884977 * pow(razvrstanost, 2)
+          2.38854   * razvrstanost_na_potenciju[7]
+        - 0.284258  * razvrstanost_na_potenciju[6]
+        - 1.87104   * razvrstanost_na_potenciju[5] 
+        + 0.372637  * razvrstanost_na_potenciju[4]
+        + 0.167242  * razvrstanost_na_potenciju[3]
+        - 0.0884977 * razvrstanost_na_potenciju[2]
         + 0.315119  * razvrstanost;
     Decimal32 Eulerov_broj_na_koju_potenciju :=
         (prirodni_logaritam(gornja_granica - donja_granica) +
