@@ -41,8 +41,8 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                 //nacin rada, ali nadam se da to nitko nece napraviti.
                 //Vjerojatnost da ce JavaScript virtualnoj masini trebati
                 //vise nego 4GB RAM-a je zanemariva, a vjerojatnost da ce
-                //se neki korisni programi srusiti zbog toga nije bas
-                //zanemariva.
+                //se neki korisni programi srusiti zbog prebacivanja u 
+                //64-bitni nacin rada nije bas zanemariva.
                 ("(memory.grow\n"
                 "\t(local.get 0)\n" //Prvi (nulti) argument funkcije,
                                     //"brojStranica".
@@ -72,7 +72,7 @@ Integer32 broj_obrnuto_poredanih_podniza,
 //Ne mozemo pozvati JavaScriptine matematicke funkcije, jer one su metode
 //globalnog objekta "Math", a ne postoji standardizirani nacin da se zovu
 //metode JavaScriptinih objekata iz WebAssemblyja.
-Decimal32 PRECISION := 512; //Ovdje mozemo balansirati izmedu brzine i
+Decimal32 PRECISION := 128; //Ovdje mozemo balansirati izmedu brzine i
                             //preciznosti.
 Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does
     //Prirodni logaritam je integral od 1/x u intervalu od 1 do x,
@@ -110,7 +110,15 @@ EndFunction
 
 Function ostatak_pri_dijeljenju(Decimal32 x, Decimal32 y)
     Which Returns Decimal32 Does
-    Return x - y * Integer64(x / y);
+    Return x - y * Integer64(x / y); //Ako napisem "Integer32",
+                                     //riskiram da ce JavaScript
+                                     //virtualna masina prekinuti
+                                     //izvodenje programa jer je
+                                     //broj "x/y" izvan intervala
+                                     //koji 32-bitni cijeli brojevi
+                                     //mogu prikazati (od oko dvije
+                                     //milijarde u pozitivno i
+                                     //negativno).
 EndFunction
 
 Function pow(Decimal32 x, Decimal32 y) Which Returns Decimal32 Does
@@ -118,7 +126,7 @@ Function pow(Decimal32 x, Decimal32 y) Which Returns Decimal32 Does
                             prirodni_logaritam(abs(x)) * y);
     Return x = 0?
               0
-           : ostatak_pri_dijeljenju(x, 2) = 1 and x<0 ?
+           : ostatak_pri_dijeljenju(x, 2) = 1 and x < 0 ?
               -result
            :  result;
 EndFunction
@@ -135,14 +143,33 @@ Function hybrid_sort(Integer32 donja_granica,
         Return;
     EndIf
     Decimal32 razvrstanost := 0;
-    Integer32 i := donja_granica;
+    Integer32 i := donja_granica, je_li_niz_vec_poredan := 1;
     While i < gornja_granica - 1 Loop
         razvrstanost := razvrstanost +
             (ValueAt(originalni_niz + i) < ValueAt(originalni_niz + i + 1));
+        If ValueAt(originalni_niz + i) > ValueAt(originalni_niz + i + 1) Then
+            je_li_niz_vec_poredan := 0;
+        EndIf
         i := i + 1;
     EndWhile
     razvrstanost := razvrstanost /
-        ( (gornja_granica - donja_granica - 2) / 2.) - 1;
+        ( (gornja_granica - donja_granica - 1) / 2.) - 1;
+    //Provjeri je li sve u redu, i, ako nije, obavijesti.
+    If abs(razvrstanost) > 1 Then
+        //To ne smije biti...
+        printString("Apsolutna vrijednost razvrstanosti je veca od 1!");
+    EndIf
+    If je_li_niz_vec_poredan and not(razvrstanost = 1 or razvrstanost > 1) Then
+        //Opet ne smije biti...
+        printString("Niz je poredan, a razvrstanost nije 1.");
+    EndIf
+    If
+        not(je_li_niz_vec_poredan) and (razvrstanost = 1 or razvrstanost > 1)
+    Then
+        //Open ne smije biti...
+        printString("Razvrstanost je 1, a niz nije poredan!");
+    EndIf
+    //Idemo dalje...
     //Formula koju je ispisao genetski algoritam za predvidanje koliko ce
     //usporedbi QuickSort napraviti:
 // https://github.com/FlatAssembler/ArithmeticExpressionCompiler/tree/master/QuickSort/Genetic_algorithm_for_deriving_the_formula
@@ -168,6 +195,7 @@ Function hybrid_sort(Integer32 donja_granica,
         2 * (gornja_granica - donja_granica) *
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
+    //I sada krece grananje na temelju izracunatog...
     If razvrstanost = 1 or razvrstanost > 1 Then
         broj_vec_poredanih_podniza := broj_vec_poredanih_podniza + 1;
         Return;
@@ -186,10 +214,12 @@ Function hybrid_sort(Integer32 donja_granica,
             i                           :=                    i + 1;
         EndWhile
         Return;
-    ElseIf koliko_usporedbi_ocekujemo_od_MergeSorta <
+    ElseIf
+        koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
         dubina_rekurzije >
-        prirodni_logaritam(velicina_niza) / prirodni_logaritam(2) Then
+        pow(prirodni_logaritam(velicina_niza) / prirodni_logaritam(2), 2)
+    Then
         //MergeSort algoritam (priblizno poredani podnizovi,
         //za koje je MergeSort efikasniji od QuickSorta,
         //a moj ga program takoder koristi kada ima jos
@@ -237,8 +267,8 @@ Function hybrid_sort(Integer32 donja_granica,
         // https://www.geeksforgeeks.org/quick-sort/
         //Iskreno, ne razumijem ni ja tocno kako funkcionira.
         //On navodno preureduje niz tako da svi elementi koji su manji
-        //od onog koji je bio prvi dodu prije njega, a ostali poslije
-        //njega.
+        //od onog koji je bio prvi (pivot) dodu prije njega, a ostali
+        //poslije njega.
         Integer32 pivot := ValueAt(originalni_niz + gornja_granica - 1);
         Integer32 i     :=                            donja_granica - 1;
         Integer32 j     :=                                donja_granica;
@@ -252,10 +282,10 @@ Function hybrid_sort(Integer32 donja_granica,
             EndIf
             j := j + 1;
         EndWhile
-        pomocna_varijabla_za_zamijenu       := ValueAt(originalni_niz + i + 1);
-        ValueAt(originalni_niz + i + 1)     :=
+        pomocna_varijabla_za_zamijenu   := ValueAt(originalni_niz + i + 1);
+        ValueAt(originalni_niz + i + 1) :=
             ValueAt(originalni_niz + gornja_granica - 1);
-        ValueAt(originalni_niz + gornja_granica - 1)  :=
+        ValueAt(originalni_niz + gornja_granica - 1) :=
             pomocna_varijabla_za_zamijenu;
         Integer32 gdje_je_pivot := i + 1;
         hybrid_sort(donja_granica, gdje_je_pivot, dubina_rekurzije + 1);
@@ -277,13 +307,19 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
     Integer32 prijasnja_velicina_niza :=       velicina_niza;
     velicina_niza                     := daj_velicinu_niza();
     //Ako je potrebno, zauzmi jos memorije...
-    If velicina_niza / (64 * 1024 / 4) >
-        prijasnja_velicina_niza / (64 * 1024 / 4) or
-        prijasnja_velicina_niza = 0 Then
+    If
+        velicina_niza / (64 * 1024 / 4) +
+        not(not(mod(velicina_niza, 64 * 1024 / 4))) >
+        prijasnja_velicina_niza / (64 * 1024 / 4) +
+        not(not(mod(prijasnja_velicina_niza, 64 * 1024 / 4))) or
+        prijasnja_velicina_niza = 0
+    Then
         originalni_niz := zauzmi_memorijske_stranice(
-                            4 * velicina_niza / (64 * 1024));
+                            4 * velicina_niza / (64 * 1024) +
+                            not(not(mod(velicina_niza, 64 * 1024 / 4))));
         pomocni_niz    := zauzmi_memorijske_stranice(
-                            4 * velicina_niza / (64 * 1024));
+                            4 * velicina_niza / (64 * 1024) +
+                            not(not(mod(velicina_niza, 64 * 1024 / 4))));
         If originalni_niz = -1 or pomocni_niz = -1 Then
             printString("Nema dovoljno memorije za nastavak programa!?");
             izvijesti_JavaScript_o_nedostatku_memorije();
