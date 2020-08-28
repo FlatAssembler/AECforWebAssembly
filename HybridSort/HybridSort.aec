@@ -18,6 +18,7 @@ Function kopiraj_niz_na_adresu(Integer32Pointer adresa)
 Function printString(CharacterPointer str)
     Which Returns Nothing Is External;
 Function printInteger(Integer32 n) Which Returns Nothing Is External;
+Function printFloat(Decimal32 x) Which Returns Nothing Is External;
 Function pocni_mjerenje_vremena() Which Returns Nothing Is External;
 Function zavrsi_mjerenje_vremena() Which Returns Nothing Is External;
 Function izvijesti_o_obrnuto_poredanim_nizovima(Integer32 n)
@@ -30,6 +31,8 @@ Function izvijesti_o_pokretanju_MergeSorta(Integer32 n)
     Which Returns Nothing Is External;
 Function izvijesti_JavaScript_o_nedostatku_memorije()
     Which Returns Nothing Is External;
+
+Integer32 DEBUG := 0;
 
 //Napravimo sada omotnicu oko WebAssemblerske naredbe "memory.grow"...
 Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
@@ -73,7 +76,7 @@ Integer32 broj_obrnuto_poredanih_podniza,
 //Ne mozemo pozvati JavaScriptine matematicke funkcije, jer one su metode
 //globalnog objekta "Math", a ne postoji standardizirani nacin da se zovu
 //metode JavaScriptinih objekata iz WebAssemblyja.
-Decimal32 PRECISION := 32; //Ovdje mozemo balansirati izmedu brzine i
+Decimal32 PRECISION := 128; //Ovdje mozemo balansirati izmedu brzine i
                             //preciznosti.
 Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does
     //Prirodni logaritam je integral od 1/x u intervalu od 1 do x,
@@ -111,6 +114,16 @@ EndFunction
 
 Function ostatak_pri_dijeljenju(Decimal32 x, Decimal32 y)
     Which Returns Decimal32 Does
+    If DEBUG = 1 Then
+        printString("Zatrazen je ostatak pri dijeljenju od brojeva: ");
+        printFloat(x);
+        printFloat(y);
+        printString("Sada ce se program mozda srusiti...");
+    EndIf
+    If x / y > Eulerov_broj_na_potenciju(prirodni_logaritam(2) * 48) Then
+        Return 0; //Imate bolju ideju sto da se radi u slucaju da kolicnik
+                  //ne stane niti u Integer64 (C-ovski "long long")?
+    EndIf
     Return x - y * Integer64(x / y); //Ako napisem "Integer32",
                                      //riskiram da ce JavaScript
                                      //virtualna masina prekinuti
@@ -147,7 +160,8 @@ Function hybrid_sort(Integer32 donja_granica,
     Integer32 i := donja_granica, je_li_niz_vec_poredan := 1;
     While i < gornja_granica - 1 Loop
         razvrstanost := razvrstanost +
-            (ValueAt(originalni_niz + i) < ValueAt(originalni_niz + i + 1));
+            (ValueAt(originalni_niz + i) < ValueAt(originalni_niz + i + 1)
+            or ValueAt(originalni_niz + i) = ValueAt(originalni_niz + i + 1) );
         If ValueAt(originalni_niz + i) > ValueAt(originalni_niz + i + 1) Then
             je_li_niz_vec_poredan := 0;
         EndIf
@@ -254,8 +268,15 @@ Function hybrid_sort(Integer32 donja_granica,
     ElseIf
         koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
-        dubina_rekurzije >
-        pow(prirodni_logaritam(velicina_niza) / prirodni_logaritam(2), 2)
+        dubina_rekurzije > pow(2,
+            16 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
+                                     //JavaScriptina virtualna masina ima
+                                     //4KB memorije na sistemskom stogu,
+                                     //i alociranje vise heap memorije
+                                     //ne mijenja tu nesretnu cinjenicu.
+                                     //Ne znam kako Emscripten (modificirana
+                                     //verzija CLANG-a koja compilira
+                                     //C++ u WebAssembly) to rjesava.
     Then
         //MergeSort algoritam (priblizno poredani podnizovi,
         //za koje je MergeSort efikasniji od QuickSorta,
@@ -340,6 +361,13 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
         Return; //Ako JavaScript nastavlja pokretati ovaj program
                 //unatoc nedostatku memorije, neka onda on ne radi nista.
     EndIf
+    //Testiraj matematicke funkcije...
+    If abs(pow(3, 3) - 27) > 2 Then //Da, one su jako neprecizne, ali zato
+                                    //jako brze.
+        printString("Izgleda da matematicke funkcije ne funkcioniraju dobro.");
+        printString("pow(3, 3) =");
+        printFloat(pow(3, 3));
+    EndIf
     //Doznaj velicinu niza iz JavaScripta...
     Integer32 prijasnja_velicina_niza :=       velicina_niza;
     velicina_niza                     := daj_velicinu_niza();
@@ -384,5 +412,6 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
             printString("Niz nije poredan!");
             Return; //Nemoj to ispisati vise puta.
         EndIf
+        i := i + 1;
     EndWhile
 EndFunction
