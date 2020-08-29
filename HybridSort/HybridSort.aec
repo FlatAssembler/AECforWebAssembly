@@ -131,7 +131,7 @@ Function ostatak_pri_dijeljenju(Decimal32 x, Decimal32 y)
         //naletjeti na probleme pri pretvorbi u JavaScriptin string.
         printFloat(x);
         printFloat(y);
-        printString("Sada ce se program mozda srušiti...");
+        printString("Sada ce se program mozda srusiti...");
     EndIf
     If abs(x / y) > Eulerov_broj_na_potenciju(prirodni_logaritam(2) * 63) Then
         Return 0; //Imate bolju ideju što da se radi u slučaju da količnik
