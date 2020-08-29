@@ -12,8 +12,8 @@ let velicina_niza, niz,
       initial : 1,
       maximum : 64
     }) // Ograniči velicinu dijeljene memorije između JavaScripta i AEC-a na 64
-       // stranice = 4 MB. To je u vrh glave dovoljno, i, ako se prekorači, znači
-       // da je neki bug u programu i da memorija negdje curi.
+       // stranice = 4 MB. To je u vrh glave dovoljno, i, ako se prekorači,
+       // znači da je neki bug u programu i da memorija negdje curi.
     ,
     gdje_se_nalazi_niz; // Potrebno da usporedimo jesu li JavaScriptin "sort" i
                         // AEC-ov HybridSort dobili isti rezultat.
@@ -43,7 +43,8 @@ function zavrsi_mjerenje_vremena() {
   trajanjeSortiranja = performance.now() - vrijemePocetkaSortiranja;
 }
 let broj_obrnuto_poredanih_podniza, broj_vec_poredanih_podniza,
-    broj_pokretanja_QuickSorta, broj_pokretanja_MergeSorta, broj_pokretanja_SelectSorta;
+    broj_pokretanja_QuickSorta, broj_pokretanja_MergeSorta,
+    broj_pokretanja_SelectSorta;
 function izvijesti_o_obrnuto_poredanim_nizovima(n) {
   broj_obrnuto_poredanih_podniza = n;
 }
@@ -68,9 +69,9 @@ let izvozi_u_AEC = {
   stack_pointer : new WebAssembly.Global(
       {value : "i32", mutable : true},
       0), //"stack_pointer" je varijabla koju koristi AEC-ov compiler. Za sada
-          //on pretpostavlja da je ona dijeljena između AEC-a i JavaScripta, da
-          //ga bude lakše debugirati (ako je točno compilirao, ona, kad god
-          //JavaScript dobiva kontrolu, mora sadržavati nulu).
+          // on pretpostavlja da je ona dijeljena između AEC-a i JavaScripta, da
+          // ga bude lakše debugirati (ako je točno compilirao, ona, kad god
+          // JavaScript dobiva kontrolu, mora sadržavati nulu).
   daj_velicinu_niza : daj_velicinu_niza,
   kopiraj_niz_na_adresu : kopiraj_niz_na_adresu,
   printString : printString,
@@ -93,8 +94,8 @@ WebAssembly.instantiate(wasmDatoteka, {JavaScript : izvozi_u_AEC})
       const pocetna_AEC_funkcija = izvozi_iz_AECa.pocetna_AEC_funkcija;
       console.log(
           "Veličina niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
-      for (velicina_niza = 500; velicina_niza <= 100000;
-           velicina_niza += 500) {
+      for (velicina_niza = 100; velicina_niza <= 100000;
+           velicina_niza += velicina_niza < 1000 ? 100 : 500) {
         niz = new Int32Array(velicina_niza);
         for (let i = 0; i < velicina_niza; i++)
           niz[i] = (Math.random() - 1 / 2) * velicina_niza * 2;
