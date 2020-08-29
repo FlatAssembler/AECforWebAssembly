@@ -1,17 +1,19 @@
 /*
- * Ovo je prijepis mog hibridnog algoritma razvrstavanja da se moze
- * pokrenuti na JavaScriptinoj virtualnoj masini. Kako bi se AEC-om mogla
- * ciljati JavaScriptina virtualna masina, napravio sam novi compiler.
+ * Ovo je prijepis mog hibridnog algoritma razvrstavanja da se može
+ * pokrenuti na JavaScriptinoj virtualnoj mašini. Kako bi se AEC-om mogla
+ * ciljati JavaScriptina virtualna mašina, napravio sam novi compiler.
  * Ovaj puta je pisan u C++-u, radio sam i novi parser i novi tokenizer.
- * Takoder sam malo promijenio sintaksu, da omogucim pisanje cistijeg koda
- * te da podrzavam razlicite vrste podataka (prije je AEC podrzavao samo
+ * Također sam malo promijenio sintaksu, da omogućim pisanje čistijeg koda
+ * te da podržavam različite vrste podataka (prije je AEC podržavao samo
  * 32-bitne decimalne brojeve). Novi compiler proizvodi WebAssembly,
  * standardizirani oblik JavaScriptinog bytecodea. Izvorno je WebAssembly 
- * bio Mozillin standard, ali danas ga podrzavaju gotovo sve JavaScriptine
- * virtualne masine. Ovdje ciljamo primarno na NodeJS.
+ * bio Mozillin standard, ali danas ga podržavaju gotovo sve JavaScriptine
+ * virtualne mašine. Ovdje ciljamo primarno na NodeJS, JavaScriptinu
+ * virtualnu mašinu koju razvija Google i primarno je namijenjena da se
+ * vrti na serverima (no može se pokrenuti i na veoma slabim računalima).
  */
 
-//Uvezimo prvo neke funkcije iz JavaScripta, koje ce nam trebati...
+//Uvezimo prvo neke funkcije iz JavaScripta, koje će nam trebati...
 Function daj_velicinu_niza() Which Returns Integer32 Is External;
 Function kopiraj_niz_na_adresu(Integer32Pointer adresa)
     Which Returns Nothing Is External;
@@ -29,6 +31,8 @@ Function izvijesti_o_pokretanju_QuickSorta(Integer32 n)
     Which Returns Nothing Is External;
 Function izvijesti_o_pokretanju_MergeSorta(Integer32 n)
     Which Returns Nothing Is External;
+Function izvijesti_o_pokretanju_SelectSorta(Integer32 n)
+    Which Returns Nothing Is External;
 Function izvijesti_JavaScript_o_nedostatku_memorije()
     Which Returns Nothing Is External;
 
@@ -38,25 +42,25 @@ Integer32 DEBUG := 0;
 Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
     CharacterPointer Does
     Integer32 nova_adresa_u_stranicama :=
-        asm_i32 //"asm_i32" kaze compileru da umetne asemblerski kod, i da
-                //pretpostavi da ce se nakon njega na sistemskom stogu
-                //nalaziti vrijednost tipa "i32". To ocito nije tocno ako
-                //netko prebaci JavaScript virtualnu masinu u 64-bitni
-                //nacin rada, ali nadam se da to nitko nece napraviti.
-                //Vjerojatnost da ce JavaScript virtualnoj masini trebati
-                //vise nego 4GB RAM-a je zanemariva, a vjerojatnost da ce
-                //se neki korisni programi srusiti zbog prebacivanja u 
-                //64-bitni nacin rada nije bas zanemariva.
+        asm_i32 //"asm_i32" kaže compileru da umetne asemblerski kod, i da
+                //pretpostavi da će se nakon njega na sistemskom stogu
+                //nalaziti vrijednost tipa "i32". To očito nije točno ako
+                //netko prebaci JavaScript virtualnu mašinu u 64-bitni
+                //način rada, ali nadam se da to nitko neće napraviti.
+                //Vjerojatnost da će JavaScript virtualnoj mašini trebati
+                //više nego 4GB RAM-a je zanemariva, a vjerojatnost da će
+                //se neki korisni programi srušiti zbog prebacivanja u 
+                //64-bitni način rada nije baš zanemariva.
                 ("(memory.grow\n"
                 "\t(local.get 0)\n" //Prvi (nulti) argument funkcije,
                                     //"brojStranica".
                 ")\n");
-    If nova_adresa_u_stranicama = -1 Then //Ako nema vise
+    If nova_adresa_u_stranicama = -1 Then //Ako nema više
                                           //slobodne memorije...
         Return -1;
     EndIf
     Return nova_adresa_u_stranicama * 64 * 1024; //Na JavaScript Virtualnoj
-                                                 //Masini, jedna stranica
+                                                 //Mašini, jedna stranica
                                                  //(page) iznosi 64 KB.
 EndFunction
 
@@ -64,23 +68,28 @@ Integer32 velicina_niza;
 Integer32Pointer originalni_niz, pomocni_niz; //To su globalne varijable,
                                               //po defaultu su u nuli,
                                               //dakle "originalni_niz" i
-                                              //"pomocni_niz" su na pocetku
-                                              //programa nulti pokazivaci.
+                                              //"pomocni_niz" su na početku
+                                              //programa nulti pokazivači.
 
 Integer32 broj_obrnuto_poredanih_podniza,
           broj_vec_poredanih_podniza,
           broj_pokretanja_QuickSorta,
-          broj_pokretanja_MergeSorta;
+          broj_pokretanja_MergeSorta,
+          broj_pokretanja_SelectSorta;
 
-//Sad cemo implementirati neke matematicke funkcije koje ce nam trebati.
-//Ne mozemo pozvati JavaScriptine matematicke funkcije, jer one su metode
-//globalnog objekta "Math", a ne postoji standardizirani nacin da se zovu
+//Sad ćemo implementirati neke matematicke funkcije koje će nam trebati.
+//Ne možemo pozvati JavaScriptine matematičke funkcije, jer one su metode
+//singletona "Math", a ne postoji standardizirani način da se zovu
 //metode JavaScriptinih objekata iz WebAssemblyja.
-Decimal32 PRECISION := 128; //Ovdje mozemo balansirati izmedu brzine i
-                            //preciznosti.
+Decimal32 PRECISION := 128; //Ovdje možemo balansirati između brzine i
+                            //preciznosti. Ako smo previše precizni, bit
+                            //ćemo spori. Ako smo previše neprecizni, lako
+                            //se može dogoditi da precijenimo koliko se
+                            //duboko rekurzija smije granati i izazovemo
+                            //stack overflow.
 Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does
     //Prirodni logaritam je integral od 1/x u intervalu od 1 do x,
-    //srednjoskolska matematika.
+    //srednjoškolska matematika.
     Decimal32 zbroj   := 0,
               epsilon := (x - 1) / (5 * PRECISION),
               i       := 1;
@@ -103,31 +112,35 @@ EndFunction
 
 Function abs(Decimal32 x) Which Returns Decimal32 Does
     //U svoj sam programski jezik ugradio uvijetni "?:" operator kakav
-    //postoji u C-u, C++-u i JavaScriptu. Izgleda malo ruzno, ali nekad zna
-    //znatno skratiti programske kodove. Odlucio sam implementirati desno
+    //postoji u C-u, C++-u i JavaScriptu. Izgleda malo ružno, ali nekad zna
+    //znatno skratiti programske kodove. Odlučio sam implementirati desno
     //asocijativan uvijetni operator, kakav je u C-u, C++-u i JavaScriptu,
     //a ne lijevo asocijativan kakav je u PHP-u i srodnim jezicima.
+    //Jednostavno mi ima više smisla da uvijetni operator bude asocijativan
+    //na desno nego na lijevo.
     Return (x < 0) ? //Ako je x manji od 0...
                -x    //...vrati (proglasi rezultatom) -x...
-           :   x;    //inace, proglasi x rezultatom.
+           :   x;    //inače, proglasi x rezultatom.
 EndFunction
 
 Function ostatak_pri_dijeljenju(Decimal32 x, Decimal32 y)
     Which Returns Decimal32 Does
     If DEBUG = 1 Then
         printString("Zatrazen je ostatak pri dijeljenju od brojeva: ");
+        //Neću upotrebljavati hrvatske znakove u stringovima, jer ću
+        //naletjeti na probleme pri pretvorbi u JavaScriptin string.
         printFloat(x);
         printFloat(y);
-        printString("Sada ce se program mozda srusiti...");
+        printString("Sada ce se program mozda srušiti...");
     EndIf
-    If x / y > Eulerov_broj_na_potenciju(prirodni_logaritam(2) * 48) Then
-        Return 0; //Imate bolju ideju sto da se radi u slucaju da kolicnik
+    If abs(x / y) > Eulerov_broj_na_potenciju(prirodni_logaritam(2) * 63) Then
+        Return 0; //Imate bolju ideju što da se radi u slučaju da količnik
                   //ne stane niti u Integer64 (C-ovski "long long")?
     EndIf
-    Return x - y * Integer64(x / y); //Ako napisem "Integer32",
-                                     //riskiram da ce JavaScript
-                                     //virtualna masina prekinuti
-                                     //izvodenje programa jer je
+    Return x - y * Integer64(x / y); //Ako napišem "Integer32",
+                                     //riskiram da će JavaScript
+                                     //virtualna mašina prekinuti
+                                     //izvođenje programa jer je
                                      //broj "x/y" izvan intervala
                                      //koji 32-bitni cijeli brojevi
                                      //mogu prikazati (od oko dvije
@@ -145,15 +158,59 @@ Function pow(Decimal32 x, Decimal32 y) Which Returns Decimal32 Does
            :  result;
 EndFunction
 
-//I sada krecemo pisati taj hibridni algoritam razvrstavanja...
+//I sada krećemo pisati taj hibridni algoritam razvrstavanja...
 Function hybrid_sort(Integer32 donja_granica,
                      Integer32 gornja_granica,
                      Integer32 dubina_rekurzije)
     Which Returns Nothing Does
     If gornja_granica - donja_granica < 2 Then //Ako je niz duljine manje od
-                                               //2 (0 ili 1), znaci da je vec
+                                               //2 (0 ili 1), znači da je već
                                                //poredan, pa prekidamo
-                                               //izvodenje ovog potprograma.
+                                               //izvođenje ovog potprograma.
+        Return;
+    ElseIf gornja_granica - donja_granica = 2 Then //Najčesći slučaj,
+                                                   //vrijedi ga posebno
+                                                   //obraditi jer time
+                                                   //možemo znatno ubrzati
+                                                   //program.
+        If
+            ValueAt(originalni_niz + donja_granica) >
+            ValueAt(originalni_niz + donja_granica + 1)
+        Then
+            Integer32 pomocna_varijabla_za_zamijenu :=
+                ValueAt(originalni_niz + donja_granica);
+            ValueAt(originalni_niz + donja_granica) :=
+                ValueAt(originalni_niz + donja_granica + 1);
+            ValueAt(originalni_niz + donja_granica + 1) :=
+                pomocna_varijabla_za_zamijenu;
+        EndIf
+        Return;
+    ElseIf gornja_granica - donja_granica < 8 Then //Za male je nizove
+                                                    //SelectionSort brži
+                                                    //i od MergeSorta i
+                                                    //QuickSorta.
+        broj_pokretanja_SelectSorta := broj_pokretanja_SelectSorta + 1;
+        Integer32 i := donja_granica;
+        While i < gornja_granica Loop
+            Integer32 gdje_je_minimum := i;
+            Integer32 j := i + 1;
+            While j < gornja_granica Loop
+                If
+                    ValueAt(originalni_niz + gdje_je_minimum) >
+                    ValueAt(originalni_niz + j)
+                Then
+                    gdje_je_minimum := j;
+                EndIf
+                j := j + 1;
+            EndWhile
+            Integer32 pomocna_varijabla_za_zamijenu :=
+                ValueAt(originalni_niz + i);
+            ValueAt(originalni_niz + i) :=
+                ValueAt(originalni_niz + gdje_je_minimum);
+            ValueAt(originalni_niz + gdje_je_minimum) :=
+                pomocna_varijabla_za_zamijenu;
+            i := i + 1;
+        EndWhile
         Return;
     EndIf
     Decimal32 razvrstanost := 0;
@@ -175,8 +232,13 @@ Function hybrid_sort(Integer32 donja_granica,
         printString("Apsolutna vrijednost razvrstanosti je veca od 1!");
         printString("Relevantni dio niza iznosi:"); //Da se ne moram baktati s
                                                     //debuggerima za JavaScript
-                                                    //virtualnu masinu ako dode
-                                                    //do problema.
+                                                    //virtualnu mašinu ako dođe
+                                                    //do problema, lakše mi
+                                                    //je ispisati brojeve u
+                                                    //programu nego tražiti
+                                                    //kako narediti 
+                                                    //debuggeru da ih
+                                                    //ispiše.
         i := donja_granica;
         While i < gornja_granica Loop
             printInteger(ValueAt(originalni_niz + i));
@@ -209,8 +271,8 @@ Function hybrid_sort(Integer32 donja_granica,
         printString("Kraj relevantnog dijela niza!");
     EndIf
     //Idemo dalje...
-    Decimal32 razvrstanost_na_potenciju[8] := {1}; //Formula ce se brze
-                                                   //izracunati ako ne
+    Decimal32 razvrstanost_na_potenciju[8] := {1}; //Formula će se brže
+                                                   //izračunati ako ne
                                                    //pozivamo "pow" gdje
                                                    //ne treba (kad je
                                                    //eksponent prirodan
@@ -221,7 +283,7 @@ Function hybrid_sort(Integer32 donja_granica,
             razvrstanost_na_potenciju[i - 1] * razvrstanost;
         i := i + 1;
     EndWhile
-    //Formula koju je ispisao genetski algoritam za predvidanje koliko ce
+    //Formula koju je ispisao genetski algoritam za predviđanje koliko će
     //usporedbi QuickSort napraviti:
 // https://github.com/FlatAssembler/ArithmeticExpressionCompiler/tree/master/QuickSort/Genetic_algorithm_for_deriving_the_formula
     Decimal32 polinom_pod_apsolutnom :=
@@ -246,7 +308,7 @@ Function hybrid_sort(Integer32 donja_granica,
         2 * (gornja_granica - donja_granica) *
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
-    //I sada krece grananje na temelju izracunatog...
+    //I sada kreće grananje na temelju izračunatog...
     If razvrstanost = 1 or razvrstanost > 1 Then
         broj_vec_poredanih_podniza := broj_vec_poredanih_podniza + 1;
         Return;
@@ -269,23 +331,23 @@ Function hybrid_sort(Integer32 donja_granica,
         koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
         dubina_rekurzije > pow(2,
-            16 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
-                                     //JavaScriptina virtualna masina ima
+            12 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
+                                     //JavaScriptina virtualna mašina ima
                                      //4KB memorije na sistemskom stogu,
-                                     //i alociranje vise heap memorije
-                                     //ne mijenja tu nesretnu cinjenicu.
+                                     //i alociranje više heap memorije
+                                     //ne mijenja tu nesretnu činjenicu.
                                      //Ne znam kako Emscripten (modificirana
                                      //verzija CLANG-a koja compilira
-                                     //C++ u WebAssembly) to rjesava.
+                                     //C++ u WebAssembly) to rješava.
     Then
-        //MergeSort algoritam (priblizno poredani podnizovi,
+        //MergeSort algoritam (približno poredani podnizovi,
         //za koje je MergeSort efikasniji od QuickSorta,
-        //a moj ga program takoder koristi kada ima jos
+        //a moj ga program također koristi kada ima još
         //malo mjesta na sistemskom stogu, pa QuickSort
         //nije opcija)...
         broj_pokretanja_MergeSorta :=       broj_pokretanja_MergeSorta + 1;
         Integer32 sredina_niza     := (gornja_granica + donja_granica) / 2;
-        //Prvo, rastavi niz na koji pokazuje pokazivac "originalni_niz"
+        //Prvo, rastavi niz na koji pokazuje pokazivač "originalni_niz"
         //na niz od originalni_niz+donja_granica do
         //originalni_niz+sredina_niza i niz od
         //originalni_niz+sredina_niza do
@@ -319,13 +381,13 @@ Function hybrid_sort(Integer32 donja_granica,
             i                           :=                    i + 1;
         EndWhile
         Return;
-    Else //QuickSort algoritam (nasumicno ispremjestani podnizovi)...
+    Else //QuickSort algoritam (nasumično ispremještani podnizovi)...
         broj_pokretanja_QuickSorta := broj_pokretanja_QuickSorta + 1;
-        //Daljnji kod je priblizno prepisan s
+        //Daljnji kod je približno prepisan s
         // https://www.geeksforgeeks.org/quick-sort/
-        //Iskreno, ne razumijem ni ja tocno kako funkcionira.
-        //On navodno preureduje niz tako da svi elementi koji su manji
-        //od onog koji je bio prvi (pivot) dodu prije njega, a ostali
+        //Iskreno, ne razumijem ni ja točno kako funkcionira.
+        //On navodno preuređuje niz tako da svi elementi koji su manji
+        //od onog koji je bio prvi (pivot) dođu prije njega, a ostali
         //poslije njega.
         Integer32 pivot := ValueAt(originalni_niz + gornja_granica - 1);
         Integer32 i     :=                            donja_granica - 1;
@@ -350,28 +412,28 @@ Function hybrid_sort(Integer32 donja_granica,
         hybrid_sort(gdje_je_pivot, gornja_granica, dubina_rekurzije + 1);
         Return;
     EndIf
-    //Ovdje tok programa ne smije doci.
+    //Ovdje tok programa ne smije doći.
     printString("Izgleda da compiler nije ispravno "
                 "preveo kontrolne strukture!");
 EndFunction
 
-//Ovo je funkcija koju ce pozvati JavaScript...
+//Ovo je funkcija koju će pozvati JavaScript...
 Function pocetna_AEC_funkcija() Which Returns Nothing Does
     If originalni_niz = -1 or pomocni_niz = -1 Then
         Return; //Ako JavaScript nastavlja pokretati ovaj program
-                //unatoc nedostatku memorije, neka onda on ne radi nista.
+                //unatoč nedostatku memorije, neka onda on ne radi ništa.
     EndIf
-    //Testiraj matematicke funkcije...
+    //Testiraj matematičke funkcije...
     If abs(pow(3, 3) - 27) > 2 Then //Da, one su jako neprecizne, ali zato
                                     //jako brze.
         printString("Izgleda da matematicke funkcije ne funkcioniraju dobro.");
         printString("pow(3, 3) =");
         printFloat(pow(3, 3));
     EndIf
-    //Doznaj velicinu niza iz JavaScripta...
+    //Doznaj veličinu niza iz JavaScripta...
     Integer32 prijasnja_velicina_niza :=       velicina_niza;
     velicina_niza                     := daj_velicinu_niza();
-    //Ako je potrebno, zauzmi jos memorije...
+    //Ako je potrebno, zauzmi još memorije...
     If
         velicina_niza / (64 * 1024 / 4) +
         not(not(mod(velicina_niza, 64 * 1024 / 4))) >
@@ -388,17 +450,18 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
         If originalni_niz = -1 or pomocni_niz = -1 Then
             printString("Nema dovoljno memorije za nastavak programa!?");
             izvijesti_JavaScript_o_nedostatku_memorije();
-            Return; //Prekini izvrsavanje ovog programa.
+            Return; //Prekini izvršavanje ovog programa.
         EndIf
     EndIf
-    //Sada zatrazi od JavaScripta da kopira niz koji treba poredati
+    //Sada zatraži od JavaScripta da kopira niz koji treba poredati
     //na memorijski prostor koji si (prethodno ili sada) zauzeo.
     kopiraj_niz_na_adresu(originalni_niz);
     //I sada ga kreni razvrstavati i mjeriti koliko ti treba vremena.
-    broj_obrnuto_poredanih_podniza :=
-        broj_vec_poredanih_podniza :=
-        broj_pokretanja_QuickSorta :=
-        broj_pokretanja_MergeSorta := 0;
+    broj_obrnuto_poredanih_podniza  :=
+        broj_vec_poredanih_podniza  :=
+        broj_pokretanja_QuickSorta  :=
+        broj_pokretanja_MergeSorta  :=
+        broj_pokretanja_SelectSorta := 0;
     pocni_mjerenje_vremena();
     hybrid_sort(0, velicina_niza, 0);
     zavrsi_mjerenje_vremena();
@@ -406,11 +469,13 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
     izvijesti_o_poredanim_nizovima(broj_vec_poredanih_podniza);
     izvijesti_o_pokretanju_QuickSorta(broj_pokretanja_QuickSorta);
     izvijesti_o_pokretanju_MergeSorta(broj_pokretanja_MergeSorta);
+    izvijesti_o_pokretanju_SelectSorta(broj_pokretanja_SelectSorta);
     Integer32 i := 0;
     While i < velicina_niza - 1 Loop
         If ValueAt(originalni_niz + i) > ValueAt(originalni_niz + i + 1) Then
             printString("Niz nije poredan!");
-            Return; //Nemoj to ispisati vise puta.
+            Return; //Nemoj to ispisati više puta, nego prekini program čim
+                    //si uočio prvu nepodudarnost.
         EndIf
         i := i + 1;
     EndWhile
