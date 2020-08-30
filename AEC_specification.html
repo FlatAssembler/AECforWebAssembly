@@ -569,13 +569,13 @@
         JavaScript). <br /><br />
         <b>Comments</b><br />
         In the version of AEC targeting x86, the comments start with
-        <span style="inline_code">;</span> and end with a newline character, as
+        <span class="inline_code">;</span> and end with a newline character, as
         in FlatAssembler dialect of Assembly (which ArithmeticExpressionCompiler
-        primarily targets), and there are no multiline comments. In the version
+        primarily targets), and there are no multi-line comments. In the version
         of AEC for WebAssembly, the comments are as in C, C++ and JavaScript,
-        single-line comments start with <span style="inline_code">//</span>, and
-        multi-line comments start with <span style="inline_code">/*</span> and
-        end with <span style="inline_code">*/</span>. Multi-line comments do not
+        single-line comments start with <span class="inline_code">//</span>, and
+        multi-line comments start with <span class="inline_code">/*</span> and
+        end with <span class="inline_code">*/</span>. Multi-line comments do not
         nest (as they do in, for example, Swift). Many people say multi-line
         comments are a bad thing because bad programmers use them for versioning
         code (which is a very bad practice). I don't think the job of the
@@ -601,7 +601,11 @@
         and JavaScript). A token which matches the regular expression
         <span class="inline_code">"^\\d+\\.\\d*$"</span> is of the type
         <span class="inline_code">Decimal64</span> and is also passed unchanged
-        to the assembler.<br />
+        to the assembler. Notice that in AEC for WebAssembly,
+        <span class="inline_code">3/2=1</span> (as in C and C++), while, in AEC
+        for x86, <span class="inline_code">3/2=1.5</span> (as in JavaScript).
+        It's hard to tell which approach is better, both can produce
+        hard-to-find bugs.<br />
         <br /><b>Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
@@ -626,7 +630,7 @@
         <span class="inline_code">Decimal64Pointer</span>. The compiler assumes
         the pointers are 32-bit and characters are 8-bit, which is true in the
         vast majority of cases. There is also a way to initialize a variable:
-        <pre>DataType name_of_the_variable := initial_value</pre>
+        <pre>DataType name_of_the_variable := initial_value;</pre>
         Without that, global variables are zero by default, and local variables
         contain whatever happens to be on the top of the system stack at the
         time of their declarations (as in C or C++). In Ada and old versions of
@@ -641,7 +645,27 @@
         <span class="inline_code">atan2(y,x)</span>,
         <span class="inline_code">pi</span> or
         <span class="inline_code">e</span>. The same doesn't work when assigning
-        initial values to local variables.<br />
+        initial values to local variables. It's possible to declare multiple
+        variables of the same type in the same statement by separating them with
+        a comma <span class="inline_code">,</span> (as in C, C++ and
+        JavaScript). For example (excerpt from the
+        <a href="dragonCurve.html">Dragon Curve</a>):
+        <pre>
+Integer32 directionX[4]    := { 0, 1, 0, -1},
+          directionY[4]    := {-1, 0, 1,  0},
+          currentX         := 10,
+          currentY         := 250 + 490 - 410, //When set on 250, the turtle
+                                               //reaches 410 and then turns
+                                               //back (I know this by
+                                               //experimenting).
+          currentDirection := 0,
+          lineLength       := 5,
+          lineWidth        := 2,
+          currentStep      := 0;
+        </pre>
+        I like the C-like approach to declaring multiple variables in the same
+        statement way more than the Ada-and-VHDL-like approach, yet alone the
+        Rust-like approach.<br />
         <br /><b>Arrays and Pointers</b><br />
         Arrays are declared as follows:
         <pre>DataType name_of_the_array[size];</pre>
@@ -699,8 +723,11 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         for the <i>bitwise and</i> operation (they use
         <span class="inline_code">&amp;</span>). AEC for x86 doesn't support
         pointers at all.<br />
+        <b>TODO</b>: Implement the multi-dimensional arrays. But let's not use
+        the JavaScript-like approach to them, JavaScript really sucks in that
+        regard.<br />
         <br /><b>Assignments</b><br />
-        For assignments, you use <span style="inline_code">:=</span> operator,
+        For assignments, you use <span class="inline_code">:=</span> operator,
         in both dialects of AEC. In the AEC for WebAssembly, you can nest
         assignment expressions, like this (excerpt from HybridSort):
         <pre>
@@ -773,7 +800,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           </tr>
         </table>
         The first argument of the ternary conditional operator is converted to
-        <span style="inline_code">Integer32</span> (that's how WebAssembly
+        <span class="inline_code">Integer32</span> (that's how WebAssembly
         represents Booleans), and the last two are converted to strongest type
         of those two. The strongest types are pointers, next comes
         <span class="inline_code">Decimal64</span>, then
@@ -1116,6 +1143,153 @@ EndFunction</pre
         <b>TODO</b>: Implement a GCC-and-CLANG-style inline assembly, where you
         can access variables from assembly by their names (rather than having to
         manually calculate their memory addresses).<br />
+        <br /><b>Built-in functions</b><br />
+        AEC for x86 has many built-in functions, wrappers around x86 assembly
+        instructions. These are: <span class="inline_code">sin(</span>,
+        <span class="inline_code">cos(</span>,
+        <span class="inline_code">tan(</span>,
+        <span class="inline_code">atan2(</span>,
+        <span class="inline_code">arctan(</span>,
+        <span class="inline_code">ctg(</span>,
+        <span class="inline_code">arcctg(</span>,
+        <span class="inline_code">sqrt(</span>,
+        <span class="inline_code">arcsin(</span>,
+        <span class="inline_code">arccos(</span>,
+        <span class="inline_code">ln(</span> (natural logarithm),
+        <span class="inline_code">log(</span> (base-10 logarithm),
+        <span class="inline_code">exp(</span> (returns the Euler number to the
+        power of the argument), <span class="inline_code">pow(</span>,
+        <span class="inline_code">abs(</span> and
+        <span class="inline_code">mod(</span> (floating-point modulo). Unlike in
+        most programming languages, trigonometric functions expect arguments in
+        degrees (not radians, as in C, C++ or JavaScript). Similarly, the
+        cyclometric functions such as <span class="inline_code">atan2(</span>
+        return the result in degrees, rather than in radians. If you want to use
+        them in AEC for WebAssembly, you can write them yourself, like this
+        (excerpt from the Analog Clock):
+        <pre>
+Function sin(Decimal32 degrees) Which Returns Decimal32 Does
+    If degrees&lt;0 Then
+        Return -sin(-degrees);
+    EndIf
+    If degrees&gt;90 Then
+        Decimal32 sinOfDegreesMinus90 := sin(degrees - 90);
+        If fmod(degrees, 360) &lt; 180 Then
+            Return sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
+        Else
+            Return -sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
+        EndIf
+    EndIf
+    /* 
+     * Sine and cosine are defined in Mathematics 2 using the system of
+     * equations (Cauchy system):
+     * 
+     * sin(0)=0
+     * cos(0)=1
+     * sin'(x)=cos(x)
+     * cos'(x)=-sin(x)
+     * ---------------
+     *
+     * Let's translate that as literally as possible to the programming
+     * language.
+     */
+    Decimal32 radians := degrees / oneRadianInDegrees,
+              tmpsin  := 0,
+              tmpcos  := 1,
+              epsilon := radians / PRECISION,
+              i       := 0;
+    While (epsilon&gt;0 and i&lt;radians) or (epsilon&lt;0 and i&gt;radians) Loop
+        tmpsin := tmpsin + epsilon * tmpcos;
+        tmpcos := tmpcos - epsilon * tmpsin;
+        i      :=               i + epsilon;
+    EndWhile
+    Return tmpsin;
+EndFunction</pre
+        >
+        Or, you may use the Taylor Series. But I think this obeys the KISS (keep
+        it simple, stupid) principle better. Note that you can't call the
+        JavaScript <span class="inline_code">Math.sin</span> and similar
+        functions, because they are methods of the
+        <span class="inline_code">Math</span> singleton, and there is no
+        standardized way to call methods of JavaScript objects from WebAssembly
+        (for a good reason).<br />
+        <b>TODO</b>: Build some mathematical functions into AEC for
+        WebAssembly.<br />
+        <br /><b>String manipulation</b><br />
+        AEC for x86 doesn't support string manipulation at all, it doesn't have
+        a character type. AEC for WebAssembly is about as good at C manipulation
+        as C is without a C library (like when doing operating system
+        development). There are no built-in string-manipulation functions, but
+        one can easily write them oneself, like this (excerpt from Dragon
+        Curve):
+        <pre>
+//Again, we need to implement string manipulation functions. Like I've said,
+//even though this program will be running on JavaScript Virtual Machine, it
+//can't call the methods of the JavaScript "String" class.
+Function strlen(CharacterPointer str) Which Returns Integer32 Does
+    //We can't implement this recursively, like we did in earlier AEC
+    //programs, because we will be dealing with large strings which will
+    //cause stack overflow.
+    Integer32 length := 0;
+    While ValueAt(str + length) Loop
+        length := length + 1;
+    EndWhile
+    Return length;
+EndFunction
+
+Function strcpy(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    While ValueAt(src) Loop
+        ValueAt(dest) := ValueAt(src);
+        dest          :=     dest + 1;
+        src           :=      src + 1;
+    EndWhile
+    ValueAt(dest) := 0;
+EndFunction
+
+Function reverseString(CharacterPointer string) Which Returns Nothing Does
+    CharacterPointer pointerToLastCharacter := string + strlen(string) - 1;
+    While pointerToLastCharacter - string &gt; 0 Loop
+        Character tmp                   := ValueAt(string);
+        ValueAt(string)                 := ValueAt(pointerToLastCharacter);
+        ValueAt(pointerToLastCharacter) := tmp;
+        string                          := string + 1;
+        pointerToLastCharacter          := pointerToLastCharacter - 1;
+    EndWhile
+EndFunction
+
+Function strcat(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    strcpy(dest + strlen(dest), src);
+EndFunction
+
+Function convertIntegerToString(CharacterPointer string,
+                                Integer32 number)
+    Which Returns Integer32 Does //Returns the length of the string.
+    Integer32 isNumberNegative := 0;
+    If number &lt; 0 Then
+        number           := -number;
+        isNumberNegative :=       1;
+    EndIf
+    Integer32 i := 0;
+    While number &gt; 9 Loop
+        ValueAt(string + i) := '0' + mod(number, 10);
+        number              :=           number / 10;
+        i                   :=                 i + 1;
+    EndWhile
+    ValueAt(string + i) := '0' + number;
+    i                   :=        i + 1;
+    If isNumberNegative Then
+        ValueAt(string + i) :=   '-';
+        i                   := i + 1;
+    EndIf
+    ValueAt(string + i) := 0;
+    reverseString(string);
+    Return i;
+EndFunction</pre
+        >
+        <b>TODO</b>: Build some useful string manipulation into AEC, at least
+        ones for converting numbers to strings and vice versa.<br />
         <br /><b>Conclusion</b><br />
         I think AEC is a promising project, but a lot of work is still needed to
         make it successful. I don't think I can do everything that's needed for
