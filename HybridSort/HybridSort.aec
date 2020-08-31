@@ -185,7 +185,7 @@ Function hybrid_sort(Integer32 donja_granica,
                 pomocna_varijabla_za_zamijenu;
         EndIf
         Return;
-    ElseIf gornja_granica - donja_granica < 8 Then //Za male je nizove
+    ElseIf gornja_granica - donja_granica < 8 Then  //Za male je nizove
                                                     //SelectionSort brži
                                                     //i od MergeSorta i
                                                     //QuickSorta.
@@ -331,7 +331,7 @@ Function hybrid_sort(Integer32 donja_granica,
         koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
         dubina_rekurzije > pow(2,
-            12 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
+            10 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
                                      //JavaScriptina virtualna mašina ima
                                      //4KB memorije na sistemskom stogu,
                                      //i alociranje više heap memorije

@@ -93,9 +93,12 @@ WebAssembly.instantiate(wasmDatoteka, {JavaScript : izvozi_u_AEC})
       const izvozi_iz_AECa = pokazivac_na_AEC_program.instance.exports;
       const pocetna_AEC_funkcija = izvozi_iz_AECa.pocetna_AEC_funkcija;
       console.log(
-          "Veličina niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
-      for (velicina_niza = 100; velicina_niza <= 100000;
-           velicina_niza += velicina_niza < 1000 ? 100 : 500) {
+          "Logaritam veličine niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
+      for (velicina_niza = 1; velicina_niza <= 100000;
+           velicina_niza +=
+           velicina_niza < 10
+               ? 1
+               : velicina_niza < 100 ? 5 : velicina_niza < 1000 ? 50 : 500) {
         niz = new Int32Array(velicina_niza);
         for (let i = 0; i < velicina_niza; i++)
           niz[i] = (Math.random() - 1 / 2) * velicina_niza * 2;
@@ -112,8 +115,9 @@ WebAssembly.instantiate(wasmDatoteka, {JavaScript : izvozi_u_AEC})
           }
         let vrijemePotrebnoJavaScriptu =
             performance.now() - vrijemePocetkaSortiranja;
-        console.log(velicina_niza + "\t" + Math.log(trajanjeSortiranja + 1) +
-                    "\t" + Math.log(vrijemePotrebnoJavaScriptu + 1) + "\t" +
+        console.log(Math.log(velicina_niza) + "\t" +
+                    Math.log(trajanjeSortiranja + 1) + "\t" +
+                    Math.log(vrijemePotrebnoJavaScriptu + 1) + "\t" +
                     Math.log(broj_obrnuto_poredanih_podniza + 1) + "\t" +
                     Math.log(broj_vec_poredanih_podniza + 1) + "\t" +
                     Math.log(broj_pokretanja_MergeSorta + 1) + "\t" +
