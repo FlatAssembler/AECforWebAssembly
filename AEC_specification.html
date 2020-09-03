@@ -696,10 +696,10 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         Note that, unlike in C, if you put only one element in the initializer
         list (between <span class="inline_code">{</span> and
         <span class="inline_code">}</span>), only the first element is
-        intialized with that value, while others are left uninitialized (or are,
-        in the case of global variables, set to zero). Makes a lot more sense to
-        me than those complicated rules C and C++ have for intializing arrays.
-        In C and C++, you can use array-style syntax with pointers or
+        initialized with that value, while others are left uninitialized (or
+        are, in the case of global variables, set to zero). Makes a lot more
+        sense to me than those complicated rules C and C++ have for initializing
+        arrays. In C and C++, you can use array-style syntax with pointers or
         pointer-style syntax with arrays most of the time, except in some
         confusing scenarios. In AEC, you can never do those things. To the AEC
         compiler, the array is named
