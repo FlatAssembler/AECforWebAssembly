@@ -185,10 +185,24 @@ Function hybrid_sort(Integer32 donja_granica,
                 pomocna_varijabla_za_zamijenu;
         EndIf
         Return;
-    ElseIf gornja_granica - donja_granica < 8 Then  //Za male je nizove
+    ElseIf gornja_granica - donja_granica < 8 or 
+           asm_i32("(global.get $stack_pointer)") > 4 * 1024 - 73 Then
+                                                    //Za male je nizove
                                                     //SelectionSort brži
                                                     //i od MergeSorta i
                                                     //QuickSorta.
+                                                    //Također, kako nije
+                                                    //rekurzivan, može se
+                                                    //koristiti i kad posve
+                                                    //potrošimo memoriju
+                                                    //na sistemskom stogu
+                                                    //(na JavaScript
+                                                    //Virtualnoj Mašini to
+                                                    //jest ne više nego
+                                                    //4 KB, kako bijaše
+                                                    //u doba Netscapea 2,
+                                                    //godine 1996, tako i
+                                                    //danas).
         broj_pokretanja_SelectSorta := broj_pokretanja_SelectSorta + 1;
         Integer32 i := donja_granica;
         While i < gornja_granica Loop
@@ -331,7 +345,7 @@ Function hybrid_sort(Integer32 donja_granica,
         koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
         dubina_rekurzije > pow(2,
-            10 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
+            16 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
                                      //JavaScriptina virtualna mašina ima
                                      //4KB memorije na sistemskom stogu,
                                      //i alociranje više heap memorije
