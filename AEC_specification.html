@@ -1338,7 +1338,13 @@ EndFunction</pre
           if (token.substr(0, 2) == "//" || token.substr(0, 2) == "/*")
             return '<span class="Comment">' + token + "</span>";
           if (token.charAt(0) == '"' || token.charAt(0) == "'")
-            return '<span class="String">' + token + "</span>";
+            return (
+              '<span class="String">' +
+              token
+                .replace(/\\n/g, "<b>\\<i>n</i></b>")
+                .replace(/\\t/g, "<b>\\<i>t</i></b>") +
+              "</span>"
+            );
           if (
             token == "Character" ||
             token == "CharacterPointer" ||
@@ -1375,7 +1381,11 @@ EndFunction</pre
             token == "While" ||
             token == "EndWhile" ||
             token == "Loop" ||
-            token == ";"
+            token == ";" ||
+            token == "Structure" ||
+            token == "Consists" ||
+            token == "Of" ||
+            token == "EndStructure"
           )
             return '<span class="Keyword">' + token + "</span>";
           if (
@@ -1492,7 +1502,10 @@ EndFunction</pre
         }
         var preTags = document.getElementsByTagName("pre");
         for (var i = 0; i < preTags.length; i++)
-          preTags[i].innerHTML = highlightAEC(preTags[i].innerText);
+          preTags[i].innerHTML = highlightAEC(preTags[i].innerText).replace(
+            /\n/g,
+            "<br/>"
+          );
       </script>
     </main>
     <footer>
