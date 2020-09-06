@@ -115,13 +115,13 @@ WebAssembly.instantiate(wasmDatoteka, {JavaScript : izvozi_u_AEC})
           }
         let vrijemePotrebnoJavaScriptu =
             performance.now() - vrijemePocetkaSortiranja;
-        console.log(Math.log(velicina_niza) + "\t" +
-                    Math.log(trajanjeSortiranja + 1) + "\t" +
-                    Math.log(vrijemePotrebnoJavaScriptu + 1) + "\t" +
-                    Math.log(broj_obrnuto_poredanih_podniza + 1) + "\t" +
-                    Math.log(broj_vec_poredanih_podniza + 1) + "\t" +
-                    Math.log(broj_pokretanja_MergeSorta + 1) + "\t" +
-                    Math.log(broj_pokretanja_QuickSorta + 1) + "\t" +
-                    Math.log(broj_pokretanja_SelectSorta + 1));
+        console.log(Math.log2(velicina_niza) + "\t" +
+                    Math.log2(trajanjeSortiranja + 1) + "\t" +
+                    Math.log2(vrijemePotrebnoJavaScriptu + 1) + "\t" +
+                    Math.log2(broj_obrnuto_poredanih_podniza + 1) + "\t" +
+                    Math.log2(broj_vec_poredanih_podniza + 1) + "\t" +
+                    Math.log2(broj_pokretanja_MergeSorta + 1) + "\t" +
+                    Math.log2(broj_pokretanja_QuickSorta + 1) + "\t" +
+                    Math.log2(broj_pokretanja_SelectSorta + 1));
       }
     });

@@ -53,7 +53,7 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                 //64-bitni način rada nije baš zanemariva.
                 ("(memory.grow\n"
                 "\t(local.get 0)\n" //Prvi (nulti) argument funkcije,
-                                    //"brojStranica".
+                                    //"broj_stranica".
                 ")\n");
     If nova_adresa_u_stranicama = -1 Then //Ako nema više
                                           //slobodne memorije...
@@ -77,11 +77,11 @@ Integer32 broj_obrnuto_poredanih_podniza,
           broj_pokretanja_MergeSorta,
           broj_pokretanja_SelectSorta;
 
-//Sad ćemo implementirati neke matematicke funkcije koje će nam trebati.
+//Sad ćemo implementirati neke matematičke funkcije koje će nam trebati.
 //Ne možemo pozvati JavaScriptine matematičke funkcije, jer one su metode
 //singletona "Math", a ne postoji standardizirani način da se zovu
 //metode JavaScriptinih objekata iz WebAssemblyja.
-Decimal32 PRECISION := 128; //Ovdje možemo balansirati između brzine i
+Decimal32 PRECISION := 256; //Ovdje možemo balansirati između brzine i
                             //preciznosti. Ako smo previše precizni, bit
                             //ćemo spori. Ako smo previše neprecizni, lako
                             //se može dogoditi da precijenimo koliko se
@@ -319,7 +319,7 @@ Function hybrid_sort(Integer32 donja_granica,
     Decimal32 koliko_usporedbi_ocekujemo_od_QuickSorta :=
         prirodni_logaritam(Eulerov_broj_na_koju_potenciju);
     Decimal32 koliko_usporedbi_ocekujemo_od_MergeSorta :=
-        2 * (gornja_granica - donja_granica) *
+        (gornja_granica - donja_granica) *
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
     //I sada kreće grananje na temelju izračunatog...
@@ -479,11 +479,13 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
     pocni_mjerenje_vremena();
     hybrid_sort(0, velicina_niza, 0);
     zavrsi_mjerenje_vremena();
+    //Kad završi mjerenje vremena, obavijesti JavaScript o onome što si izmjerio.
     izvijesti_o_obrnuto_poredanim_nizovima(broj_obrnuto_poredanih_podniza);
     izvijesti_o_poredanim_nizovima(broj_vec_poredanih_podniza);
     izvijesti_o_pokretanju_QuickSorta(broj_pokretanja_QuickSorta);
     izvijesti_o_pokretanju_MergeSorta(broj_pokretanja_MergeSorta);
     izvijesti_o_pokretanju_SelectSorta(broj_pokretanja_SelectSorta);
+    //Napravi neki osnovni sanity-check, je li niz uistinu poredan?
     Integer32 i := 0;
     While i < velicina_niza - 1 Loop
         If ValueAt(originalni_niz + i) > ValueAt(originalni_niz + i + 1) Then
