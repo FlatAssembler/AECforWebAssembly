@@ -1092,8 +1092,11 @@ EndFunction</pre
         dependent functions, for the simple reason that there is no obvious way
         to implement them in WebAssembly.<br />
         <b>TODO</b>: Find a way to implement circularly dependent functions,
-        and, if possible, function hoisting. Also, implement function
-        pointers.<br />
+        and, if possible, function hoisting. Also, implement function pointers.
+        Named function arguments (using, for example, the
+        <span class="inline_code">:=</span> operator) might also come useful (in
+        languages with them, there is basically no need for the abstract
+        factories).<br />
         <br /><b>Structures</b><br />
         The parser can parse structure declarations of the form:
         <pre>
