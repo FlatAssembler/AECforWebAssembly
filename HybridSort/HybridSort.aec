@@ -332,7 +332,11 @@ Function hybrid_sort(Integer32 donja_granica,
                                            //pomoćni niz, a druga za kopiranje
                                            //pomoćnog niza u originalni. S
                                            //druge strane, iz mjerenja se čini
-                                           //da je ovako brže.
+                                           //da je cjelokupni algoritam brži
+                                           //ako se ne množi s 2. Zato ćemo
+                                           //nekada množiti s dva, a nekada ne,
+                                           //pa ćemo preciznijim mjerenjima
+                                           //vidjeti što je bolje.
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
     //I sada kreće grananje na temelju izračunatog...
@@ -392,19 +396,19 @@ Function hybrid_sort(Integer32 donja_granica,
         Integer32 gdje_smo_u_prvom_nizu  := donja_granica;
         Integer32 gdje_smo_u_drugom_nizu := sredina_niza;
         While i < gornja_granica Loop
-        If (gdje_smo_u_prvom_nizu = sredina_niza or
-            ValueAt(originalni_niz + gdje_smo_u_drugom_nizu)
-            < ValueAt(originalni_niz + gdje_smo_u_prvom_nizu))
-            and gdje_smo_u_drugom_nizu < gornja_granica Then
-            ValueAt(pomocni_niz + i):=
-                ValueAt(originalni_niz + gdje_smo_u_drugom_nizu);
-            gdje_smo_u_drugom_nizu  := gdje_smo_u_drugom_nizu + 1;
-        Else
-            ValueAt(pomocni_niz + i) :=
-                ValueAt(originalni_niz + gdje_smo_u_prvom_nizu);
-            gdje_smo_u_prvom_nizu    := gdje_smo_u_prvom_nizu + 1;
-        EndIf
-        i := i + 1;
+            If (gdje_smo_u_prvom_nizu = sredina_niza or
+                ValueAt(originalni_niz + gdje_smo_u_drugom_nizu)
+                < ValueAt(originalni_niz + gdje_smo_u_prvom_nizu))
+                and gdje_smo_u_drugom_nizu < gornja_granica Then
+                ValueAt(pomocni_niz + i):=
+                    ValueAt(originalni_niz + gdje_smo_u_drugom_nizu);
+                gdje_smo_u_drugom_nizu  := gdje_smo_u_drugom_nizu + 1;
+            Else
+                ValueAt(pomocni_niz + i) :=
+                    ValueAt(originalni_niz + gdje_smo_u_prvom_nizu);
+                gdje_smo_u_prvom_nizu    := gdje_smo_u_prvom_nizu + 1;
+            EndIf
+            i := i + 1;
         EndWhile
         i := donja_granica;
         While i < gornja_granica Loop
