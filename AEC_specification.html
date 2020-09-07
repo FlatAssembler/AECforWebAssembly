@@ -687,6 +687,20 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
         I like the C-like approach to declaring multiple variables in the same
         statement way more than the Ada-and-VHDL-like approach, yet alone the
         Rust-like approach.<br />
+        <b>TODO</b>: Decide what to do about aligning the variables in memory
+        (making sure that, for example, a
+        <span class="inline_code">Integer32</span> is on the memory location
+        divisible by 4). Aligning variables wastes memory, sometimes around half
+        of the allocated memory ends up unused because of the aligning. On the
+        other hand, for the interoperability with other languages, it is
+        probably desirable for variables and arrays to be aligned. JavaScript
+        throws an exception on attempted unaligned access, while in C and C++,
+        it is supported by some compilers and optimization levels but not in
+        others (it's undefined behavior). Right now, the AEC compiler doesn't
+        make sure the variables are aligned, which I am not sure is the best
+        approach. Also, while JavaScript Virtual Machine does allow unaligned
+        memory access, it's not guaranteed to be nearly as fast as aligned
+        access (on x86, it usually is, on ARM, it's many times slower).<br />
         <br /><b>Arrays and Pointers</b><br />
         Arrays are declared as follows:
         <pre>DataType name_of_the_array[size];</pre>
@@ -743,7 +757,14 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         sense to me than the way C and C++ do that, using the same operator as
         for the <i>bitwise and</i> operation (they use
         <span class="inline_code">&amp;</span>). AEC for x86 doesn't support
-        pointers at all.<br />
+        pointers at all. Note that, like in C and C++ (but unlike in JavaScript
+        or Assembly),
+        <span class="inline_code"
+          >name_of_some_integer32pointer := name_of_some_integer32pointer +
+          1</span
+        >
+        increases the value stored in it by 4 (the size of
+        <span class="inline_code">Integer32</span>), rather than by 1.<br />
         <b>TODO</b>: Implement the multi-dimensional arrays. But let's not use
         the JavaScript-like approach to them, JavaScript really sucks in that
         regard.<br />

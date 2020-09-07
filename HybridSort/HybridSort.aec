@@ -36,7 +36,11 @@ Function izvijesti_o_pokretanju_SelectSorta(Integer32 n)
 Function izvijesti_JavaScript_o_nedostatku_memorije()
     Which Returns Nothing Is External;
 
-Integer32 DEBUG := 0;
+Integer32 DEBUG := 0, broj_mjerenja := 0; //broj_mjerenja bit će koristan za
+                                          //pokretanje raznih algoritama
+                                          //ovisno o rednom broju mjerenja
+                                          //što dobro dođe za
+                                          //eksperimentiranje s algoritmima.
 
 //Napravimo sada omotnicu oko WebAssemblerske naredbe "memory.grow"...
 Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
@@ -319,7 +323,16 @@ Function hybrid_sort(Integer32 donja_granica,
     Decimal32 koliko_usporedbi_ocekujemo_od_QuickSorta :=
         Eulerov_broj_na_potenciju(Eulerov_broj_na_koju_potenciju);
     Decimal32 koliko_usporedbi_ocekujemo_od_MergeSorta :=
-        (gornja_granica - donja_granica) *
+        (mod(broj_mjerenja, 2) + 1) *
+        (gornja_granica - donja_granica) * //Nisam siguran treba li ovdje
+                                           //pisati "2 * (gornja_granica...".
+                                           //S jedne strane, MergeSort radi
+                                           //dvije petlje, jedna za spajanje
+                                           //dijelova originalnog niza u
+                                           //pomoćni niz, a druga za kopiranje
+                                           //pomoćnog niza u originalni. S
+                                           //druge strane, iz mjerenja se čini
+                                           //da je ovako brže.
         prirodni_logaritam(gornja_granica - donja_granica)
         / prirodni_logaritam(2);
     //I sada kreće grananje na temelju izračunatog...
@@ -342,10 +355,10 @@ Function hybrid_sort(Integer32 donja_granica,
         EndWhile
         Return;
     ElseIf
-        koliko_usporedbi_ocekujemo_od_MergeSorta <
+        (koliko_usporedbi_ocekujemo_od_MergeSorta <
         koliko_usporedbi_ocekujemo_od_QuickSorta or
         dubina_rekurzije > pow(2,
-            16 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
+            18 - prirodni_logaritam(velicina_niza) / prirodni_logaritam(2))
                                      //JavaScriptina virtualna mašina ima
                                      //4KB memorije na sistemskom stogu,
                                      //i alociranje više heap memorije
@@ -353,6 +366,10 @@ Function hybrid_sort(Integer32 donja_granica,
                                      //Ne znam kako Emscripten (modificirana
                                      //verzija CLANG-a koja compilira
                                      //C++ u WebAssembly) to rješava.
+        ) and not(gornja_granica - donja_granica = velicina_niza
+              and not(mod(broj_mjerenja, 3)))
+        //Izgleda da je, iz nekog razloga, program brži ako se QuickSort
+        //pokrene barem jednom, no probajmo raditi preciznija mjerenja.
     Then
         //MergeSort algoritam (približno poredani podnizovi,
         //za koje je MergeSort efikasniji od QuickSorta,
@@ -476,11 +493,12 @@ Function pocetna_AEC_funkcija() Which Returns Nothing Does
         broj_pokretanja_QuickSorta  :=
         broj_pokretanja_MergeSorta  :=
         broj_pokretanja_SelectSorta := 0;
+    broj_mjerenja := broj_mjerenja + 1;
     pocni_mjerenje_vremena();
     hybrid_sort(0, velicina_niza, 0);
     zavrsi_mjerenje_vremena();
-    //Kad završi mjerenje vremena,
-    //obavijesti JavaScript o onome što si izmjerio.
+    //Kad završi mjerenje vremena (koje se vrtilo u JavaScriptu),
+    //obavijesti JavaScript o onome što si ti izmjerio.
     izvijesti_o_obrnuto_poredanim_nizovima(broj_obrnuto_poredanih_podniza);
     izvijesti_o_poredanim_nizovima(broj_vec_poredanih_podniza);
     izvijesti_o_pokretanju_QuickSorta(broj_pokretanja_QuickSorta);
