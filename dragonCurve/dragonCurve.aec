@@ -23,165 +23,139 @@
  * to WebAssembly to make sense?).
  */
 
-//Let's import some JavaScript functions...
-Function drawLine(Integer32 x1,
-                  Integer32 y1,
-                  Integer32 x2,
-                  Integer32 y2,
+// Let's import some JavaScript functions...
+Function drawLine(Integer32 x1, Integer32 y1, Integer32 x2, Integer32 y2,
                   CharacterPointer color,
                   Integer32 lineWidth) Which Returns Nothing Is External;
 Function applyTurtleTransformation(CharacterPointer svgDirective)
-    Which Returns Nothing Is External; //We won't use the turtle for actual
-                                       //drawing, but we will move it and
-                                       //rotate it.
+    Which Returns Nothing Is External; // We won't use the turtle for actual
+                                       // drawing, but we will move it and
+                                       // rotate it.
 
-Integer32 directionX[4]    := { 0, 1, 0, -1},
-          directionY[4]    := {-1, 0, 1,  0},
-          currentX         := 10,
-          currentY         := 250 + 490 - 410, //When set on 250, the turtle
-                                               //reaches 410 and then turns
-                                               //back (I know this by
-                                               //experimenting).
-          currentDirection := 0,
-          lineLength       := 5,
-          lineWidth        := 2,
-          currentStep      := 0;
+Integer32 directionX[4] : = {0, 1, 0, -1}, directionY[4] : = {-1, 0, 1, 0},
+                        currentX : = 10,
+                        currentY : = 250 + 490 - 410, // When set on 250, the
+                                                      // turtle reaches 410 and
+                                                      // then turns back (I know
+                                                      // this by experimenting).
+    currentDirection : = 0, lineLength : = 5, lineWidth : = 2,
+                        currentStep : = 0;
 
 Character path[16384], reversedPath[16384];
 
-//Again, we need to implement string manipulation functions. Like I've said,
-//even though this program will be running on JavaScript Virtual Machine, it
-//can't call the methods of the JavaScript "String" class.
+// Again, we need to implement string manipulation functions. Like I've said,
+// even though this program will be running on JavaScript Virtual Machine, it
+// can't call the methods of the JavaScript "String" class.
 Function strlen(CharacterPointer str) Which Returns Integer32 Does
-    //We can't implement this recursively, like we did in earlier AEC
-    //programs, because we will be dealing with large strings which will
-    //cause stack overflow.
-    Integer32 length := 0;
-    While ValueAt(str + length) Loop
-        length := length + 1;
-    EndWhile
-    Return length;
+    // We can't implement this recursively, like we did in earlier AEC
+    // programs, because we will be dealing with large strings which will
+    // cause stack overflow.
+    Integer32 length : = 0;
+While ValueAt(str + length) Loop length : = length + 1;
+EndWhile Return length;
 EndFunction
 
-Function strcpy(CharacterPointer dest,
-                CharacterPointer src) Which Returns Nothing Does
-    While ValueAt(src) Loop
-        ValueAt(dest) := ValueAt(src);
-        dest          :=     dest + 1;
-        src           :=      src + 1;
-    EndWhile
-    ValueAt(dest) := 0;
+    Function
+    strcpy(CharacterPointer dest,
+           CharacterPointer src) Which Returns Nothing Does While
+    ValueAt(src) Loop ValueAt(dest)
+    : = ValueAt(src);
+dest : = dest + 1;
+src : = src + 1;
+EndWhile ValueAt(dest) : = 0;
 EndFunction
 
-Function reverseString(CharacterPointer string) Which Returns Nothing Does
-    CharacterPointer pointerToLastCharacter := string + strlen(string) - 1;
-    While pointerToLastCharacter - string > 0 Loop
-        Character tmp                   := ValueAt(string);
-        ValueAt(string)                 := ValueAt(pointerToLastCharacter);
-        ValueAt(pointerToLastCharacter) := tmp;
-        string                          := string + 1;
-        pointerToLastCharacter          := pointerToLastCharacter - 1;
-    EndWhile
-EndFunction
+    Function
+    reverseString(CharacterPointer string) Which Returns Nothing Does
+    CharacterPointer pointerToLastCharacter : = string + strlen(string) - 1;
+While pointerToLastCharacter - string > 0 Loop Character tmp
+    : = ValueAt(string);
+ValueAt(string) : = ValueAt(pointerToLastCharacter);
+ValueAt(pointerToLastCharacter) : = tmp;
+string : = string + 1;
+pointerToLastCharacter : = pointerToLastCharacter - 1;
+EndWhile EndFunction
 
-Function strcat(CharacterPointer dest,
-                CharacterPointer src) Which Returns Nothing Does
+    Function
+    strcat(CharacterPointer dest,
+           CharacterPointer src) Which Returns Nothing Does
     strcpy(dest + strlen(dest), src);
 EndFunction
 
-Function convertIntegerToString(CharacterPointer string,
-                                Integer32 number)
-    Which Returns Integer32 Does //Returns the length of the string.
-    Integer32 isNumberNegative := 0;
-    If number < 0 Then
-        number           := -number;
-        isNumberNegative :=       1;
-    EndIf
-    Integer32 i := 0;
-    While number > 9 Loop
-        ValueAt(string + i) := '0' + mod(number, 10);
-        number              :=           number / 10;
-        i                   :=                 i + 1;
-    EndWhile
-    ValueAt(string + i) := '0' + number;
-    i                   :=        i + 1;
-    If isNumberNegative Then
-        ValueAt(string + i) :=   '-';
-        i                   := i + 1;
-    EndIf
-    ValueAt(string + i) := 0;
-    reverseString(string);
-    Return i;
+    Function
+    convertIntegerToString(CharacterPointer string,
+                           Integer32 number)
+        Which Returns Integer32 Does // Returns the length of the string.
+    Integer32 isNumberNegative : = 0;
+If number < 0 Then number : = -number;
+isNumberNegative : = 1;
+EndIf Integer32 i : = 0;
+While number > 9 Loop ValueAt(string + i) : = '0' + mod(number, 10);
+number : = number / 10;
+i : = i + 1;
+EndWhile ValueAt(string + i) : = '0' + number;
+i : = i + 1;
+If isNumberNegative Then ValueAt(string + i) : = '-';
+i : = i + 1;
+EndIf ValueAt(string + i) : = 0;
+reverseString(string);
+Return i;
 EndFunction
 
-//This is the function that's supposed to be called by JavaScript as soon
-//as it is ready.
-Function init() Which Returns Nothing Does
-    CharacterPointer path         :=         AddressOf(path[0]);
-    CharacterPointer reversedPath := AddressOf(reversedPath[0]);
-    strcpy(path, "R");
-    Integer32 counter := 0;
-    While strlen(path) < 8192 Loop
-        strcpy(reversedPath, path);
-        If mod(counter, 4) = 0 Then
-            reverseString(reversedPath);
-        EndIf
-        strcat(path, reversedPath);
-        strcat(path, not(mod(counter, 4))?
-                        "L"
-                     :  "LLL");
-        counter := counter + 1;
-    EndWhile
-EndFunction
+    // This is the function that's supposed to be called by JavaScript as soon
+    // as it is ready.
+    Function
+    init() Which Returns Nothing Does CharacterPointer path
+    : = AddressOf(path[0]);
+CharacterPointer reversedPath : = AddressOf(reversedPath[0]);
+strcpy(path, "R");
+Integer32 counter : = 0;
+While strlen(path) < 8192 Loop strcpy(reversedPath, path);
+If mod(counter, 4) = 0 Then reverseString(reversedPath);
+EndIf strcat(path, reversedPath);
+strcat(path, not(mod(counter, 4)) ? "L" : "LLL");
+counter : = counter + 1;
+EndWhile EndFunction
 
-//This function is supposed to be periodically called by JavaScript:
-Function step() Which Returns Nothing Does
-    If not(path[currentStep] = 0) and currentX > 0 and currentX < 500
-       and currentY > 0 and currentY < 500 Then
-        Integer32 nextX := currentX +
-                           directionX[currentDirection] * lineLength,
-                  nextY := currentY +
-                           directionY[currentDirection] * lineLength;
-        drawLine(currentX, currentY, nextX, nextY,
-                 currentStep = 0?
-                    "lightYellow"
-                 :path[currentStep] = 'R'?
-                    "red"
-                 :path[currentStep] = 'L'?
-                    "lightBlue"
-                 :  "lightYellow",
-                 lineWidth);
-        currentX    := nextX;
-        currentY    := nextY;
-        If path[currentStep] = 'R' Then
-            currentDirection := mod(currentDirection + 1, 4);
-        ElseIf not(currentDirection = 0) and path[currentStep] = 'L' Then
-            currentDirection := currentDirection - 1;
-        ElseIf path[currentStep] = 'L' Then
-            currentDirection := 3;
-        EndIf
-        Integer32 tmp; //I had no idea WebAssembly would behave that way,
-                       //that the assembler will complain about not storing
-                       //the result of a function. This is very different
-                       //from x86 assembly. So, I modified the compiler
-                       //to warn about that.
-        currentStep := currentStep + 1;
-        Character turtleTranformation[64]    := {0};
-        CharacterPointer turtleTranformation := AddressOf(
-                                                    turtleTranformation[0]);
-        strcat(turtleTranformation, "translate(");
-        tmp := convertIntegerToString(turtleTranformation +
-                                         strlen(turtleTranformation),
-                                      currentX);
-        strcat(turtleTranformation, " ");
-        tmp := convertIntegerToString(turtleTranformation +
-                                         strlen(turtleTranformation),
-                                      currentY);
-        strcat(turtleTranformation, ") rotate(");
-        tmp := convertIntegerToString(turtleTranformation +
-                                         strlen(turtleTranformation),
-                                      currentDirection * 90);
-        strcat(turtleTranformation, ")");
-        applyTurtleTransformation(turtleTranformation);
-    EndIf
-EndFunction
+        // This function is supposed to be periodically called by JavaScript:
+        Function
+        step() Which Returns Nothing Does If not(path[currentStep] = 0) and
+    currentX > 0 and
+    currentX<500 and currentY> 0 and currentY < 500 Then Integer32 nextX
+    : = currentX + directionX[currentDirection] * lineLength,
+    nextY : = currentY + directionY[currentDirection] * lineLength;
+drawLine(currentX, currentY, nextX, nextY,
+         currentStep = 0 ? "lightYellow"
+                         : path[currentStep] = 'R' ? "red"
+                                                   : path[currentStep] =
+                                                         'L' ? "lightBlue"
+                                                             : "lightYellow",
+         lineWidth);
+currentX : = nextX;
+currentY : = nextY;
+If path[currentStep] =
+    'R' Then currentDirection : = mod(currentDirection + 1, 4);
+ElseIf not(currentDirection = 0) and path[currentStep] =
+    'L' Then currentDirection : = currentDirection - 1;
+ElseIf path[currentStep] = 'L' Then currentDirection : = 3;
+EndIf Integer32 tmp; // I had no idea WebAssembly would behave that way,
+                     // that the assembler will complain about not storing
+                     // the result of a function. This is very different
+                     // from x86 assembly. So, I modified the compiler
+                     // to warn about that.
+currentStep : = currentStep + 1;
+Character turtleTranformation[64] : = {0};
+CharacterPointer turtleTranformation : = AddressOf(turtleTranformation[0]);
+strcat(turtleTranformation, "translate(");
+tmp : = convertIntegerToString(
+          turtleTranformation + strlen(turtleTranformation), currentX);
+strcat(turtleTranformation, " ");
+tmp : = convertIntegerToString(
+          turtleTranformation + strlen(turtleTranformation), currentY);
+strcat(turtleTranformation, ") rotate(");
+tmp : = convertIntegerToString(turtleTranformation +
+                                   strlen(turtleTranformation),
+                               currentDirection * 90);
+strcat(turtleTranformation, ")");
+applyTurtleTransformation(turtleTranformation);
+EndIf EndFunction
