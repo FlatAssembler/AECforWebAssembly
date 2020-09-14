@@ -266,12 +266,12 @@
     <header>
       <svg
         id="gornjiLijevi"
-        style="float: left; width: 25%; height: 200px; background: white;"
+        style="float: left; width: 25%; height: 200px; background: white"
       ></svg>
       AEC Specification
       <svg
         id="gornjiDesni"
-        style="float: right; width: 25%; height: 200px; background: white;"
+        style="float: right; width: 25%; height: 200px; background: white"
       ></svg>
       <script type="text/javascript">
         var svgNS = "http://www.w3.org/2000/svg";
@@ -337,7 +337,7 @@
       <br />
       <center><b>Here are my online publications:</b></center>
       <br />
-      <b style="margin-left: 5px;">HTML5 stuff:</b>
+      <b style="margin-left: 5px">HTML5 stuff:</b>
       <a href="sat.html"
         ><div class="link1">
           <div class="popup">
@@ -380,7 +380,7 @@
           Etymology Game
         </div></a
       >
-      <br /><b style="margin-left: 5px;">Webpages on this website:</b>
+      <br /><b style="margin-left: 5px">Webpages on this website:</b>
       <a href="index.html"
         ><div class="link1">
           <div class="popup">A webpage with a bunch of links.</div>
@@ -411,12 +411,12 @@
             Why I like languages.<br /><br />
             See also:<br />
             <u
-              style="color: #0077ff;"
+              style="color: #0077ff"
               onclick="window.open('http://flatassembler.github.io/toponyms.html'); window.close();"
               >Croatian Toponyms</u
             ><br />
             <u
-              style="color: #0077ff;"
+              style="color: #0077ff"
               onclick="window.open('http://flatassembler.github.io/Indo-Austronesian.html'); window.close();"
               >Indo-Austronesian</u
             >
@@ -438,7 +438,7 @@
           Pseudosciences
         </div></a
       >
-      <br /><b style="margin-left: 5px;">On Internet forums and blogs:</b>
+      <br /><b style="margin-left: 5px">On Internet forums and blogs:</b>
       <a href="http://linguistforum.com/outside-of-the-box/croatian-toponyms/"
         ><div class="link1">
           <div class="popup">
@@ -456,7 +456,7 @@
       >
     </aside>
     <section>
-      <p style="margin-left: 5px; margin-right: 5px;">
+      <p style="margin-left: 5px; margin-right: 5px">
         <br />
         I've started a discussion about AEC
         <a href="https://www.forum.hr/showthread.php?t=1125353">on</a>
@@ -474,7 +474,7 @@
         >. <br />
       </p>
       <br />
-      <a id="loptica" href="#vrh" style="position: absolute;">
+      <a id="loptica" href="#vrh" style="position: absolute">
         <svg width="100" height="100">
           <defs>
             <radialgradient id="modrozelen">
@@ -528,9 +528,9 @@
         }
       </script>
     </section>
-    <main class="main1" id="glavni" style="display: block;">
+    <main class="main1" id="glavni" style="display: block">
       <a name="vrh"></a>
-      <h2 style="text-align: center;">AEC Specification</h2>
+      <h2 style="text-align: center">AEC Specification</h2>
       <div
         style="
           text-align: justify;
@@ -788,10 +788,14 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         between signal and variable assignments in VHDL). In AEC for
         WebAssembly, you use <span class="inline_code">:=</span> for string
         assignments.<br />
-        <b>TODO</b>: Implement the assignment operators
-        <span class="inline_code">+=</span>,
-        <span class="inline_code">-=</span> and related ones as they are in C,
-        C++ and JavaScript. They can make code significantly shorter.<br />
+        <b>TODO</b>:
+        <del
+          >Implement the assignment operators
+          <span class="inline_code">+=</span>,
+          <span class="inline_code">-=</span> and related ones as they are in C,
+          C++ and JavaScript. They can make code significantly shorter.</del
+        >
+        (<i>UPDATE on 14/09/2020: They have been implemented.</i>)<br />
         <br /><b>Operators</b><br />
         AEC has the following operators:<br />
         <table>
@@ -932,8 +936,18 @@ EndFunction</pre
         <span class="inline_code">ElseIf</span> token, much like the
         <span class="inline_code">If</span> token, is followed by an expression
         representing a condition, which is ended by the
-        <span class="inline_code">Then</span> token. An example from the Analog
-        Clock in AEC:
+        <span class="inline_code">Then</span> token. After the
+        <span class="inline_code">Then</span> token and after the
+        <span class="inline_code">Else</span> token, you can put an
+        <span class="inline_code">{</span> (curly brace) which the compiler will
+        ignore. Similarly, you can put an
+        <span class="inline_code">}</span> before
+        <span class="inline_code">EndIf</span>,
+        <span class="inline_code">ElseIf</span> and
+        <span class="inline_code">Else</span>. That is to make it easier to use
+        text editors made primarily for C like languages for writing AEC (to
+        jump to the end of the code block, for example). An example from the
+        Analog Clock in AEC:
         <pre>
         If signature[j] = '\n' Then
             i := (i / windowWidth + 1) * windowWidth;
@@ -1117,7 +1131,7 @@ EndFunction</pre
         Named function arguments (using, for example, the
         <span class="inline_code">:=</span> operator) might also come useful (in
         languages with them, there is basically no need for the abstract
-        factories).<br />
+        builders and directors).<br />
         <br /><b>Structures</b><br />
         The parser can parse structure declarations of the form:
         <pre>
@@ -1539,23 +1553,23 @@ EndFunction</pre
       </script>
     </main>
     <footer>
-      <div style="width: 25%; float: right; text-align: left; bottom: 30px;">
+      <div style="width: 25%; float: right; text-align: left; bottom: 30px">
         Choose the style:
         <a
           href="#"
-          style="color: red;"
+          style="color: red"
           onclick="document.getElementById('glavni').setAttribute('class', 'main1')"
           >[1]</a
         >
         <a
           href="#"
-          style="color: red;"
+          style="color: red"
           onclick="document.getElementById('glavni').setAttribute('class', 'main2')"
           >[2]</a
         >
         <a
           href="#"
-          style="color: red;"
+          style="color: red"
           onclick="document.getElementById('glavni').setAttribute('class', 'main3')"
           >[3]</a
         >
@@ -1563,7 +1577,7 @@ EndFunction</pre
       Uploaded by Teo Samarzija on 29/08/2020
       <svg
         id="donjiLijevi"
-        style="float: left; width: 25%; height: 100%; background: white;"
+        style="float: left; width: 25%; height: 100%; background: white"
       ></svg>
       <script type="text/javascript">
         if (navigator.appName == "Microsoft Internet Explorer") {

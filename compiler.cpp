@@ -224,7 +224,7 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   }
   inlineAssembly = ";;Inline assembly begins.\n" +
                    inlineAssembly.substr(1, inlineAssembly.size() - 2) +
-                   "\n;;Inline assembly ends.\n";
+                   "\n;;Inline assembly ends.";
   inlineAssembly =
       std::regex_replace(inlineAssembly, std::regex(R"(\\\\)"), "\\");
   inlineAssembly =
@@ -356,7 +356,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           }
         }
       } else {
-        if (childNode.text == ":=" or childNode.getType(context) == "Nothing")
+        if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
+            childNode.getType(context) == "Nothing")
           assembly += std::string(childNode.compile(context)) + "\n";
         else {
           std::cerr
@@ -469,6 +470,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << ", Compiler warning: You are assigning a pointer to a type \""
           << typeOfTheCurrentNode << "\", this is likely an error!"
           << std::endl;
+  } else if (text.size() == 2 and
+             text[1] ==
+                 '=') // The assignment operators "+=", "-=", "*=" and "/="...
+  {
+    TreeNode convertedToSimpleAssignment(":=", lineNumber, columnNumber);
+    convertedToSimpleAssignment.children.push_back(children[0]);
+    convertedToSimpleAssignment.children.push_back(*this);
+    convertedToSimpleAssignment.children[1].text =
+        convertedToSimpleAssignment.children[1].text.substr(0, 1);
+    assembly += convertedToSimpleAssignment.compile(context);
   } else if (text == "If") {
     if (children.size() < 2) {
       std::cerr
@@ -511,7 +522,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     }
     assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n" +
                 convertToInteger32(children[0], context).indentBy(4) +
-                "\n\t\t\t)\n\t\t)" + children[1].compile(context).indentBy(2) +
+                "\n\t\t\t)\n\t\t)\n" +
+                children[1].compile(context).indentBy(2) +
                 "\n\t\t(br 0)\n\t)\n)";
   } else if (std::regex_match(text,
                               std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
@@ -1111,10 +1123,12 @@ std::string TreeNode::getType(const CompilationContext context) const {
                            children[0].getType(context),
                            children[1].getType(context));
   }
-  if (text == ":=") {
+  if (text.size() == 2 and text[1] == '=') // Assignment operators
+  {
     if (children.size() < 2) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
-                << ", Compiler error: The assignment operator \":=\" has less "
+                << ", Compiler error: The assignment operator \"" << text
+                << "\" has less "
                    "than two operands. Aborting the compilation, or else the "
                    "compiler will segfault."
                 << std::endl;

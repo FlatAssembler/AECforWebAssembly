@@ -170,10 +170,14 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
       }
     for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
       if (tokenizedExpression[i].text == "=" and
-          tokenizedExpression[i - 1].text ==
-              ":") // The ":=" assignment operator.
-      {
-        tokenizedExpression[i - 1].text = ":=";
+          (tokenizedExpression[i - 1].text ==
+               ":" // The ":=" assignment operator.
+           or tokenizedExpression[i - 1].text ==
+                  "+" // The "+=" assignment operator.
+           or tokenizedExpression[i - 1].text == "-" or
+           tokenizedExpression[i - 1].text == "*" or
+           tokenizedExpression[i - 1].text == "/")) {
+        tokenizedExpression[i - 1].text = tokenizedExpression[i - 1].text + "=";
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
       }
     for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
@@ -189,6 +193,31 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         tokenizedExpression.erase(tokenizedExpression.begin() + i);
         i--;
       }
+    for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
+      if (tokenizedExpression[i].text == "{" // Hints to the code formatter,
+                                             // will make parsing harder
+                                             // if passed on to it.
+          and (tokenizedExpression[i - 1].text == "Does" or
+               tokenizedExpression[i - 1].text == "Then" or
+               tokenizedExpression[i - 1].text == "Loop" or
+               tokenizedExpression[i - 1].text == "Of" or
+               tokenizedExpression[i - 1].text == "Else")) {
+        tokenizedExpression.erase(tokenizedExpression.begin() + i);
+        i--;
+      }
+    if (!tokenizedExpression.empty()) {
+      for (unsigned int i = 0; i < tokenizedExpression.size() - 1; i++)
+        if (tokenizedExpression[i].text == "}" and
+            (tokenizedExpression[i + 1].text == "EndFunction" or
+             tokenizedExpression[i + 1].text == "Else" or
+             tokenizedExpression[i + 1].text == "ElseIf" or
+             tokenizedExpression[i + 1].text == "EndIf" or
+             tokenizedExpression[i + 1].text == "EndWhile" or
+             tokenizedExpression[i + 1].text == "EndStructure")) {
+          tokenizedExpression.erase(tokenizedExpression.begin() + i);
+          i--;
+        }
+    }
   } catch (std::regex_error &error) {
     std::cerr << "Internal compiler error in tokenizer: " << error.what() << ":"
               << error.code() << std::endl;

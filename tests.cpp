@@ -1,6 +1,7 @@
 #include "TreeNode.cpp"
 
-struct test { // When the debugger doesn't work, "cassert" doesn't help a lot.
+struct test { // When the debugger doesn't work (and I can't get it to
+              // work on my Linux machine), "cassert" doesn't help a lot.
   std::string input, expectedResult;
 };
 
@@ -220,7 +221,25 @@ void parserTests() {
             Return (a + b) * (c + d);
         EndIf
         )",
-        "(If (and (or a b) (or c d)) (Then (Return (* (+ a b) (+ c d)))))"}});
+        "(If (and (or a b) (or c d)) (Then (Return (* (+ a b) (+ c d)))))"},
+       {R"(
+			Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
+			{ //The curly brace here is a hint to the code formatter.
+				While not(b = 0) Loop {
+					If a > b Then {
+						a -= b;
+					} Else {
+						b -= a;
+					} EndIf
+				}
+				EndWhile;
+				Return a;
+			}
+			EndFunction;
+		)",
+        "(Function (gcd (Integer32 a) (Integer32 b)) (Returns Integer32) (Does "
+        "(While (not (= b 0)) (Loop (If (> a b) (Then (-= a b)) (Else (-= b "
+        "a))))) (Return a)))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();

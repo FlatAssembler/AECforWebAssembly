@@ -322,8 +322,8 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                              parsedExpression.begin() + colon + 1);
       i = questionMark;
     }
-  parsedExpression =
-      applyBinaryOperators(parsedExpression, {":="}, Associativity::right);
+  parsedExpression = applyBinaryOperators(
+      parsedExpression, {":=", "+=", "-=", "*=", "/="}, Associativity::right);
 #ifndef NDEBUG
   std::cerr << "DEBUG: Returning the array: "
             << JSONifyArrayOfTokens(parsedExpression) << std::endl;

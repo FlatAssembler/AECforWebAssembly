@@ -13,68 +13,86 @@ CharacterPointer colors[23 * 80]; // Will contain pointers to the CSS names
                                   // of colors of the characters in the
                                   //"output".
 
-Function getAddressOfOutput() Which Returns CharacterPointer Does Return
-    AddressOf(output[0]); // When I didn't implement the "extern"
-                          // keyword into my AEC compiler...
-EndFunction
+Function getAddressOfOutput() Which Returns CharacterPointer
+    Does { // The curly brace here is just as a hint to the IDE of how to format
+           // the code, it's ignored by the parser.
+  Return AddressOf(output[0]); // When I didn't implement the "extern"
+                               // keyword into my AEC compiler...
+}
+EndFunction;
 
-    Function
-    getAddressOfColors() Which Returns CharacterPointerPointer Does Return
-    AddressOf(colors[0]);
-EndFunction
+Function getAddressOfColors() Which Returns CharacterPointerPointer Does {
+  Return AddressOf(colors[0]);
+}
+EndFunction;
 
-    // Now, let's implement some mathematical functions. We can't use JavaScript
-    //"Math.sin" and similar because they are methods of the global "Math"
-    // object, and there is, as far as I know, no way to import JavaScript
-    // objects into WebAssembly (or some language that compiles into it).
-    // I wonder whether this is what operating system development feels like.
-    // In the OS development, the only code that's running on a virtual machine
-    // is your own, and you can only use a debugger running outside of that
-    // virtual machine. Here, quite some code runs on JavaScript Virtual
-    // Machine, but the only code I can call is the code I've written myself in
-    // my own programming language and some debugging functions (logString and
-    // logInteger).
-        Decimal32 PRECISION : = 512; // So that we can balance between speed and
-                                     // precision.
-Function ln(Decimal32 x) Which Returns Decimal32 Does
-    // Natural logarithm is the integral of 1/x from 1 to x, highschool math.
-    Decimal32 sum : = 0,
-                  epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
-While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop sum
-    : = sum + epsilon / i;
-i : = i + epsilon;
-EndWhile Return sum;
-EndFunction
+// Now, let's implement some mathematical functions. We can't use JavaScript
+//"Math.sin" and similar because they are methods of the global "Math"
+// object, and there is, as far as I know, no way to import JavaScript
+// objects into WebAssembly (or some language that compiles into it).
+// I wonder whether this is what operating system development feels like.
+// In the OS development, the only code that's running on a virtual machine
+// is your own, and you can only use a debugger running outside of that
+// virtual machine. Here, quite some code runs on JavaScript Virtual
+// Machine, but the only code I can call is the code I've written myself in
+// my own programming language and some debugging functions (logString and
+// logInteger).
+Decimal32 PRECISION : = 512; // So that we can balance between speed and
+                             // precision.
+Function ln(Decimal32 x) Which Returns Decimal32 Does {
+  // Natural logarithm is the integral of 1/x from 1 to x, highschool math.
+  Decimal32 sum : = 0, epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
+  While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop {
+    sum += epsilon / i;
+    i += epsilon;
+  }
+  EndWhile; // The semicolon after "EndWhile" and "EndIf" and "EndFunction" is
+            // optional, but it provides a hint to the IDEs (made for C-like
+            // languages).
+  Return sum;
+}
+EndFunction;
 
-    Function
-    exp(Decimal32 x) Which Returns Decimal32 Does
-    // Euler's Algorithm from Mathematics 2...
-    Decimal32 i : = 0,
-                y : = 1, epsilon : = x / PRECISION;
-While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop y
-    : = y + epsilon * y;
-i : = i + epsilon;
-EndWhile Return y;
-EndFunction
+Function exp(Decimal32 x) Which Returns Decimal32 Does {
+  // Euler's Algorithm from Mathematics 2...
+  Decimal32 i : = 0, y : = 1, epsilon : = x / PRECISION;
+  While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop {
+    y += epsilon * y;
+    i += epsilon;
+  }
+  EndWhile;
+  Return y;
+}
+EndFunction;
 
-    Function
-    sqrt(Decimal32 x) Which Returns Decimal32 Does
-    // Binary Search Algorithm...
-    Decimal32 max : = 80 * 24,
-                  min : = 0, i : = (min + max) / 2;
-While(max - min) > 1 / PRECISION Loop If i *i > x Then max : = i;
-Else min : = i;
-EndIf i : = (max + min) / 2;
-EndWhile Return i;
-EndFunction
+Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
+  // Binary Search Algorithm...
+  Decimal32 max : = 80 * 24, min : = 0, i : = (min + max) / 2;
+  While(max - min) > 1 / PRECISION Loop {
+    If i *i > x Then {
+    max:
+      = i;
+    }
+    Else {
+    min:
+      = i;
+    }
+    EndIf;
+  i:
+    = (max + min) / 2;
+  }
+  EndWhile;
+  Return i;
+}
+EndFunction;
 
-        Function
-        fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does Return a
-    - b *Integer32(a / b);
-EndFunction
+Function fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does {
+  Return a - b *Integer32(a / b);
+}
+EndFunction;
 
-    // Now, let's implement trigonometric and cyclometric functions.
-    Decimal32 oneRadianInDegrees
+// Now, let's implement trigonometric and cyclometric functions.
+Decimal32 oneRadianInDegrees
     : = 180 / pi; //"180/pi" is a compile-time decimal
                   // constant (since we are assigning an
                   // initial value to a global variable),
@@ -82,341 +100,431 @@ EndFunction
                   // refer to M_PI from the C library,
                   // it's available to the compiler.
 
-Function arctan(Decimal32 x) Which Returns Decimal32 Does
-    // Arcus tangens is equal to the integral of 1/(1+x^2), highschool math.
-    Decimal32 sum : = 0,
-                  epsilon : = x / PRECISION, i : = 0;
-While i < x Loop sum : = sum + epsilon / (1 + i * i);
-i : = i + epsilon;
-EndWhile Return sum *oneRadianInDegrees;
-EndFunction
+Function arctan(Decimal32 x) Which Returns Decimal32 Does {
+  // Arcus tangens is equal to the integral of 1/(1+x^2), highschool math.
+  Decimal32 sum : = 0, epsilon : = x / PRECISION, i : = 0;
+  While i < x Loop {
+    sum += epsilon / (1 + i * i);
+    i += epsilon;
+  }
+  EndWhile;
+  Return sum *oneRadianInDegrees;
+}
+EndFunction;
 
-        Function
-        sin(Decimal32 degrees) Which Returns Decimal32 Does If degrees <
-    0 Then Return - sin(-degrees);
-EndIf If degrees > 90 Then Decimal32 sinOfDegreesMinus90 : = sin(degrees - 90);
-If fmod(degrees, 360) < 180 Then Return
-    sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
-Else Return - sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
-EndIf EndIf
-    /*
-     * Sine and cosine are defined in Mathematics 2 using the system of
-     * equations (Cauchy system):
-     *
-     * sin(0)=0
-     * cos(0)=1
-     * sin'(x)=cos(x)
-     * cos'(x)=-sin(x)
-     * ---------------
-     *
-     * Let's translate that as literally as possible to the programming
-     * language.
-     */
-    Decimal32 radians : = degrees / oneRadianInDegrees,
-                      tmpsin : = 0, tmpcos : = 1,
-                      epsilon : = radians / PRECISION, i : = 0;
-While(epsilon > 0 and i < radians) or (epsilon < 0 and i > radians) Loop tmpsin
-    : = tmpsin + epsilon * tmpcos;
-tmpcos : = tmpcos - epsilon * tmpsin;
-i : = i + epsilon;
-EndWhile Return tmpsin;
-EndFunction
+Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
+  If degrees < 0 Then { Return - sin(-degrees); }
+  EndIf;
+  If degrees > 90 Then {
+    Decimal32 sinOfDegreesMinus90 : = sin(degrees - 90);
+    If fmod(degrees, 360) < 180 Then {
+      Return sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
+    }
+    Else { Return - sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90); }
+    EndIf;
+  }
+  EndIf;
+  /*
+   * Sine and cosine are defined in Mathematics 2 using the system of
+   * equations (Cauchy system):
+   *
+   * sin(0)=0
+   * cos(0)=1
+   * sin'(x)=cos(x)
+   * cos'(x)=-sin(x)
+   * ---------------
+   *
+   * Let's translate that as literally as possible to the programming
+   * language.
+   */
+  Decimal32 radians : = degrees / oneRadianInDegrees, tmpsin : = 0,
+                    tmpcos : = 1, epsilon : = radians / PRECISION, i : = 0;
+  While(epsilon > 0 and i < radians) or (epsilon < 0 and i > radians) Loop {
+    tmpsin += epsilon * tmpcos;
+    tmpcos -= epsilon * tmpsin;
+    i += epsilon;
+  }
+  EndWhile;
+  Return tmpsin;
+}
+EndFunction;
 
-    Function
-    arcsin(Decimal32 x) Which Returns Decimal32 Does Return
-    arctan(x / sqrt(1 - x * x)); // Highschool mathematics.
-EndFunction
+Function arcsin(Decimal32 x) Which Returns Decimal32 Does {
+  Return arctan(x / sqrt(1 - x * x)); // Highschool mathematics.
+}
+EndFunction;
 
-        Function
-        arccos(Decimal32 x) Which Returns Decimal32 Does Return 90 -
-    arcsin(x); // Basic common sense to somebody who understands
-               // what those terms mean.
-EndFunction
+Function arccos(Decimal32 x) Which Returns Decimal32 Does {
+  Return 90 - arcsin(x); // Basic common sense to somebody who understands
+  // what those terms mean.
+}
+EndFunction;
 
-    Function
-    cos(Decimal32 degrees) Which Returns Decimal32 Does Return
-    sin(90 - degrees); // Again, basic common sense to somebody who
-                       // understands what those terms means.
-EndFunction
+Function cos(Decimal32 degrees) Which Returns Decimal32 Does {
+  Return sin(90 - degrees); // Again, basic common sense to somebody who
+                            // understands what those terms means.
+}
+EndFunction;
 
-        Function
-        tan(Decimal32 degrees) Which Returns Decimal32 Does Return
-    sin(degrees) /
-    cos(degrees); // The definition.
-EndFunction
+Function tan(Decimal32 degrees) Which Returns Decimal32 Does {
+  Return sin(degrees) / cos(degrees); // The definition.
+}
+EndFunction;
 
-            Function
-            abs(Decimal32 x) Which Returns Decimal32 Does Return x < 0
-    ? -x
-    : x;
-EndFunction
+Function abs(Decimal32 x) Which Returns Decimal32 Does {
+  Return x < 0 ? -x : x;
+}
+EndFunction;
 
-    // Now, let's implement some string manipulation functions. We can't
-    // call the methods of the JavaScript "String" class here.
-    Function
-    strlen(CharacterPointer ptr) Which Returns Integer32 Does Return
-    ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
-EndFunction
+// Now, let's implement some string manipulation functions. We can't
+// call the methods of the JavaScript "String" class here.
+Function strlen(CharacterPointer ptr) Which Returns Integer32 Does {
+  Return ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
+}
+EndFunction;
 
-    Function
-    strcat(CharacterPointer first,
-           CharacterPointer second) Which Returns Nothing Does first
-    : = first + strlen(first);
-While ValueAt(second) Loop ValueAt(first) : = ValueAt(second);
-first : = first + 1;
-second : = second + 1;
-EndWhile ValueAt(first) : = 0;
-EndFunction
+Function strcat(CharacterPointer first,
+                CharacterPointer second) Which Returns Nothing Does {
+  first += strlen(first);
+  While ValueAt(second) Loop {
+    ValueAt(first) : = ValueAt(second);
+    first += 1;
+    second += 1;
+  }
+  EndWhile;
+  ValueAt(first) : = 0;
+}
+EndFunction;
 
-    // And, finally, we can start porting the original AEC Analog Clock,
-    // which was targeting x86, to WebAssembly.
-    Function
-    updateClockToTime(Integer32 hour, Integer32 minute, Integer32 second) Which
-    Returns Nothing Does Integer32 windowWidth : = 80,
-                                               windowHeight : = 23, i : = 0;
-CharacterPointer lightGrayColor : = "#EEEEEE";
-CharacterPointer lightGreenColor : = "#CCFFCC";
-While i < windowWidth *windowHeight Loop // First, fill the window with
-                                         // spaces and newlines.
-              If mod(i, windowWidth) = windowWidth - 1 Then output[i] : = '\n';
-Else output[i] : = ' ';
-EndIf colors[i] : = lightGrayColor;
-i : = i + 1;
-EndWhile Integer32 centerX : = windowWidth / 2, centerY : = windowHeight / 2,
-                           clockRadius : = (centerX < centerY) ? centerX - 1
-                                                               : centerY - 1;
-i : = 0;
-While i < windowWidth *windowHeight Loop // Next, draw the circle which
-                                         // represents the clock
-              Integer32 y : = i / windowWidth,
-                          x : = mod(i, windowWidth);
-Decimal32 distance : = sqrt((x - centerX) * (x - centerX) +
-                            (y - centerY) * (y - centerY)); // Pythagorean
-                                                            // Theorem.
-If abs(distance - clockRadius) < 3. / 4 Then output[i] : = '*';
-colors[i] : = lightGreenColor;
-EndIf i : = i + 1;
-EndWhile CharacterPointer redColor : = "#FFAAAA";
-// Label "12"...
-output[(centerY - clockRadius + 1) * windowWidth + centerX] : = '1';
-output[(centerY - clockRadius + 1) * windowWidth + centerX + 1] : = '2';
-colors[(centerY - clockRadius + 1) * windowWidth + centerX]
-    : = colors[(centerY - clockRadius + 1) * windowWidth + centerX + 1]
-    : = redColor;
-// Label "6"...
-output[(centerY + clockRadius - 1) * windowWidth + centerX] : = '6';
-colors[(centerY + clockRadius - 1) * windowWidth + centerX] : = redColor;
-// Label "3"...
-output[centerY * windowWidth + centerX + clockRadius - 1] : = '3';
-colors[centerY * windowWidth + centerX + clockRadius - 1] : = redColor;
-// Label "9"...
-output[centerY * windowWidth + centerX - clockRadius + 1] : = '9';
-colors[centerY * windowWidth + centerX - clockRadius + 1] : = redColor;
-// Label "1"...
-Integer32 y : = centerY - (clockRadius - 1) * cos(360. / 12);
-output[y * windowWidth + centerX + sin(360. / 12) * (clockRadius - 1)] : = '1';
-colors[y * windowWidth + centerX + sin(360. / 12) * (clockRadius - 1)]
-    : = redColor;
+// And, finally, we can start porting the original AEC Analog Clock,
+// which was targeting x86, to WebAssembly.
+Function updateClockToTime(Integer32 hour, Integer32 minute,
+                           Integer32 second) Which Returns Nothing Does {
+  Integer32 windowWidth : = 80, windowHeight : = 23, i : = 0;
+  CharacterPointer lightGrayColor : = "#EEEEEE";
+  CharacterPointer lightGreenColor : = "#CCFFCC";
+  While i < windowWidth *windowHeight Loop { // First, fill the window with
+                                             // spaces and newlines.
+    If mod(i, windowWidth) = windowWidth - 1 Then { output[i] : = '\n'; }
+    Else { output[i] : = ' '; }
+    EndIf;
+    colors[i] : = lightGrayColor;
+    i += 1;
+  }
+  EndWhile;
+  Integer32 centerX : = windowWidth / 2, centerY : = windowHeight / 2,
+                    clockRadius : = (centerX < centerY) ? centerX - 1
+                                                        : centerY - 1;
+i:
+  = 0;
+  While i < windowWidth *windowHeight Loop { // Next, draw the circle which
+                                             // represents the clock
+    Integer32 y : = i / windowWidth, x : = mod(i, windowWidth);
+    Decimal32 distance : = sqrt((x - centerX) * (x - centerX) +
+                                (y - centerY) * (y - centerY)); // Pythagorean
+                                                                // Theorem.
+    If abs(distance - clockRadius) < 3. / 4 Then {
+      output[i] : = '*';
+      colors[i] : = lightGreenColor;
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+  CharacterPointer redColor : = "#FFAAAA";
+  // Label "12"...
+  output[(centerY - clockRadius + 1) * windowWidth + centerX] : = '1';
+  output[(centerY - clockRadius + 1) * windowWidth + centerX + 1] : = '2';
+  colors[(centerY - clockRadius + 1) * windowWidth + centerX]
+      : = colors[(centerY - clockRadius + 1) * windowWidth + centerX + 1]
+      : = redColor;
+  // Label "6"...
+  output[(centerY + clockRadius - 1) * windowWidth + centerX] : = '6';
+  colors[(centerY + clockRadius - 1) * windowWidth + centerX] : = redColor;
+  // Label "3"...
+  output[centerY * windowWidth + centerX + clockRadius - 1] : = '3';
+  colors[centerY * windowWidth + centerX + clockRadius - 1] : = redColor;
+  // Label "9"...
+  output[centerY * windowWidth + centerX - clockRadius + 1] : = '9';
+  colors[centerY * windowWidth + centerX - clockRadius + 1] : = redColor;
+  // Label "1"...
+  Integer32 y : = centerY - (clockRadius - 1) * cos(360. / 12);
+  output[y * windowWidth + centerX + sin(360. / 12) * (clockRadius - 1)]
+      : = '1';
+  colors[y * windowWidth + centerX + sin(360. / 12) * (clockRadius - 1)]
+      : = redColor;
 // Label "2"...
-y : = centerY - (clockRadius - 1.5) * cos(2 * 360. / 12);
-output[y * windowWidth + centerX + sin(2 * 360. / 12) * (clockRadius - 1.5)]
-    : = '2';
-colors[y * windowWidth + centerX + sin(2 * 360. / 12) * (clockRadius - 1.5)]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1.5) * cos(2 * 360. / 12);
+  output[y * windowWidth + centerX + sin(2 * 360. / 12) * (clockRadius - 1.5)]
+      : = '2';
+  colors[y * windowWidth + centerX + sin(2 * 360. / 12) * (clockRadius - 1.5)]
+      : = redColor;
 // Label "4"...
-y : = centerY - (clockRadius - 1) * cos(4 * 360. / 12);
-output[y * windowWidth + centerX + sin(4 * 360. / 12) * (clockRadius - 1) + 1]
-    : = '4';
-colors[y * windowWidth + centerX + sin(4 * 360. / 12) * (clockRadius - 1) + 1]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1) * cos(4 * 360. / 12);
+  output[y * windowWidth + centerX + sin(4 * 360. / 12) * (clockRadius - 1) + 1]
+      : = '4';
+  colors[y * windowWidth + centerX + sin(4 * 360. / 12) * (clockRadius - 1) + 1]
+      : = redColor;
 // Label "5"...
-y : = centerY - (clockRadius - 1) * cos(5 * 360. / 12);
-output[y * windowWidth + centerX + sin(5 * 360. / 12) * (clockRadius - 1) + 1]
-    : = '5';
-colors[y * windowWidth + centerX + sin(5 * 360. / 12) * (clockRadius - 1) + 1]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1) * cos(5 * 360. / 12);
+  output[y * windowWidth + centerX + sin(5 * 360. / 12) * (clockRadius - 1) + 1]
+      : = '5';
+  colors[y * windowWidth + centerX + sin(5 * 360. / 12) * (clockRadius - 1) + 1]
+      : = redColor;
 // Label "7"...
-y : = centerY - (clockRadius - 1) * cos(7 * 360. / 12);
-output[y * windowWidth + centerX + sin(7 * 360. / 12) * (clockRadius - 1)]
-    : = '7';
-colors[y * windowWidth + centerX + sin(7 * 360. / 12) * (clockRadius - 1)]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1) * cos(7 * 360. / 12);
+  output[y * windowWidth + centerX + sin(7 * 360. / 12) * (clockRadius - 1)]
+      : = '7';
+  colors[y * windowWidth + centerX + sin(7 * 360. / 12) * (clockRadius - 1)]
+      : = redColor;
 // Label "8"...
-y : = centerY - (clockRadius - 1) * cos(8 * 360. / 12);
-output[y * windowWidth + centerX + sin(8 * 360. / 12) * (clockRadius - 1)]
-    : = '8';
-colors[y * windowWidth + centerX + sin(8 * 360. / 12) * (clockRadius - 1)]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1) * cos(8 * 360. / 12);
+  output[y * windowWidth + centerX + sin(8 * 360. / 12) * (clockRadius - 1)]
+      : = '8';
+  colors[y * windowWidth + centerX + sin(8 * 360. / 12) * (clockRadius - 1)]
+      : = redColor;
 // Label "10"...
-y : = centerY - (clockRadius - 1.5) * cos(10 * 360. / 12);
-output[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
-       1] : = '1';
-output[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
-       2] : = '0';
-colors[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
-       1] : = colors[y * windowWidth + centerX +
-                     sin(10 * 360. / 12) * (clockRadius - 1.5) + 2]
-    : = redColor;
+y:
+  = centerY - (clockRadius - 1.5) * cos(10 * 360. / 12);
+  output[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
+         1] : = '1';
+  output[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
+         2] : = '0';
+  colors[y * windowWidth + centerX + sin(10 * 360. / 12) * (clockRadius - 1.5) +
+         1] : = colors[y * windowWidth + centerX +
+                       sin(10 * 360. / 12) * (clockRadius - 1.5) + 2]
+      : = redColor;
 // Label "11"...
-y : = centerY - (clockRadius - 1.5) * cos(11 * 360. / 12);
-output[y * windowWidth + centerX + sin(11 * 360. / 12) * (clockRadius - 1.5) +
-       1] : = output[y * windowWidth + centerX +
-                     sin(11 * 360. / 12) * (clockRadius - 1.5) + 2] : = '1';
-colors[y * windowWidth + centerX + sin(11 * 360. / 12) * (clockRadius - 1.5) +
-       1] : = colors[y * windowWidth + centerX +
-                     sin(11 * 360. / 12) * (clockRadius - 1.5) + 2]
-    : = redColor;
-Integer32 j : = 0;
-Decimal32 angle;
-CharacterPointer blueColor : = "#AAAAFF";
-CharacterPointer yellowColor : = "#FFFFAA";
-While j < 3 Loop CharacterPointer currentColor;
-If j = 0 Then angle : = fmod(hour + minute / 60., 12) * (360. / 12);
-currentColor : = redColor;
-ElseIf j = 1 Then angle : = minute * (360. / 60);
-currentColor : = yellowColor;
-Else angle : = second * (360 / 60);
-currentColor : = blueColor;
-EndIf Decimal32 endOfTheHandX
-    : = centerX +
-        sin(angle) * clockRadius / (j = 0 ? 2. : j = 1 ? 3. / 2 : 4. / 3),
-    endOfTheHandY : = centerY - cos(angle) * clockRadius /
-                                    (j = 0 ? 2. : j = 1 ? 3. / 2 : 4. / 3),
-    coefficientOfTheDirection
-    : = (endOfTheHandY - centerY) /
-        (abs(endOfTheHandX - centerX) = 0 ?
-                                          // Protect ourselves from
-                                          // dividing by 0.
-                                            1. / 100
-                                          : endOfTheHandX - centerX);
-logString("Drawing line between (");
-logInteger(centerX);
-logString(",");
-logInteger(centerY);
-logString(") and (");
-logInteger(endOfTheHandX);
-logString(",");
-logInteger(endOfTheHandY);
-logString(").\n");
-i : = 0;
-While i<windowWidth *windowHeight Loop Decimal32 lowerBoundX : =
-            endOfTheHandX < centerX ? endOfTheHandX : Decimal32(centerX),
-        upperBoundX : = endOfTheHandX>
-        centerX ? endOfTheHandX : Decimal32(centerX),
-    lowerBoundY : = endOfTheHandY < centerY ? endOfTheHandY : centerY,
-                upperBoundY : = endOfTheHandY > centerY ? endOfTheHandY
-                                                        : centerY;
-y : = i / windowWidth;
-Integer32 x : = mod(i, windowWidth), isXWithinBounds;
-isXWithinBounds : = (x > lowerBoundX or x = lowerBoundX) and
-                    (x < upperBoundX or x = upperBoundX);
-Integer32 isYWithinBounds;
-isYWithinBounds : = (y > lowerBoundY or y = lowerBoundY) and
-                    (y < upperBoundY or y = upperBoundY);
-If isXWithinBounds and isYWithinBounds Then Decimal32 expectedX, expectedY;
-expectedY : = (x - centerX) * coefficientOfTheDirection + centerY;
-expectedX : = (y - centerY) * (1 / coefficientOfTheDirection) + centerX;
-If coefficientOfTheDirection =
-    1. / 0 Then expectedY : = 1000; // Bigger than any possible value.
-EndIf If coefficientOfTheDirection =
-    0 Then expectedX : = 1000; // Again, bigger than any possible.
-EndIf logString("The point (");
-logInteger(x);
-logString(",");
-logInteger(y);
-logString(") is within bounds, expectedY is ");
-logInteger(expectedY);
-logString(" and expectedX is ");
-logInteger(expectedX);
-logString(".\n");
-Character currentSign : = j = 0 ? 'h' : j = 1 ? 'm' : 's';
-If(abs(upperBoundX - lowerBoundX) < 1 + 1 / PRECISION or
-   abs(upperBoundY - lowerBoundY) < 1 + 1 / PRECISION) and
-    output[i] = ' ' Then output[i] : = currentSign;
-colors[i] : = currentColor;
-EndIf If(abs(expectedX - x) < 3. / 4 or abs(expectedY - y) < 3. / 4) and
-    output[i] = ' ' Then output[i] : = currentSign;
-colors[i] : = currentColor;
-EndIf EndIf i : = i + 1;
-EndWhile j : = j + 1;
-EndWhile
-    // Let's draw some ornaments.
-    CharacterPointer darkGreenColor : = "#AAFFAA";
-i : = 0;
-While i < windowWidth *windowHeight Loop y : = i / windowWidth;
-Integer32 x : = mod(i, windowWidth);
-If abs(windowHeight - 2 * ln(1 + abs((x - centerX) / 2.)) -
-       y)<1 - abs(x - centerX) / (centerX * 95. / 112) and x> 1. /
-        2 * centerX and x <
-    3. / 2 * centerX and output[i] =
-    ' ' Then // The logarithmic curve looks somewhat
-             // like a lemma of a flower.
-    output[i] : = 'x';
-colors[i] : = darkGreenColor;
-EndIf i : = i + 1;
-EndWhile
-    // Let's try to make it look like the bottom of the lemma isn't floating
-    // in the air.
-    j : = 0;
-While j < 3 Loop i
-    : = windowWidth * (windowHeight - 1); // So, move to the beginning of
-                                          // the last line.
-While i < windowWidth *windowHeight Loop If j < 2 and
-    (output[i - windowWidth] =
-         'x' and (output[i + 1] = 'x' or output[i - 1] = 'x')) Then output[i]
-    : = 'x';
-colors[i] : = darkGreenColor;
-ElseIf j = 2 and (output[i + 1] = ' ' and output[i - windowWidth] = 'x')
-                     Then output[i] : = ' ';
-EndIf i : = i + 1;
-EndWhile j : = j + 1;
-EndWhile
-    // The digital clock in the corner...
-    output[windowWidth * windowHeight - 2] : = '0' + mod(second, 10);
-output[windowWidth * windowHeight - 3] : = '0' + second / 10;
-colors[windowWidth * windowHeight - 2]
-    : = colors[windowWidth * windowHeight - 3] : = blueColor;
-output[windowWidth * windowHeight - 4] : = ':';
-output[windowWidth * windowHeight - 5] : = '0' + mod(minute, 10);
-output[windowWidth * windowHeight - 6] : = '0' + minute / 10;
-colors[windowWidth * windowHeight - 5]
-    : = colors[windowWidth * windowHeight - 6] : = yellowColor;
-output[windowWidth * windowHeight - 7] : = ':';
-output[windowWidth * windowHeight - 8] : = '0' + mod(hour, 10);
-output[windowWidth * windowHeight - 9] : = '0' + hour / 10;
-colors[windowWidth * windowHeight - 8]
-    : = colors[windowWidth * windowHeight - 9] : = redColor;
-// My signature...
-Character signature[100] : = {0};
-CharacterPointer signature : = AddressOf(signature[0]);
-// AEC, unlike C, always makes a clear distinction between
-// arrays and pointers.
-logString("Empty signature has length of: ");
-logInteger(strlen(signature));
-logString("\n");
-strcat(signature, " Analog Clock for WebAssembly\n");
-logString("The first row of the signature has length of: ");
-logInteger(strlen(signature));
-logString("\n");
-strcat(signature, " Made in AEC by\n");
-logString("The first two rows of signature have length: ");
-logInteger(strlen(signature));
-logString("\n");
-strcat(signature, " Teo Samarzija");
-logString("Signature has length of: ");
-logInteger(strlen(signature));
-logString(" \n\n"); // Let's mark the last log of this function like this.
-i : = windowWidth * (windowHeight - 3);
-j : = 0;
-CharacterPointer modraColor : = "#AAFFFF"; // Sorry, I don't know how
-                                           // to say "modra" in English,
-                                           // and I am not wasting my time
-                                           // looking that up.
-While not(signature[j] = 0) Loop If signature[j] =
-    '\n' Then i : = (i / windowWidth + 1) * windowWidth;
-ElseIf not(signature[j] = 0) Then output[i] : = signature[j];
-colors[i] : = modraColor;
-i : = i + 1;
-Else output[i] : = ' ';
-EndIf j : = j + 1;
-EndWhile EndFunction
+y:
+  = centerY - (clockRadius - 1.5) * cos(11 * 360. / 12);
+  output[y * windowWidth + centerX + sin(11 * 360. / 12) * (clockRadius - 1.5) +
+         1] : = output[y * windowWidth + centerX +
+                       sin(11 * 360. / 12) * (clockRadius - 1.5) + 2] : = '1';
+  colors[y * windowWidth + centerX + sin(11 * 360. / 12) * (clockRadius - 1.5) +
+         1] : = colors[y * windowWidth + centerX +
+                       sin(11 * 360. / 12) * (clockRadius - 1.5) + 2]
+      : = redColor;
+  Integer32 j : = 0;
+  Decimal32 angle;
+  CharacterPointer blueColor : = "#AAAAFF";
+  CharacterPointer yellowColor : = "#FFFFAA";
+  While j < 3 Loop {
+    CharacterPointer currentColor;
+    If j = 0 Then {
+    angle:
+      = fmod(hour + minute / 60., 12) * (360. / 12);
+    currentColor:
+      = redColor;
+    }
+    ElseIf j = 1 Then {
+    angle:
+      = minute * (360. / 60);
+    currentColor:
+      = yellowColor;
+    }
+    Else {
+    angle:
+      = second * (360 / 60);
+    currentColor:
+      = blueColor;
+    }
+    EndIf;
+    Decimal32 endOfTheHandX
+        : = centerX +
+            sin(angle) * clockRadius / (j = 0 ? 2. : j = 1 ? 3. / 2 : 4. / 3),
+        endOfTheHandY : = centerY - cos(angle) * clockRadius /
+                                        (j = 0 ? 2. : j = 1 ? 3. / 2 : 4. / 3),
+        coefficientOfTheDirection
+        : = (endOfTheHandY - centerY) /
+            (abs(endOfTheHandX - centerX) = 0 ?
+                                              // Protect ourselves from
+                                              // dividing by 0.
+                                                1. / 100
+                                              : endOfTheHandX - centerX);
+    logString("Drawing line between (");
+    logInteger(centerX);
+    logString(",");
+    logInteger(centerY);
+    logString(") and (");
+    logInteger(endOfTheHandX);
+    logString(",");
+    logInteger(endOfTheHandY);
+    logString(").\n");
+  i:
+    = 0;
+    While i < windowWidth *windowHeight Loop {
+      Decimal32 lowerBoundX
+          : = endOfTheHandX < centerX ? endOfTheHandX : Decimal32(centerX),
+          upperBoundX : = endOfTheHandX > centerX ? endOfTheHandX
+                                                  : Decimal32(centerX),
+          lowerBoundY : = endOfTheHandY < centerY ? endOfTheHandY : centerY,
+          upperBoundY : = endOfTheHandY > centerY ? endOfTheHandY : centerY;
+    y:
+      = i / windowWidth;
+      Integer32 x : = mod(i, windowWidth), isXWithinBounds;
+    isXWithinBounds:
+      = (x > lowerBoundX or x = lowerBoundX) and
+        (x < upperBoundX or x = upperBoundX);
+      Integer32 isYWithinBounds;
+    isYWithinBounds:
+      = (y > lowerBoundY or y = lowerBoundY) and
+        (y < upperBoundY or y = upperBoundY);
+      If isXWithinBounds and isYWithinBounds Then {
+        Decimal32 expectedX, expectedY;
+      expectedY:
+        = (x - centerX) * coefficientOfTheDirection + centerY;
+      expectedX:
+        = (y - centerY) * (1 / coefficientOfTheDirection) + centerX;
+        If coefficientOfTheDirection = 1. / 0 Then {
+        expectedY:
+          = 1000; // Bigger than any possible value.
+        }
+        EndIf;
+        If coefficientOfTheDirection = 0 Then {
+        expectedX:
+          = 1000; // Again, bigger than any possible.
+        }
+        EndIf;
+        logString("The point (");
+        logInteger(x);
+        logString(",");
+        logInteger(y);
+        logString(") is within bounds, expectedY is ");
+        logInteger(expectedY);
+        logString(" and expectedX is ");
+        logInteger(expectedX);
+        logString(".\n");
+        Character currentSign : = j = 0 ? 'h' : j = 1 ? 'm' : 's';
+        If(abs(upperBoundX - lowerBoundX) < 1 + 1 / PRECISION or
+           abs(upperBoundY - lowerBoundY) < 1 + 1 / PRECISION) and
+            output[i] = ' ' Then {
+          output[i] : = currentSign;
+          colors[i] : = currentColor;
+        }
+        EndIf;
+        If(abs(expectedX - x) < 3. / 4 or abs(expectedY - y) < 3. / 4) and
+            output[i] = ' ' Then {
+          output[i] : = currentSign;
+          colors[i] : = currentColor;
+        }
+        EndIf;
+      }
+      EndIf;
+      i += 1;
+    }
+    EndWhile;
+    j += 1;
+  }
+  EndWhile;
+  // Let's draw some ornaments.
+  CharacterPointer darkGreenColor : = "#AAFFAA";
+i:
+  = 0;
+  While i < windowWidth *windowHeight Loop {
+  y:
+    = i / windowWidth;
+    Integer32 x : = mod(i, windowWidth);
+    If abs(windowHeight - 2 * ln(1 + abs((x - centerX) / 2.)) -
+           y)<1 - abs(x - centerX) / (centerX * 95. / 112) and x> 1. /
+            2 * centerX and x <
+        3. / 2 * centerX and output[i] =
+        ' ' Then { // The logarithmic curve looks somewhat
+                   // like a lemma of a flower.
+      output[i] : = 'x';
+      colors[i] : = darkGreenColor;
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+// Let's try to make it look like the bottom of the lemma isn't floating
+// in the air.
+j:
+  = 0;
+  While j < 3 Loop {
+  i:
+    = windowWidth * (windowHeight - 1); // So, move to the beginning of
+                                        // the last line.
+    While i < windowWidth *windowHeight Loop {
+      If j < 2 and (output[i - windowWidth] =
+                        'x' and (output[i + 1] = 'x' or output[i - 1] = 'x'))
+                       Then {
+        output[i] : = 'x';
+        colors[i] : = darkGreenColor;
+      }
+      ElseIf j =
+          2 and (output[i + 1] = ' ' and output[i - windowWidth] = 'x') Then {
+        output[i] : = ' ';
+      }
+      EndIf;
+      i += 1;
+    }
+    EndWhile;
+    j += 1;
+  }
+  EndWhile;
+  // The digital clock in the corner...
+  output[windowWidth * windowHeight - 2] : = '0' + mod(second, 10);
+  output[windowWidth * windowHeight - 3] : = '0' + second / 10;
+  colors[windowWidth * windowHeight - 2]
+      : = colors[windowWidth * windowHeight - 3] : = blueColor;
+  output[windowWidth * windowHeight - 4] : = ':';
+  output[windowWidth * windowHeight - 5] : = '0' + mod(minute, 10);
+  output[windowWidth * windowHeight - 6] : = '0' + minute / 10;
+  colors[windowWidth * windowHeight - 5]
+      : = colors[windowWidth * windowHeight - 6] : = yellowColor;
+  output[windowWidth * windowHeight - 7] : = ':';
+  output[windowWidth * windowHeight - 8] : = '0' + mod(hour, 10);
+  output[windowWidth * windowHeight - 9] : = '0' + hour / 10;
+  colors[windowWidth * windowHeight - 8]
+      : = colors[windowWidth * windowHeight - 9] : = redColor;
+  // My signature...
+  Character signature[100] : = {0};
+  CharacterPointer signature : = AddressOf(signature[0]);
+  // AEC, unlike C, always makes a clear distinction between
+  // arrays and pointers.
+  logString("Empty signature has length of: ");
+  logInteger(strlen(signature));
+  logString("\n");
+  strcat(signature, " Analog Clock for WebAssembly\n");
+  logString("The first row of the signature has length of: ");
+  logInteger(strlen(signature));
+  logString("\n");
+  strcat(signature, " Made in AEC by\n");
+  logString("The first two rows of signature have length: ");
+  logInteger(strlen(signature));
+  logString("\n");
+  strcat(signature, " Teo Samarzija");
+  logString("Signature has length of: ");
+  logInteger(strlen(signature));
+  logString(" \n\n"); // Let's mark the last log of this function like this.
+i:
+  = windowWidth * (windowHeight - 3);
+j:
+  = 0;
+  CharacterPointer modraColor : = "#AAFFFF"; // Sorry, I don't know how
+                                             // to say "modra" in English,
+                                             // and I am not wasting my time
+                                             // looking that up.
+  While not(signature[j] = 0) Loop {
+    If signature[j] = '\n' Then {
+    i:
+      = (i / windowWidth + 1) * windowWidth;
+    }
+    ElseIf not(signature[j] = 0) Then {
+      output[i] : = signature[j];
+      colors[i] : = modraColor;
+      i += 1;
+    }
+    Else { output[i] : = ' '; }
+    EndIf;
+    j += 1;
+  }
+  EndWhile;
+}
+EndFunction;
