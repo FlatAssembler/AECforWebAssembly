@@ -14,8 +14,9 @@ CharacterPointer colors[23 * 80]; // Will contain pointers to the CSS names
                                   //"output".
 
 Function getAddressOfOutput() Which Returns CharacterPointer
-    Does { // The curly brace here is just as a hint to the IDE of how to format
-           // the code, it's ignored by the parser.
+    Does { // The curly brace here is optional and is just as a hint to advanced
+           // text editors and IDEs (made mostly for C-like languages) of how to
+           // format the code, it's ignored by the AEC parser.
   Return AddressOf(output[0]); // When I didn't implement the "extern"
                                // keyword into my AEC compiler...
 }
@@ -67,7 +68,11 @@ EndFunction;
 
 Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
   // Binary Search Algorithm...
-  Decimal32 max : = 80 * 24, min : = 0, i : = (min + max) / 2;
+  Decimal32 max
+      : = 80 * 80 + 24 * 24, // This function will be used for calculating the
+                             // Euclidean distance between cells in the display
+                             // grid, and there will be 80x24 cells.
+      min : = 0, i : = (min + max) / 2;
   While(max - min) > 1 / PRECISION Loop {
     If i *i > x Then {
     max:
