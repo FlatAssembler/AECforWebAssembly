@@ -201,22 +201,10 @@ Function hybrid_sort(Integer32 donja_granica, Integer32 gornja_granica,
   ElseIf gornja_granica -
       donja_granica<8 or asm_i32("(global.get $stack_pointer)")> 4 * 1024 -
       73 Then {
-  // Za male je nizove
-  // SelectionSort brži
-  // i od MergeSorta i
-  // QuickSorta.
-  // Također, kako nije
-  // rekurzivan, može se
-  // koristiti i kad posve
-  // potrošimo memoriju
-  // na sistemskom stogu
-  //(na JavaScript
-  // Virtualnoj Mašini to
-  // jest ne više nego
-  // 4 KB, kako bijaše
-  // u doba Netscapea 2,
-  // godine 1996, tako i
-  // danas).
+  // Za male je nizove SelectionSort brži i od MergeSorta i QuickSorta. Također,
+  // kako nije rekurzivan, može se koristiti i kad posve potrošimo memoriju na
+  // sistemskom stogu(na JavaScript Virtualnoj Mašini to jest ne više nego 4 KB,
+  // kako bijaše u doba Netscapea 2, godine 1996, tako i danas).
   broj_pokretanja_SelectSorta:
     = broj_pokretanja_SelectSorta + 1;
     Integer32 i : = donja_granica;
@@ -226,7 +214,18 @@ Function hybrid_sort(Integer32 donja_granica, Integer32 gornja_granica,
       While j < gornja_granica Loop {
         If ValueAt(originalni_niz + gdje_je_minimum) >
             ValueAt(originalni_niz + j) Then {
-        gdje_je_minimum:
+        gdje_je_minimum
+            /*
+             * ClangFormat (koji koristim za formatiranje AEC programa, a
+             * primarno je namijenjen za C-olike jezike) pogrešno tumači
+             * AEC-ov operator pridruživanja ":=" kao C-ovu oznaku za labele
+             * ':' plus C-ov operator pridruživanja '='. Ne vidim nekakvo
+             * jednostavno rješenje tog problema. Na sreću, AEC-ov tokenizer,
+             * još od najranije verzije, trpi ako se stavi whitespace znak
+             * (razmak, tabulator ili znak za novi red) između ':' i '=' u
+             * operatoru ":=", ali svejedno to ne izgleda dobro.
+             */
+            :
           = j;
         }
         EndIf;
