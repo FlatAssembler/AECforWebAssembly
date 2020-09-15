@@ -14,7 +14,7 @@ CharacterPointer colors[23 * 80]; // Will contain pointers to the CSS names
                                   //"output".
 
 Function getAddressOfOutput() Which Returns CharacterPointer
-    Does { // The curly brace here is optional and is just as a hint to advanced
+    Does { // The curly brace here is optional and is just a hint to advanced
            // text editors and IDEs (made mostly for C-like languages) of how to
            // format the code, it's ignored by the AEC parser.
   Return AddressOf(output[0]); // When I didn't implement the "extern"
@@ -73,10 +73,21 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
                              // Euclidean distance between cells in the display
                              // grid, and there will be 80x24 cells.
       min : = 0, i : = (min + max) / 2;
-  While(max - min) > 1 / PRECISION Loop {
-    If i *i > x Then {
-    max:
-      = i;
+  If(max * max < x) Then // Shouldn't happen, but let's deal with that anyway.
+  {
+    Return exp(
+        ln(x) /
+        2); // Much less precise (and probably slower) than binary search.
+  }
+  EndIf;
+  While((max - min) > 1 / PRECISION) Loop {
+    If(i * i > x) Then {
+      max /*
+           * ClangFormat apparently misinterprets the assignment operator ":="
+           * as the C label marker ':' followed by the C '=' operator,
+           * there doesn't appear to be a simple solution to this problem.
+           */
+          : = i;
     }
     Else {
     min:
@@ -92,7 +103,7 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
 EndFunction;
 
 Function fmod(Decimal32 a, Decimal32 b) Which Returns Decimal32 Does {
-  Return a - b *Integer32(a / b);
+  Return(a - b * Integer32(a / b));
 }
 EndFunction;
 
@@ -108,24 +119,24 @@ Decimal32 oneRadianInDegrees
 Function arctan(Decimal32 x) Which Returns Decimal32 Does {
   // Arcus tangens is equal to the integral of 1/(1+x^2), highschool math.
   Decimal32 sum : = 0, epsilon : = x / PRECISION, i : = 0;
-  While i < x Loop {
+  While(i < x) Loop {
     sum += epsilon / (1 + i * i);
     i += epsilon;
   }
   EndWhile;
-  Return sum *oneRadianInDegrees;
+  Return(sum * oneRadianInDegrees);
 }
 EndFunction;
 
 Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
-  If degrees < 0 Then { Return - sin(-degrees); }
+  If(degrees < 0) Then { Return - sin(-degrees); }
   EndIf;
   If degrees > 90 Then {
     Decimal32 sinOfDegreesMinus90 : = sin(degrees - 90);
     If fmod(degrees, 360) < 180 Then {
       Return sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
     }
-    Else { Return - sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90); }
+    Else { Return(-sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90)); }
     EndIf;
   }
   EndIf;
@@ -144,7 +155,7 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
    */
   Decimal32 radians : = degrees / oneRadianInDegrees, tmpsin : = 0,
                     tmpcos : = 1, epsilon : = radians / PRECISION, i : = 0;
-  While(epsilon > 0 and i < radians) or (epsilon < 0 and i > radians) Loop {
+  While((epsilon > 0 and i < radians) or (epsilon < 0 and i > radians)) Loop {
     tmpsin += epsilon * tmpcos;
     tmpcos -= epsilon * tmpsin;
     i += epsilon;
@@ -161,7 +172,7 @@ EndFunction;
 
 Function arccos(Decimal32 x) Which Returns Decimal32 Does {
   Return 90 - arcsin(x); // Basic common sense to somebody who understands
-  // what those terms mean.
+                         // what those terms mean.
 }
 EndFunction;
 
@@ -208,8 +219,8 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
   Integer32 windowWidth : = 80, windowHeight : = 23, i : = 0;
   CharacterPointer lightGrayColor : = "#EEEEEE";
   CharacterPointer lightGreenColor : = "#CCFFCC";
-  While i < windowWidth *windowHeight Loop { // First, fill the window with
-                                             // spaces and newlines.
+  While(i < windowWidth * windowHeight) Loop { // First, fill the window with
+                                               // spaces and newlines.
     If mod(i, windowWidth) = windowWidth - 1 Then { output[i] : = '\n'; }
     Else { output[i] : = ' '; }
     EndIf;
@@ -222,8 +233,8 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
                                                         : centerY - 1;
 i:
   = 0;
-  While i < windowWidth *windowHeight Loop { // Next, draw the circle which
-                                             // represents the clock
+  While (i < windowWidth * windowHeight) Loop { // Next, draw the circle which
+                                                // represents the clock
     Integer32 y : = i / windowWidth, x : = mod(i, windowWidth);
     Decimal32 distance : = sqrt((x - centerX) * (x - centerX) +
                                 (y - centerY) * (y - centerY)); // Pythagorean
@@ -405,9 +416,9 @@ y:
         logInteger(expectedX);
         logString(".\n");
         Character currentSign : = j = 0 ? 'h' : j = 1 ? 'm' : 's';
-        If(abs(upperBoundX - lowerBoundX) < 1 + 1 / PRECISION or
-           abs(upperBoundY - lowerBoundY) < 1 + 1 / PRECISION) and
-            output[i] = ' ' Then {
+        If((abs(upperBoundX - lowerBoundX) < 1 + 1 / PRECISION or
+            abs(upperBoundY - lowerBoundY) < 1 + 1 / PRECISION) and
+               output[i] = ' ') Then {
           output[i] : = currentSign;
           colors[i] : = currentColor;
         }
@@ -430,7 +441,7 @@ y:
   CharacterPointer darkGreenColor : = "#AAFFAA";
 i:
   = 0;
-  While i < windowWidth *windowHeight Loop {
+  While (i < windowWidth * windowHeight) Loop {
   y:
     = i / windowWidth;
     Integer32 x : = mod(i, windowWidth);
@@ -455,7 +466,7 @@ j:
   i:
     = windowWidth * (windowHeight - 1); // So, move to the beginning of
                                         // the last line.
-    While i < windowWidth *windowHeight Loop {
+    While(i < windowWidth * windowHeight) Loop {
       If j < 2 and (output[i - windowWidth] =
                         'x' and (output[i + 1] = 'x' or output[i - 1] = 'x'))
                        Then {
