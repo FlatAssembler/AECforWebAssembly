@@ -11,10 +11,12 @@
         font-family: "Lucida Console", monospace;
         font-size: 12px;
         white-space: pre;
+        max-width: 100%;
         width: calc(80 * 7.2px);
         background: #111111;
         color: #eeeeee;
-        height: calc(24 * 14.5px);
+        height: 333px;
+        max-height: 75vh;
         display: block;
       }
       h1 {
@@ -24,6 +26,7 @@
         margin-left: auto;
         margin-right: auto;
         width: calc(80 * 7.2px);
+        max-width: 80%;
       }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,7 +34,7 @@
   <body>
     <h1>Analog Clock</h1>
     This is my attempt to port the
-    <span style="font-family: monospace;">analogClock.aec</span> from
+    <span style="font-family: monospace">analogClock.aec</span> from
     <a
       href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/blob/master/ArithmeticExpressionCompiler.zip?raw=true"
       >Linux and FreeDOS</a
@@ -46,14 +49,15 @@
     Explorer.<br /><br />
     <div id="center">
       AEC program output:<br />
-      <span id="format_as_code"></span>
+      <svg
+        id="format_as_code"
+        viewbox="0 0 576 333"
+        preserveAspectRatio="none"
+      ></svg>
     </div>
     <br />
     You can see the source code of the AEC program
-    <a
-      href="analogClock.aec.html"
-      >here</a
-    >.
+    <a href="analogClock.aec.html">here</a>.
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
@@ -109,11 +113,15 @@
         let str = "";
         for (let i = 0; i < 80 * 23; i++)
           str +=
-            '<span style="color:' +
+            "<text x=" +
+            7.2 * (i % 80) +
+            " y=" +
+            Math.floor(i / 80) * 14.5 +
+            ' fill="' +
             getStringAtAddress(colors[i]) +
             '">' +
             String.fromCharCode(bytes[i]) +
-            "<\/span>";
+            "<\/text>";
         document.getElementById("format_as_code").innerHTML = str;
       }
       setInterval(updateClock, 1000);
