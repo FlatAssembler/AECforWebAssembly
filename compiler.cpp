@@ -556,6 +556,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                        "continue, but be warned it might produce wrong code "
                        "because of this."
                     << std::endl;
+        valueToBeReturned = valueToBeReturned.children[0];
+        if (tmp.children[0].getLispExpression() !=
+            valueToBeReturned.getLispExpression())
+          std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                    << ", Internal compiler error: Some part of the compiler "
+                       "has changed a part of the AST from "
+                    << tmp.children[0].getLispExpression() << " into "
+                    << valueToBeReturned.getLispExpression()
+                    << ", which shouldn't be possible. The compilation will "
+                       "continue, but be warned it might produce wrong code "
+                       "because of this."
+                    << std::endl;
         valueToBeReturned = tmp.children[0];
       }
       assembly +=
