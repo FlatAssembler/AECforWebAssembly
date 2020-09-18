@@ -64,7 +64,8 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
          ")\n");
   If nova_adresa_u_stranicama = -1 Then { // Ako nema više
                                           // slobodne memorije...
-    Return - 1;
+    Return(-1); // Ne stavim li zagrade oko "-1", ClangFormat će misliti da je
+                // "Return" ime neke varijable.
   }
   EndIf; // Ni točka-zarez ovdje nije potreban, ali pomaže IDE-ovima da razumiju
          // programski kôd.
@@ -95,7 +96,30 @@ Decimal32 PRECISION : = 128; // Ovdje možemo balansirati između brzine i
                              // se može dogoditi da precijenimo koliko se
                              // duboko rekurzija smije granati i izazovemo
                              // stack overflow.
+
+Decimal32
+    memoizacija_prirodnog_logaritma[8192]; // Memoizacija je dio memorije u koju
+                                           // se spremaju već izračunati podaci,
+                                           // da se ne računaju više puta.
+
+Function Eulerov_broj_na_potenciju(Decimal32 x)
+    Which Returns Decimal32 Is Declared; // Vidi dolje za pojašnjenje ovoga.
+
 Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does {
+  If x < 1 Then { Return(-prirodni_logaritam(1 / x)); }
+  EndIf;
+  If(x < 8192 and
+     not(memoizacija_prirodnog_logaritma[asm_f32( // Vidi iduću funkciju za
+                                                  // pojašnjenje ovoga...
+             "(f32.nearest (local.get 0))")] = 0)) Then {
+    Return
+        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (local.get 0))")];
+  }
+  EndIf;
+  If x > 8192 Then {
+    Return 1 + prirodni_logaritam(x / Eulerov_broj_na_potenciju(1));
+  }
+  EndIf;
   // Prirodni logaritam je integral od 1/x u intervalu od 1 do x,
   // srednjoškolska matematika.
   Decimal32 zbroj : = 0, epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
@@ -106,11 +130,38 @@ Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does {
                   // čine nečitkima.
   }
   EndWhile;
+  If x < 8192 Then {
+    Return
+        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (local.get 0))")]
+        : = zbroj;
+  }
+  EndIf;
   Return zbroj;
 }
 EndFunction;
 
+Decimal32
+    memoizacija_Eulerovog_algoritma[256]; // Možda malo ubrza program, gotovo
+                                          // sigurno ga neće usporiti...
+
+Function abs(Decimal32 x) Which Returns Decimal32 Is
+    Declared; // Deklarirat ćemo funkciju "abs" da se može koristiti prije no
+              // što se definira.
+
 Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
+  If(abs(x) < 64 and
+     not(memoizacija_Eulerovog_algoritma
+             [asm_f32("(f32.nearest (local.get 0))") * 2 + 128] = 0))
+      Then { // Koristio sam ovdje umetnuti asembler zato što ništa drugo što
+             // napišem u AEC-u neće učiniti da compiler koji sam napravio
+             // pozove asemblersku instrukciju "f32.nearest" (poznatu kao
+             // "round" u drugim programskim jezicima), a mnogo je lakše
+             // napisati malo umetnutog asemblera nego mijenjati i recompilirati
+             // compiler.
+    Return memoizacija_Eulerovog_algoritma
+        [asm_f32("(f32.nearest (local.get 0))") * 2 + 128];
+  }
+  EndIf;
   // Eulerov Algoritam iz Matematike 2...
   Decimal32 i : = 0, y : = 1, epsilon : = x / PRECISION;
   While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop {
@@ -118,7 +169,11 @@ Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
     i += epsilon;
   }
   EndWhile;
-  Return y;
+  If abs(x) < 64 Then {
+    Return memoizacija_Eulerovog_algoritma
+        [asm_f32("(f32.nearest (local.get 0))") * 2 + 128] : = y;
+  }
+  EndIf Return y;
 }
 EndFunction;
 

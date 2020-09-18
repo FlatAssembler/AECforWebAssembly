@@ -128,16 +128,26 @@ Function arctan(Decimal32 x) Which Returns Decimal32 Does {
 }
 EndFunction;
 
+Function cos(Decimal32 degrees)
+    Which Returns Decimal32 Is Declared; // Because "sin" and "cos" are
+                                         // circularly dependent on one another.
+
+Decimal32 sineMemoisation[91];
+
 Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
   If(degrees < 0) Then { Return - sin(-degrees); }
   EndIf;
-  If degrees > 90 Then {
-    Decimal32 sinOfDegreesMinus90 : = sin(degrees - 90);
-    If fmod(degrees, 360) < 180 Then {
-      Return sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
-    }
-    Else { Return(-sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90)); }
-    EndIf;
+  If degrees > 90 Then { Return cos(degrees - 90); }
+  EndIf;
+  If not(sineMemoisation[asm_f32("(f32.nearest (local.get 0))")] = 0)
+      Then { //"(local.get 0)" means, in WebAssembly, "Get the first argument of
+             // this function.", and the first argument of this function is
+             //"degrees". I've used inline assembly here because nothing else I
+             // write will output "f32.nearest" (called "round" in most
+             // programming languages) WebAssembly directive, and it's way more
+             // convenient to insert some inline assembly than to modify and
+             // recompile the compiler.
+    Return sineMemoisation[asm_f32("(f32.nearest (local.get 0))")];
   }
   EndIf;
   /*
@@ -161,7 +171,7 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
     i += epsilon;
   }
   EndWhile;
-  Return tmpsin;
+  Return sineMemoisation[asm_f32("(f32.nearest (local.get 0))")] : = tmpsin;
 }
 EndFunction;
 
@@ -233,8 +243,8 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
                                                         : centerY - 1;
 i:
   = 0;
-  While (i < windowWidth * windowHeight) Loop { // Next, draw the circle which
-                                                // represents the clock
+  While(i < windowWidth * windowHeight) Loop { // Next, draw the circle which
+                                               // represents the clock
     Integer32 y : = i / windowWidth, x : = mod(i, windowWidth);
     Decimal32 distance : = sqrt((x - centerX) * (x - centerX) +
                                 (y - centerY) * (y - centerY)); // Pythagorean
@@ -441,7 +451,7 @@ y:
   CharacterPointer darkGreenColor : = "#AAFFAA";
 i:
   = 0;
-  While (i < windowWidth * windowHeight) Loop {
+  While(i < windowWidth * windowHeight) Loop {
   y:
     = i / windowWidth;
     Integer32 x : = mod(i, windowWidth);

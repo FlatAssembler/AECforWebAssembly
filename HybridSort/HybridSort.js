@@ -117,11 +117,12 @@ else {
             const pocetna_AEC_funkcija = izvozi_iz_AECa.pocetna_AEC_funkcija;
             console.log(
                 "Logaritam veličine niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
-            for (let logaritam_velicine_niza = 0; logaritam_velicine_niza <= 18;
+            for (let logaritam_velicine_niza = 0;
+                 logaritam_velicine_niza <= 18.5;
                  logaritam_velicine_niza +=
                  logaritam_velicine_niza >= 10 && logaritam_velicine_niza < 13
                      ? 1 / 5
-                     : 1 / 2) {
+                     : 2 / 5) {
               velicina_niza = Math.pow(2, logaritam_velicine_niza);
               niz = new Int32Array(velicina_niza);
               for (let i = 0; i < velicina_niza; i++)

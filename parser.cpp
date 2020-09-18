@@ -497,7 +497,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
             << ", Parser error: Expected a function declaration of the format "
                "\"Function function_name(argument list) Which Returns "
                "type_name Does\" or \"Function function_name(argument list) "
-               "Which Returns type_name Is External;\"!"
+               "Which Returns type_name Is External|Declared;\"!"
             << std::endl;
         return input;
       }
@@ -520,10 +520,12 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       input[functionName - 1].children.push_back(input[functionName + 2]);
       if (input[functionName + 4].text == "Is") // External function
       {
-        if (input[functionName + 5].text != "External") {
+        if (input[functionName + 5].text != "External" and
+            input[functionName + 5].text != "Declared") {
           std::cerr << "Line " << input[functionName + 5].lineNumber
                     << ", Column " << input[functionName + 5].columnNumber
-                    << ", Parser error: Expected \"External\" instead of \""
+                    << ", Parser error: Expected \"External\" or \"Declared\" "
+                       "instead of \""
                     << input[functionName + 5].text << "\"!" << std::endl;
           return input;
         }

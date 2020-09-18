@@ -25,19 +25,20 @@ function highlightedToken(token) {
       token == "Integer64" || token == "Integer64Pointer" ||
       token == "Decimal32" || token == "Decimal64" ||
       token == "Decimal32Pointer" || token == "Decimal64Pointer" ||
-      token == "DataType" || token == "Nothing")
+      token == "CharacterPointerPointer" || token == "DataType" ||
+      token == "Nothing")
     return '<span class="Type">' + token + "</span>";
   if (token.charAt(0) >= "0" && token.charAt(0) <= "9")
     return '<span class="Constant">' + token + "</span>";
   if (token == "Function" || token == "Which" || token == "Returns" ||
-      token == "Is" || token == "External" || token == "Does" ||
-      token == "EndFunction" || token == "Return" || token == "If" ||
-      token == "ElseIf" || token == "Else" || token == "EndIf" ||
-      token == "Then" || token == "While" || token == "EndWhile" ||
-      token == "Loop" || token == ";" || token == "Structure" ||
-      token == "Consists" || token == "Of" || token == "EndStructure" ||
-      token == "asm" || token == "asm_i32" || token == "asm_i64" ||
-      token == "asm_f32" || token == "asm_f64")
+      token == "Is" || token == "External" || token == "Declared" ||
+      token == "Does" || token == "EndFunction" || token == "Return" ||
+      token == "If" || token == "ElseIf" || token == "Else" ||
+      token == "EndIf" || token == "Then" || token == "While" ||
+      token == "EndWhile" || token == "Loop" || token == ";" ||
+      token == "Structure" || token == "Consists" || token == "Of" ||
+      token == "EndStructure" || token == "asm" || token == "asm_i32" ||
+      token == "asm_i64" || token == "asm_f32" || token == "asm_f64")
     return '<span class="Keyword">' + token + "</span>";
   if (token == "and" || token == "or" || token == "mod" ||
       token == "AddressOf" || token == "ValueAt" || token == "," ||

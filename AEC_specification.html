@@ -1123,9 +1123,18 @@ EndFunction</pre
         Now, if you call such a function with fewer than 6 arguments, the
         compiler will not complain, but will supply the rest with default
         values. Note that this will not work when calling an AEC function from
-        JavaScript. AEC doesn't support function hoisting nor circularly
-        dependent functions, for the simple reason that there is no obvious way
-        to implement them in WebAssembly.<br />
+        JavaScript.
+        <del
+          >AEC doesn't support function hoisting nor circularly dependent
+          functions, for the simple reason that there is no obvious way to
+          implement them in WebAssembly.</del
+        >
+        <i
+          >(UPDATE: C++-style forward function declarations have been
+          implemented, as there is a relatively simple way to do it using
+          WebAssembly Binary Toolkit, the assembler takes care of that for
+          you.)</i
+        ><br />
         <b>TODO</b>: Find a way to implement circularly dependent functions,
         and, if possible, function hoisting. Also, implement function pointers.
         Named function arguments (using, for example, the

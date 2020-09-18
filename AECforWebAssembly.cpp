@@ -18,11 +18,28 @@ bool ends_with(string first, string second) {
 int main(int argc, char **argv) {
   using namespace std::regex_constants;
   using namespace std::chrono;
-  if (argc < 2 or
-      (!ends_with(argv[1], ".aec") and !ends_with(argv[1], ".AEC"))) {
-    cerr << "Please invoke this program as follows:\n"
-         << argv[0] << " name_of_the_program.aec" << endl;
-    return -1;
+  try {
+    if (argc < 2 or
+        !regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase))) {
+      if (argc >= 2 and
+          (ends_with(argv[1], ".aec") or
+           ends_with(argv[1],
+                     ".AEC"))) // Damn, CLANG on Linux is to C++ what Internet
+                               // Explorer 6 is to JavaScript. I don't understand
+                               // how it manages to compile itself, yet it
+                               // miscompiles something every now and then in a
+                               // 4'000-lines-of-code program.
+        throw regex_error(error_complexity);
+      cerr << "Please invoke this program as follows:\n"
+           << argv[0] << " name_of_the_program.aec" << endl;
+      return -1;
+    }
+  } catch (regex_error &error) {
+    cerr << "Your C++ compiler doesn't appear to support JavaScript-style "
+            "regular expressions, "
+            "that this program makes heavy use of. Quitting now!"
+         << endl;
+    exit(-1);
   }
   cout << "Running the tests..." << endl;
   auto beginningOfTests = chrono::high_resolution_clock::now();

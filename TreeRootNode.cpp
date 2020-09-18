@@ -402,7 +402,7 @@ public:
                                 functionDeclaration.name.substr(
                                     0, functionDeclaration.name.size() - 1) +
                                 "))\n";
-        } else {
+        } else if (childNode.children[2].text != "Declared") {
           std::cerr << "Line " << childNode.lineNumber << ", Column "
                     << childNode.columnNumber
                     << ", Internal compiler error: The compiler got into a "
