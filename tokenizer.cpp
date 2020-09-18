@@ -86,7 +86,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         tokenizedExpression.push_back(
             TreeNode(string(), currentLine, currentColumn));
       } else if ((std::isalnum(input[i]) or input[i] == '_') and
-                 regex_match(
+                 regex_search(
                      tokenizedExpression.back().text,
                      regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                            "\\d|_|[a-z]|[A-Z])*$)")) and
@@ -95,8 +95,8 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         currentColumn++;
         tokenizedExpression.back().text += input[i];
       } else if (input[i] == '.' and
-                 regex_match(tokenizedExpression.back().text,
-                             regex("^\\d+$")) and
+                 regex_search(tokenizedExpression.back().text,
+                              regex("^\\d+$")) and
                  !areWeInAString and
                  !areWeInAComment) // If we are currently
                                    // tokenizing a number, a dot
@@ -146,7 +146,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
         iterator->text = to_string(int('\\'));
     for (auto iterator = tokenizedExpression.begin();
          iterator < tokenizedExpression.end(); iterator++)
-      if (regex_match(iterator->text, regex("^\\s*$"))) // Delete empty nodes.
+      if (regex_search(iterator->text, regex("^\\s*$"))) // Delete empty nodes.
       {
         iterator--;
         tokenizedExpression.erase(iterator + 1);

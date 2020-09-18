@@ -19,7 +19,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                   << "\" has less than two operands." << std::endl;
         return input;
       }
-      if (!regex_match(
+      if (!regex_search(
               input[i - 1].text,
               regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                     "\\d|_|[a-z]|[A-Z])*$)")) and
@@ -30,7 +30,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                   << ", Parser error: Unexpected token \"" << input[i - 1].text
                   << "\"." << std::endl;
       }
-      if (!regex_match(
+      if (!regex_search(
               input[i + 1].text,
               regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
                     "\\d|_|[a-z]|[A-Z])*$)")) and
@@ -232,12 +232,12 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
     if (parsedExpression[i].text == "-" and
         i != int(parsedExpression.size()) - 1 and
         parsedExpression[i].children.size() == 0 and
-        (!i or
-         (!std::regex_match(parsedExpression[i - 1].text,
-                            std::regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]"
-                                       "|[A-Z])+\\.(\\d|_|[a-z]|[A-Z])*$)")) and
-          parsedExpression[i - 1].text.back() != '(' and
-          parsedExpression[i - 1].children.size() == 0))) {
+        (!i or (!std::regex_search(
+                    parsedExpression[i - 1].text,
+                    std::regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]"
+                               "|[A-Z])+\\.(\\d|_|[a-z]|[A-Z])*$)")) and
+                parsedExpression[i - 1].text.back() != '(' and
+                parsedExpression[i - 1].children.size() == 0))) {
       parsedExpression[i].children.push_back(
           TreeNode("0", parsedExpression[i].lineNumber,
                    parsedExpression[i].columnNumber));

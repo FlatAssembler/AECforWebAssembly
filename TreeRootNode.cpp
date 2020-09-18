@@ -34,8 +34,8 @@ public:
       if (basicDataTypeSizes.count(
               childNode.text)) { // Global variable declaration
         for (auto variableName : childNode.children) {
-          if (!std::regex_match(variableName.text,
-                                std::regex("^(_|[A-Z]|[a-z])\\w*\\[?$")) or
+          if (!std::regex_search(variableName.text,
+                                 std::regex("^(_|[A-Z]|[a-z])\\w*\\[?$")) or
               AECkeywords.count(variableName.text)) {
             std::cerr
                 << "Line " << variableName.lineNumber << ", Column "
@@ -45,6 +45,14 @@ public:
                 << std::endl;
             exit(1);
           }
+          if (context.variableTypes.count(variableName.text))
+            std::cerr << "Line " << childNode.lineNumber << ", Column "
+                      << childNode.columnNumber
+                      << ", Compiler warning: Variable named \""
+                      << variableName.text
+                      << "\" is already visible in this scope, this "
+                         "declaration shadows it."
+                      << std::endl;
           context.globalVariables[variableName.text] =
               context.globalVariablePointer;
           context.variableTypes[variableName.text] = childNode.text;
@@ -57,7 +65,7 @@ public:
             context.globalVariablePointer +=
                 basicDataTypeSizes.at(childNode.text);
           globalDeclarations +=
-              ";;\"" + variableName.text +
+              "\t;;\"" + variableName.text +
               "\" is declared to be at the memory address " +
               std::to_string(context.globalVariables[variableName.text]) + "\n";
           auto iteratorOfTheAssignment = std::find_if(

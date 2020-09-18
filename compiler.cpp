@@ -225,14 +225,25 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   inlineAssembly = ";;Inline assembly begins.\n" +
                    inlineAssembly.substr(1, inlineAssembly.size() - 2) +
                    "\n;;Inline assembly ends.";
-  inlineAssembly =
-      std::regex_replace(inlineAssembly, std::regex(R"(\\\\)"), "\\");
-  inlineAssembly =
-      std::regex_replace(inlineAssembly, std::regex(R"(\\n)"), "\n");
-  inlineAssembly =
-      std::regex_replace(inlineAssembly, std::regex(R"(\\t)"), "\t");
-  inlineAssembly =
-      std::regex_replace(inlineAssembly, std::regex(R"(\\\")"), "\"");
+  // CLANG 10 (but not GCC 9.3.0) appears to miscompile "regex_replace" on
+  // Oracle Linux 7.
+  std::string temporaryString;
+  for (unsigned int i = 0; i < inlineAssembly.size(); i++)
+    if (inlineAssembly.substr(i, 2) == R"(\\)") {
+      temporaryString += '\\';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\n)") {
+      temporaryString += '\n';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\t)") {
+      temporaryString += '\t';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\")") {
+      temporaryString += '"';
+      i++;
+    } else
+      temporaryString += inlineAssembly[i];
+  inlineAssembly = temporaryString;
   return inlineAssembly;
 }
 
@@ -283,6 +294,13 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       else if (basicDataTypeSizes.count(childNode.text)) {
         // Local variables declaration.
         for (TreeNode variableName : childNode.children) {
+          if (context.variableTypes.count(variableName.text))
+            std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                      << ", Compiler warning: Variable named \""
+                      << variableName.text
+                      << "\" is already visible in this scope, this "
+                         "declaration shadows it."
+                      << std::endl;
           if (variableName.text.back() != '[') { // If it's not an array.
             context.localVariables[variableName.text] = 0;
             for (auto &pair : context.localVariables)
@@ -525,10 +543,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 "\n\t\t\t)\n\t\t)\n" +
                 children[1].compile(context).indentBy(2) +
                 "\n\t\t(br 0)\n\t)\n)";
-  } else if (std::regex_match(text,
-                              std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+  } else if (std::regex_search(text,
+                               std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     assembly += "(i64.const " + text + ")";
-  else if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
+  else if (std::regex_search(text, std::regex("^\\d+\\.\\d*$")))
     assembly += "(f64.const " + text + ")";
   else if (text == "Return") {
     if (currentFunction.returnType != "Nothing") {
@@ -559,6 +577,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         valueToBeReturned = valueToBeReturned.children[0];
         if (tmp.children[0].getLispExpression() !=
             valueToBeReturned.getLispExpression())
+          // https://stackoverflow.com/questions/63951270/using-default-copy-constructor-corrupts-a-tree-in-c
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                     << ", Internal compiler error: Some part of the compiler "
                        "has changed a part of the AST from "
@@ -986,9 +1005,9 @@ std::string TreeNode::getType(const CompilationContext context) const {
               << getLispExpression() << std::endl;
     std::exit(1);
   }
-  if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+  if (std::regex_search(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
     return "Integer64";
-  if (std::regex_match(text, std::regex("^\\d+\\.\\d*$")))
+  if (std::regex_search(text, std::regex("^\\d+\\.\\d*$")))
     return "Decimal64";
   if (text == "AddressOf(") {
     if (children.empty()) {
@@ -1098,7 +1117,7 @@ std::string TreeNode::getType(const CompilationContext context) const {
       text == "Return") // Or else the compiler will claim those
                         // tokens are undeclared variables.
     return "Nothing";
-  if (std::regex_match(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?"))) {
+  if (std::regex_search(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?$"))) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
               << "\" is not declared!" << std::endl;

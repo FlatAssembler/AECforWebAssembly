@@ -21,6 +21,14 @@ class TreeNode {
 protected:
   std::set<std::string> getStringsInSubnodes() const {
     auto setToBeReturned = std::set<std::string>();
+    if (text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
+        text == "asm_f32(" or
+        text == "asm_f64(") // Inline assembly isn't a string that can be
+                            // manipulated, and storing it in memory wastes
+                            // memory (potentially a lot of it).
+      return std::set<std::string>(); // That's why we will return an empty set,
+                                      // as if we had no strings in our subnodes
+                                      // (even though we have at least one).
     if (text.size() and text[0] == '"') {
       setToBeReturned.insert(text);
       return setToBeReturned;
