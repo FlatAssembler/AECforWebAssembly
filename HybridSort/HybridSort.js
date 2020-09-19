@@ -15,9 +15,9 @@ else {
   let velicina_niza, niz,
       memory = new WebAssembly.Memory({
         initial : 1,
-        maximum : 256
+        maximum : 1024
       }) // Ograniči velicinu dijeljene memorije između JavaScripta i AEC-a na
-         // 256 stranice = 16 MB. To je u vrh glave dovoljno, i, ako se
+         // 1024 stranice = 64 MB. To je u vrh glave dovoljno, i, ako se
          // prekorači, znači da je neki bug u programu i da memorija negdje
          // curi.
       ,
@@ -117,12 +117,11 @@ else {
             const pocetna_AEC_funkcija = izvozi_iz_AECa.pocetna_AEC_funkcija;
             console.log(
                 "Logaritam veličine niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
-            for (let logaritam_velicine_niza = 0;
-                 logaritam_velicine_niza <= 18.5;
+            for (let logaritam_velicine_niza = 0; logaritam_velicine_niza <= 20;
                  logaritam_velicine_niza +=
                  logaritam_velicine_niza >= 10 && logaritam_velicine_niza < 13
                      ? 1 / 5
-                     : 2 / 5) {
+                     : logaritam_velicine_niza >= 13 ? 2 / 5 : 1 / 2) {
               velicina_niza = Math.pow(2, logaritam_velicine_niza);
               niz = new Int32Array(velicina_niza);
               for (let i = 0; i < velicina_niza; i++)

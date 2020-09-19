@@ -141,7 +141,7 @@ Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does {
 EndFunction;
 
 Decimal32
-    memoizacija_Eulerovog_algoritma[256]; // Možda malo ubrza program, gotovo
+    memoizacija_Eulerovog_algoritma[512]; // Možda malo ubrza program, gotovo
                                           // sigurno ga neće usporiti...
 
 Function abs(Decimal32 x) Which Returns Decimal32 Is
@@ -151,7 +151,8 @@ Function abs(Decimal32 x) Which Returns Decimal32 Is
 Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
   If(abs(x) < 64 and
      not(memoizacija_Eulerovog_algoritma
-             [asm_f32("(f32.nearest (local.get 0))") * 2 + 128] = 0))
+             [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") +
+              256] = 0))
       Then { // Koristio sam ovdje umetnuti asembler zato što ništa drugo što
              // napišem u AEC-u neće učiniti da compiler koji sam napravio
              // pozove asemblersku instrukciju "f32.nearest" (poznatu kao
@@ -159,7 +160,7 @@ Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
              // napisati malo umetnutog asemblera nego mijenjati i recompilirati
              // compiler.
     Return memoizacija_Eulerovog_algoritma
-        [asm_f32("(f32.nearest (local.get 0))") * 2 + 128];
+        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") + 256];
   }
   EndIf;
   // Eulerov Algoritam iz Matematike 2...
@@ -171,9 +172,11 @@ Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
   EndWhile;
   If abs(x) < 64 Then {
     Return memoizacija_Eulerovog_algoritma
-        [asm_f32("(f32.nearest (local.get 0))") * 2 + 128] : = y;
+        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") + 256]
+        : = y;
   }
-  EndIf Return y;
+  EndIf;
+  Return y;
 }
 EndFunction;
 
