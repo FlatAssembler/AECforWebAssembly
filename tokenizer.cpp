@@ -5,7 +5,7 @@ bool isComposedOfAlnumsAndOneDot(
                        // portable) to do it this way than in REGEX.
 {
   bool passedOverADot = false;
-  for (int i = 0; i < token.size(); i++)
+  for (unsigned i = 0; i < token.size(); i++)
     if (token[i] == '.' and !passedOverADot and i != 0)
       passedOverADot = true;
     else if (token[i] == '.')
@@ -19,7 +19,7 @@ bool isAllWhitespace(
     std::string token) // No obvious way to do it in REGEX so that CLANG on
                        // Linux won't miscompile it.
 {
-  for (int i = 0; i < token.size(); i++)
+  for (unsigned i = 0; i < token.size(); i++)
     if (!std::isspace(token[i]))
       return false;
   return true;
@@ -126,8 +126,8 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
                    regex("[0-9]+",
                          std::regex::extended)) and // Some C++ runtime
                                                     // environments apparently
-                                                    // think "[0-9]+" wouldn't be
-                                                    // a proper REGEX in
+                                                    // think "[0-9]+" wouldn't
+                                                    // be a proper REGEX in
                                                     // JavaScript (it would be).
                !areWeInAString and
                !areWeInAComment) // If we are currently
