@@ -295,10 +295,13 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         // Local variables declaration.
         for (TreeNode variableName : childNode.children) {
           if (context.variableTypes.count(variableName.text))
-            std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+            std::cerr << "Line " << variableName.lineNumber << ", Column "
+                      << variableName.columnNumber
                       << ", Compiler warning: Variable named \""
                       << variableName.text
-                      << "\" is already visible in this scope, this "
+                      << "\" is already visible in this scope (to be of type \""
+                      << context.variableTypes.at(variableName.text)
+                      << "\"), this "
                          "declaration shadows it."
                       << std::endl;
           if (variableName.text.back() != '[') { // If it's not an array.
@@ -574,10 +577,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                        "continue, but be warned it might produce wrong code "
                        "because of this."
                     << std::endl;
-        valueToBeReturned = valueToBeReturned.children[0];
+        valueToBeReturned = TreeNode(valueToBeReturned.children[0]);
         if (tmp.children[0].getLispExpression() !=
-            valueToBeReturned.getLispExpression())
-          // https://stackoverflow.com/questions/63951270/using-default-copy-constructor-corrupts-a-tree-in-c
+            valueToBeReturned.getLispExpression()) {
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                     << ", Internal compiler error: Some part of the compiler "
                        "has changed a part of the AST from "
@@ -587,7 +589,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                        "continue, but be warned it might produce wrong code "
                        "because of this."
                     << std::endl;
-        valueToBeReturned = tmp.children[0];
+          valueToBeReturned = tmp.children[0];
+        }
       }
       assembly +=
           ";;Setting for returning: " + valueToBeReturned.getLispExpression() +
