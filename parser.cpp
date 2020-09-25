@@ -5,8 +5,6 @@ std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                std::vector<std::string> operators,
                                Associativity associativity) {
-  using std::regex;
-  using std::regex_match;
   for (int i = associativity == left ? 0 : int(input.size()) - 1;
        associativity == left ? i < int(input.size()) : i >= 0;
        i += associativity == left ? 1 : -1) {
@@ -19,10 +17,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                   << "\" has less than two operands." << std::endl;
         return input;
       }
-      if (!regex_search(
-              input[i - 1].text,
-              regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
-                    "\\d|_|[a-z]|[A-Z])*$)")) and
+      if (!isComposedOfAlnumsAndOneDot(input[i - 1].text) and
           !input[i - 1].children.size() and input[i - 1].text.back() != '(' and
           input[i - 1].text.front() != '"') {
         std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
@@ -30,10 +25,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                   << ", Parser error: Unexpected token \"" << input[i - 1].text
                   << "\"." << std::endl;
       }
-      if (!regex_search(
-              input[i + 1].text,
-              regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]|[A-Z])+\\.("
-                    "\\d|_|[a-z]|[A-Z])*$)")) and
+      if (!isComposedOfAlnumsAndOneDot(input[i + 1].text) and
           !input[i + 1].children.size() and input[i - 1].text.back() != '(' and
           input[i + 1].text.back() != '(' and
           input[i + 1].text.front() != '"') {
@@ -232,10 +224,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
     if (parsedExpression[i].text == "-" and
         i != int(parsedExpression.size()) - 1 and
         parsedExpression[i].children.size() == 0 and
-        (!i or (!std::regex_search(
-                    parsedExpression[i - 1].text,
-                    std::regex("(^(\\d|_|[a-z]|[A-Z])*$)|(^(\\d|_|[a-z]"
-                               "|[A-Z])+\\.(\\d|_|[a-z]|[A-Z])*$)")) and
+        (!i or (!isComposedOfAlnumsAndOneDot(parsedExpression[i - 1].text) and
                 parsedExpression[i - 1].text.back() != '(' and
                 parsedExpression[i - 1].children.size() == 0))) {
       parsedExpression[i].children.push_back(

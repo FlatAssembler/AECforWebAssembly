@@ -11,6 +11,81 @@
 
 #pragma once
 
+bool isInteger(std::string str) {
+  // std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)"), so that CLANG on Oracle
+  // Linux doesn't miscompile it (as it miscompiles nearly all regexes).
+  if (!str.size())
+    return false;
+  if (str.substr(0, 2) == "0x") { // Hexadecimal numbers...
+    if (str.size() == 2)
+      return false;
+    for (unsigned i = 2; i < str.size(); i++)
+      if (!std::isdigit(str[i]) and !((str[i] >= 'A' and str[i] <= 'F') or
+                                      (str[i] >= 'a' and str[i] <= 'f')))
+        return false;
+    return true;
+  }
+  // Integer decimal numbers...
+  for (unsigned i = 0; i < str.size(); i++)
+    if (!std::isdigit(str[i]))
+      return false;
+  return true;
+}
+
+bool isDecimalNumber(std::string str) {
+  if (!str.size())
+    return false;
+  bool haveWePassedOverADecimalPoint = false;
+  if (str[0] == '.')
+    return false;
+  for (unsigned i = 0; i < str.size(); i++)
+    if (str[i] == '.' and !haveWePassedOverADecimalPoint)
+      haveWePassedOverADecimalPoint = true;
+    else if (str[i] == '.')
+      return false;
+    else if (!isdigit(str[i]))
+      return false;
+  return true;
+}
+
+bool isValidVariableName(std::string str) {
+  // std::regex("^(_|[a-z]|[A-Z])\\w*\\[?$")
+  if (!str.size())
+    return false;
+  if (std::isdigit(str[0]))
+    return false;
+  for (unsigned i = 0; i < str.size(); i++)
+    if (!std::isalnum(str[i]) and str[i] != '_' and
+        !(i == str.size() - 1 and str[i] == '['))
+      return false;
+  return true;
+}
+
+bool isPointerType(std::string str) {
+  if (str.size() < std::string("Pointer").size())
+    return false;
+  return str.substr(str.size() - std::string("Pointer").size()) == "Pointer";
+}
+
+bool isDecimalType(std::string str) {
+  return str == "Decimal32" or str == "Decimal64";
+}
+
+bool isComposedOfAlnumsAndOneDot(
+    std::string token) // Done often in the tokenizer, so it's probably better
+                       // (and more portable) to do it this way than in REGEX.
+{
+  bool passedOverADot = false;
+  for (unsigned i = 0; i < token.size(); i++)
+    if (token[i] == '.' and !passedOverADot and i != 0)
+      passedOverADot = true;
+    else if (token[i] == '.')
+      return false;
+    else if (!std::isalnum(token[i]) and token[i] != '_')
+      return false;
+  return true;
+}
+
 class TreeNode {
   enum Associativity { left, right };
   static std::vector<TreeNode>
@@ -144,7 +219,7 @@ public:
     return LispExpression;
   }
   virtual int interpretAsACompileTimeIntegerConstant() const {
-    if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+    if (isInteger(text))
       return std::stoi(text, 0, 0);
     if (text == "+" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() +
@@ -195,9 +270,9 @@ public:
     return 0;
   }
   virtual double interpretAsACompileTimeDecimalConstant() const {
-    if (std::regex_match(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+    if (isInteger(text))
       return std::stoi(text, 0, 0);
-    if (std::regex_match(text, std::regex("\\d+\\.\\d*")))
+    if (isDecimalNumber(text))
       return std::stod(text);
     if (text == "+" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() +

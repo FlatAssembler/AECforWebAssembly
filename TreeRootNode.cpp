@@ -34,8 +34,7 @@ public:
       if (basicDataTypeSizes.count(
               childNode.text)) { // Global variable declaration
         for (auto variableName : childNode.children) {
-          if (!std::regex_search(variableName.text,
-                                 std::regex("^(_|[A-Z]|[a-z])\\w*\\[?$")) or
+          if (!isValidVariableName(variableName.text) or
               AECkeywords.count(variableName.text)) {
             std::cerr
                 << "Line " << variableName.lineNumber << ", Column "
@@ -302,8 +301,7 @@ public:
                     mappingOfAECTypesToWebAssemblyTypes.at(argumentType)) +
                 ") ";
           if (functionDeclaration.returnType != "Nothing") {
-            if (std::regex_search(functionDeclaration.returnType,
-                                  std::regex("Pointer$")))
+            if (isPointerType(functionDeclaration.returnType))
               globalDeclarations += "(result i32)";
             else
               globalDeclarations += "(result " +
@@ -325,8 +323,7 @@ public:
                     mappingOfAECTypesToWebAssemblyTypes.at(argumentType)) +
                 ") ";
           if (functionDeclaration.returnType != "Nothing") {
-            if (std::regex_search(functionDeclaration.returnType,
-                                  std::regex("Pointer$")))
+            if (isPointerType(functionDeclaration.returnType))
               globalDeclarations += "(result i32) (local $return_value i32)";
             else
               globalDeclarations += "(result " +
@@ -354,8 +351,7 @@ public:
             else if (functionDeclaration.argumentTypes[i] == "Integer16")
               globalDeclarations += "\t\t(i32.store16 ";
             else if (functionDeclaration.argumentTypes[i] == "Integer32" or
-                     std::regex_search(functionDeclaration.argumentTypes[i],
-                                       std::regex("Pointer$")))
+                     isPointerType(functionDeclaration.argumentTypes[i]))
               globalDeclarations += "\t\t(i32.store ";
             else if (functionDeclaration.argumentTypes[i] == "Integer64")
               globalDeclarations += "\t\t(i64.store ";
@@ -385,8 +381,7 @@ public:
               childNode.children[2].compile(contextOfThatFunction).indentBy(2) +
               "\n";
           if (functionDeclaration.returnType != "Nothing") {
-            if (std::regex_search(functionDeclaration.returnType,
-                                  std::regex("Pointer$")))
+            if (isPointerType(functionDeclaration.returnType))
               globalDeclarations += "\t\t(i32.const 0)\n";
             else
               globalDeclarations += "\t\t(" +

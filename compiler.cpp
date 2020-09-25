@@ -177,17 +177,14 @@ AssemblyCode convertToDecimal64(const TreeNode node,
 AssemblyCode convertTo(const TreeNode node, const std::string type,
                        const CompilationContext context) {
   if (type == "Character" or type == "Integer16" or type == "Integer32" or
-      std::regex_search(
-          type,
-          std::regex(
-              "Pointer$"))) // When, in JavaScript Virtual Machine, you can't
-                            // push types of less than 4 bytes (32 bits) onto
-                            // the system stack, you need to convert those to
-                            // Integer32 (i32). Well, makes slightly more sense
-                            // than the way it is in 64-bit x86 assembly, where
-                            // you can put 16-bit values and 64-bit values onto
-                            // the system stack, but you can't put 32-bit
-                            // values.
+      isPointerType(type)) // When, in JavaScript Virtual Machine, you can't
+                           // push types of less than 4 bytes (32 bits) onto
+                           // the system stack, you need to convert those to
+                           // Integer32 (i32). Well, makes slightly more sense
+                           // than the way it is in 64-bit x86 assembly, where
+                           // you can put 16-bit values and 64-bit values onto
+                           // the system stack, but you can't put 32-bit
+                           // values.
     return convertToInteger32(node, context);
   if (type == "Integer64")
     return convertToInteger64(node, context);
@@ -250,7 +247,7 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
 AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType;
-  if (std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+  if (isPointerType(typeOfTheCurrentNode))
     returnType = AssemblyCode::AssemblyType::i32;
   else {
     if (!mappingOfAECTypesToWebAssemblyTypes.count(typeOfTheCurrentNode)) {
@@ -328,6 +325,23 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               assembly += assignmentNode.compile(context) + "\n";
             }
           } else { // If that's a local array declaration.
+            if (!variableName.children.size()) {
+              std::cerr << "Line " << variableName.lineNumber << ", Column "
+                        << variableName.columnNumber
+                        << ", Compiler error: Corrupt AST, the array named \""
+                        << variableName.text
+                        << "\" has no child node indicating size." << std::endl;
+              exit(1);
+            }
+            if (!basicDataTypeSizes.count(childNode.text)) {
+              std::cerr << "Line " << variableName.lineNumber << ", Column "
+                        << variableName.columnNumber
+                        << ", Compiler error: Corrupt AST, the variable is "
+                           "supposed to be of the type \""
+                        << childNode.text << "\", but no such type exists."
+                        << std::endl;
+              exit(1);
+            }
             int arraySizeInBytes =
                 basicDataTypeSizes.at(childNode.text) *
                 variableName.children[0]
@@ -410,7 +424,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       assembly +=
           "(i32.load16_s\n" + compileAPointer(context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer32" or
-             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+             isPointerType(typeOfTheCurrentNode))
       assembly += "(i32.load\n" + compileAPointer(context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer64")
       assembly += "(i64.load\n" + compileAPointer(context).indentBy(1) + "\n)";
@@ -455,7 +469,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
                   convertToInteger32(rightSide, context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer32" or
-             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+             isPointerType(typeOfTheCurrentNode))
       assembly += "(i32.store\n" +
                   children[0].compileAPointer(context).indentBy(1) + "\n" +
                   convertToInteger32(rightSide, context).indentBy(1) + "\n)";
@@ -478,14 +492,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << text << "\", aborting the compilation!" << std::endl;
       exit(1);
     }
-    if (std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")) and
-        !std::regex_search(rightSide.getType(context), std::regex("Pointer$")))
+    if (isPointerType(typeOfTheCurrentNode) and
+        !isPointerType(rightSide.getType(context)))
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler warning: You are assigning a type \""
                 << rightSide.getType(context)
                 << "\" to a pointer, this is likely an error!" << std::endl;
-    if (!std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")) and
-        std::regex_search(rightSide.getType(context), std::regex("Pointer$")))
+    if (!isPointerType(typeOfTheCurrentNode) and
+        isPointerType(rightSide.getType(context)))
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Compiler warning: You are assigning a pointer to a type \""
@@ -546,10 +560,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 "\n\t\t\t)\n\t\t)\n" +
                 children[1].compile(context).indentBy(2) +
                 "\n\t\t(br 0)\n\t)\n)";
-  } else if (std::regex_search(text,
-                               std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+  } else if (isInteger(text))
     assembly += "(i64.const " + text + ")";
-  else if (std::regex_search(text, std::regex("^\\d+\\.\\d*$")))
+  else if (isDecimalNumber(text))
     assembly += "(f64.const " + text + ")";
   else if (text == "Return") {
     if (currentFunction.returnType != "Nothing") {
@@ -614,18 +627,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     std::vector<TreeNode> children =
         this->children; // To make sure we don't change the AST during
                         // compiling.
-    if (std::regex_search(children[1].getType(context), std::regex("Pointer$")))
+    if (isPointerType(children[1].getType(context)))
       std::iter_swap(children.begin(), children.begin() + 1);
     std::string firstType = children[0].getType(context);
     std::string secondType = children[1].getType(context);
-    if (std::regex_search(
-            firstType,
-            std::regex(
-                "Pointer$"))) // Multiply the second operand by the numbers of
-                              // bytes the data type that the pointer points to
-                              // takes. That is, be compatible with pointers in
-                              // C and C++, rather than with pointers in
-                              // Assembly (which allows unaligned access).
+    if (isPointerType(
+            firstType)) // Multiply the second operand by the numbers of
+                        // bytes the data type that the pointer points to
+                        // takes. That is, be compatible with pointers in
+                        // C and C++, rather than with pointers in
+                        // Assembly (which allows unaligned access).
     {
       if (!basicDataTypeSizes.count(firstType.substr(
               0, firstType.size() - std::string("Pointer").size()))) {
@@ -656,22 +667,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   } else if (text == "-") {
     std::string firstType = children[0].getType(context);
     std::string secondType = children[1].getType(context);
-    if (!std::regex_search(firstType, std::regex("Pointer$")) and
-        std::regex_search(secondType, std::regex("Pointer$"))) {
+    if (!isPointerType(firstType) and isPointerType(secondType)) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: What exactly does it mean to subtract a "
                    "pointer from a number? Aborting the compilation!"
                 << std::endl;
       exit(1);
-    } else if (std::regex_search(firstType, std::regex("Pointer$")) and
-               std::regex_search(
-                   secondType,
-                   std::regex("Pointer$"))) // Subtract two pointers as if they
-                                            // were two Integer32s.
+    } else if (isPointerType(firstType) and
+               isPointerType(secondType)) // Subtract two pointers as if they
+                                          // were two Integer32s.
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
                   "\n" + children[1].compile(context).indentBy(1) + "\n)";
-    else if (std::regex_search(firstType, std::regex("Pointer$")) and
-             !std::regex_search(secondType, std::regex("Pointer$"))) {
+    else if (isPointerType(firstType) and !isPointerType(secondType)) {
       if (!basicDataTypeSizes.count(firstType.substr(
               0, firstType.size() - std::string("Pointer").size()))) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -726,8 +733,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     std::string firstType = children[0].getType(context);
     std::string secondType = children[1].getType(context);
     std::string strongerType;
-    if (std::regex_search(firstType, std::regex("Pointer$")) and
-        std::regex_search(secondType, std::regex("Pointer$")))
+    if (isPointerType(firstType) and isPointerType(secondType))
       strongerType =
           "Integer32"; // Let's allow people to shoot themselves in the foot by
                        // comparing pointers of different types.
@@ -753,8 +759,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     std::string firstType = children[0].getType(context);
     std::string secondType = children[1].getType(context);
     std::string strongerType;
-    if (std::regex_search(firstType, std::regex("Pointer$")) and
-        std::regex_search(secondType, std::regex("Pointer$")))
+    if (isPointerType(firstType) and isPointerType(secondType))
       strongerType = "Integer32";
     else
       strongerType =
@@ -857,7 +862,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       assembly +=
           "(i32.load16_s\n" + children[0].compile(context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer32" or
-             std::regex_search(typeOfTheCurrentNode, std::regex("Pointer$")))
+             isPointerType(typeOfTheCurrentNode))
       assembly +=
           "(i32.load\n" + children[0].compile(context).indentBy(1) + "\n)";
     else if (typeOfTheCurrentNode == "Integer64")
@@ -962,14 +967,11 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
               << std::endl;
     exit(1);
   }
-  if (std::regex_search(firstType, std::regex("Pointer$")) and
-      !std::regex_search(secondType, std::regex("Pointer$")))
+  if (isPointerType(firstType) and !isPointerType(secondType))
     return firstType;
-  if (std::regex_search(secondType, std::regex("Pointer$")) and
-      !std::regex_search(firstType, std::regex("Pointer$")))
+  if (isPointerType(secondType) and !isPointerType(firstType))
     return secondType;
-  if (std::regex_search(firstType, std::regex("Pointer$")) and
-      std::regex_search(secondType, std::regex("Pointer$"))) {
+  if (isPointerType(firstType) and isPointerType(secondType)) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: Can't add, multiply or divide two pointers!"
               << std::endl;
@@ -1008,9 +1010,9 @@ std::string TreeNode::getType(const CompilationContext context) const {
               << getLispExpression() << std::endl;
     std::exit(1);
   }
-  if (std::regex_search(text, std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)")))
+  if (isInteger(text))
     return "Integer64";
-  if (std::regex_search(text, std::regex("^\\d+\\.\\d*$")))
+  if (isDecimalNumber(text))
     return "Decimal64";
   if (text == "AddressOf(") {
     if (children.empty()) {
@@ -1049,8 +1051,7 @@ std::string TreeNode::getType(const CompilationContext context) const {
           << std::endl;
       exit(1);
     }
-    if (std::regex_search(children[0].getType(context),
-                          std::regex("Pointer$")) == false) {
+    if (!isPointerType(children[0].getType(context))) {
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Compiler error: The argument to \"ValueAt\" is not a pointer!"
@@ -1099,10 +1100,8 @@ std::string TreeNode::getType(const CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    if (std::regex_search(children[0].getType(context),
-                          std::regex("^Decimal")) or
-        std::regex_search(children[1].getType(context),
-                          std::regex("^Decimal"))) {
+    if (isDecimalType(children[0].getType(context)) or
+        isDecimalType(children[1].getType(context))) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: Unfortunately, WebAssembly (unlike x86 "
                    "assembly) doesn't support computing remaining of division "
@@ -1120,7 +1119,7 @@ std::string TreeNode::getType(const CompilationContext context) const {
       text == "Return") // Or else the compiler will claim those
                         // tokens are undeclared variables.
     return "Nothing";
-  if (std::regex_search(text, std::regex("^(_|[a-z]|[A-Z])\\w*\\[?$"))) {
+  if (isValidVariableName(text)) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
               << "\" is not declared!" << std::endl;
@@ -1148,9 +1147,8 @@ std::string TreeNode::getType(const CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    if (std::regex_search(children[0].getType(context),
-                          std::regex("Pointer$")) and
-        std::regex_search(children[1].getType(context), std::regex("Pointer$")))
+    if (isPointerType(children[0].getType(context)) and
+        isPointerType(children[1].getType(context)))
       return "Integer32"; // Difference between pointers is an integer of the
                           // same size as the pointers (32-bit).
     return getStrongerType(lineNumber, columnNumber,
@@ -1191,9 +1189,8 @@ std::string TreeNode::getType(const CompilationContext context) const {
     exit(1);
   }
   if (text == "?:") {
-    if (std::regex_search(children[1].getType(context),
-                          std::regex("Pointer$")) and
-        std::regex_search(children[2].getType(context), std::regex("Pointer$")))
+    if (isPointerType(children[1].getType(context)) and
+        isPointerType(children[2].getType(context)))
       return children[1].getType(context);
     else
       return getStrongerType(lineNumber, columnNumber,

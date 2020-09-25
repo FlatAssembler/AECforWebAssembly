@@ -1132,8 +1132,10 @@ EndFunction</pre
         <i
           >(UPDATE: C++-style forward function declarations have been
           implemented, as there is a relatively simple way to do it using
-          WebAssembly Binary Toolkit, the assembler takes care of that for
-          you.)</i
+          WebAssembly Binary Toolkit, the assembler takes care of that for you.
+          The syntax is the same as for declaring external functions, except
+          that you replace <span style="inline_code">External</span> with
+          <span style="inline_code">Declared</span>.)</i
         ><br />
         <b>TODO</b>: Find a way to implement circularly dependent functions,
         and, if possible, function hoisting. Also, implement function pointers.

@@ -1,26 +1,20 @@
 #include "TreeNode.cpp"
 
-bool isComposedOfAlnumsAndOneDot(
-    std::string token) // Done often, so it's probably better (and more
-                       // portable) to do it this way than in REGEX.
-{
-  bool passedOverADot = false;
-  for (unsigned i = 0; i < token.size(); i++)
-    if (token[i] == '.' and !passedOverADot and i != 0)
-      passedOverADot = true;
-    else if (token[i] == '.')
-      return false;
-    else if (!std::isalnum(token[i]) and token[i] != '_')
-      return false;
-  return true;
-}
-
 bool isAllWhitespace(
     std::string token) // No obvious way to do it in REGEX so that CLANG on
                        // Linux won't miscompile it.
 {
   for (unsigned i = 0; i < token.size(); i++)
     if (!std::isspace(token[i]))
+      return false;
+  return true;
+}
+
+bool isAllDigits(std::string token) {
+  if (!token.size())
+    return false;
+  for (unsigned i = 0; i < token.size(); i++)
+    if (!isdigit(token[i]))
       return false;
   return true;
 }
@@ -121,14 +115,7 @@ std::vector<TreeNode> TreeNode::tokenize(std::string input) {
       currentColumn++;
       tokenizedExpression.back().text += input[i];
     } else if (input[i] == '.' and
-               regex_match(
-                   tokenizedExpression.back().text,
-                   regex("[0-9]+",
-                         std::regex::extended)) and // Some C++ runtime
-                                                    // environments apparently
-                                                    // think "[0-9]+" wouldn't
-                                                    // be a proper REGEX in
-                                                    // JavaScript (it would be).
+               isAllDigits(tokenizedExpression.back().text) and
                !areWeInAString and
                !areWeInAComment) // If we are currently
                                  // tokenizing a number, a dot

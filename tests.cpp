@@ -11,6 +11,7 @@ void tokenizerTests() {
         "['\"/*Comment inside a string*/\"']"},
        {"5+5", "['5','+','5']"},
        {"5+5=10", "['5','+','5','=','10']"},
+       {"55.;", "['55.',';']"},
        {"structureName.structureMember/3.14159265359",
         "['structureName','.','structureMember','/','3.14159265359']"},
        {"sin(pi/2)=1", "['sin(','pi','/','2',')','=','1']"},

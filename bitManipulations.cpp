@@ -4,12 +4,22 @@
 
 #pragma once
 
+bool isHexadecimalNumber(std::string str) {
+  // std::regex("^(\\d|[a-f])+$")
+  if (!str.size())
+    return false;
+  for (unsigned i = 0; i < str.size(); i++)
+    if (!std::isdigit(str[i]) and !(str[i] >= 'a' and str[i] <= 'f'))
+      return false;
+  return true;
+}
+
 std::string
 reverseOrderOfBytes(std::string hexadecimal) // Because the JavaScript Virtual
                                              // Machine is little-endian
 {
   if (hexadecimal.size() % 2 != 0 || hexadecimal.size() < 2 ||
-      !std::regex_match(hexadecimal, std::regex("^(\\d|[a-f])+$"))) {
+      !isHexadecimalNumber(hexadecimal)) {
     std::cerr << "Internal compiler error: Some part of the compiler has "
                  "attempted to reverse the bytes of \""
               << hexadecimal << "\", which doesn't make sense." << std::endl;

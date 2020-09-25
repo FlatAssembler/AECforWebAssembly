@@ -23,12 +23,13 @@ int main(int argc, char **argv) {
         !regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase))) {
       if (argc >= 2 and
           (ends_with(argv[1], ".aec") or
-           ends_with(argv[1],
-                     ".AEC"))) // Damn, CLANG on Linux is to C++ what Internet
-                               // Explorer 6 is to JavaScript. I don't
-                               // understand how it manages to compile itself,
-                               // yet it miscompiles something every now and
-                               // then in a 4'000-lines-of-code program.
+           ends_with(
+               argv[1],
+               ".AEC"))) // Damn, CLANG on Linux is to C++ what Internet
+                         // Explorer 6 (or, maybe better say, Opera Mini) is to
+                         // JavaScript. I don't understand how it manages to
+                         // compile itself, yet it miscompiles something every
+                         // now and then in a 4'000-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows:\n"
            << argv[0] << " name_of_the_program.aec" << endl;
@@ -36,11 +37,8 @@ int main(int argc, char **argv) {
     }
   } catch (regex_error &error) {
     cerr << "Your C++ compiler doesn't appear to support JavaScript-style "
-            "regular expressions "
-            "that this program makes heavy use of.\n"
-            "Unless you've significantly modified the program (instead of "
-            "choosing "
-            "a better\n compiler), don't expect it to work!"
+            "regular\nexpressions. Parts of this program that rely on them "
+            "will not work."
          << endl;
   }
   cout << "Running the tests..." << endl;
