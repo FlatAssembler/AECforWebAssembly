@@ -1,0 +1,13 @@
+Structure Point Consists Of
+    Integer32 dimensions := 3;
+    Decimal32 x,y,z;
+EndStructure
+Integer32 a := 0;
+InstantiateStructure Point points[12];
+Integer32 b := 1;
+Structure String Consists Of
+    Integer32 length;
+    Character string[256];
+EndStructure
+InstantiateStructure String helloWorld;
+Integer32 c := 2;

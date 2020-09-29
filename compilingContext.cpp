@@ -1,3 +1,9 @@
+/*
+ * Some data-classes used by the compiler. There doesn't appear to be
+ * an easy way to make them follow object-oriented principles, and I
+ * doubt that would be make the code significantly better.
+ */
+
 #include <map>
 #include <string>
 #include <vector>
@@ -8,6 +14,15 @@ struct function {
   std::vector<std::string> argumentTypes;
   std::vector<double> defaultArgumentValues;
   std::vector<std::string> argumentNames;
+};
+
+struct structure {
+  std::string name;
+  unsigned sizeInBytes = 0;
+  std::vector<std::string> memberNames;
+  std::map<std::string, std::string> memberTypes;
+  std::map<std::string, unsigned> memberOffsetInBytes;
+  std::map<std::string, double> defaultValuesOfMembers;
 };
 
 struct CompilationContext {
@@ -26,4 +41,5 @@ struct CompilationContext {
   int stackSizeOfThisFunction = 0;
   int stackSizeOfThisScope = 0; // Variables declared inside while-loops...
   std::string currentFunctionName;
+  std::vector<structure> structures;
 };

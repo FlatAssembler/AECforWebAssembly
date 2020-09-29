@@ -1,3 +1,17 @@
+/*
+ * A parser is a part of the compiler that constructs ASTs from tokens.
+ * There are many tools to generate them automatically, but they take
+ * time to learn. As I don't expect to be making countless parsers, or
+ * parsers with complicated but well-specified grammars, I haven't
+ * bothered learning those parser-generating tools and have written the
+ * parser myself.
+ * The parser is implemented as some sort of a static method factory,
+ * not really following the object-oriented principles. If we had
+ * multiple parsers, it would make much more sense to implement them as
+ * strategies. But, since that's not what we expect, I think it would
+ * make the code unnecessarily harder to understand.
+ */
+
 #include "TreeNode.cpp"
 #include <algorithm>
 

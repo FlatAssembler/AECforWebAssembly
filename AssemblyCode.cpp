@@ -1,3 +1,11 @@
+/*
+ * AssemblyCode is some sort of a decorater for the "string" class, as
+ * we want it to be able to do whatever the C++ "string" can (at least
+ * as far as this program is concerned), but it should also do some
+ * things useful for dealing with Assembly code, such as keeping the
+ * information about type and indenting it.
+ */
+
 #include <iterator>
 #include <sstream>
 #include <string>
@@ -32,6 +40,8 @@ struct AssemblyCode {
     std::ostream_iterator<std::string> streamIterator(stream);
     std::copy(tokenized.begin(), tokenized.end(), streamIterator);
     code = stream.str();
+    while (code.back() == '\t')
+      code = code.substr(0, code.size() - 1);
     return *this;
   }
   AssemblyCode(std::string code, AssemblyType type = null) {

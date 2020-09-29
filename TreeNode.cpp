@@ -1,3 +1,12 @@
+/*
+ * "TreeNode" is supposed to basically be a composite, representing the
+ * tree structure (abstract syntax tree, AST) in such a way that other
+ * code doesn't have to deal with whether it's interacting with a leaf
+ * or some other node in a tree. It isn't a true composite because almost
+ * none of the operations that make sense for other nodes make sense for
+ * the root node.
+ */
+
 #include "AssemblyCode.cpp"
 #include "bitManipulations.cpp"
 #include "compilingContext.cpp"
@@ -370,3 +379,39 @@ public:
   virtual AssemblyCode compileAPointer(CompilationContext context) const;
   virtual std::string getType(CompilationContext context) const; // Integer32...
 };
+
+std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
+  std::string inlineAssembly = inlineAssemblyNode.text;
+  if (inlineAssembly.front() != '"' or inlineAssembly.back() != '"') {
+    std::cerr << "Line " << inlineAssemblyNode.lineNumber << ", Column "
+              << inlineAssemblyNode.columnNumber
+              << ", Compiler error: Inline assembly doesn't appear to be a "
+                 "string. Aborting the compilation (or we will produce "
+                 "syntactically incorrect assembly)."
+              << std::endl;
+    std::exit(1);
+  }
+  inlineAssembly = ";;Inline assembly begins.\n" +
+                   inlineAssembly.substr(1, inlineAssembly.size() - 2) +
+                   "\n;;Inline assembly ends.";
+  // CLANG 10 (but not GCC 9.3.0) appears to miscompile "regex_replace" on
+  // Oracle Linux 7.
+  std::string temporaryString;
+  for (unsigned int i = 0; i < inlineAssembly.size(); i++)
+    if (inlineAssembly.substr(i, 2) == R"(\\)") {
+      temporaryString += '\\';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\n)") {
+      temporaryString += '\n';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\t)") {
+      temporaryString += '\t';
+      i++;
+    } else if (inlineAssembly.substr(i, 2) == R"(\")") {
+      temporaryString += '"';
+      i++;
+    } else
+      temporaryString += inlineAssembly[i];
+  inlineAssembly = temporaryString;
+  return inlineAssembly;
+}

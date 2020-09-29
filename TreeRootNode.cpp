@@ -1,7 +1,81 @@
+/*
+ * So, this is the class for the root of the AST. It behaves significantly
+ * differently from other nodes in the AST, so I thought it would make sense
+ * to make a special class for it.
+ */
+
 #include "TreeNode.cpp"
 
+AssemblyCode instantiateGloabalStructure(structure str, int offset) {
+  std::string assemblyCode;
+  for (auto memberName : str.memberNames)
+    if (str.defaultValuesOfMembers[memberName]) {
+      int address = offset + str.memberOffsetInBytes[memberName];
+      if (str.memberTypes[memberName] == "Character")
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfCharacter(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else if (str.memberTypes[memberName] == "Integer16")
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfInteger16(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else if (str.memberTypes[memberName] == "Integer32" or
+               isPointerType(str.memberTypes[memberName]))
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfInteger32(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else if (str.memberTypes[memberName] == "Integer64")
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfInteger64(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else if (str.memberTypes[memberName] == "Decimal32")
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfDecimal32(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else if (str.memberTypes[memberName] == "Decimal64")
+        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
+                        getCharVectorRepresentationOfInteger16(
+                            str.defaultValuesOfMembers[memberName]) +
+                        ") ;;Hex of " +
+                        std::to_string(str.defaultValuesOfMembers[memberName]) +
+                        ", the default value of \"" + str.name + "." +
+                        memberName + "\"\n";
+      else
+        std::cerr << "Compiler error: Can't assign an initial value to the "
+                     "structure member \""
+                  << str.name << '.' << memberName
+                  << "\", because the compiler doesn't know how to convert the "
+                     "type \""
+                  << str.memberTypes[memberName]
+                  << "\" to hexadecimal. The compilation will continue, but be "
+                     "warned it might produce wrong code because of this."
+                  << std::endl;
+    }
+  return AssemblyCode(assemblyCode);
+}
+
 class TreeRootNode : public TreeNode // Sets up the compilation context, rather
-                                     // than compiling itself.
+                                     // than doing the compilation itself.
 {
 public:
   TreeRootNode() {
@@ -303,12 +377,27 @@ public:
           if (functionDeclaration.returnType != "Nothing") {
             if (isPointerType(functionDeclaration.returnType))
               globalDeclarations += "(result i32)";
-            else
+            else {
+              if (!mappingOfAECTypesToWebAssemblyTypes.count(
+                      functionDeclaration.returnType) and
+                  !std::count_if(context.structures.begin(),
+                                 context.structures.end(), [=](structure str) {
+                                   return str.name ==
+                                          functionDeclaration.returnType;
+                                 })) {
+                std::cerr << "Line " << childNode.children[1].lineNumber
+                          << ", Column " << childNode.children[1].columnNumber
+                          << ", Compiler error: Unknown type name \""
+                          << functionDeclaration.returnType << "\"!"
+                          << std::endl;
+                exit(1);
+              }
               globalDeclarations += "(result " +
                                     stringRepresentationOfWebAssemblyType.at(
                                         mappingOfAECTypesToWebAssemblyTypes.at(
                                             functionDeclaration.returnType)) +
                                     ")";
+            }
           }
           globalDeclarations += "))\n";
         } else if (childNode.children[2].text == "Does") {
@@ -324,8 +413,35 @@ public:
                 ") ";
           if (functionDeclaration.returnType != "Nothing") {
             if (isPointerType(functionDeclaration.returnType))
-              globalDeclarations += "(result i32) (local $return_value i32)";
-            else
+              globalDeclarations +=
+                  "(result i32) (local $return_value i32)"; // Will, of course,
+                                                            // crash if somebody
+                                                            // switches the
+                                                            // JavaScript
+                                                            // Virtual Machine
+                                                            // to the 64-bit
+                                                            // mode (so that
+                                                            // pointers are no
+                                                            // longer 32-bit
+                                                            // integers), but
+                                                            // let's hope that
+                                                            // isn't going to
+                                                            // happen.
+            else {
+              if (!mappingOfAECTypesToWebAssemblyTypes.count(
+                      functionDeclaration.returnType) and
+                  !std::count_if(context.structures.begin(),
+                                 context.structures.end(), [=](structure str) {
+                                   return str.name ==
+                                          functionDeclaration.returnType;
+                                 })) {
+                std::cerr << "Line " << childNode.children[1].lineNumber
+                          << ", Column " << childNode.children[1].columnNumber
+                          << ", Compiler error: Unknown type name \""
+                          << functionDeclaration.returnType << "\"!"
+                          << std::endl;
+                exit(1);
+              }
               globalDeclarations += "(result " +
                                     stringRepresentationOfWebAssemblyType.at(
                                         mappingOfAECTypesToWebAssemblyTypes.at(
@@ -335,6 +451,7 @@ public:
                                         mappingOfAECTypesToWebAssemblyTypes.at(
                                             functionDeclaration.returnType)) +
                                     ")";
+            }
           }
           globalDeclarations += "\n";
           globalDeclarations +=
@@ -405,11 +522,180 @@ public:
                     << std::endl;
           exit(1);
         }
+      } else if (childNode.text == "asm(") {
+        if (childNode.children.size() != 1) {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Compiler error: The \"asm(\" keyword doesn't"
+                       " have exactly one argument, quitting now before"
+                       " segfaulting"
+                    << std::endl;
+          exit(1);
+        }
+        globalDeclarations +=
+            convertInlineAssemblyToAssembly(childNode.children[0]);
+      } else if (childNode.text == "Structure") {
+        if (childNode.children.size() != 2) {
+          std::cerr
+              << "Line " << childNode.lineNumber << ", Column "
+              << childNode.columnNumber
+              << ", Compiler error: Corrupt AST, the \"Structure\" node has "
+              << childNode.children.size()
+              << " children instead of 2. Quitting now!" << std::endl;
+          exit(1);
+        }
+        if (!isValidVariableName(childNode.children[0].text) or
+            childNode.children[0].text.back() == '[' or
+            AECkeywords.count(childNode.children[0].text)) {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber << ", Compiler error: The name \""
+                    << childNode.children[0].text
+                    << "\" is not a valid structure name." << std::endl;
+          exit(1);
+        }
+        if (childNode.children[1].text != "Of") {
+          std::cerr << "Line " << childNode.children[1].lineNumber
+                    << ", Column " << childNode.children[1].columnNumber
+                    << ", Compiler error: Expected \"Of\" instead of \""
+                    << childNode.children[1].text << "\"." << std::endl;
+          exit(1);
+        }
+        structure currentStructure;
+        currentStructure.name = childNode.children[0].text;
+        globalDeclarations += "\t;;Declaring a structure named \"" +
+                              currentStructure.name + "\"...\n";
+        for (TreeNode typeName : childNode.children[1].children) {
+          if (!isPointerType(typeName.text) and
+              !basicDataTypeSizes.count(typeName.text) and
+              !std::count_if(
+                  context.structures.begin(), context.structures.end(),
+                  [=](structure str) { return str.name == typeName.text; })) {
+          }
+          for (TreeNode memberName : typeName.children) {
+            currentStructure.memberNames.push_back(memberName.text);
+            currentStructure.memberTypes[memberName.text] = typeName.text;
+            currentStructure.memberOffsetInBytes[memberName.text] =
+                currentStructure.sizeInBytes;
+            globalDeclarations +=
+                "\t;;Declaring a structure member named \"" +
+                currentStructure.name + "." + memberName.text +
+                "\" of type \"" + typeName.text + "\" to be at offset " +
+                std::to_string(currentStructure.sizeInBytes) + "...\n";
+            if (memberName.text.back() == '[') // An array inside a structure...
+            {
+              if (memberName.children.size() != 1) {
+                std::cerr << "Line " << memberName.lineNumber << ", Column "
+                          << memberName.columnNumber
+                          << ", Compiler error: Corrupt AST, the node \""
+                          << memberName.text
+                          << "\" should have 1 child, but it has "
+                          << memberName.children.size()
+                          << ". Aborting the compilation." << std::endl;
+                exit(1);
+              }
+              currentStructure.sizeInBytes +=
+                  memberName.children[0]
+                      .interpretAsACompileTimeIntegerConstant() *
+                  basicDataTypeSizes.at(typeName.text);
+            } else { // A member that's not an array...
+              if (memberName.children.size() == 1 and
+                  memberName.children[0].text == ":=")
+                currentStructure.defaultValuesOfMembers[memberName.text] =
+                    memberName.children[0]
+                        .children[0]
+                        .interpretAsACompileTimeDecimalConstant();
+              else if (memberName.children.size())
+                std::cerr << "Line " << memberName.children[0].lineNumber
+                          << ", Column " << memberName.children[0].columnNumber
+                          << ", Compiler error: Unexpected AST node \""
+                          << memberName.children[0].text
+                          << "\". The compilation will continue, but be warned "
+                             "it might produce wrong code because of this."
+                          << std::endl;
+              currentStructure.sizeInBytes +=
+                  basicDataTypeSizes.at(typeName.text);
+            }
+          }
+        }
+        context.structures.push_back(currentStructure);
+        globalDeclarations += "\t;;Declaring the structure \"" +
+                              currentStructure.name + "\" finished.\n";
+      } else if (childNode.text == "InstantiateStructure") {
+        if (childNode.children.size() != 1) {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Compiler error: Corrupt AST, the node "
+                       "\"InstantiateStructure\" should have 1 child node, but "
+                       "it has "
+                    << childNode.children.size()
+                    << ". Aborting the compilation!" << std::endl;
+          exit(1);
+        }
+        TreeNode structureName = childNode.children.front();
+        if (!std::count_if(context.structures.begin(), context.structures.end(),
+                           [=](structure str) {
+                             return str.name == structureName.text;
+                           })) {
+          std::cerr << "Line " << structureName.lineNumber << ", Column "
+                    << structureName.columnNumber
+                    << ", Compiler error: The structure named \""
+                    << structureName.text
+                    << "\" hasn't been declared in this scope. Aborting the "
+                       "compilation!"
+                    << std::endl;
+          exit(1);
+        }
+        auto iteratorPointingToTheStructure = std::find_if(
+            context.structures.begin(), context.structures.end(),
+            [=](structure str) { return str.name == structureName.text; });
+        for (TreeNode instanceName : structureName.children) {
+          context.variableTypes[instanceName.text] = structureName.text;
+          context.globalVariables[instanceName.text] =
+              context.globalVariablePointer;
+          globalDeclarations +=
+              "\t;;Instance named \"" + instanceName.text +
+              "\" of the structure type \"" + structureName.text +
+              "\" is declared to be at the address " +
+              std::to_string(context.globalVariablePointer) + "\n";
+          if (instanceName.text.back() == '[') // Global array of structures...
+          {
+            if (instanceName.children.size() != 1) {
+              std::cerr << "Line " << instanceName.lineNumber << ", Column "
+                        << instanceName.columnNumber
+                        << ", Compiler error: Corrupt AST, the node \""
+                        << instanceName.text
+                        << "\" should have 1 child, but it has "
+                        << instanceName.children.size()
+                        << ". Aborting the compilation." << std::endl;
+              exit(1);
+            }
+            int arraySize = instanceName.children[0]
+                                .interpretAsACompileTimeIntegerConstant();
+            for (int i = 0; i < arraySize; i++) {
+              AssemblyCode initialization =
+                  instantiateGloabalStructure(*iteratorPointingToTheStructure,
+                                              context.globalVariablePointer);
+              initialization.indentBy(1);
+              globalDeclarations += initialization;
+              context.globalVariablePointer +=
+                  iteratorPointingToTheStructure->sizeInBytes;
+            }
+          } else // Global structure...
+          {
+            AssemblyCode initialization = instantiateGloabalStructure(
+                *iteratorPointingToTheStructure, context.globalVariablePointer);
+            initialization.indentBy(1);
+            globalDeclarations += initialization;
+            context.globalVariablePointer +=
+                iteratorPointingToTheStructure->sizeInBytes;
+          }
+        }
       } else {
         std::cerr << "Line " << childNode.lineNumber << ", Column "
                   << childNode.columnNumber
                   << ", Compiler error: No rule for compiling the token \""
-                  << childNode.text << "\", aborting the compilation!"
+                  << childNode.text
+                  << "\" in the global scope, aborting the compilation!"
                   << std::endl;
         exit(1);
       }

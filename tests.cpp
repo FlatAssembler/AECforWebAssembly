@@ -1,3 +1,9 @@
+/*
+ * So, I've implemented some automated tests (I am not sure those can be
+ * called unit tests) for the tokenizer and the parser. Unfortunately,
+ * it's not nearly as easy to implement automated tests for the core of
+ * the compiler.
+ */
 #include "TreeNode.cpp"
 
 struct test { // When the debugger doesn't work (and I can't get it to
@@ -21,8 +27,9 @@ void tokenizerTests() {
        {"/*This should be tokenized into\nan empty string*/", "[]"},
        {"a/*Randomly\ninserted\ncomment.*/+/*Another\nrandom\ncomment*/b",
         "['a','+','b']"},
-       {"array_name:={1,1+1,1+1+1}", "['array_name',':=','{','1',',','1','+','"
-                                     "1',',','1','+','1','+','1','}']"}});
+       {"array_name := {1, 1 + 1, 1 + 1 + 1}",
+        "['array_name',':=','{','1',',','1','+','"
+        "1',',','1','+','1','+','1','}']"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));

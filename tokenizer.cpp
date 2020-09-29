@@ -1,8 +1,16 @@
+/*
+ * A tokenizer is a part of the compiler that, basically, tells other
+ * parts of the compiler where the "word boundaries" in the programming
+ * language are. There are some tools to produce them automatically, but
+ * I haven't bothered learning to use them and have written a simple
+ * tokenizer by myself.
+ */
+
 #include "TreeNode.cpp"
 
 bool isAllWhitespace(
-    std::string token) // No obvious way to do it in REGEX so that CLANG on
-                       // Linux won't miscompile it.
+    const std::string token) // No obvious way to do it in REGEX so that CLANG
+                             // on Linux won't miscompile it.
 {
   for (unsigned i = 0; i < token.size(); i++)
     if (!std::isspace(token[i]))
@@ -10,7 +18,7 @@ bool isAllWhitespace(
   return true;
 }
 
-bool isAllDigits(std::string token) {
+bool isAllDigits(const std::string token) {
   if (!token.size())
     return false;
   for (unsigned i = 0; i < token.size(); i++)
@@ -20,13 +28,13 @@ bool isAllDigits(std::string token) {
 }
 
 bool isWordCharacterButNotDigit(
-    char c) // No obvious way to do it in REGEX so that CLANG on Linux won't
-            // miscompile it.
+    const char c) // No obvious way to do it in REGEX so that CLANG on Linux
+                  // won't miscompile it.
 {
   return (std::isalnum(c) or c == '_') and !std::isdigit(c);
 }
 
-std::vector<TreeNode> TreeNode::tokenize(std::string input) {
+std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
 #ifndef NDEBUG
   std::cerr << "DEBUG: Tokenizing the string \"" << input << "\"..."
             << std::endl;

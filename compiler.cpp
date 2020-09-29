@@ -1,3 +1,13 @@
+/*
+ * This is the core of the compiler, a part of the compiler that produces
+ * assembly code. The code is somewhat ugly (lots of else-if-s), but
+ * there doesn't appear to be an easy way to avoid that. Using inheritance
+ * would lead to countless classes and code that's even harder to understand
+ * and debug. Allegedly, compilers can be nicely structured using the
+ * visitor behavioral pattern, but, honestly, I don't understand it and
+ * I doubt it would help significantly.
+ */
+
 #include "TreeNode.cpp"
 #include "bitManipulations.cpp"
 
@@ -207,42 +217,6 @@ AssemblyCode convertTo(const TreeNode node, const std::string type,
 std::string getStrongerType(int, int, std::string,
                             std::string); // When C++ doesn't support function
                                           // hoisting, like JavaScript does.
-
-std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
-  std::string inlineAssembly = inlineAssemblyNode.text;
-  if (inlineAssembly.front() != '"' or inlineAssembly.back() != '"') {
-    std::cerr << "Line " << inlineAssemblyNode.lineNumber << ", Column "
-              << inlineAssemblyNode.columnNumber
-              << ", Compiler error: Inline assembly doesn't appear to be a "
-                 "string. Aborting the compilation (or we will produce "
-                 "syntactically incorrect assembly)."
-              << std::endl;
-    std::exit(1);
-  }
-  inlineAssembly = ";;Inline assembly begins.\n" +
-                   inlineAssembly.substr(1, inlineAssembly.size() - 2) +
-                   "\n;;Inline assembly ends.";
-  // CLANG 10 (but not GCC 9.3.0) appears to miscompile "regex_replace" on
-  // Oracle Linux 7.
-  std::string temporaryString;
-  for (unsigned int i = 0; i < inlineAssembly.size(); i++)
-    if (inlineAssembly.substr(i, 2) == R"(\\)") {
-      temporaryString += '\\';
-      i++;
-    } else if (inlineAssembly.substr(i, 2) == R"(\n)") {
-      temporaryString += '\n';
-      i++;
-    } else if (inlineAssembly.substr(i, 2) == R"(\t)") {
-      temporaryString += '\t';
-      i++;
-    } else if (inlineAssembly.substr(i, 2) == R"(\")") {
-      temporaryString += '"';
-      i++;
-    } else
-      temporaryString += inlineAssembly[i];
-  inlineAssembly = temporaryString;
-  return inlineAssembly;
-}
 
 AssemblyCode TreeNode::compile(CompilationContext context) const {
   std::string typeOfTheCurrentNode = getType(context);
@@ -591,6 +565,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                        "because of this."
                     << std::endl;
         valueToBeReturned = TreeNode(valueToBeReturned.children[0]);
+        // https://stackoverflow.com/questions/63951270/using-default-copy-constructor-corrupts-a-tree-in-c
+        // And I thought C++ didn't have such quirks, typical of
+        // quickly-designed languages such as JavaScript. The way it behaves
+        // makes some degree sense when you read the explanation, but it's
+        // definitely what one would expect, and it leads to hard-to-find bugs.
+        // Now I see the reason why there are no automatically generated copy
+        // constructors in Java, C# and JavaScript (there, variables don't hold
+        // objects but pointers to objects, and, as confusing as it can be at
+        // first, it can't lead to this kind of problems).
         if (tmp.children[0].getLispExpression() !=
             valueToBeReturned.getLispExpression()) {
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber

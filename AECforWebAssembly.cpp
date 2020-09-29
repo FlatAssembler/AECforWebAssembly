@@ -1,4 +1,14 @@
-#define NDEBUG
+/*
+ * So, this is the main program, the driver which reads the source code
+ * and lets the tokenizer, the parser and the compiler communicate.
+ *
+ * TODO: What if some part of the compiler (most likely tokenizer) wants
+ * to read some file other than the main AEC program? Such a problem
+ * isn't easily solvable with this design.
+ */
+
+#define NDEBUG // If deleted, the tokenizer and parser will output verbose
+               // output.
 #include "TreeRootNode.cpp"
 #include "compiler.cpp"
 #include "parser.cpp"
@@ -23,13 +33,14 @@ int main(int argc, char **argv) {
         !regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase))) {
       if (argc >= 2 and
           (ends_with(argv[1], ".aec") or
-           ends_with(
-               argv[1],
-               ".AEC"))) // Damn, CLANG on Linux is to C++ what Internet
-                         // Explorer 6 (or, maybe better say, Opera Mini) is to
-                         // JavaScript. I don't understand how it manages to
-                         // compile itself, yet it miscompiles something every
-                         // now and then in a 4'000-lines-of-code program.
+           ends_with(argv[1],
+                     ".AEC"))) // Damn, CLANG on Linux is to C++ what Internet
+                               // Explorer 6 (or, maybe better say, Opera Mini,
+                               // because it appears to be fast by disobeying
+                               // the standards) is to JavaScript. I don't
+                               // understand how it manages to compile itself,
+                               // yet it miscompiles something every now and
+                               // then in a 4'000-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows:\n"
            << argv[0] << " name_of_the_program.aec" << endl;

@@ -1,3 +1,9 @@
+/*
+ * No doubt one of the main reasons C++ is a popular language for compilers
+ * is that compilers sometimes (though much less than an average developer
+ * probably thinks) need to do bit manipulation. It's significantly
+ * easier to do complicated bit manipulation in C++ than in JavaScript.
+ */
 #include <iostream>
 #include <regex>
 #include <sstream>
@@ -5,7 +11,9 @@
 #pragma once
 
 bool isHexadecimalNumber(std::string str) {
-  // std::regex("^(\\d|[a-f])+$")
+  // std::regex("^(\\d|[a-f])+$"), some C++ compilers (GCC when targeting
+  // FreeDOS and CLANG when targeting Oracle Linux) produce wrong code for
+  // that regex.
   if (!str.size())
     return false;
   for (unsigned i = 0; i < str.size(); i++)
