@@ -64,3 +64,20 @@ Function eggs() Which Returns Integer32 Does {
   Return localPoint.dimensions;
 }
 EndFunction;
+
+Structure innerStructure Consists Of { Integer32 innerNuber : = 1; }
+EndStructure;
+
+Structure outerStructure Consists Of {
+  Integer32 outerNumber : = 2;
+  innerStructure structureWithInnerNumber;
+}
+EndStructure;
+
+Function onion() Which Returns Integer32 Does {
+  // Should return 1, but for now returns a random number.
+  InstantiateStructure outerStructure
+      nestedStructure;
+  Return nestedStructure.structureWithInnerNumber.innerNuber;
+}
+EndFunction;

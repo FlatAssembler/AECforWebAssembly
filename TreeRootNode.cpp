@@ -610,7 +610,9 @@ public:
               currentStructure.sizeInBytes +=
                   memberName.children[0]
                       .interpretAsACompileTimeIntegerConstant() *
-                  basicDataTypeSizes.at(typeName.text);
+                  (basicDataTypeSizes.count(typeName.text)
+                       ? basicDataTypeSizes.at(typeName.text)
+                       : context.structureSizes.at(typeName.text));
             } else { // A member that's not an array...
               if (memberName.children.size() == 1 and
                   memberName.children[0].text == ":=")
@@ -627,7 +629,9 @@ public:
                              "it might produce wrong code because of this."
                           << std::endl;
               currentStructure.sizeInBytes +=
-                  basicDataTypeSizes.at(typeName.text);
+                  basicDataTypeSizes.count(typeName.text)
+                      ? basicDataTypeSizes.at(typeName.text)
+                      : context.structureSizes.at(typeName.text);
             }
           }
         }

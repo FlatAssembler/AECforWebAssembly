@@ -483,6 +483,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           for (int i = 0; i < arraySizeInStructures; i++) {
             for (std::string memberName :
                  iteratorPointingToTheStructure->memberNames) {
+              if (!basicDataTypeSizes.count(
+                      iteratorPointingToTheStructure->memberTypes.at(
+                          memberName))) {
+                std::cerr
+                    << "Line " << instanceName.lineNumber << ", Column "
+                    << instanceName.columnNumber
+                    << ", Compiler warning: Nested structures aren't yet "
+                       "implemented. The compilation will continue, but be "
+                       "warned it might produce wrong code because of that."
+                    << std::endl;
+                continue;
+              }
               // And now we need to do that daunting task of constructing an
               // S-expression in C++ again...
               TreeNode nodeRepresentingIndex(std::to_string(i),

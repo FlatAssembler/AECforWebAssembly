@@ -585,7 +585,7 @@
         compiler for WebAssembly) always assumes the standard C library is
         present on the JavaScript Virtual Machine when compiling any kind of
         program, so it's an overkill for most cases when it could come useful.
-        The AEC-to-WebAssembly compiler has around 4'000 lines of code, and it's
+        The AEC-to-WebAssembly compiler has around 4'500 lines of code, and it's
         written in C++ (a language much more suitable for writing compilers than
         JavaScript). <br /><br />
         <b>Comments</b><br />
@@ -806,7 +806,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           </tr>
           <tr>
             <td>1</td>
-            <td>right</td>
+            <td>left</td>
             <td>.</td>
           </tr>
           <tr>
@@ -1159,7 +1159,21 @@ EndStructure</pre
         the structure name followed by the variable name (and the variable will
         be of type represented by the structure name).<br />
         <b>TODO</b>: Implement structures in the compiler, not just in the
-        parser.<br />
+        parser.
+        <i
+          >(UPDATE on 30/09/2020: Some progress on that has been made, namely,
+          local and global structures are now supported as long as they are not
+          nested. You can see an example program using them
+          <a href="structureDeclarationTest.aec.html">here</a>. Structures as
+          arguments or return types aren't supported for now, and are unlikely
+          to be so in the near future. I've started a
+          <a
+            href="https://www.reddit.com/r/WebAssembly/comments/j24p4z/how_to_compile_returning_a_structure_from_a/?utm_source=share&utm_medium=web2x&context=3"
+          >
+            Reddit thread
+          </a>
+          asking for help with that.)</i
+        ><br />
         <br /><b>Inline assembly</b><br />
         AEC for x86 passes everything between the
         <span class="inline_code">AsmStart</span> and

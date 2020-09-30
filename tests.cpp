@@ -247,7 +247,10 @@ void parserTests() {
 		)",
         "(Function (gcd (Integer32 a) (Integer32 b)) (Returns Integer32) (Does "
         "(While (not (= b 0)) (Loop (If (> a b) (Then (-= a b)) (Else (-= b "
-        "a))))) (Return a)))"}});
+        "a))))) (Return a)))"},
+       {"Return nestedStructure.structureWithInnerNumber.innerNumber;",
+        "(Return (. (. nestedStructure structureWithInnerNumber) "
+        "innerNumber))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();

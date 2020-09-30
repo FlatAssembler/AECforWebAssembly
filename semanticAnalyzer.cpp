@@ -267,17 +267,18 @@ std::string TreeNode::getType(const CompilationContext context) const {
           << std::endl;
       exit(1);
     }
+    std::string memberName = children[1].text;
     if (!iteratorPointingToTheStructure->memberTypes.count(children[1].text)) {
       std::cerr << "Line " << children[1].lineNumber << ", Column "
                 << children[1].columnNumber
                 << ", Compiler error: The instance \"" << children[0].text
                 << "\", of the structure named \""
                 << iteratorPointingToTheStructure->name
-                << "\", doesn't have a member named \"" << children[1].text
+                << "\", doesn't have a member named \"" << memberName
                 << "\". Quitting now!" << std::endl;
       exit(1);
     }
-    return iteratorPointingToTheStructure->memberTypes.at(children[1].text);
+    return iteratorPointingToTheStructure->memberTypes.at(memberName);
   }
   return "Nothing";
 }
