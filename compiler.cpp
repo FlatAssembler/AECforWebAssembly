@@ -360,6 +360,167 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             }
           }
         }
+      } else if (childNode.text == "InstantiateStructure") {
+        if (childNode.children.size() != 1) {
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Compiler error: Corrupt AST, the node "
+                       "\"InstantiateStructure\" should "
+                       "have exactly one child, but it has "
+                    << childNode.children.size()
+                    << ". Aborting the compilation!" << std::endl;
+          exit(1);
+        }
+        TreeNode nodeWithStructureName = childNode.children[0];
+        if (!isValidVariableName(nodeWithStructureName.text) ||
+            AECkeywords.count(nodeWithStructureName.text) ||
+            nodeWithStructureName.text.back() == '[') {
+          std::cerr << "Line " << nodeWithStructureName.lineNumber
+                    << ", Column " << nodeWithStructureName.columnNumber
+                    << ", Compiler error: The name \""
+                    << nodeWithStructureName.text
+                    << "\" is supposed to be a structure name, but it's not a "
+                       "valid AEC name. Quitting now!"
+                    << std::endl;
+          exit(1);
+        }
+        auto iteratorPointingToTheStructure =
+            std::find_if(context.structures.begin(), context.structures.end(),
+                         [=](structure str) {
+                           return str.name == nodeWithStructureName.text;
+                         });
+        if (iteratorPointingToTheStructure == context.structures.end() &&
+            !context.structureSizes.count(nodeWithStructureName.text)) {
+          std::cerr << "Line " << nodeWithStructureName.lineNumber
+                    << ", Column " << nodeWithStructureName.columnNumber
+                    << ", Compiler error: The structure named \""
+                    << nodeWithStructureName.text
+                    << "\" is not visible in the current scope. Quitting now!"
+                    << std::endl;
+          exit(1);
+        } else if (iteratorPointingToTheStructure == context.structures.end()) {
+          std::cerr
+              << "Line " << nodeWithStructureName.lineNumber << ", Column "
+              << nodeWithStructureName.columnNumber
+              << ", Internal compiler error: Some part of the compiler has "
+                 "corrupted the compilation context, the structure named \""
+              << nodeWithStructureName.text
+              << "\" isn't visible, but its size is. Aborting the compilation!"
+              << std::endl;
+          exit(1);
+        } else if (!context.structureSizes.count(nodeWithStructureName.text)) {
+          std::cerr
+              << "Line " << nodeWithStructureName.lineNumber << ", Column "
+              << nodeWithStructureName.columnNumber
+              << ", Internal compiler error: Some part of the compiler has "
+                 "corrupted the compilation context, the structure named \""
+              << nodeWithStructureName.text
+              << "\" is visible, but its size isn't. Aborting the compilation!"
+              << std::endl;
+          exit(1);
+        }
+        for (TreeNode instanceName : nodeWithStructureName.children) {
+          if (!isValidVariableName(instanceName.text) ||
+              AECkeywords.count(instanceName.text)) {
+            std::cerr << "Line " << instanceName.lineNumber << ", Column "
+                      << instanceName.columnNumber
+                      << ", Compiler error: The name \"" << instanceName.text
+                      << "\" is supposed to be an instance name, but it's not "
+                      << "a valid AEC name. Quitting now!" << std::endl;
+            exit(1);
+          }
+          context.variableTypes[instanceName.text] =
+              iteratorPointingToTheStructure->name;
+          context.localVariables[instanceName.text] = 0;
+          int arraySizeInBytes = 0, arraySizeInStructures = 0;
+          if (instanceName.text.back() == '[' &&
+              instanceName.children.size() == 1) {
+            arraySizeInStructures =
+                instanceName.children[0]
+                    .interpretAsACompileTimeIntegerConstant();
+            arraySizeInBytes = iteratorPointingToTheStructure->sizeInBytes *
+                               arraySizeInStructures;
+
+          } else {
+            if (instanceName.text.back() == '[') {
+              std::cerr
+                  << "Line " << instanceName.lineNumber << ", Column "
+                  << instanceName.columnNumber
+                  << ", Compiler error: Corrupt AST, the node with text \""
+                  << instanceName.text
+                  << "\" is supposed to have 1 child, but it has "
+                  << instanceName.children.size()
+                  << ". Aborting the compilation!" << std::endl;
+              exit(1);
+            } else {
+              arraySizeInBytes = iteratorPointingToTheStructure->sizeInBytes;
+              arraySizeInStructures = 1;
+            }
+          }
+          if (arraySizeInBytes < 1 || arraySizeInStructures < 1) {
+            std::cerr << "Line " << instanceName.lineNumber << ", Column "
+                      << instanceName.columnNumber
+                      << ", Internal compiler error: Some part of the "
+                         "compiler attempted "
+                         "to compile an array with size less than 1, which "
+                         "doesn't make sense. "
+                         "Aborting the compilation!"
+                      << std::endl;
+            exit(1);
+          }
+          for (auto bitand pair : context.localVariables)
+            pair.second += arraySizeInBytes;
+          context.stackSizeOfThisFunction += arraySizeInBytes;
+          context.stackSizeOfThisScope += arraySizeInBytes;
+          assembly +=
+              "(global.set $stack_pointer\n\t(i32.add (global.get "
+              "$stack_pointer) (i32.const " +
+              std::to_string(arraySizeInBytes) +
+              ")) ;;Allocating the space for the local structure instance \"" +
+              instanceName.text + "\".\n)\n";
+          // Now we can set the default values. Let's set the members without
+          // specified default values to 0, this may avoid some bugs.
+          for (int i = 0; i < arraySizeInStructures; i++) {
+            for (std::string memberName :
+                 iteratorPointingToTheStructure->memberNames) {
+              // And now we need to do that daunting task of constructing an
+              // S-expression in C++ again...
+              TreeNode nodeRepresentingIndex(std::to_string(i),
+                                             instanceName.lineNumber,
+                                             instanceName.columnNumber);
+              TreeNode nodeWithInstanceName(instanceName.text,
+                                            instanceName.lineNumber,
+                                            instanceName.columnNumber);
+              nodeWithInstanceName.children.push_back(nodeRepresentingIndex);
+              TreeNode dotOperator(".", instanceName.lineNumber,
+                                   instanceName.columnNumber);
+              TreeNode nodeWithMemberName(memberName, instanceName.lineNumber,
+                                          instanceName.columnNumber);
+              dotOperator.children =
+                  <% nodeWithInstanceName,
+                   nodeWithMemberName %>; // Is this valid in standard C++? I am
+                                          // not sure. GCC (at least as early
+                                          // as 4.8.5) accept that, and so does
+                                          // CLANG 10.
+              TreeNode assignmentOperator(":=", instanceName.lineNumber,
+                                          instanceName.columnNumber);
+              TreeNode nodeRepresentendingDefaultValue(
+                  std::to_string(
+                      iteratorPointingToTheStructure->defaultValuesOfMembers
+                          [memberName] // The operator[] of std::map returns 0
+                                       // if we try to read a non-initialized
+                                       // field. That's different from the
+                                       // "at(key)" method, which throws an
+                                       // exception in that case.
+                      ),
+                  instanceName.lineNumber, instanceName.columnNumber);
+              assignmentOperator.children =
+                  <% dotOperator, nodeRepresentendingDefaultValue %>;
+              // So, finally, now we can compile that S-expression.
+              assembly += assignmentOperator.compile(context) + "\n";
+            }
+          }
+        }
       } else {
         if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
             childNode.getType(context) == "Nothing")

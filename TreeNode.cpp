@@ -354,6 +354,10 @@ public:
       return pow(children[0].interpretAsACompileTimeDecimalConstant(),
                  children[1].interpretAsACompileTimeDecimalConstant());
     if (text == "pi")
+#ifndef M_PI // Microsoft C++ Compiler (I haven't tested this code in it,
+             // but I suppose it will reject my code without this).
+#define M_PI (atan(1) * 4)
+#endif
       return M_PI;
     if (text == "e")
       return exp(1);

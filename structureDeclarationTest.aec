@@ -1,5 +1,5 @@
 /*
- * This is a nonsense program to test whether global structures are compiled
+ * This is a nonsense program to test whether structures are compiled
  * correctly.
  */
 
@@ -48,5 +48,19 @@ Function bar() Which Returns Integer32 Does {
   strcpy(AddressOf(helloWorld.string[0]), hw);
   helloWorld.length : = strlen(hw);
   Return helloWorld.length;
+}
+EndFunction;
+
+Function spam() Which Returns Integer32 Does {
+  // Should return 3.
+  InstantiateStructure Point localPoints[3];
+  Return localPoints[b].dimensions;
+}
+EndFunction;
+
+Function eggs() Which Returns Integer32 Does {
+  // Should return 3.
+  InstantiateStructure Point localPoint;
+  Return localPoint.dimensions;
 }
 EndFunction;
