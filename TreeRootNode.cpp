@@ -570,8 +570,22 @@ public:
               !std::count_if(
                   context.structures.begin(), context.structures.end(),
                   [=](structure str) { return str.name == typeName.text; })) {
+            std::cerr << "Line " << typeName.lineNumber << ", Column "
+                      << typeName.columnNumber
+                      << ", Compiler error: The type named \"" << typeName.text
+                      << "\" is not visible in this scope." << std::endl;
+            exit(1);
           }
           for (TreeNode memberName : typeName.children) {
+            if (!isValidVariableName(memberName.text) or
+                AECkeywords.count(memberName.text)) {
+              std::cerr << "Line " << memberName.lineNumber << ", Column "
+                        << memberName.columnNumber << ", Compiler error: \""
+                        << memberName.text
+                        << "\" is not a valid structure member name."
+                        << std::endl;
+              exit(1);
+            }
             currentStructure.memberNames.push_back(memberName.text);
             currentStructure.memberTypes[memberName.text] = typeName.text;
             currentStructure.memberOffsetInBytes[memberName.text] =

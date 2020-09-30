@@ -1180,5 +1180,38 @@ std::string TreeNode::getType(const CompilationContext context) const {
                              children[1].getType(context),
                              children[2].getType(context));
   }
+  if (text == ".") { // The dot operator for accessing structure members.
+    if (children.size() != 2) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: Corrupt AST, the \".\" node should have "
+                   "2 children, but it has "
+                << children.size() << ". Quitting now!" << std::endl;
+      exit(1);
+    }
+    std::string structureName = children[0].getType(context);
+    auto iteratorPointingToTheStructure =
+        std::find_if(context.structures.begin(), context.structures.end(),
+                     [=](structure str) { return str.name == structureName; });
+    if (iteratorPointingToTheStructure == context.structures.end()) {
+      std::cerr
+          << "Line " << children[0].lineNumber << ", Column "
+          << children[0].columnNumber << ", Compiler error: The instance \""
+          << children[0].text << "\" has the type \"" << structureName
+          << "\", which doesn't appear to be a structure name. Quitting now!"
+          << std::endl;
+      exit(1);
+    }
+    if (!iteratorPointingToTheStructure->memberTypes.count(children[1].text)) {
+      std::cerr << "Line " << children[1].lineNumber << ", Column "
+                << children[1].columnNumber
+                << ", Compiler error: The instance \"" << children[0].text
+                << "\", of the structure named \""
+                << iteratorPointingToTheStructure->name
+                << "\", doesn't have a member named \"" << children[1].text
+                << "\". Quitting now!" << std::endl;
+      exit(1);
+    }
+    return iteratorPointingToTheStructure->memberTypes.at(children[1].text);
+  }
   return "Nothing";
 }
