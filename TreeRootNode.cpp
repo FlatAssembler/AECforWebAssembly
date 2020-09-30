@@ -632,6 +632,9 @@ public:
           }
         }
         context.structures.push_back(currentStructure);
+        context.structureSizes[currentStructure.name] =
+            currentStructure
+                .sizeInBytes; // Will make the compiler significantly shorter.
         globalDeclarations += "\t;;Declaring the structure \"" +
                               currentStructure.name + "\" finished.\n";
       } else if (childNode.text == "InstantiateStructure") {

@@ -42,4 +42,7 @@ struct CompilationContext {
   int stackSizeOfThisScope = 0; // Variables declared inside while-loops...
   std::string currentFunctionName;
   std::vector<structure> structures;
+  std::map<std::string, unsigned>
+      structureSizes; // A bit redundant, but it can make the code significantly
+                      // shorter sometimes.
 };
