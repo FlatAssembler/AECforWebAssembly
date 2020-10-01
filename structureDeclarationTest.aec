@@ -13,7 +13,7 @@ InstantiateStructure Point points[12];
 Integer32 b : = 1;
 Structure String Consists Of {
   Integer32 length;
-  Character string[256];
+  Character string[16];
 }
 EndStructure;
 InstantiateStructure String helloWorld;
@@ -76,8 +76,30 @@ EndStructure;
 
 Function onion() Which Returns Integer32 Does {
   // Should return 1, but for now returns a random number.
-  InstantiateStructure outerStructure
-      nestedStructure;
+  InstantiateStructure outerStructure nestedStructure;
   Return nestedStructure.structureWithInnerNumber.innerNuber;
+}
+EndFunction;
+
+Function copyString(StringPointer destination,
+                    StringPointer source) Which Returns Nothing Does {
+  ValueAt(destination).length : = ValueAt(source).length;
+  Integer32 i : = 0;
+  While i < ValueAt(source).length Loop {
+    ValueAt(destination).string[i] : = ValueAt(source).string[i];
+    i += 1;
+  }
+  EndWhile;
+}
+EndFunction;
+
+Function pomegranate() Which Returns Integer32 Does {
+  // Should return 12.
+  CharacterPointer hw : = "Hello world!";
+  strcpy(AddressOf(helloWorld.string[0]), hw);
+  helloWorld.length : = strlen(hw);
+  InstantiateStructure String localString;
+  copyString(AddressOf(localString), AddressOf(helloWorld));
+  Return localString.length;
 }
 EndFunction;

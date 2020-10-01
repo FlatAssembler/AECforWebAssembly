@@ -495,41 +495,49 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     << std::endl;
                 continue;
               }
-              // And now we need to do that daunting task of constructing an
-              // S-expression in C++ again...
-              TreeNode nodeRepresentingIndex(std::to_string(i),
-                                             instanceName.lineNumber,
-                                             instanceName.columnNumber);
-              TreeNode nodeWithInstanceName(instanceName.text,
-                                            instanceName.lineNumber,
+              for (unsigned int k = 0;
+                   k < iteratorPointingToTheStructure->arraySize[memberName];
+                   k++) {
+                // And now we need to do that daunting task of constructing an
+                // S-expression in C++ again...
+                TreeNode nodeRepresentingIndex(std::to_string(i),
+                                               instanceName.lineNumber,
+                                               instanceName.columnNumber);
+                TreeNode nodeWithInstanceName(instanceName.text,
+                                              instanceName.lineNumber,
+                                              instanceName.columnNumber);
+                nodeWithInstanceName.children.push_back(nodeRepresentingIndex);
+                TreeNode dotOperator(".", instanceName.lineNumber,
+                                     instanceName.columnNumber);
+                TreeNode nodeWithMemberName(memberName, instanceName.lineNumber,
                                             instanceName.columnNumber);
-              nodeWithInstanceName.children.push_back(nodeRepresentingIndex);
-              TreeNode dotOperator(".", instanceName.lineNumber,
-                                   instanceName.columnNumber);
-              TreeNode nodeWithMemberName(memberName, instanceName.lineNumber,
-                                          instanceName.columnNumber);
-              dotOperator.children =
-                  <% nodeWithInstanceName,
-                   nodeWithMemberName %>; // Is this valid in standard C++? I am
-                                          // not sure. GCC (at least as early
-                                          // as 4.8.5) accept that, and so does
-                                          // CLANG 10.
-              TreeNode assignmentOperator(":=", instanceName.lineNumber,
-                                          instanceName.columnNumber);
-              TreeNode nodeRepresentendingDefaultValue(
-                  std::to_string(
-                      iteratorPointingToTheStructure->defaultValuesOfMembers
-                          [memberName] // The operator[] of std::map returns 0
-                                       // if we try to read a non-initialized
-                                       // field. That's different from the
-                                       // "at(key)" method, which throws an
-                                       // exception in that case.
-                      ),
-                  instanceName.lineNumber, instanceName.columnNumber);
-              assignmentOperator.children =
-                  <% dotOperator, nodeRepresentendingDefaultValue %>;
-              // So, finally, now we can compile that S-expression.
-              assembly += assignmentOperator.compile(context) + "\n";
+                TreeNode nodeWithMemberArrayIndex(std::to_string(k),
+                                                  instanceName.lineNumber,
+                                                  instanceName.columnNumber);
+                nodeWithMemberName.children.push_back(nodeWithMemberArrayIndex);
+                dotOperator.children =
+                    <% nodeWithInstanceName,
+                     nodeWithMemberName %>; // Is this valid in standard C++? I
+                                            // am not sure. GCC (at least as
+                                            // early as 4.8.5) accept that, and
+                                            // so does CLANG 10.
+                TreeNode assignmentOperator(":=", instanceName.lineNumber,
+                                            instanceName.columnNumber);
+                TreeNode nodeRepresentendingDefaultValue(
+                    std::to_string(
+                        iteratorPointingToTheStructure->defaultValuesOfMembers
+                            [memberName] // The operator[] of std::map returns 0
+                                         // if we try to read a non-initialized
+                                         // field. That's different from the
+                                         // "at(key)" method, which throws an
+                                         // exception in that case.
+                        ),
+                    instanceName.lineNumber, instanceName.columnNumber);
+                assignmentOperator.children =
+                    <% dotOperator, nodeRepresentendingDefaultValue %>;
+                // So, finally, now we can compile that S-expression.
+                assembly += assignmentOperator.compile(context) + "\n";
+              }
             }
           }
         }
@@ -1110,12 +1118,29 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
                      [=](structure str) { return str.name == structureName; });
     unsigned offset = iteratorPointingToTheStructure->memberOffsetInBytes.at(
         children[1].text);
-    return AssemblyCode("(i32.add\n" +
-                            children[0].compileAPointer(context).indentBy(1) +
-                            "\n\t(i32.const " + std::to_string(offset) +
-                            ") ;;The offset of the structure member " +
-                            structureName + "." + children[1].text + "\n)",
-                        AssemblyCode::AssemblyType::i32);
+    if (children[1].text.back() == '[') // If it's an array inside of a
+                                        // structure
+      return AssemblyCode(
+          "(i32.add\n" + children[0].compileAPointer(context).indentBy(1) +
+              "\n\t(i32.add\n\t\t(i32.const " + std::to_string(offset) +
+              ") ;;The offset of the structure member " + structureName + "." +
+              children[1].text + "\n\t\t(i32.mul\n\t\t\t(i32.const " +
+              std::to_string(basicDataTypeSizes.at(
+                  iteratorPointingToTheStructure->memberTypes.at(
+                      children[1].text))) +
+              ") ;;Size of the type \"" +
+              iteratorPointingToTheStructure->memberTypes.at(children[1].text) +
+              "\"\n" +
+              convertToInteger32(children[1].children[0], context).indentBy(3) +
+              "\n\t\t)\n\t)\n)",
+          AssemblyCode::AssemblyType::i32);
+    else
+      return AssemblyCode("(i32.add\n" +
+                              children[0].compileAPointer(context).indentBy(1) +
+                              "\n\t(i32.const " + std::to_string(offset) +
+                              ") ;;The offset of the structure member " +
+                              structureName + "." + children[1].text + "\n)",
+                          AssemblyCode::AssemblyType::i32);
   }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber
             << ", Compiler error: Some part of the compiler attempted to get "

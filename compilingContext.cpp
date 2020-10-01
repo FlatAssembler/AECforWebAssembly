@@ -23,6 +23,8 @@ struct structure {
   std::map<std::string, std::string> memberTypes;
   std::map<std::string, unsigned> memberOffsetInBytes;
   std::map<std::string, double> defaultValuesOfMembers;
+  std::map<std::string, unsigned>
+      arraySize; // Should contain '1' for members that aren't arrays.
 };
 
 struct CompilationContext {

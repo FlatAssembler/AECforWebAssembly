@@ -340,13 +340,26 @@ public:
           for (auto &pair : contextOfThatFunction
                                 .localVariables) // The reference operator '&'
                                                  // is needed because... C++.
-            pair.second += basicDataTypeSizes.at(
-                argument.text); // Push all the variables
-                                // further back on the stack.
+            pair.second +=
+                isPointerType(argument.text)
+                    ? 4
+                    : basicDataTypeSizes.count(argument.text)
+                          ? basicDataTypeSizes.at(argument.text)
+                          : context.structureSizes.at(
+                                argument.text); // Push all the variables
+                                                // further back on the stack.
           contextOfThatFunction.stackSizeOfThisFunction +=
-              basicDataTypeSizes.at(argument.text);
-          contextOfThatFunction.stackSizeOfThisScope =
-              contextOfThatFunction.stackSizeOfThisFunction;
+              isPointerType(argument.text)
+                  ? 4
+                  : basicDataTypeSizes.count(argument.text)
+                        ? basicDataTypeSizes.at(argument.text)
+                        : context.structureSizes.at(argument.text);
+          contextOfThatFunction.stackSizeOfThisScope +=
+              isPointerType(argument.text)
+                  ? 4
+                  : basicDataTypeSizes.count(argument.text)
+                        ? basicDataTypeSizes.at(argument.text)
+                        : context.structureSizes.at(argument.text);
           if (argument.children[0]
                   .children.size()) // If there is a default value.
             functionDeclaration.defaultArgumentValues.push_back(
@@ -409,7 +422,9 @@ public:
             globalDeclarations +=
                 "(param " +
                 stringRepresentationOfWebAssemblyType.at(
-                    mappingOfAECTypesToWebAssemblyTypes.at(argumentType)) +
+                    mappingOfAECTypesToWebAssemblyTypes.at(
+                        isPointerType(argumentType) ? "Integer32"
+                                                    : argumentType)) +
                 ") ";
           if (functionDeclaration.returnType != "Nothing") {
             if (isPointerType(functionDeclaration.returnType))
@@ -590,6 +605,7 @@ public:
             currentStructure.memberTypes[memberName.text] = typeName.text;
             currentStructure.memberOffsetInBytes[memberName.text] =
                 currentStructure.sizeInBytes;
+            currentStructure.arraySize[memberName.text] = 1;
             globalDeclarations +=
                 "\t;;Declaring a structure member named \"" +
                 currentStructure.name + "." + memberName.text +
@@ -613,6 +629,9 @@ public:
                   (basicDataTypeSizes.count(typeName.text)
                        ? basicDataTypeSizes.at(typeName.text)
                        : context.structureSizes.at(typeName.text));
+              currentStructure.arraySize[memberName.text] =
+                  memberName.children[0]
+                      .interpretAsACompileTimeIntegerConstant();
             } else { // A member that's not an array...
               if (memberName.children.size() == 1 and
                   memberName.children[0].text == ":=")

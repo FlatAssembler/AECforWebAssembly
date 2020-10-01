@@ -8,7 +8,8 @@ let importObject = {
 WebAssembly.instantiate(buffer, importObject).then((results) => {
   const exports = results.instance.exports;
   if (exports.foo() == 3 && exports.bar() == 12 && exports.spam() == 3 &&
-      exports.eggs() == 3 && exports.onion() == 1)
+      exports.eggs() == 3 && exports.onion() == 1 &&
+      exports.pomegranate() == 12)
     console.log("Structure declaration test succeeded!");
   else
     console.log("Structure declaration test failed!\n" +
@@ -17,5 +18,6 @@ WebAssembly.instantiate(buffer, importObject).then((results) => {
                 "bar()\t12\t" + exports.bar() + "\n" +
                 "spam()\t3\t" + exports.spam() + "\n" +
                 "eggs()\t3\t" + exports.eggs() + "\n" +
-                "onion()\t1\t" + exports.onion() + "\n");
+                "onion()\t1\t" + exports.onion() + "\n" +
+                "pomegranate()\t12\t" + exports.pomegranate() + "\n");
 });
