@@ -15,6 +15,7 @@
 #include "tests.cpp"
 #include "tokenizer.cpp"
 #include <chrono>
+#include <exception>
 #include <fstream>
 #include <iostream>
 using namespace std;
@@ -106,7 +107,14 @@ int main(int argc, char **argv) {
   AST.children = parsed;
   cout << "Compiling the program..." << endl;
   auto beginningOfCompilation = chrono::high_resolution_clock::now();
-  string assembly = AST.compile();
+  string assembly;
+  try {
+    assembly = AST.compile();
+  } catch (exception &error) {
+    cerr << "Internal compiler error: Uncaught exception in the compiler: "
+         << error.what() << std::endl;
+    return 1;
+  }
   auto endOfCompilation = chrono::high_resolution_clock::now();
   cout << "Compilation finished in "
        << ((endOfCompilation - beginningOfCompilation).count() *

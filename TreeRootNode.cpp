@@ -6,71 +6,82 @@
 
 #include "TreeNode.cpp"
 
-AssemblyCode instantiateGloabalStructure(structure str, int offset) {
+AssemblyCode instantiateGlobalStructure(const structure str, const int offset) {
   std::string assemblyCode;
-  for (auto memberName : str.memberNames)
-    if (str.defaultValuesOfMembers[memberName]) {
-      int address = offset + str.memberOffsetInBytes[memberName];
-      if (str.memberTypes[memberName] == "Character")
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfCharacter(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
-      else if (str.memberTypes[memberName] == "Integer16")
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfInteger16(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
-      else if (str.memberTypes[memberName] == "Integer32" or
-               isPointerType(str.memberTypes[memberName]))
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfInteger32(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
-      else if (str.memberTypes[memberName] == "Integer64")
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfInteger64(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
-      else if (str.memberTypes[memberName] == "Decimal32")
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfDecimal32(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
-      else if (str.memberTypes[memberName] == "Decimal64")
-        assemblyCode += "(data 0 (i32.const " + std::to_string(address) + ") " +
-                        getCharVectorRepresentationOfInteger16(
-                            str.defaultValuesOfMembers[memberName]) +
-                        ") ;;Hex of " +
-                        std::to_string(str.defaultValuesOfMembers[memberName]) +
-                        ", the default value of \"" + str.name + "." +
-                        memberName + "\"\n";
+  for (auto memberName : str.memberNames) {
+    if (!TreeNode().basicDataTypeSizes.count(str.memberTypes.at(memberName)))
+      std::cerr << "Compiler warning: This version of "
+                   "ArithmeticExpressionCompiler doesn't support nested "
+                   "structures, such as instance of the structure type \""
+                << str.memberTypes.at(memberName) << "\", called \""
+                << memberName
+                << "\", being inside of a structure of the type \"" << str.name
+                << "\". The compilation will continue, but be warned it might "
+                   "produce wrong code because of that."
+                << std::endl;
+    if (str.defaultValuesOfMembers.count(memberName)) {
+      int address = offset + str.memberOffsetInBytes.at(memberName);
+      if (str.memberTypes.at(memberName) == "Character")
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfCharacter(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
+      else if (str.memberTypes.at(memberName) == "Integer16")
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfInteger16(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
+      else if (str.memberTypes.at(memberName) == "Integer32" or
+               isPointerType(str.memberTypes.at(memberName)))
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfInteger32(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
+      else if (str.memberTypes.at(memberName) == "Integer64")
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfInteger64(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
+      else if (str.memberTypes.at(memberName) == "Decimal32")
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfDecimal32(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
+      else if (str.memberTypes.at(memberName) == "Decimal64")
+        assemblyCode +=
+            "(data 0 (i32.const " + std::to_string(address) + ") " +
+            getCharVectorRepresentationOfInteger16(
+                str.defaultValuesOfMembers.at(memberName)) +
+            ") ;;Hex of " +
+            std::to_string(str.defaultValuesOfMembers.at(memberName)) +
+            ", the default value of \"" + str.name + "." + memberName + "\"\n";
       else
         std::cerr << "Compiler error: Can't assign an initial value to the "
                      "structure member \""
                   << str.name << '.' << memberName
                   << "\", because the compiler doesn't know how to convert the "
                      "type \""
-                  << str.memberTypes[memberName]
+                  << str.memberTypes.at(memberName)
                   << "\" to hexadecimal. The compilation will continue, but be "
                      "warned it might produce wrong code because of this."
                   << std::endl;
     }
+  }
   return AssemblyCode(assemblyCode);
 }
 
@@ -713,8 +724,8 @@ public:
                                 .interpretAsACompileTimeIntegerConstant();
             for (int i = 0; i < arraySize; i++) {
               AssemblyCode initialization =
-                  instantiateGloabalStructure(*iteratorPointingToTheStructure,
-                                              context.globalVariablePointer);
+                  instantiateGlobalStructure(*iteratorPointingToTheStructure,
+                                             context.globalVariablePointer);
               initialization.indentBy(1);
               globalDeclarations += initialization;
               context.globalVariablePointer +=
@@ -722,7 +733,7 @@ public:
             }
           } else // Global structure...
           {
-            AssemblyCode initialization = instantiateGloabalStructure(
+            AssemblyCode initialization = instantiateGlobalStructure(
                 *iteratorPointingToTheStructure, context.globalVariablePointer);
             initialization.indentBy(1);
             globalDeclarations += initialization;
