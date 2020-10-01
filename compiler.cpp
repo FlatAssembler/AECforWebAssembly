@@ -540,6 +540,28 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               }
             }
           }
+          if (instanceName.children.size() &&
+              instanceName.children[0].text ==
+                  ":=") // Initial assignment of local structures
+          {
+            TreeNode assignmentOperator(
+                ":=", instanceName.children[0].lineNumber,
+                instanceName.children[0].columnNumber);
+            TreeNode leftHandSide(instanceName.text, instanceName.lineNumber,
+                                  instanceName.columnNumber);
+            assignmentOperator.children =
+                <% leftHandSide, instanceName.children[0].children[0] %>;
+            TreeNode nodeWithFakeDoesToken(
+                "Does", instanceName.lineNumber,
+                instanceName.columnNumber); // Let's, for now, avoid the
+                                            // Internal Compiler Error in the
+                                            // semantic analyzer this way.
+            nodeWithFakeDoesToken.children.push_back(assignmentOperator);
+            CompilationContext fakeContext = context;
+            fakeContext.stackSizeOfThisFunction = 0;
+            fakeContext.stackSizeOfThisScope = 0;
+            assembly += nodeWithFakeDoesToken.compile(fakeContext) + "\n";
+          }
         }
       } else if (childNode.text == ":=" &&
                  context.structureSizes.count(
