@@ -100,6 +100,9 @@ Function pomegranate() Which Returns Integer32 Does {
   helloWorld.length : = strlen(hw);
   InstantiateStructure String localString;
   copyString(AddressOf(localString), AddressOf(helloWorld));
-  Return localString.length;
+  InstantiateStructure String copyOfLocalString;
+copyOfLocalString:
+  = localString;
+  Return copyOfLocalString.length;
 }
 EndFunction;

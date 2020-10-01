@@ -519,7 +519,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     <% nodeWithInstanceName,
                      nodeWithMemberName %>; // Is this valid in standard C++? I
                                             // am not sure. GCC (at least as
-                                            // early as 4.8.5) accept that, and
+                                            // early as 4.8.5) accepts that, and
                                             // so does CLANG 10.
                 TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                             instanceName.columnNumber);
@@ -541,20 +541,55 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             }
           }
         }
-      } else {
-        if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
-            childNode.getType(context) == "Nothing")
-          assembly += std::string(childNode.compile(context)) + "\n";
-        else {
-          std::cerr
-              << "Line " << lineNumber << ", Column " << columnNumber
-              << ", Compiler error: Sorry about that, but WebAssembly doesn't "
-                 "support expressions which aren't assigned to anything (the "
-                 "assembler complains if you write something like that). The "
-                 "compilation is going to be aborted now."
-              << std::endl;
-          std::exit(1);
-        }
+      } else if (childNode.text == ":=" &&
+                 context.structureSizes.count(
+                     childNode.getType(context))) { // Structure assignments.
+        std::string structureName = childNode.getType(context);
+        auto iteratorPointingToTheStructure = std::find_if(
+            context.structures.begin(), context.structures.end(),
+            [=](structure str) { return str.name == structureName; });
+        for (std::string memberName :
+             iteratorPointingToTheStructure->memberNames)
+          for (unsigned memberArrayIndex = 0;
+               memberArrayIndex <
+               iteratorPointingToTheStructure->arraySize.at(memberName);
+               memberArrayIndex++) {
+            // For every member of the structure, assume it's an array, so, for
+            // every element of that array, construct an S-expression for
+            // assigning the corresponding element of the righ-side structure to
+            // it, and then compile that S-expression.
+            TreeNode nodeWithMemberArrayIndex(std::to_string(memberArrayIndex),
+                                              childNode.lineNumber,
+                                              childNode.columnNumber);
+            TreeNode nodeWithMemberName(memberName, childNode.lineNumber,
+                                        childNode.columnNumber);
+            nodeWithMemberName.children.push_back(nodeWithMemberArrayIndex);
+            TreeNode leftDotOperator(".", childNode.lineNumber,
+                                     childNode.columnNumber);
+            leftDotOperator.children =
+                <% childNode.children[0], nodeWithMemberName %>;
+            TreeNode rightDotOperator(".", childNode.lineNumber,
+                                      childNode.columnNumber);
+            rightDotOperator.children =
+                <% childNode.children[1], nodeWithMemberName %>;
+            TreeNode assignmentOperator(":=", childNode.lineNumber,
+                                        childNode.columnNumber);
+            assignmentOperator.children =
+                <% leftDotOperator, rightDotOperator %>;
+            assembly += assignmentOperator.compile(context) + "\n";
+          }
+      } else if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
+                 childNode.getType(context) == "Nothing")
+        assembly += std::string(childNode.compile(context)) + "\n";
+      else {
+        std::cerr
+            << "Line " << lineNumber << ", Column " << columnNumber
+            << ", Compiler error: Sorry about that, but WebAssembly doesn't "
+               "support expressions which aren't assigned to anything (the "
+               "assembler complains if you write something like that). The "
+               "compilation is going to be aborted now."
+            << std::endl;
+        std::exit(1);
       }
     }
     assembly += "(global.set $stack_pointer (i32.sub (global.get "
