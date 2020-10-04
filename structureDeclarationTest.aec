@@ -78,11 +78,14 @@ InstantiateStructure outerStructure globalNestedStructure;
 
 Function onion() Which Returns Integer32 Does {
   // Should return 1.
-  InstantiateStructure outerStructure nestedStructure;
+  InstantiateStructure outerStructure nestedStructure,
+      copyOfTheNestedStructure : = nestedStructure;
   Return(nestedStructure.structureWithInnerNumber.innerNumber =
              globalNestedStructure.structureWithInnerNumber
                  .innerNumber and nestedStructure.outerNumber =
-                 2 and globalNestedStructure.outerNumber = 2);
+                 2 and globalNestedStructure.outerNumber =
+                     2 and copyOfTheNestedStructure.structureWithInnerNumber
+                         .innerNumber = 1);
 }
 EndFunction;
 

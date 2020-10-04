@@ -225,8 +225,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Internal compiler error: The function \"getType\" returned \""
           << typeOfTheCurrentNode
-          << "\", which is an invalid name of type. Aborting the compilation!"
-          << std::endl;
+          << "\", which is an invalid name of type. It's for the node with AST "
+          << getLispExpression() << ". Aborting the compilation!" << std::endl;
       exit(1);
     }
     returnType = mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
@@ -535,7 +535,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                           // compiler errors.
                   fakeInnerFunctionNode.children =
                       <% instantiateStructureNode, assignmentOperator %>;
-                  assembly += fakeInnerFunctionNode.compile(fakeContext);
+                  assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
                 }
                 continue;
               }
@@ -642,7 +642,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                         childNode.columnNumber);
             assignmentOperator.children =
                 <% leftDotOperator, rightDotOperator %>;
-            assembly += assignmentOperator.compile(context) + "\n";
+            TreeNode fakeInnerFunctionNode(
+                "Does", childNode.lineNumber,
+                childNode
+                    .columnNumber); // Again, to avoid the internal compiler
+                                    // error in the semantic analyzer in case of
+                                    // nested structures. This isn't an elegant
+                                    // solution, but I can't think of any better.
+            CompilationContext fakeContext = context;
+            fakeContext.stackSizeOfThisScope = 0;
+            fakeContext.stackSizeOfThisFunction = 0;
+            fakeInnerFunctionNode.children.push_back(assignmentOperator);
+            assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
           }
       } else if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
                  childNode.getType(context) == "Nothing")
