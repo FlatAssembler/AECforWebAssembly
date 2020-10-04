@@ -483,16 +483,60 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           for (int i = 0; i < arraySizeInStructures; i++) {
             for (std::string memberName :
                  iteratorPointingToTheStructure->memberNames) {
-              if (!basicDataTypeSizes.count(
+              if (context.structureSizes.count(
                       iteratorPointingToTheStructure->memberTypes.at(
-                          memberName))) {
-                std::cerr
-                    << "Line " << instanceName.lineNumber << ", Column "
-                    << instanceName.columnNumber
-                    << ", Compiler warning: Nested structures aren't yet "
-                       "implemented. The compilation will continue, but be "
-                       "warned it might produce wrong code because of that."
-                    << std::endl;
+                          memberName))) { // Nested local strucrues.
+                for (unsigned int k = 0;
+                     k < iteratorPointingToTheStructure->arraySize[memberName];
+                     k++) {
+                  // Let's solve this using S-expressions...
+                  CompilationContext fakeContext =
+                      context; // To avoid the internal compiler error in the
+                               // semantic analyzer.
+                  fakeContext.stackSizeOfThisFunction = 0;
+                  fakeContext.stackSizeOfThisScope = 0;
+                  TreeNode innerStructureNameNode(
+                      "innerStructureInstantiated" +
+                          std::to_string(std::rand()),
+                      instanceName.lineNumber, instanceName.columnNumber);
+                  TreeNode innerStructureTypeNode(
+                      iteratorPointingToTheStructure->memberTypes.at(
+                          memberName),
+                      instanceName.lineNumber, instanceName.columnNumber);
+                  innerStructureTypeNode.children.push_back(
+                      innerStructureNameNode);
+                  TreeNode instantiateStructureNode("InstantiateStructure",
+                                                    instanceName.lineNumber,
+                                                    instanceName.columnNumber);
+                  instantiateStructureNode.children.push_back(
+                      innerStructureTypeNode);
+                  TreeNode instanceNameNode(instanceName.text,
+                                            instanceName.lineNumber,
+                                            instanceName.columnNumber);
+                  TreeNode memberNameNode(memberName, instanceName.lineNumber,
+                                          instanceName.columnNumber);
+                  TreeNode arrayIndexNode(std::to_string(k),
+                                          instanceName.lineNumber,
+                                          instanceName.columnNumber);
+                  memberNameNode.children.push_back(arrayIndexNode);
+                  TreeNode dotOperator(".", instanceName.lineNumber,
+                                       instanceName.columnNumber);
+                  dotOperator.children = <% instanceNameNode, memberNameNode %>;
+                  TreeNode assignmentOperator(":=", instanceName.lineNumber,
+                                              instanceName.columnNumber);
+                  assignmentOperator.children =
+                      <% dotOperator, innerStructureNameNode %>;
+                  TreeNode fakeInnerFunctionNode(
+                      "Does", instanceName.lineNumber,
+                      instanceName
+                          .columnNumber); // Again, to work around the
+                                          // hard-to-fix issue in the semantic
+                                          // analyzer which causes internal
+                                          // compiler errors.
+                  fakeInnerFunctionNode.children =
+                      <% instantiateStructureNode, assignmentOperator %>;
+                  assembly += fakeInnerFunctionNode.compile(fakeContext);
+                }
                 continue;
               }
               for (unsigned int k = 0;
