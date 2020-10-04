@@ -497,7 +497,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   fakeContext.stackSizeOfThisScope = 0;
                   TreeNode innerStructureNameNode(
                       "innerStructureInstantiated" +
-                          std::to_string(std::rand()),
+                          std::to_string(
+                              std::rand()), // To silence useless warnings about
+                                            // supposed variable shadowing.
                       instanceName.lineNumber, instanceName.columnNumber);
                   TreeNode innerStructureTypeNode(
                       iteratorPointingToTheStructure->memberTypes.at(
@@ -568,15 +570,24 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                             instanceName.columnNumber);
                 TreeNode nodeRepresentendingDefaultValue(
-                    std::to_string(
-                        iteratorPointingToTheStructure->defaultValuesOfMembers
-                            [memberName] // The operator[] of std::map returns 0
-                                         // if we try to read a non-initialized
-                                         // field. That's different from the
-                                         // "at(key)" method, which throws an
-                                         // exception in that case.
-                        ),
+                    !isPointerType(
+                        iteratorPointingToTheStructure->memberTypes[memberName])
+                        ? std::to_string(
+                              iteratorPointingToTheStructure
+                                  ->defaultValuesOfMembers
+                                      [memberName]) // The operator[] of
+                                                    // std::map returns 0 if we
+                                                    // try to read a
+                                                    // non-initialized field.
+                                                    // That's different from the
+                                                    // "at(key)" method, which
+                                                    // throws an exception in
+                                                    // that case.
+                        : "CharacterPointer(",
                     instanceName.lineNumber, instanceName.columnNumber);
+                TreeNode zeroNode("0", instanceName.lineNumber,
+                                  instanceName.columnNumber);
+                nodeRepresentendingDefaultValue.children.push_back(zeroNode);
                 assignmentOperator.children =
                     <% dotOperator, nodeRepresentendingDefaultValue %>;
                 // So, finally, now we can compile that S-expression.

@@ -72,6 +72,7 @@ Structure outerStructure Consists Of {
   Integer32 outerNumber : = 2;
   innerStructure structureWithInnerNumber;
   innerStructure arrayOfInnerStructures[2];
+  innerStructurePointer structurePointer;
 }
 EndStructure;
 

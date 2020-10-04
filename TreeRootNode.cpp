@@ -663,9 +663,11 @@ public:
               currentStructure.sizeInBytes +=
                   memberName.children[0]
                       .interpretAsACompileTimeIntegerConstant() *
-                  (basicDataTypeSizes.count(typeName.text)
-                       ? basicDataTypeSizes.at(typeName.text)
-                       : context.structureSizes.at(typeName.text));
+                  (isPointerType(typeName.text)
+                       ? 4
+                       : basicDataTypeSizes.count(typeName.text)
+                             ? basicDataTypeSizes.at(typeName.text)
+                             : context.structureSizes.at(typeName.text));
               currentStructure.arraySize[memberName.text] =
                   memberName.children[0]
                       .interpretAsACompileTimeIntegerConstant();
@@ -685,9 +687,11 @@ public:
                              "it might produce wrong code because of this."
                           << std::endl;
               currentStructure.sizeInBytes +=
-                  basicDataTypeSizes.count(typeName.text)
-                      ? basicDataTypeSizes.at(typeName.text)
-                      : context.structureSizes.at(typeName.text);
+                  isPointerType(typeName.text)
+                      ? 4
+                      : basicDataTypeSizes.count(typeName.text)
+                            ? basicDataTypeSizes.at(typeName.text)
+                            : context.structureSizes.at(typeName.text);
             }
           }
         }

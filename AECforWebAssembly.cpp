@@ -18,6 +18,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <typeinfo>
 using namespace std;
 
 bool ends_with(string first, string second) {
@@ -112,7 +113,7 @@ int main(int argc, char **argv) {
     assembly = AST.compile();
   } catch (exception &error) {
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
-         << error.what() << std::endl;
+         << typeid(error).name() << ": " << error.what() << std::endl;
     return 1;
   }
   auto endOfCompilation = chrono::high_resolution_clock::now();
