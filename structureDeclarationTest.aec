@@ -71,6 +71,7 @@ EndStructure;
 Structure outerStructure Consists Of {
   Integer32 outerNumber : = 2;
   innerStructure structureWithInnerNumber;
+  innerStructure arrayOfInnerStructures[2];
 }
 EndStructure;
 
@@ -85,7 +86,9 @@ Function onion() Which Returns Integer32 Does {
                  .innerNumber and nestedStructure.outerNumber =
                  2 and globalNestedStructure.outerNumber =
                      2 and copyOfTheNestedStructure.structureWithInnerNumber
-                         .innerNumber = 1);
+                         .innerNumber = 1 and copyOfTheNestedStructure
+                                                  .arrayOfInnerStructures[1]
+                                                  .innerNumber = 1);
 }
 EndFunction;
 

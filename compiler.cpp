@@ -648,7 +648,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     .columnNumber); // Again, to avoid the internal compiler
                                     // error in the semantic analyzer in case of
                                     // nested structures. This isn't an elegant
-                                    // solution, but I can't think of any better.
+                                    // solution, but I can't think of any
+                                    // better.
             CompilationContext fakeContext = context;
             fakeContext.stackSizeOfThisScope = 0;
             fakeContext.stackSizeOfThisFunction = 0;
@@ -1237,9 +1238,19 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
               "\n\t(i32.add\n\t\t(i32.const " + std::to_string(offset) +
               ") ;;The offset of the structure member " + structureName + "." +
               children[1].text + "\n\t\t(i32.mul\n\t\t\t(i32.const " +
-              std::to_string(basicDataTypeSizes.at(
-                  iteratorPointingToTheStructure->memberTypes.at(
-                      children[1].text))) +
+              std::to_string(
+                  isPointerType(iteratorPointingToTheStructure->memberTypes.at(
+                      children[1].text))
+                      ? 4
+                      : context.structureSizes.count(
+                            iteratorPointingToTheStructure->memberTypes.at(
+                                children[1].text))
+                            ? context.structureSizes.at(
+                                  iteratorPointingToTheStructure->memberTypes
+                                      .at(children[1].text))
+                            : basicDataTypeSizes.at(
+                                  iteratorPointingToTheStructure->memberTypes
+                                      .at(children[1].text))) +
               ") ;;Size of the type \"" +
               iteratorPointingToTheStructure->memberTypes.at(children[1].text) +
               "\"\n" +
