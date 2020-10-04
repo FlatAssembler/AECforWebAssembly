@@ -65,7 +65,7 @@ Function eggs() Which Returns Integer32 Does {
 }
 EndFunction;
 
-Structure innerStructure Consists Of { Integer32 innerNuber : = 1; }
+Structure innerStructure Consists Of { Integer32 innerNumber : = 1; }
 EndStructure;
 
 Structure outerStructure Consists Of {
@@ -74,10 +74,13 @@ Structure outerStructure Consists Of {
 }
 EndStructure;
 
+InstantiateStructure outerStructure globalNestedStructure;
+
 Function onion() Which Returns Integer32 Does {
-  // Should return 1, but for now returns a random number.
+  // Should return 1, but for now returns 0.
   InstantiateStructure outerStructure nestedStructure;
-  Return nestedStructure.structureWithInnerNumber.innerNuber;
+  Return(nestedStructure.structureWithInnerNumber.innerNumber =
+             globalNestedStructure.structureWithInnerNumber.innerNumber);
 }
 EndFunction;
 

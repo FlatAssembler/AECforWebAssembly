@@ -6,19 +6,43 @@
 
 #include "TreeNode.cpp"
 
-AssemblyCode instantiateGlobalStructure(const structure str, const int offset) {
-  std::string assemblyCode;
+AssemblyCode
+instantiateGlobalStructure(const structure str, const int offset,
+                           const std::vector<structure> structures) {
+  std::string assemblyCode = ";;Instantiating a structure of the type \"" +
+                             str.name + "\" at memory address " +
+                             std::to_string(offset) + ".\n";
   for (auto memberName : str.memberNames) {
-    if (!TreeNode().basicDataTypeSizes.count(str.memberTypes.at(memberName)))
-      std::cerr << "Compiler warning: This version of "
-                   "ArithmeticExpressionCompiler doesn't support nested "
-                   "structures, such as instance of the structure type \""
-                << str.memberTypes.at(memberName) << "\", called \""
-                << memberName
-                << "\", being inside of a structure of the type \"" << str.name
-                << "\". The compilation will continue, but be warned it might "
-                   "produce wrong code because of that."
-                << std::endl;
+    if (!TreeNode().basicDataTypeSizes.count(str.memberTypes.at(memberName)) &&
+        !isPointerType(
+            str.memberTypes.at(memberName))) { // Nested global structures.
+      auto iteratorPointingToTheStructure = std::find_if(
+          structures.begin(), structures.end(), [=](structure innerStructure) {
+            return str.memberTypes.at(memberName) == innerStructure.name;
+          });
+      if (iteratorPointingToTheStructure == structures.end()) {
+        std::cerr << "Internal compiler error: Structure declaration in the "
+                     "compilation context is corrupt. The structure \""
+                  << str.name
+                  << "\" is supposed to contain a nested structure named \""
+                  << str.memberTypes.at(memberName)
+                  << "\", but that structure is not present in the compilation "
+                     "context. Quitting now before segfaulting!"
+                  << std::endl;
+        exit(1);
+      }
+      for (unsigned arrayIndex = 0; arrayIndex < str.arraySize.at(memberName);
+           arrayIndex++)
+        assemblyCode +=
+            instantiateGlobalStructure(
+                *iteratorPointingToTheStructure,
+                offset +
+                    arrayIndex * iteratorPointingToTheStructure->sizeInBytes +
+                    str.memberOffsetInBytes.at(memberName),
+                structures)
+                .indentBy(1);
+      continue;
+    }
     if (str.defaultValuesOfMembers.count(memberName)) {
       int address = offset + str.memberOffsetInBytes.at(memberName);
       if (str.memberTypes.at(memberName) == "Character")
@@ -82,6 +106,8 @@ AssemblyCode instantiateGlobalStructure(const structure str, const int offset) {
                   << std::endl;
     }
   }
+  assemblyCode +=
+      ";;Finished instantiating the structure of type \"" + str.name + "\"\n";
   return AssemblyCode(assemblyCode);
 }
 
@@ -723,9 +749,9 @@ public:
             int arraySize = instanceName.children[0]
                                 .interpretAsACompileTimeIntegerConstant();
             for (int i = 0; i < arraySize; i++) {
-              AssemblyCode initialization =
-                  instantiateGlobalStructure(*iteratorPointingToTheStructure,
-                                             context.globalVariablePointer);
+              AssemblyCode initialization = instantiateGlobalStructure(
+                  *iteratorPointingToTheStructure,
+                  context.globalVariablePointer, context.structures);
               initialization.indentBy(1);
               globalDeclarations += initialization;
               context.globalVariablePointer +=
@@ -734,7 +760,8 @@ public:
           } else // Global structure...
           {
             AssemblyCode initialization = instantiateGlobalStructure(
-                *iteratorPointingToTheStructure, context.globalVariablePointer);
+                *iteratorPointingToTheStructure, context.globalVariablePointer,
+                context.structures);
             initialization.indentBy(1);
             globalDeclarations += initialization;
             context.globalVariablePointer +=
