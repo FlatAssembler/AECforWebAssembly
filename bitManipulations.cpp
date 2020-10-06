@@ -85,9 +85,12 @@ std::string getCharVectorRepresentationOfInteger64(uint64_t Integer64) {
 std::string getCharVectorRepresentationOfDecimal32(float Decimal32) {
   std::stringstream stream;
   stream.flags(std::ios::hex);
-  uint32_t Integer32 =
-      *((uint32_t *)(&Decimal32)); // This is actually invalid in standard C++,
-                                   // but all compilers I've tried accept this.
+  union {
+    uint32_t Integer32;
+    float Decimal32;
+  } convertor;
+  convertor.Decimal32 = Decimal32;
+  uint32_t Integer32 = convertor.Integer32;
   stream << Integer32 << std::flush;
   std::string fillWithZeros(stream.str());
   while (fillWithZeros.size() < 8)
@@ -98,9 +101,12 @@ std::string getCharVectorRepresentationOfDecimal32(float Decimal32) {
 std::string getCharVectorRepresentationOfDecimal64(double Decimal64) {
   std::stringstream stream;
   stream.flags(std::ios::hex);
-  uint64_t Integer64 =
-      *((uint64_t *)(&Decimal64)); // Have a better idea? Doing this in assembly
-                                   // is even less portable.
+  union {
+    uint64_t Integer64;
+    double Decimal64;
+  } convertor;
+  convertor.Decimal64 = Decimal64;
+  uint64_t Integer64 = convertor.Integer64;
   stream << Integer64 << std::flush;
   std::string fillWithZeros(stream.str());
   while (fillWithZeros.size() < 16)
