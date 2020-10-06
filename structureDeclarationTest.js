@@ -9,7 +9,7 @@ WebAssembly.instantiate(buffer, importObject).then((results) => {
   const exports = results.instance.exports;
   if (exports.foo() == 3 && exports.bar() == 12 && exports.spam() == 3 &&
       exports.eggs() == 3 && exports.onion() == 1 &&
-      exports.pomegranate() == 12)
+      exports.pomegranate() == 12 && exports.spaghetti() == 2)
     console.log("Structure declaration test succeeded!");
   else
     console.log("Structure declaration test failed!\n" +
@@ -19,5 +19,6 @@ WebAssembly.instantiate(buffer, importObject).then((results) => {
                 "spam()\t3\t" + exports.spam() + "\n" +
                 "eggs()\t3\t" + exports.eggs() + "\n" +
                 "onion()\t1\t" + exports.onion() + "\n" +
-                "pomegranate()\t12\t" + exports.pomegranate() + "\n");
+                "pomegranate()\t12\t" + exports.pomegranate() + "\n" +
+                "spaghetti()\t2\t" + exports.spaghetti() + "\n");
 });

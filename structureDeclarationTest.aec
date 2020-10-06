@@ -116,3 +116,24 @@ Function pomegranate() Which Returns Integer32 Does {
   Return copyOfLocalString.length;
 }
 EndFunction;
+
+Structure ListNode Consists Of {
+  ListNodePointer next;
+  Integer32 value;
+}
+EndStructure;
+
+Function spaghetti() Which Returns Integer32 Does {
+  // https://stackoverflow.com/questions/63951270/using-default-copy-constructor-corrupts-a-tree-in-c
+  // By common sense, this should return 2. By C++ semantics, this should
+  // return 3.
+  InstantiateStructure ListNode list[3];
+  list[0].value : = 1;
+  list[1].value : = 2;
+  list[2].value : = 3;
+  list[0].next : = AddressOf(list[1]);
+  list[1].next : = AddressOf(list[2]);
+  list[0] : = ValueAt(list[0].next);
+  Return list[0].value;
+}
+EndFunction;
