@@ -622,6 +622,26 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                  context.structureSizes.count(
                      childNode.getType(context))) { // Structure assignments.
         std::string structureName = childNode.getType(context);
+        TreeNode fakeInnerFunctionNode(
+            "Does", childNode.lineNumber,
+            childNode
+                .columnNumber); // Again, to avoid the internal compiler error
+                                // in the semantic analyzer in case of nested
+                                // structures. This isn't an elegant solution,
+                                // but I can't think of any better.
+        TreeNode instantiateStructureNode("InstantiateStructure",
+                                          childNode.lineNumber,
+                                          childNode.columnNumber);
+        TreeNode structureNameNode(structureName, childNode.lineNumber,
+                                   childNode.columnNumber);
+        TreeNode temporaryStructureNode(
+            "temporaryAssignmentStructure" + std::to_string(rand()),
+            childNode.lineNumber, childNode.columnNumber);
+        structureNameNode.children.push_back(temporaryStructureNode);
+        instantiateStructureNode.children.push_back(structureNameNode);
+        fakeInnerFunctionNode.children.push_back(instantiateStructureNode);
+        std::vector<TreeNode> assignmentsToTemporary;
+        std::vector<TreeNode> assignmentsFromTemporary;
         auto iteratorPointingToTheStructure = std::find_if(
             context.structures.begin(), context.structures.end(),
             [=](structure str) { return str.name == structureName; });
@@ -644,7 +664,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             TreeNode leftDotOperator(".", childNode.lineNumber,
                                      childNode.columnNumber);
             leftDotOperator.children =
-                <% childNode.children[0], nodeWithMemberName %>;
+                <% temporaryStructureNode, nodeWithMemberName %>;
             TreeNode rightDotOperator(".", childNode.lineNumber,
                                       childNode.columnNumber);
             rightDotOperator.children =
@@ -653,20 +673,25 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                         childNode.columnNumber);
             assignmentOperator.children =
                 <% leftDotOperator, rightDotOperator %>;
-            TreeNode fakeInnerFunctionNode(
-                "Does", childNode.lineNumber,
-                childNode
-                    .columnNumber); // Again, to avoid the internal compiler
-                                    // error in the semantic analyzer in case of
-                                    // nested structures. This isn't an elegant
-                                    // solution, but I can't think of any
-                                    // better.
-            CompilationContext fakeContext = context;
-            fakeContext.stackSizeOfThisScope = 0;
-            fakeContext.stackSizeOfThisFunction = 0;
-            fakeInnerFunctionNode.children.push_back(assignmentOperator);
-            assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
+            assignmentsToTemporary.push_back(assignmentOperator);
+            leftDotOperator.children =
+                <% childNode.children[0], nodeWithMemberName %>;
+            rightDotOperator.children =
+                <% temporaryStructureNode, nodeWithMemberName %>;
+            assignmentOperator.children =
+                <% leftDotOperator, rightDotOperator %>;
+            assignmentsFromTemporary.push_back(assignmentOperator);
           }
+        fakeInnerFunctionNode.children.insert(
+            fakeInnerFunctionNode.children.end(),
+            assignmentsToTemporary.begin(), assignmentsToTemporary.end());
+        fakeInnerFunctionNode.children.insert(
+            fakeInnerFunctionNode.children.end(),
+            assignmentsFromTemporary.begin(), assignmentsFromTemporary.end());
+        CompilationContext fakeContext = context;
+        fakeContext.stackSizeOfThisScope = 0;
+        fakeContext.stackSizeOfThisFunction = 0;
+        assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
       } else if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
                  childNode.getType(context) == "Nothing")
         assembly += std::string(childNode.compile(context)) + "\n";
