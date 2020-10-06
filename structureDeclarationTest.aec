@@ -134,6 +134,7 @@ Function spaghetti() Which Returns Integer32 Does {
   list[0].next : = AddressOf(list[1]);
   list[1].next : = AddressOf(list[2]);
   list[0] : = ValueAt(list[0].next);
-  Return list[0].value;
+  CharacterPointer pointer : = AddressOf(list[0]);
+  Return ValueAt(ListNodePointer(pointer)).value;
 }
 EndFunction;

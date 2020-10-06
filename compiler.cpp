@@ -1111,8 +1111,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 convertToInteger32(children[0], context).indentBy(1) + "\n" +
                 convertToInteger32(children[1], context).indentBy(1) + "\n)";
   else if (text.back() == '(' and
-           basicDataTypeSizes.count(
-               text.substr(0, text.size() - 1))) // The casting operator.
+           (basicDataTypeSizes.count(text.substr(0, text.size() - 1)) or
+            isPointerType(
+                text.substr(0, text.size() - 1)))) // The casting operator.
     assembly +=
         convertTo(children[0], text.substr(0, text.size() - 1), context);
   else if (std::count_if(context.functions.begin(), context.functions.end(),

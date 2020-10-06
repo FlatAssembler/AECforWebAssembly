@@ -229,7 +229,8 @@ std::string TreeNode::getType(const CompilationContext context) const {
   if (potentialFunction != context.functions.end())
     return potentialFunction->returnType;
   if (text.back() == '(' and
-      basicDataTypeSizes.count(text.substr(0, text.size() - 1))) // Casting
+      (basicDataTypeSizes.count(text.substr(0, text.size() - 1)) or
+       isPointerType(text.substr(0, text.size() - 1)))) // Casting
     return text.substr(0, text.size() - 1);
   if (text.back() == '(') {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
