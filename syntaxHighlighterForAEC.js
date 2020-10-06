@@ -44,7 +44,8 @@ function highlightedToken(token) {
       token == "AddressOf" || token == "ValueAt" || token == "," ||
       token == "+" || token == "-" || token == "/" || token == "*" ||
       token == "?" || token == ":" || token == "=" || token == "&lt;" ||
-      token == "&gt;" || token == "not" || token == "invertBits")
+      token == "&gt;" || token == "not" || token == "invertBits" ||
+      token == "SizeOf")
     return '<span class="Operator">' + token + "</span>";
   if (token == "{" || token == "}" || token == "(" || token == ")" ||
       token == "[" || token == "]")

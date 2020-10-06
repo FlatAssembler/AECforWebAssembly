@@ -138,3 +138,11 @@ Function spaghetti() Which Returns Integer32 Does {
   Return ValueAt(ListNodePointer(pointer)).value;
 }
 EndFunction;
+
+Function elephant() Which Returns Integer32 Does {
+  // Should return 1.
+  Return(SizeOf(outerStructure) = SizeOf(Integer32) +
+                                  3 * SizeOf(innerStructure) +
+                                  SizeOf(innerStructurePointer));
+}
+EndFunction;

@@ -42,7 +42,7 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
 std::string TreeNode::getType(const CompilationContext context) const {
   if (text == "asm(" and children.size() == 1)
     return "Nothing";
-  if (text == "asm_i32(" and children.size() == 1)
+  if ((text == "asm_i32(" or text == "SizeOf(") and children.size() == 1)
     return "Integer32";
   if (text == "asm_i64(" and children.size() == 1)
     return "Integer64";
@@ -51,7 +51,7 @@ std::string TreeNode::getType(const CompilationContext context) const {
   if (text == "asm_f64(" and children.size() == 1)
     return "Decimal64";
   if (text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
-      text == "asm_f32(" or text == "asm_f64(") {
+      text == "asm_f32(" or text == "asm_f64(" or text == "SizeOf") {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The inline assembly operator \"" << text
               << "\" has " << children.size()

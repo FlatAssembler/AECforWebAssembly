@@ -1193,7 +1193,25 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     }
   } else if (text == "AddressOf(")
     return children[0].compileAPointer(context);
-  else {
+  else if (text == "SizeOf(") {
+    std::string typeName = children[0].text;
+    int size = 0;
+    if (isPointerType(typeName))
+      size = 4;
+    else if (basicDataTypeSizes.count(typeName))
+      size = basicDataTypeSizes.at(typeName);
+    else if (context.structureSizes.count(typeName))
+      size = context.structureSizes.at(typeName);
+    else {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: \"" << typeName
+                << "\" doesn't seem to be a data type. Quitting now."
+                << std::endl;
+      exit(1);
+    }
+    assembly += "(i32.const " + std::to_string(size) + ") ;;Size of \"" +
+                typeName + "\"";
+  } else {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: No rule to compile the token \"" << text
               << "\", quitting now!" << std::endl;
