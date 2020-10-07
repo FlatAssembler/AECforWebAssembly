@@ -142,8 +142,8 @@ public:
       context.globalVariablePointer += string.size() - 1;
     }
     for (auto childNode : children) {
-      if (basicDataTypeSizes.count(
-              childNode.text)) { // Global variable declaration
+      if (basicDataTypeSizes.count(childNode.text) ||
+          isPointerType(childNode.text)) { // Global variable declaration
         for (auto variableName : childNode.children) {
           if (!isValidVariableName(variableName.text) or
               AECkeywords.count(variableName.text)) {
@@ -168,12 +168,16 @@ public:
           context.variableTypes[variableName.text] = childNode.text;
           if (variableName.text.back() == '[')
             context.globalVariablePointer +=
-                basicDataTypeSizes.at(childNode.text) *
+                (isPointerType(childNode.text)
+                     ? 4
+                     : basicDataTypeSizes.at(childNode.text)) *
                 variableName.children[0]
                     .interpretAsACompileTimeIntegerConstant();
           else
             context.globalVariablePointer +=
-                basicDataTypeSizes.at(childNode.text);
+                isPointerType(childNode.text)
+                    ? 4
+                    : basicDataTypeSizes.at(childNode.text);
           globalDeclarations +=
               "\t;;\"" + variableName.text +
               "\" is declared to be at the memory address " +

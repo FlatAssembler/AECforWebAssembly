@@ -539,7 +539,27 @@
           margin-bottom: 25px;
         "
       >
-        <b>Introduction</b><br />
+        <b>Contents</b><br />
+        <ol>
+          <li><a href="#Introduction">Introduction</a></li>
+          <li><a href="#Platforms">What platforms can be targeted now</a></li>
+          <li><a href="#Comments">Comments</a></li>
+          <li><a href="#Constants">Constants</a></li>
+          <li><a href="#Variables">Variable declarations</a></li>
+          <li><a href="#Arrays">Arrays and pointers</a></li>
+          <li><a href="#Assignments">Assignments</a></li>
+          <li><a href="#Operators">Operators</a></li>
+          <li><a href="#Branching">Branching</a></li>
+          <li><a href="#Loops">Loops</a></li>
+          <li><a href="#Functions">Functions</a></li>
+          <li><a href="#Structures">Structures</a></li>
+          <li><a href="#Assembly">Inline assembly</a></li>
+          <li><a href="#Builtin">Built-in functions</a></li>
+          <li><a href="#String">String manipulation</a></li>
+          <li><a href="#AdvancedArray">Advanced array manipulation</a></li>
+          <li><a href="#Conclusion">Conclusion</a></li>
+        </ol>
+        <b id="Introduction">Introduction</b><br />
         Compilers these days, even C compilers, have lots of features and are
         often smarter than the programmer when it comes to things they are made
         to do. While this is usually very useful, sometimes it's
@@ -559,7 +579,7 @@
         language with a compiler that does only what you told it, in a very
         predictable way? Well, that's what inspired me to create
         <i>Arithmetic Expression Compiler</i> (AEC) a few years ago.<br />
-        <br /><b>What platforms can be targeted now</b><br />
+        <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
         wrote one targeting x86 processors (AMD and Intel). That one is written
         in JavaScript and the <a href="compiler.html">core of it</a> can be run
@@ -588,7 +608,7 @@
         The AEC-to-WebAssembly compiler has around 4'500 lines of code, and it's
         written in C++ (a language much more suitable for writing compilers than
         JavaScript). <br /><br />
-        <b>Comments</b><br />
+        <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
         in FlatAssembler dialect of Assembly (which ArithmeticExpressionCompiler
@@ -602,7 +622,7 @@
         code (which is a very bad practice). I don't think the job of the
         compiler is to enforce some particular programming style and refuse to
         compile code-smelling programs (though warnings are often useful).<br />
-        <br /><b>Constants</b><br />
+        <br /><b id="Constants">Constants</b><br />
         In AEC for x86, a token that consists of numbers and at most one point
         is a number, and all numbers are treated as 32-bit decimal numbers. In
         both dialects of AEC, a string is a token which starts and ends with
@@ -627,7 +647,7 @@
         for x86, <span class="inline_code">3/2=1.5</span> (as in JavaScript).
         It's hard to tell which approach is better, both can produce
         hard-to-find bugs.<br />
-        <br /><b>Variable declarations</b><br />
+        <br /><b id="Variables">Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
         matches the regular expression
@@ -701,7 +721,7 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
         approach. Also, while JavaScript Virtual Machine does allow unaligned
         memory access, it's not guaranteed to be nearly as fast as aligned
         access (on x86, it usually is, on ARM, it's many times slower).<br />
-        <br /><b>Arrays and Pointers</b><br />
+        <br /><b id="Arrays">Arrays and Pointers</b><br />
         Arrays are declared as follows:
         <pre>DataType name_of_the_array[size];</pre>
         They can be initialized as follows:
@@ -768,7 +788,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         <b>TODO</b>: Implement the multi-dimensional arrays. But let's not use
         the JavaScript-like approach to them, JavaScript really sucks in that
         regard.<br />
-        <br /><b>Assignments</b><br />
+        <br /><b id="Assignments">Assignments</b><br />
         For assignments, you use <span class="inline_code">:=</span> operator,
         in both dialects of AEC. In the AEC for WebAssembly, you can nest
         assignment expressions, like this (excerpt from HybridSort):
@@ -796,7 +816,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           C++ and JavaScript. They can make code significantly shorter.</del
         >
         (<i>UPDATE on 14/09/2020: They have been implemented.</i>)<br />
-        <br /><b>Operators</b><br />
+        <br /><b id="Operators">Operators</b><br />
         AEC has the following operators:<br />
         <table>
           <tr>
@@ -807,7 +827,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           <tr>
             <td>1</td>
             <td>left</td>
-            <td>.</td>
+            <td>. -&gt;</td>
           </tr>
           <tr>
             <td>2</td>
@@ -845,6 +865,12 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
             <td>:= (assignment operator)</td>
           </tr>
         </table>
+        <i
+          >(UPDATE on 07/10/2020: The operators
+          <span class="inline_code">.</span> and
+          <span class="inline_code">-&gt;</span> have the same meaning they do
+          in C, dealing with structures and structure pointers.)</i
+        >
         The first argument of the ternary conditional operator is converted to
         <span class="inline_code">Integer32</span> (that's how WebAssembly
         represents Booleans), and the last two are converted to strongest type
@@ -911,7 +937,7 @@ EndFunction</pre
         <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
         operator <span class="inline_code">&gt;=</span>. For that, we will need
         to modify both the tokenizer, the parser and the compiler.<br />
-        <br /><b>Branching</b><br />
+        <br /><b id="Branching">Branching</b><br />
         Branching is supported only via <span class="inline_code">If</span>,
         <span class="inline_code">If</span>-<span class="inline_code">Else</span
         >, and <span class="inline_code">If</span>-<span class="inline_code"
@@ -1008,7 +1034,7 @@ EndFunction</pre
         <span class="inline_code">ElseIf</span> branchings. Most of the time,
         they are a sign of bad code design, but sometimes they are not, and it's
         not acceptable for a language to discourage them.<br />
-        <br /><b>Loops</b><br />
+        <br /><b id="Loops">Loops</b><br />
         For now, there is only one type of loop in AEC, the
         <span class="inline_code">While</span>-loop. A
         <span class="inline_code">While</span> token is followed by an
@@ -1062,7 +1088,7 @@ EndFunction</pre
         <span class="inline_code">continue</span>. Most of the time, they are a
         sign of bad code design, but sometimes they aren't, and it's not
         acceptable for a language to discourage them.<br />
-        <br /><b>Functions</b><br />
+        <br /><b id="Functions">Functions</b><br />
         AEC for x86 supports no user-added functions. Furthermore, the parser
         implemented there doesn't support functions with more than 2 arguments.
         AEC for WebAssembly supports functions, because WebAssembly makes it
@@ -1143,7 +1169,7 @@ EndFunction</pre
         <span class="inline_code">:=</span> operator) might also come useful (in
         languages with them, there is basically no need for the abstract
         builders and directors).<br />
-        <br /><b>Structures</b><br />
+        <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
         <pre>
 Structure Point Consists Of
@@ -1174,7 +1200,7 @@ EndStructure</pre
           </a>
           asking for help with that.)</i
         ><br />
-        <br /><b>Inline assembly</b><br />
+        <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
         <span class="inline_code">AsmStart</span> and
         <span class="inline_code">AsmEnd</span> token unchanged to the
@@ -1227,7 +1253,7 @@ EndFunction</pre
         <b>TODO</b>: Implement a GCC-and-CLANG-style inline assembly, where you
         can access variables from assembly by their names (rather than having to
         manually calculate their memory addresses).<br />
-        <br /><b>Built-in functions</b><br />
+        <br /><b id="Builtin">Built-in functions</b><br />
         AEC for x86 has many built-in functions, wrappers around x86 assembly
         instructions. These are: <span class="inline_code">sin(</span>,
         <span class="inline_code">cos(</span>,
@@ -1299,13 +1325,13 @@ EndFunction</pre
         (for a good reason).<br />
         <b>TODO</b>: Build some mathematical functions into AEC for
         WebAssembly.<br />
-        <br /><b>String manipulation</b><br />
+        <br /><b id="String">String manipulation</b><br />
         AEC for x86 doesn't support string manipulation at all, it doesn't have
         a character type. AEC for WebAssembly is about as good at C manipulation
         as C is without a C library (like when doing operating system
         development). There are no built-in string-manipulation functions, but
-        one can easily write them oneself, like this (excerpt from Dragon
-        Curve):
+        one can easily write them oneself, like this (excerpt from
+        <a href="dragonCurve.html">Dragon Curve</a>):
         <pre>
 //Again, we need to implement string manipulation functions. Like I've said,
 //even though this program will be running on JavaScript Virtual Machine, it
@@ -1374,7 +1400,7 @@ EndFunction</pre
         >
         <b>TODO</b>: Build some useful string manipulation into AEC, at least
         ones for converting numbers to strings and vice versa.<br />
-        <br /><b>Advanced array manipulation</b><br />
+        <br /><b id="AdvancedArray">Advanced array manipulation</b><br />
         When it comes to sorting arrays, I've tried to efficiently implement the
         <a href="HybridSort.aec.html">HybridSort</a> (an optimized mixture of
         MergeSort, QuickSort and SelectionSort) algorithm in AEC. However, for
@@ -1390,7 +1416,7 @@ EndFunction</pre
           "
           alt="Results of the measurements"
         /><br />
-        <br /><b>Conclusion</b><br />
+        <br /><b id="Conclusion">Conclusion</b><br />
         I think AEC is a promising project, but a lot of work is still needed to
         make it successful. I don't think I can do everything that's needed for
         it to be successful by myself.

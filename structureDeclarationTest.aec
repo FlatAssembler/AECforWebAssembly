@@ -146,3 +146,17 @@ Function elephant() Which Returns Integer32 Does {
                                   SizeOf(innerStructurePointer));
 }
 EndFunction;
+
+ListNodePointer globalStructurePointer, globalStructurePointerArray[2];
+
+Function arrow() Which Returns Integer32 Does {
+  // Should return 2.
+  InstantiateStructure ListNode node[2];
+  node[0].value : = 1;
+  node[0].next : = AddressOf(node[1]);
+  node[1].value : = 2;
+  ListNodePointer ptr : = AddressOf(node[0]), localPointerArray[2];
+  ptr += 1;
+  Return(ptr->value);
+}
+EndFunction

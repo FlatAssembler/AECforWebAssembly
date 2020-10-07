@@ -281,5 +281,12 @@ std::string TreeNode::getType(const CompilationContext context) const {
     }
     return iteratorPointingToTheStructure->memberTypes.at(memberName);
   }
+  if (text == "->") {
+    TreeNode dotOperator(".", lineNumber, columnNumber);
+    TreeNode valueAtOperator("ValueAt(", lineNumber, columnNumber);
+    valueAtOperator.children.push_back(children[0]);
+    dotOperator.children = <% valueAtOperator, children[1] %>;
+    return dotOperator.getType(context);
+  }
   return "Nothing";
 }

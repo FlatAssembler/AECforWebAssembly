@@ -248,7 +248,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression.erase(parsedExpression.begin() + i + 1);
     }
   std::vector<std::vector<std::string>> leftAssociativeBinaryOperators(
-      {{"."}, {"*", "/"}, {"-", "+"}, {"<", ">", "="}, {"and"}, {"or"}});
+      {{".", "->"}, {"*", "/"}, {"-", "+"}, {"<", ">", "="}, {"and"}, {"or"}});
   for (unsigned int i = 0; i < leftAssociativeBinaryOperators.size(); i++)
     parsedExpression = applyBinaryOperators(parsedExpression,
                                             leftAssociativeBinaryOperators[i],
@@ -388,7 +388,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
   }
 #endif
   for (unsigned i = 0; i < input.size(); i++)
-    if (input[i].basicDataTypeSizes.count(input[i].text) and
+    if ((input[i].basicDataTypeSizes.count(input[i].text) ||
+         isPointerType(input[i].text)) and
         input[i].children.empty()) { // Declaration of a variable of a basic
                                      // type (Integer32...).
 #ifndef NDEBUG

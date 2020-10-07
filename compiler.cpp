@@ -258,7 +258,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     for (auto childNode : children) {
       if (childNode.text == "Nothing")
         continue;
-      else if (basicDataTypeSizes.count(childNode.text)) {
+      else if (basicDataTypeSizes.count(childNode.text) ||
+               isPointerType(childNode.text)) {
         // Local variables declaration.
         for (TreeNode variableName : childNode.children) {
           if (context.variableTypes.count(variableName.text))
@@ -274,17 +275,26 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           if (variableName.text.back() != '[') { // If it's not an array.
             context.localVariables[variableName.text] = 0;
             for (auto &pair : context.localVariables)
-              pair.second += basicDataTypeSizes.at(childNode.text);
+              pair.second += isPointerType(childNode.text)
+                                 ? 4
+                                 : basicDataTypeSizes.at(childNode.text);
             context.variableTypes[variableName.text] = childNode.text;
             context.stackSizeOfThisFunction +=
-                basicDataTypeSizes.at(childNode.text);
+                isPointerType(childNode.text)
+                    ? 4
+                    : basicDataTypeSizes.at(childNode.text);
             context.stackSizeOfThisScope +=
-                basicDataTypeSizes.at(childNode.text);
-            assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
-                        "$stack_pointer) (i32.const " +
-                        std::to_string(basicDataTypeSizes.at(childNode.text)) +
-                        ")) ;;Allocating the space for the local variable \"" +
-                        variableName.text + "\".\n)\n";
+                isPointerType(childNode.text)
+                    ? 4
+                    : basicDataTypeSizes.at(childNode.text);
+            assembly +=
+                "(global.set $stack_pointer\n\t(i32.add (global.get "
+                "$stack_pointer) (i32.const " +
+                std::to_string(isPointerType(childNode.text)
+                                   ? 4
+                                   : basicDataTypeSizes.at(childNode.text)) +
+                ")) ;;Allocating the space for the local variable \"" +
+                variableName.text + "\".\n)\n";
             if (variableName.children.size() and
                 variableName.children[0].text ==
                     ":=") // Initial assignment to local variables.
@@ -303,7 +313,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                         << "\" has no child node indicating size." << std::endl;
               exit(1);
             }
-            if (!basicDataTypeSizes.count(childNode.text)) {
+            if (!basicDataTypeSizes.count(childNode.text) &&
+                !isPointerType(childNode.text)) {
               std::cerr << "Line " << variableName.lineNumber << ", Column "
                         << variableName.columnNumber
                         << ", Compiler error: Corrupt AST, the variable is "
@@ -313,7 +324,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               exit(1);
             }
             int arraySizeInBytes =
-                basicDataTypeSizes.at(childNode.text) *
+                (isPointerType(childNode.text)
+                     ? 4
+                     : basicDataTypeSizes.at(childNode.text)) *
                 variableName.children[0]
                     .interpretAsACompileTimeIntegerConstant();
             context.localVariables[variableName.text] = 0;
@@ -716,7 +729,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             text == "asm_f32(" or text == "asm_f64(") and
            children.size() == 1)
     assembly += convertInlineAssemblyToAssembly(children[0]);
-  else if (context.variableTypes.count(text) or text == ".") {
+  else if (context.variableTypes.count(text) or text == "." || text == "->") {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
           "(i32.load8_s\n" + compileAPointer(context).indentBy(1) + "\n)";
@@ -947,8 +960,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                         // C and C++, rather than with pointers in
                         // Assembly (which allows unaligned access).
     {
-      if (!basicDataTypeSizes.count(firstType.substr(
-              0, firstType.size() - std::string("Pointer").size()))) {
+      std::string typeName =
+          firstType.substr(0, firstType.size() - std::string("Pointer").size());
+      if (!basicDataTypeSizes.count(typeName) && !isPointerType(typeName) &&
+          !context.structureSizes.count(typeName)) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Internal compiler error: The size of the type \""
                   << firstType.substr(0, firstType.size() -
@@ -958,13 +973,13 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << std::endl;
         std::exit(1);
       }
-      assembly += "(i32.add\n" +
-                  std::string(children[0].compile(context).indentBy(1)) +
-                  "\n\t(i32.mul (i32.const " +
-                  std::to_string(basicDataTypeSizes.at(firstType.substr(
-                      0, firstType.size() - std::string("Pointer").size()))) +
-                  ")\n" + convertToInteger32(children[1], context).indentBy(2) +
-                  "\n\t)\n)";
+      TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
+      sizeOfNode.children.push_back(
+          TreeNode(typeName, lineNumber, columnNumber));
+      assembly +=
+          "(i32.add\n" + std::string(children[0].compile(context).indentBy(1)) +
+          "\n\t(i32.mul\n" + sizeOfNode.compile(context).indentBy(2) + "\n" +
+          convertToInteger32(children[1], context).indentBy(2) + "\n\t)\n)";
     } else
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
@@ -988,8 +1003,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
                   "\n" + children[1].compile(context).indentBy(1) + "\n)";
     else if (isPointerType(firstType) and !isPointerType(secondType)) {
-      if (!basicDataTypeSizes.count(firstType.substr(
-              0, firstType.size() - std::string("Pointer").size()))) {
+      std::string typeName =
+          firstType.substr(0, firstType.size() - std::string("Pointer").size());
+      if (!basicDataTypeSizes.count(typeName) && !isPointerType(typeName) &&
+          !context.structureSizes.count(typeName)) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Internal compiler error: The size of the type \""
                   << firstType.substr(0, firstType.size() -
@@ -999,11 +1016,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << std::endl;
         std::exit(1);
       }
+      TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
+      sizeOfNode.children.push_back(
+          TreeNode(typeName, lineNumber, columnNumber));
       assembly += "(i32.sub\n" + children[0].compile(context).indentBy(1) +
-                  "\n\t(i32.mul (i32.const " +
-                  std::to_string(basicDataTypeSizes.at(firstType.substr(
-                      0, firstType.size() - std::string("Pointer").size()))) +
-                  ")\n" + convertToInteger32(children[1], context).indentBy(2) +
+                  "\n\t(i32.mul\n" + sizeOfNode.compile(context).indentBy(2) +
+                  "\n" + convertToInteger32(children[1], context).indentBy(2) +
                   "\n\t)\n)";
     } else
       assembly +=
@@ -1319,6 +1337,13 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
                               ") ;;The offset of the structure member " +
                               structureName + "." + children[1].text + "\n)",
                           AssemblyCode::AssemblyType::i32);
+  }
+  if (text == "->") {
+    TreeNode dotOperator(".", lineNumber, columnNumber);
+    TreeNode valueAtOperator("ValueAt(", lineNumber, columnNumber);
+    valueAtOperator.children.push_back(children[0]);
+    dotOperator.children = <% valueAtOperator, children[1] %>;
+    return dotOperator.compileAPointer(context);
   }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber
             << ", Compiler error: Some part of the compiler attempted to get "

@@ -205,6 +205,12 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       tokenizedExpression.erase(tokenizedExpression.begin() + i);
     }
   for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
+    if (tokenizedExpression[i].text == ">" &&
+        tokenizedExpression[i - 1].text == "-") {
+      tokenizedExpression[i - 1].text = tokenizedExpression[i - 1].text + ">";
+      tokenizedExpression.erase(tokenizedExpression.begin() + i);
+    }
+  for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
     if (tokenizedExpression[i].text[0] == '"' and
         tokenizedExpression[i - 1].text[0] ==
             '"') // Concatenate two strings next to each other (as in C and
