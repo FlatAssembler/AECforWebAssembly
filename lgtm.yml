@@ -1,0 +1,4 @@
+extraction:
+  cpp:
+    index:
+      build_command: "g++ -o aec AECforWebAssembly.cpp -Wall"
