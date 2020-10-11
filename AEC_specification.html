@@ -605,9 +605,32 @@
         compiler for WebAssembly) always assumes the standard C library is
         present on the JavaScript Virtual Machine when compiling any kind of
         program, so it's an overkill for most cases when it could come useful.
-        The AEC-to-WebAssembly compiler has around 5'000 lines of code, and it's
-        written in C++ (a language much more suitable for writing compilers than
-        JavaScript). <br /><br />
+        The
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly"
+          >AEC-to-WebAssembly compiler</a
+        >
+        has around 5'000 lines of code, and it's written in C++ (a language much
+        more suitable for writing compilers than JavaScript). <br />
+        <b>UPDATE</b> on 11/10/2020: Of course, my compiler is not a very
+        high-quality software. The LGTM static analyzer places it in the
+        <a
+          href="https://lgtm.com/projects/g/FlatAssembler/AECforWebAssembly/context:cpp"
+          ><img
+            alt="Language grade: C/C++"
+            src="https://img.shields.io/lgtm/grade/cpp/g/FlatAssembler/AECforWebAssembly.svg?logo=lgtm&logoWidth=18"
+        /></a>
+        category, because it has found
+        <a
+          href="https://lgtm.com/projects/g/FlatAssembler/AECforWebAssembly/alerts/"
+          ><img
+            alt="Total alerts"
+            src="https://img.shields.io/lgtm/alerts/g/FlatAssembler/AECforWebAssembly.svg?logo=lgtm&logoWidth=18"
+        /></a>
+        potential bugs per 5'000 lines of code, most of them being unnecessarily
+        doing deep copies of C++ objects (wasting time and memory), and quite a
+        few of them being using uninitialized variables in JavaScript. If you
+        want to collaborate with me, perhaps one of the first things to do is
+        fix those bugs found by static analysis. <br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
