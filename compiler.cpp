@@ -729,6 +729,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             text == "asm_f32(" or text == "asm_f64(") and
            children.size() == 1)
     assembly += convertInlineAssemblyToAssembly(children[0]);
+  else if (text == "nan")
+    assembly += "(f32.reinterpret_i32\n\t(i32.const -1) ;;IEE754 for "
+                "not-a-number is 0xffffffff=-1.\n)";
   else if (context.variableTypes.count(text) or text == "." || text == "->") {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
@@ -1315,15 +1318,15 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
                   isPointerType(iteratorPointingToTheStructure->memberTypes.at(
                       children[1].text))
                       ? 4
-                      : context.structureSizes.count(
+                  : context.structureSizes.count(
+                        iteratorPointingToTheStructure->memberTypes.at(
+                            children[1].text))
+                      ? context.structureSizes.at(
                             iteratorPointingToTheStructure->memberTypes.at(
                                 children[1].text))
-                            ? context.structureSizes.at(
-                                  iteratorPointingToTheStructure->memberTypes
-                                      .at(children[1].text))
-                            : basicDataTypeSizes.at(
-                                  iteratorPointingToTheStructure->memberTypes
-                                      .at(children[1].text))) +
+                      : basicDataTypeSizes.at(
+                            iteratorPointingToTheStructure->memberTypes.at(
+                                children[1].text))) +
               ") ;;Size of the type \"" +
               iteratorPointingToTheStructure->memberTypes.at(children[1].text) +
               "\"\n" +

@@ -382,25 +382,22 @@ public:
                                 .localVariables) // The reference operator '&'
                                                  // is needed because... C++.
             pair.second +=
-                isPointerType(argument.text)
-                    ? 4
-                    : basicDataTypeSizes.count(argument.text)
-                          ? basicDataTypeSizes.at(argument.text)
-                          : context.structureSizes.at(
-                                argument.text); // Push all the variables
-                                                // further back on the stack.
+                isPointerType(argument.text) ? 4
+                : basicDataTypeSizes.count(argument.text)
+                    ? basicDataTypeSizes.at(argument.text)
+                    : context.structureSizes.at(
+                          argument.text); // Push all the variables
+                                          // further back on the stack.
           contextOfThatFunction.stackSizeOfThisFunction +=
-              isPointerType(argument.text)
-                  ? 4
-                  : basicDataTypeSizes.count(argument.text)
-                        ? basicDataTypeSizes.at(argument.text)
-                        : context.structureSizes.at(argument.text);
+              isPointerType(argument.text) ? 4
+              : basicDataTypeSizes.count(argument.text)
+                  ? basicDataTypeSizes.at(argument.text)
+                  : context.structureSizes.at(argument.text);
           contextOfThatFunction.stackSizeOfThisScope +=
-              isPointerType(argument.text)
-                  ? 4
-                  : basicDataTypeSizes.count(argument.text)
-                        ? basicDataTypeSizes.at(argument.text)
-                        : context.structureSizes.at(argument.text);
+              isPointerType(argument.text) ? 4
+              : basicDataTypeSizes.count(argument.text)
+                  ? basicDataTypeSizes.at(argument.text)
+                  : context.structureSizes.at(argument.text);
           if (argument.children[0]
                   .children.size()) // If there is a default value.
             functionDeclaration.defaultArgumentValues.push_back(
@@ -667,11 +664,10 @@ public:
               currentStructure.sizeInBytes +=
                   memberName.children[0]
                       .interpretAsACompileTimeIntegerConstant() *
-                  (isPointerType(typeName.text)
-                       ? 4
-                       : basicDataTypeSizes.count(typeName.text)
-                             ? basicDataTypeSizes.at(typeName.text)
-                             : context.structureSizes.at(typeName.text));
+                  (isPointerType(typeName.text) ? 4
+                   : basicDataTypeSizes.count(typeName.text)
+                       ? basicDataTypeSizes.at(typeName.text)
+                       : context.structureSizes.at(typeName.text));
               currentStructure.arraySize[memberName.text] =
                   memberName.children[0]
                       .interpretAsACompileTimeIntegerConstant();
@@ -691,11 +687,10 @@ public:
                              "it might produce wrong code because of this."
                           << std::endl;
               currentStructure.sizeInBytes +=
-                  isPointerType(typeName.text)
-                      ? 4
-                      : basicDataTypeSizes.count(typeName.text)
-                            ? basicDataTypeSizes.at(typeName.text)
-                            : context.structureSizes.at(typeName.text);
+                  isPointerType(typeName.text) ? 4
+                  : basicDataTypeSizes.count(typeName.text)
+                      ? basicDataTypeSizes.at(typeName.text)
+                      : context.structureSizes.at(typeName.text);
             }
           }
         }

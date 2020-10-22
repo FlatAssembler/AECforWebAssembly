@@ -40,6 +40,8 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
 }
 
 std::string TreeNode::getType(const CompilationContext context) const {
+  if (text == "nan") // Not-a-number, to signal a numeric error.
+    return "Decimal32";
   if (text == "asm(" and children.size() == 1)
     return "Nothing";
   if ((text == "asm_i32(" or text == "SizeOf(") and children.size() == 1)

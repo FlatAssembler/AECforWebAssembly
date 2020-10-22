@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
                                // the standards) is to JavaScript. I don't
                                // understand how it manages to compile itself,
                                // yet it miscompiles something every now and
-                               // then in a 4'000-lines-of-code program.
+                               // then in a 5'000-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows:\n"
            << argv[0] << " name_of_the_program.aec" << endl;
