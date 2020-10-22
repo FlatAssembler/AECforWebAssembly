@@ -373,6 +373,17 @@ void testBitManipulations() {
   }
 }
 
+void testMaps() {
+  if (isnanf(std::map<std::string, float>()[""])) // The Virtual DOS Machine on
+                                                  // ReactOS, when this program
+                                                  // is compiled with DJGPP 10.2.
+    std::cerr
+        << R"(Your C++ runtime environment apparently returns a NaN instead of 0 for
+"std::map<std::string, float>()[""]". The program will continue, but be warned
+it may produce wrong code or crash because of that.)"
+        << std::endl;
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
@@ -382,4 +393,5 @@ void runTests() {
   testAssemblyCodeStructure();
   testTypeChecking();
   testBitManipulations();
+  testMaps();
 }
