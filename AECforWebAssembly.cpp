@@ -49,8 +49,9 @@ int main(int argc, char **argv) {
       return -1;
     }
   } catch (regex_error &error) {
-    cerr << "Your C++ compiler doesn't appear to support JavaScript-style "
-            "regular\nexpressions. Parts of this program that rely on them "
+    cerr << "The C++ compiler this executable has been compiled with\n"
+            "doesn't appear to support JavaScript-style regular\n"
+            "expressions. Parts of this program that rely on them\n"
             "will not work."
          << endl;
   }

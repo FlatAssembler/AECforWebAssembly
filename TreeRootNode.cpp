@@ -372,6 +372,17 @@ public:
         functionDeclaration.name = childNode.children[0].text;
         functionDeclaration.returnType = childNode.children[1].children[0].text;
         for (TreeNode argument : childNode.children[0].children) {
+          if (not(isPointerType(argument.text)) and
+              not(basicDataTypeSizes.count(argument.text)) and
+              not(context.structureSizes.count(argument.text))) {
+            std::cerr << "Line " << argument.lineNumber << ", Column "
+                      << argument.columnNumber << ", Compiler error: \""
+                      << argument.text
+                      << "\" does not appear to be a name of a type. Aborting "
+                         "the compilation!"
+                      << std::endl;
+            exit(1);
+          }
           functionDeclaration.argumentNames.push_back(
               argument.children[0].text);
           functionDeclaration.argumentTypes.push_back(argument.text);

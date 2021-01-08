@@ -374,9 +374,11 @@ void testBitManipulations() {
 }
 
 void testMaps() {
-  if (isnanf(std::map<std::string, float>()[""])) // The Virtual DOS Machine on
-                                                  // ReactOS, when this program
-                                                  // is compiled with DJGPP 10.2.
+  if (isnanf(std::map<std::string, float>()[""]) or
+      isnanf(
+          std::map<std::string, double>()[""])) // The Virtual DOS Machine on
+                                                // ReactOS, when this program is
+                                                // compiled with DJGPP 10.2.
     std::cerr
         << R"(Your C++ runtime environment apparently returns a NaN instead of 0 for
 "std::map<std::string, float>()[""]". The program will continue, but be warned
