@@ -360,7 +360,8 @@ public:
 #endif
       return M_PI;
     if (text == "e")
-      return exp(1);
+      return exp(1.); // That seems to be the only way to get 'e' on 
+                      // GCC 7 on Solaris 11.
     if (text == "<" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() <
              children[1].interpretAsACompileTimeDecimalConstant();
