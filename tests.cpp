@@ -374,8 +374,8 @@ void testBitManipulations() {
 }
 
 void testMaps() {
-  if (isnanf(std::map<std::string, float>()[""]) or
-      isnanf(
+  if (std::isnan(std::map<std::string, float>()[""]) or
+      std::isnan(
           std::map<std::string, double>()[""])) // The Virtual DOS Machine on
                                                 // ReactOS, when this program is
                                                 // compiled with DJGPP 10.2.
