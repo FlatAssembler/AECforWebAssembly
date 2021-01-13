@@ -1481,14 +1481,14 @@ EndFunction</pre
         </div>
         , where <i>s</i> is the sortedness of the array (-1 when the array is
         inverse-sorted, 1 when it is sorted, around 0 when it is randomly
-        shuffled), and <i>log</i> being the natural logarithm, base
-        <i>e = 2.718...</i>. My algorithm is recursive, and for every iteration
-        of the recursion, it estimates whether it should behave like QuickSort
-        or like MergeSort based on those formulas. In case the array is very
-        small, so that SelectionSort is faster than both QuickSort and
-        MergeSort, or in case it runs of stack memory, it runs SelectionSort.
-        However, for some reason, my algorithm is significantly slower than
-        JavaScript
+        shuffled), and <i>ln</i> being the natural logarithm, base
+        <i>e = 2.718...</i>. I am not sure how to test how correct that
+        approximation is. My algorithm is recursive, and for every iteration of
+        the recursion, it estimates whether it should behave like QuickSort or
+        like MergeSort based on those formulas. In case the array is very small,
+        so that SelectionSort is faster than both QuickSort and MergeSort, or in
+        case it runs of stack memory, it runs SelectionSort. However, for some
+        reason, my algorithm is significantly slower than JavaScript
         <span class="inline_code">Array.sort</span> method:<br /><br />
         <img
           src="https://github.com/FlatAssembler/AECforWebAssembly/raw/master/HybridSort/rezultati_mjerenja.jpg"
