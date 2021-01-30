@@ -317,7 +317,6 @@
           AEC specification
         </div>
       </div>
-
       <script type="text/javascript">
         var svgNS = "http://www.w3.org/2000/svg";
         function nacrtajRubove() {
@@ -602,6 +601,7 @@
         <ol>
           <li><a href="#Introduction">Introduction</a></li>
           <li><a href="#Platforms">What platforms can be targeted now</a></li>
+          <li><a href="#HowToCompile">How to use the compilers</a></li>
           <li><a href="#Comments">Comments</a></li>
           <li><a href="#Constants">Constants</a></li>
           <li><a href="#Variables">Variable declarations</a></li>
@@ -643,9 +643,12 @@
         wrote one targeting x86 processors (AMD and Intel). That one is written
         in JavaScript and the <a href="compiler.html">core of it</a> can be run
         in browsers that have basic support for JavaScript (even in Internet
-        Explorer 6). When I started studying at the university, many professors
-        were impressed by that. My Algorithms and Data Structures professor
-        Alfonso Baumgartner urged me to write a
+        Explorer 6). To use all the features, one needs to use
+        <a href="https://nodejs.org/en/">NodeJS</a> or
+        <a href="https://duktape.org/">Duktape</a> with it, to enable it to
+        access the file system. When I started studying at the university, many
+        professors were impressed by that. My Algorithms and Data Structures
+        professor Alfonso Baumgartner urged me to write a
         <a
           href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/seminar/PojednostavljeniSeminar.pdf"
         >
@@ -690,6 +693,76 @@
         few of them being using uninitialized variables in JavaScript. If you
         want to collaborate with me, perhaps one of the first things to do is
         fix those bugs found by static analysis. <br /><br />
+        <b id="HowToCompile">How to use the compilers</b><br />
+        Probably the simplest way to use the AEC-to-x86 compiler on a Linux
+        machine is to type the following code into a terminal emulator:
+        <pre class="LinuxShell">
+mkdir ArithmeticExpressionCompiler
+cd ArithmeticExpressionCompiler
+wget https://flatassembler.github.io/Duktape.zip
+unzip Duktape.zip
+gcc -o aec -lm aec.c duktape.c
+./aec analogClock.aec
+gcc -o analogClock analogClock.s -m32
+./analogClock
+        </pre>
+        If everything is fine, the Analog Clock program should now print the
+        current time in the terminal. I think this would work on the vast
+        majority of Linux machines, as well as on many non-Linux (FreeBSD,
+        Solaris...) machines. A potential problem is that the 32-bit libraries
+        are not installed on a 64-bit Linux machine (so that
+        <span class="inline_code">-m32</span> fails), but this is rarely the
+        case, as Linux machines today usually have
+        <a href="https://www.winehq.org/">WINE</a> (a Windows compatibility
+        layer requiring 32-bit libraries), or at least some 32-bit programs.
+        Needless to say, this will not work on Linux running on ARM processors,
+        such as Android or Raspberry Pi. Also, the Analog Clock program probably
+        cannot be run on Windows (I haven't managed to try it using
+        <a href="https://www.cygwin.com/">Cygwin</a>, but I am quite sure it
+        wouldn't run on Windows even if I managed to install Cygwin), but some
+        other programs in <span class="inline_code">Duktape.zip</span> can.
+        However, those cannot be assembled by GNU Assembler (invoked by
+        <span class="inline_code">gcc</span>), you need to use
+        <a href="https://flatassembler.net/">FlatAssembler</a> instead. See the
+        <span class="inline_code">ReadMe.html</span> inside
+        <span class="inline_code">Duktape.zip</span> for more details.<br />
+        Using the AEC-to-WebAssembly compiler is, on most Linux machines, a
+        little trickier. The following code might work:
+        <pre class="LinuxShell">
+git clone https://github.com/FlatAssembler/AECforWebAssembly.git
+cd AECforWebAssembly
+g++ -std=c++11 -o aec AECforWebAssembly.cpp
+cd analogClock
+../aec analogClock.aec
+npx wat2wasm analogClock.wat
+node analogClock
+        </pre>
+        Again, if everything is fine, the Analog Clock program should print the
+        current in the terminal. However, in order for this to work, you need to
+        have NodeJS installed, which is often not the case. You also need to
+        have a version of NodeJS newer than one which is usually shipped with
+        Linux, as Debian-like Linux distributions today usually ship with NodeJS
+        10, and CentOS-like distributions with NodeJS 6, and the code my
+        compiler generates relies on
+        <span class="inline_code">WebAssembly.Global</span> being present, which
+        is only true on NodeJS 11 and newer. Of course, in order for
+        <span class="inline_code">npx wat2wasm</span> to work, you either need
+        to have <a href="https://www.npmjs.com/package/wabt">WABT</a> already
+        installed, or you need to be connected to the Internet so that
+        <span class="inline_code">npx</span> can download it. Of course, fewer
+        machines have <span class="inline_code">git</span> installed than they
+        have <span class="inline_code">wget</span> installed, but, if you are a
+        programmer, you probably have
+        <span class="inline_code">git</span> installed as well. If you want to
+        use it on an OS that's not compatible with Linux, well, good luck. I
+        have provided some executable files of my compiler for different OS-es
+        in case it helps, as the
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly/releases"
+          >assets to the releases of AECforWebAssembly</a
+        >. Especially good luck using WABT there. Sorry, but dealing with binary
+        files is complicated, and me building an assembler for WebAssembly into
+        my compiler (instead of simply outputting assembly) would give me a lot
+        of hassle and very little benefit. I hope you understand.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
@@ -1756,10 +1829,13 @@ EndFunction</pre
         }
         var preTags = document.getElementsByTagName("pre");
         for (var i = 0; i < preTags.length; i++)
-          preTags[i].innerHTML = highlightAEC(preTags[i].innerText).replace(
-            /\n/g,
-            navigator.appName === "Microsoft Internet Explorer" ? "<br/>" : "\n"
-          );
+          if (!/LinuxShell/.test(preTags[i].className))
+            preTags[i].innerHTML = highlightAEC(preTags[i].innerText).replace(
+              /\n/g,
+              navigator.appName === "Microsoft Internet Explorer"
+                ? "<br/>"
+                : "\n"
+            );
       </script>
     </main>
     <footer>
