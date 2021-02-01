@@ -748,14 +748,22 @@ node analogClock
         is only true on NodeJS 11 and newer. I think I made the right decision
         not to waste time supporting the earliest implementations of
         WebAssembly, as almost nobody will notice my effort, and I'd need to put
-        a lot of it. <i>Where to draw the line there?</i> Of course, in order
-        for <span class="inline_code">npx -p wabt wat2wasm</span> to work, you
+        a lot of it.
+        <i
+          >Where to draw the line there? Make my compiler output
+          <a href="http://asmjs.org/">asm.js</a> as well?</i
+        >
+        Of course, in order for
+        <span class="inline_code">npx -p wabt wat2wasm</span> to work, you
         either need to have
         <a href="https://www.npmjs.com/package/wabt">WABT</a> already installed,
         or you need to be connected to the Internet so that
-        <span class="inline_code">npx</span> can download it. Of course, fewer
-        machines have <span class="inline_code">git</span> installed than they
-        have <span class="inline_code">wget</span> installed, but, if you are a
+        <span class="inline_code">npx</span> can download it (which you probably
+        do as you recently cloned from GitHub, but the firewall also needs to
+        enable access to <span class="inline_code">npmjs.com</span>, which fewer
+        firewalls do). Also, fewer machines have
+        <span class="inline_code">git</span> installed than they have
+        <span class="inline_code">wget</span> installed, but, if you are a
         programmer, you probably have
         <span class="inline_code">git</span> installed as well. If you want to
         use it on an OS that's not compatible with Linux, well, good luck. I
