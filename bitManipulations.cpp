@@ -4,10 +4,10 @@
  * probably thinks) need to do bit manipulation. It's significantly
  * easier to do complicated bit manipulation in C++ than in JavaScript.
  */
+#include <cstring> //Some compilers apparently require this for "memcpy".
 #include <iostream>
 #include <regex>
 #include <sstream>
-#include <cstring> //Some compilers apparently require this for "memcpy".
 
 #pragma once
 
