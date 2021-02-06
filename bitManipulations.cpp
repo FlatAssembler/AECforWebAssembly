@@ -7,6 +7,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <cstring> //Some compilers apparently require this for "memcpy".
 
 #pragma once
 
