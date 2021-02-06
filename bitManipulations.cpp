@@ -85,12 +85,9 @@ std::string getCharVectorRepresentationOfInteger64(uint64_t Integer64) {
 std::string getCharVectorRepresentationOfDecimal32(float Decimal32) {
   std::stringstream stream;
   stream.flags(std::ios::hex);
-  union {
-    uint32_t Integer32;
-    float Decimal32;
-  } convertor;
-  convertor.Decimal32 = Decimal32;
-  uint32_t Integer32 = convertor.Integer32;
+  // https://discord.com/channels/172018499005317120/172018499005317120/807361535193776138
+  uint32_t Integer32;
+  std::memcpy(&Integer32, &Decimal32, sizeof(float));
   stream << Integer32 << std::flush;
   std::string fillWithZeros(stream.str());
   while (fillWithZeros.size() < 8)
@@ -101,12 +98,9 @@ std::string getCharVectorRepresentationOfDecimal32(float Decimal32) {
 std::string getCharVectorRepresentationOfDecimal64(double Decimal64) {
   std::stringstream stream;
   stream.flags(std::ios::hex);
-  union {
-    uint64_t Integer64;
-    double Decimal64;
-  } convertor;
-  convertor.Decimal64 = Decimal64;
-  uint64_t Integer64 = convertor.Integer64;
+  // https://discord.com/channels/172018499005317120/172018499005317120/807361535193776138
+  uint64_t Integer64;
+  std::memcpy(&Integer64, &Decimal64, sizeof(double));
   stream << Integer64 << std::flush;
   std::string fillWithZeros(stream.str());
   while (fillWithZeros.size() < 16)
