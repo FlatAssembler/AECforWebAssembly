@@ -383,6 +383,7 @@ public:
   virtual AssemblyCode compile(CompilationContext context) const;
   virtual AssemblyCode compileAPointer(CompilationContext context) const;
   virtual std::string getType(CompilationContext context) const; // Integer32...
+  virtual ~TreeNode() = default; //https://discord.com/channels/172018499005317120/172018499005317120/809830734256406569
 };
 
 std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
