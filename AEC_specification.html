@@ -726,7 +726,17 @@ gcc -o analogClock analogClock.s -m32
         <span class="inline_code">gcc</span>), you need to use
         <a href="https://flatassembler.net/">FlatAssembler</a> instead. See the
         <span class="inline_code">ReadMe.html</span> inside
-        <span class="inline_code">Duktape.zip</span> for more details.<br />
+        <span class="inline_code">Duktape.zip</span> for more details. You can
+        also use
+        <a
+          href="https://github.com/FlatAssembler/SimpleCalculator/raw/master/SimpleCalculator.zip"
+          >SimpleCalculator</a
+        >, a version of the AEC-to-x86-compiler running in
+        <a href="https://www.mozilla.org/rhino/">Rhino</a> (a JavaScript engine
+        written in Java, by Mozilla) and using
+        <a href="https://docs.oracle.com/javase/tutorial/uiswing/">Swing GUI</a
+        >. It an be used as a simple calculator, but it also supports converting
+        AEC programs to x86 assembly.<br />
         Using the AEC-to-WebAssembly compiler is, on most Linux machines, a
         little trickier. The following code might work:
         <pre class="LinuxShell">
