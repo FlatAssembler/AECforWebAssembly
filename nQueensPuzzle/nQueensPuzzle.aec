@@ -1,0 +1,224 @@
+/*
+ * My solution to the n-queens puzzle, one of the classical problems of the
+ * structural programming. It asks in how many ways you can arrange n chess
+ * queens on an n-times-n chessboard without breaking the rules that no two 
+ * chess queens can be in the same row, column or diagonal.
+ */
+
+// Import some functions we need to communicate with the outside world from
+// JavaScript...
+Function printString(CharacterPointer str)
+  Which Returns Nothing Is External;
+Function clearScreen() Which Returns Nothing Is External;
+
+// Declare the "Queen" structure and write relevant functions.
+Structure Queen Consists Of
+  Integer32 row, column;
+EndStructure
+
+Function areQueensInTheSameColumn(QueenPointer first, QueenPointer second)
+  Which Returns Integer32 Does
+    Return first->column = second->column;
+EndFunction
+
+Function areQueensInTheSameRow(QueenPointer first, QueenPointer second)
+  Which Returns Integer32 Does
+    Return first->row = second->row;
+EndFunction
+
+Function areQueensOnTheSameDiagonal(QueenPointer first,
+                                    QueenPointer second)
+  Which Returns Integer32 Does
+    Return first->row + first->column = second->row + second->column or
+           first->row - first->column = second->row - second->column;
+EndFunction
+
+Function areQueensAttackingEachOther(QueenPointer first,
+                                     QueenPointer second)
+  Which Returns Integer32 Does
+    Return areQueensInTheSameRow(first, second) or
+           areQueensInTheSameColumn(first, second) or
+           areQueensOnTheSameDiagonal(first, second);
+EndFunction
+
+// Let's write a structure representing an array of queens...
+Structure ChessBoard Consists Of
+  Integer32 length;
+  Queen queens[12]; // There are too many solutions for over 12 queens.
+EndStructure
+
+// Now, let's forward-declare the functions we will write later.
+// Putting them here would make the code less legible.
+Function recursiveFunction(ChessBoardPointer chessBoard,
+                           Integer32 n) Which Returns Integer32 Is Declared;
+
+Function convertIntegerToString(CharacterPointer str,
+                                Integer32 n)
+  Which Returns Nothing Is Declared;
+
+Function strcat(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Is Declared;
+
+Function strlen(CharacterPointer str) Which Returns Integer32 Is Declared;
+
+// Let's write the function that JavaScript is supposed to call...
+Function nQueensPuzzle(Integer32 n) Which Returns Integer32 Does
+  clearScreen();
+  If n < 1 or n > 12 Then
+    printString("Please enter a number between 1 and 12!");
+    Return -1;
+  EndIf
+  InstantiateStructure ChessBoard chessBoard;
+  Character stringToBePrinted[64] := {0};
+  CharacterPointer stringToBePrinted := AddressOf(stringToBePrinted[0]);
+  strcat(stringToBePrinted, "Solving the n-queens puzzle for ");
+  convertIntegerToString(stringToBePrinted + strlen(stringToBePrinted),
+                         n);
+  strcat(stringToBePrinted,":\n");
+  printString(stringToBePrinted);
+  Integer32 result := recursiveFunction(AddressOf(chessBoard), n);
+  stringToBePrinted[0] := 0;
+  strcat(stringToBePrinted, "Found ");
+  convertIntegerToString(stringToBePrinted + strlen(stringToBePrinted),
+                         result);
+  strcat(stringToBePrinted, " solutions!");
+  printString(stringToBePrinted);
+  Return result;
+EndFunction
+
+// I guess moving this code out of "recursiveFunction" makes the
+// code more legible.
+Function printAsASolution(ChessBoardPointer chessBoard)
+  Which Returns Nothing Does
+    Character stringToBePrinted[32] := {0};
+    Integer32 i := 0;
+    While i < chessBoard->length Loop
+      Character stringToBeAdded[8];
+      stringToBeAdded[0] := 'A' + chessBoard->queens[i].column;
+      convertIntegerToString(AddressOf(stringToBeAdded[1]),
+                             chessBoard->queens[i].row + 1);
+      strcat(AddressOf(stringToBeAdded[0]), " ");
+      strcat(AddressOf(stringToBePrinted[0]),
+             AddressOf(stringToBeAdded[0]));
+      i += 1;
+    EndWhile
+    strcat(AddressOf(stringToBePrinted[0]), "\n");
+    printString(AddressOf(stringToBePrinted[0]));
+EndFunction
+
+// Now, let's implement the brute-force algorithm.
+Function recursiveFunction(ChessBoardPointer chessBoard,
+                           Integer32 n) Which Returns Integer32 Does
+  // First, do some sanity checks useful for debugging...
+  If chessBoard->length > n Then
+    printString("Bug: Chessboard length too large!");
+    Return 0;
+  EndIf
+  Integer32 i := 0, j := 0;
+  While i < chessBoard->length Loop
+    If chessBoard->queens[i].column < 0 or
+       chessBoard->queens[i].row    < 0 or
+       chessBoard->queens[i].column > n or
+       chessBoard->queens[i].row    > n Then
+      printString("Bug: Corrupt chessboard!");
+      Return 0;
+    EndIf
+    i += 1;
+  EndWhile
+  // Check if there is a contradiction (queens attacking
+  // each other) in what we have thus far...
+  i := j := 0;
+  While i < chessBoard->length Loop
+    j := i + 1;
+    While j < chessBoard->length Loop
+      If not(i = j) and areQueensAttackingEachOther(
+                          AddressOf(chessBoard->queens[i]),
+                          AddressOf(chessBoard->queens[j])
+                        ) Then
+        Return 0;
+      EndIf
+      j += 1;
+    EndWhile
+    i += 1;
+  EndWhile
+  // Check if this is a solution...
+  If chessBoard->length = n Then
+    printAsASolution(chessBoard);
+    Return 1;
+  EndIf
+  // If this is not a complete solution, but there are no contradictions
+  // in it, branch the recursion into searching for complete solutions
+  // based on this one.
+  Integer32 result := 0;
+  i := 0;
+  While i<n Loop
+    InstantiateStructure ChessBoard newChessBoard := ValueAt(chessBoard);
+    newChessBoard.length += 1;
+    newChessBoard.queens[chessBoard->length].column := chessBoard->length;
+    newChessBoard.queens[chessBoard->length].row := i;
+    result += recursiveFunction(AddressOf(newChessBoard), n);
+    i += 1;
+  EndWhile
+  Return result;
+EndFunction
+
+// Now go the helper functions related to string manipulation,
+// copied from the Dragon Curve program. They are named the same
+// as the corresponding functions in the standard C library.
+Function strlen(CharacterPointer str) Which Returns Integer32 Does
+     Integer32 length := 0;
+     While ValueAt(str + length) Loop
+         length := length + 1;
+     EndWhile
+     Return length;
+EndFunction
+
+Function strcpy(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    While ValueAt(src) Loop
+        ValueAt(dest) := ValueAt(src);
+        dest          :=     dest + 1;
+        src           :=      src + 1;
+     EndWhile
+    ValueAt(dest) := 0;
+EndFunction
+
+Function strcat(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    strcpy(dest + strlen(dest), src);
+EndFunction
+
+Function reverseString(CharacterPointer string) Which Returns Nothing Does
+    CharacterPointer pointerToLastCharacter := string + strlen(string) - 1;
+    While pointerToLastCharacter - string > 0 Loop
+        Character tmp                   := ValueAt(string);
+        ValueAt(string)                 := ValueAt(pointerToLastCharacter);
+        ValueAt(pointerToLastCharacter) := tmp;
+        string                          := string + 1;
+        pointerToLastCharacter          := pointerToLastCharacter - 1;
+    EndWhile
+EndFunction
+
+Function convertIntegerToString(CharacterPointer string,
+                                Integer32 number)
+    Which Returns Nothing Does
+    Integer32 isNumberNegative := 0;
+    If number < 0 Then
+        number           := -number;
+        isNumberNegative :=       1;
+    EndIf
+    Integer32 i := 0;
+    While number > 9 Loop
+        ValueAt(string + i) := '0' + mod(number, 10);
+        number              :=           number / 10;
+        i                   :=                 i + 1;
+    EndWhile
+    ValueAt(string + i) := '0' + number;
+    i                   :=        i + 1;
+    If isNumberNegative Then
+        ValueAt(string + i) :=   '-';
+        i                   := i + 1;
+    EndIf
+    ValueAt(string + i) := 0;
+    reverseString(string);
+EndFunction

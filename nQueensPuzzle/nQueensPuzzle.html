@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html lang="en">
+  <head>
+    <title>AEC-to-WebAssembly compiler - N-Queens Puzzle</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+        white-space: pre;
+        width: 100%;
+        background: #eeeeee;
+        height: 75vh;
+        display: block;
+        overflow: scroll;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>N-Queens Puzzle</h1>
+    I have decided to write a solution to the
+    <a href="https://en.wikipedia.org/wiki/Eight_queens_puzzle">
+      N-Queens Puzzle</a
+    >, one of the classic problems in computer science, in the
+    <a href="https://flatassembler.github.io/AEC_specification.html"
+      >AEC programming language</a
+    >. That puzzle asks in how many ways you can arrange <i>n</i> chess queens
+    on an <i>n</i>-times-<i>n</i> chessboard without breaking the rules that no
+    two chess queens can be in the same row, column or diagonal.
+    <br />
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer. After a few years (if not months), all JavaScript
+    environments will become as capable as they are, rather than like Internet
+    Explorer.<br /><br />
+    <form>
+      <label for="enterTheNumber"
+        >Enter the numberi <i>n</i> (between 1 and 12):</label
+      ><br />
+      <input type="text" id="enterTheNumber" name="enterTheNumber" /><br />
+    </form>
+    <button onclick="invokeAECfunctions()">Invoke AEC program!</button
+    ><br /><br />
+    AEC program output:<br />
+    <span id="format_as_code"></span>
+    <br />
+    You can see the source code of the AEC program
+    <a href="nQueensPuzzle.aec.html">here</a>.
+    <script type="text/javascript">
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      function printString(ptr) {
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
+        while (buffer[ptr]) {
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
+        }
+        document.getElementById("format_as_code").innerHTML += str;
+      }
+      function clearScreen() {
+        document.getElementById("format_as_code").innerHTML = "";
+      }
+      let importObject = {
+        JavaScript: {
+          stack_pointer: stack_pointer,
+          memory: memory,
+          printString: printString,
+          clearScreen: clearScreen,
+        },
+      };
+      let printPermutationsOfDigits;
+      fetch("nQueensPuzzle.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          const exports = results.instance.exports;
+          nQueensPuzzle = exports.nQueensPuzzle;
+        });
+      function invokeAECfunctions() {
+        let originalNumber = parseInt(
+          document.getElementById("enterTheNumber").value
+        );
+        nQueensPuzzle(originalNumber);
+      }
+    </script>
+  </body>
+</html>
