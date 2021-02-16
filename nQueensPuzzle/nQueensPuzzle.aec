@@ -90,7 +90,7 @@ EndFunction
 // code more legible.
 Function printAsASolution(ChessBoardPointer chessBoard)
   Which Returns Nothing Does
-    Character stringToBePrinted[32] := {0};
+    Character stringToBePrinted[64] := {0};
     Integer32 i := 0;
     While i < chessBoard->length Loop
       Character stringToBeAdded[8];
