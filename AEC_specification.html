@@ -736,7 +736,22 @@ gcc -o analogClock analogClock.s -m32
         written in Java, by Mozilla) and using
         <a href="https://docs.oracle.com/javase/tutorial/uiswing/">Swing GUI</a
         >. It an be used as a simple calculator, but it also supports converting
-        AEC programs to x86 assembly.<br />
+        AEC programs to x86 assembly. The AEC-to-x86 compiler, both when run in
+        Rhino and when run in Duktape, can output assembly in two formats, one
+        compatible with FlatAssembler, and one compatible with GNU Assembler. To
+        switch between them, use
+        <span class="inline_code">syntax fasm</span> and
+        <span class="inline_code">syntax gas</span>. By default, it targets
+        FlatAssembler. When targeting GNU Assembler, keep in mind that the
+        directive <span class="inline_code">syntax gas</span> needs to be the
+        very first directive in your program, even before any comments. Namely,
+        the AEC-to-x86 compiler passes the comments down to the assembler, but
+        FlatAssembler begins comments with <span class="inline_code">;</span>,
+        whereas GNU Assembler begins comments with
+        <span class="inline_code">#</span>. To GNU Assembler, semi-colon
+        <span class="inline_code">;</span> means to have multiple
+        assembly-language directives in a single line (useful for when invoked
+        from a debugger, where you need to inline a few directives).<br />
         Using the AEC-to-WebAssembly compiler is, on most Linux machines, a
         little trickier. The following code might work:
         <pre class="LinuxShell">
@@ -1379,7 +1394,10 @@ EndStructure</pre
           >
             Reddit thread
           </a>
-          asking for help with that.)</i
+          asking for help with that.<br />
+          UPDATE on 16/02/2021: My implementation of the
+          <a href="nQueensPuzzle.html">N-Queens Puzzle</a> in AEC uses
+          structures.)</i
         ><br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
