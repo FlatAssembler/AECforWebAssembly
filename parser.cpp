@@ -19,41 +19,65 @@ std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                std::vector<std::string> operators,
                                Associativity associativity) {
-  for (int i = associativity == left ? 0 : int(input.size()) - 1;
-       associativity == left ? i < int(input.size()) : i >= 0;
-       i += associativity == left ? 1 : -1) {
-    if (std::count(operators.begin(), operators.end(), input[i].text) and
-        !input[i].children.size()) {
-      if (!i or i == int(input.size()) - 1) {
-        std::cerr << "Line " << input[i].lineNumber << ", Column "
-                  << input[i].columnNumber
-                  << ", Parser error: The binary operator \"" << input[i].text
-                  << "\" has less than two operands." << std::endl;
-        return input;
-      }
-      if (!isComposedOfAlnumsAndOneDot(input[i - 1].text) and
-          !input[i - 1].children.size() and input[i - 1].text.back() != '(' and
-          input[i - 1].text.front() != '"') {
-        std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
-                  << input[i - 1].columnNumber
-                  << ", Parser error: Unexpected token \"" << input[i - 1].text
-                  << "\"." << std::endl;
-      }
-      if (!isComposedOfAlnumsAndOneDot(input[i + 1].text) and
-          !input[i + 1].children.size() and input[i - 1].text.back() != '(' and
-          input[i + 1].text.back() != '(' and
-          input[i + 1].text.front() != '"') {
-        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
-                  << input[i + 1].columnNumber
-                  << ", Parser error: Unexpected token \"" << input[i - 1].text
-                  << "\"." << std::endl;
-      }
-      input[i].children.push_back(input[i - 1]);
-      input[i].children.push_back(input[i + 1]);
-      input.erase(input.begin() + i + 1);
-      input.erase(input.begin() + i - 1);
-      i += associativity == left ? -1 : 1;
-    }
+  auto loop_body =
+      [&](int &i)->void {
+        if (i >= input.size()) {
+          std::cerr << "Line " << input[0].lineNumber << ", Column "
+                    << input[0].columnNumber
+                    << ", Internal compiler error: The parser tried to "
+                       "access an array member with an index greater than "
+                       "the size of the array.\n The array is:\n"
+                    << TreeNode::JSONifyArrayOfTokens(input) << std::endl;
+          std::exit(1);
+        }
+        if (std::count(operators.begin(), operators.end(), input[i].text) and
+            !input[i].children.size()) {
+          if (!i or i == int(input.size()) - 1) {
+            std::cerr << "Line " << input[i].lineNumber << ", Column "
+                      << input[i].columnNumber
+                      << ", Parser error: The binary operator \""
+                      << input[i].text << "\" has less than two operands."
+                      << std::endl;
+            std::exit(1);
+          }
+          if (!isComposedOfAlnumsAndOneDot(input[i - 1].text) and
+              !input[i - 1].children.size() and
+              input[i - 1].text.back() != '(' and
+              input[i - 1].text.front() != '"') {
+            std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
+                      << input[i - 1].columnNumber
+                      << ", Parser error: Unexpected token \""
+                      << input[i - 1].text << "\"." << std::endl;
+          }
+          if (!isComposedOfAlnumsAndOneDot(input[i + 1].text) and
+              !input[i + 1].children.size() and
+              input[i - 1].text.back() != '(' and
+              input[i + 1].text.back() != '(' and
+              input[i + 1].text.front() != '"') {
+            std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                      << input[i + 1].columnNumber
+                      << ", Parser error: Unexpected token \""
+                      << input[i - 1].text << "\"." << std::endl;
+          }
+          input[i].children.push_back(input[i - 1]);
+          input[i].children.push_back(input[i + 1]);
+          input.erase(input.begin() + i + 1);
+          input.erase(input.begin() + i - 1);
+          i += associativity == left ? -1 : 0;
+        }
+      };
+  // https://discord.com/channels/172018499005317120/258361499519549440/811664251789639740
+  if (associativity == left) for (int i = 0; i < input.size(); i++)
+      loop_body(i);
+  else if (associativity == right) for (int i = input.size() - 1; i >= 0; i--)
+      loop_body(i);
+  else {
+    std::cerr << "Line " << input[0].lineNumber << ", Column "
+              << input[0].columnNumber
+              << ", Internal compiler error: The parser has apparently "
+                 "lost the track of what is the associativity!"
+              << std::endl;
+    std::exit(1);
   }
   return input;
 }
@@ -86,8 +110,9 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       }
       std::vector<TreeNode> nodesThatTheRecursionDealsWith;
       for (unsigned int i = firstParenthesis + 1; i < nextParenthesis - 1;
-           i++) // Don't include the parentheses in the expression passed to the
-                // recursion, otherwise you will end up in an infinite loop.
+           i++) // Don't include the parentheses in the expression passed to
+                // the recursion, otherwise you will end up in an infinite
+                // loop.
         nodesThatTheRecursionDealsWith.push_back(parsedExpression[i]);
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
@@ -211,8 +236,8 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
           parsedExpression.begin() + openCurlyBrace + 1,
           parsedExpression.begin() +
               closedCurlyBrace); // We aren't in JavaScript, let's use the
-                                 // features of C++, such as the iterator range
-                                 // constructors...
+                                 // features of C++, such as the iterator
+                                 // range constructors...
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       nodesThatTheRecursionDealsWith.erase(
@@ -351,8 +376,8 @@ TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
     {
       TreeNode nodeWithVariableName =
           inputWithParenthesesParsed[i]
-              .children[0]; // Let's assume the parser has done a good job thus
-                            // far.
+              .children[0]; // Let's assume the parser has done a good job
+                            // thus far.
       TreeNode NodeWithAssignment = inputWithParenthesesParsed[i].children[1];
       TreeNode temporaryNode =
           TreeNode(":=", inputWithParenthesesParsed[i].lineNumber,
@@ -496,7 +521,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         std::cerr
             << "Line " << input[functionName].lineNumber << ", Column "
             << input[functionName].columnNumber
-            << ", Parser error: Expected a function declaration of the format "
+            << ", Parser error: Expected a function declaration of the "
+               "format "
                "\"Function function_name(argument list) Which Returns "
                "type_name Does\" or \"Function function_name(argument list) "
                "Which Returns type_name Is External|Declared;\"!"
@@ -570,8 +596,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         input[functionName - 1].children.push_back(input[functionName + 4]);
         input.erase(input.begin() + functionName,
                     input.begin() + endOfTheFunction +
-                        1); // Because now it's all supposed to be the children
-                            // of the "Function" node.
+                        1); // Because now it's all supposed to be the
+                            // children of the "Function" node.
       } else {
         std::cerr << "Line " << input[functionName + 4].lineNumber
                   << ", Column " << input[functionName + 4].columnNumber
@@ -808,9 +834,9 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                       iteratorPointingToTheEndIfToken == input.end()
                           ? input.end()
                           : iteratorPointingToTheEndIfToken + 1);
-        } else { // There is neither an "Else" nor an "ElseIf" token, so we can
-                 // simply pass the tokens between (but not including) "Then"
-                 // and "EndIf" token.
+        } else { // There is neither an "Else" nor an "ElseIf" token, so we
+                 // can simply pass the tokens between (but not including)
+                 // "Then" and "EndIf" token.
           TreeNodes nodesThatTheRecursionDealsWith(
               iteratorPointingToTheThenToken + 1,
               iteratorPointingToTheEndIfToken);
@@ -835,8 +861,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       }
       input[i].children.push_back(input[i + 1]);
       input.erase(input.begin() + i +
-                  1); // Delete the structure name, because it's been copied to
-                      // the "input[i].children".
+                  1); // Delete the structure name, because it's been copied
+                      // to the "input[i].children".
       if (i == input.size() - 1) {
         std::cerr << "Line " << input[i].lineNumber << ", Column "
                   << input[i].columnNumber
@@ -892,8 +918,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                       << structureMemberDeclaration[1].text << "\"!"
                       << std::endl;
           if (!structureMemberDeclaration
-                   .empty()) // I am not sure if that's possible, but let's not
-                             // segfault then.
+                   .empty()) // I am not sure if that's possible, but let's
+                             // not segfault then.
             input[i + 1].children.push_back(
                 structureMemberDeclaration[0]); // Make the structure member
                                                 // declaration a child of the
@@ -921,16 +947,16 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         if (!structureMemberDeclaration.empty())
           input[i + 1].children.push_back(structureMemberDeclaration[0]);
       }
-      input[i].children.push_back(
-          input[i + 1]); // Make the "Of" node a child of the "Structure" node.
+      input[i].children.push_back(input[i + 1]); // Make the "Of" node a child
+                                                 // of the "Structure" node.
       input.erase(input.begin() + i + 1,
                   iteratorPointingToTheEndStructureToken == input.end()
                       ? input.end()
                       : iteratorPointingToTheEndStructureToken +
                             1); // If there is an "EndStructure" node, delete it
                                 // from the AST, together with the "Of" node.
-    } else { // Assume that what follows is an expression, presumably including
-             // a ":=".
+    } else { // Assume that what follows is an expression, presumably
+             // including a ":=".
       auto iteratorPointingToTheNextSemicolon =
           std::find_if(input.begin() + i, input.end(),
                        [](TreeNode node) { return node.text == ";"; });
@@ -952,10 +978,10 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
           input.begin() + i,
           (iteratorPointingToTheNextSemicolon != input.end())
               ? iteratorPointingToTheNextSemicolon + 1
-              : iteratorPointingToTheNextSemicolon); // If there is a semicolon
-                                                     // terminating the
-                                                     // expression, delete it
-                                                     // together with the
+              : iteratorPointingToTheNextSemicolon); // If there is a
+                                                     // semicolon terminating
+                                                     // the expression, delete
+                                                     // it together with the
                                                      // expression.
       input.insert(input.begin() + i, expression.begin(), expression.end());
       i += expression.size() - 1;
