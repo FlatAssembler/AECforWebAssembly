@@ -19,61 +19,59 @@ std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                std::vector<std::string> operators,
                                Associativity associativity) {
-  auto loop_body =
-      [&](int &i)->void {
-        if (i >= input.size()) {
-          std::cerr << "Line " << input[0].lineNumber << ", Column "
-                    << input[0].columnNumber
-                    << ", Internal compiler error: The parser tried to "
-                       "access an array member with an index greater than "
-                       "the size of the array.\n The array is:\n"
-                    << TreeNode::JSONifyArrayOfTokens(input) << std::endl;
-          std::exit(1);
-        }
-        if (std::count(operators.begin(), operators.end(), input[i].text) and
-            !input[i].children.size()) {
-          if (!i or i == int(input.size()) - 1) {
-            std::cerr << "Line " << input[i].lineNumber << ", Column "
-                      << input[i].columnNumber
-                      << ", Parser error: The binary operator \""
-                      << input[i].text << "\" has less than two operands."
-                      << std::endl;
-            std::exit(1);
-          }
-          if (!isComposedOfAlnumsAndOneDot(input[i - 1].text) and
-              !input[i - 1].children.size() and
-              input[i - 1].text.back() != '(' and
-              input[i - 1].text.front() != '"') {
-            std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
-                      << input[i - 1].columnNumber
-                      << ", Parser error: Unexpected token \""
-                      << input[i - 1].text << "\"." << std::endl;
-          }
-          if (!isComposedOfAlnumsAndOneDot(input[i + 1].text) and
-              !input[i + 1].children.size() and
-              input[i - 1].text.back() != '(' and
-              input[i + 1].text.back() != '(' and
-              input[i + 1].text.front() != '"') {
-            std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
-                      << input[i + 1].columnNumber
-                      << ", Parser error: Unexpected token \""
-                      << input[i - 1].text << "\"." << std::endl;
-          }
-          input[i].children.push_back(input[i - 1]);
-          input[i].children.push_back(input[i + 1]);
-          input.erase(input.begin() + i + 1);
-          input.erase(input.begin() + i - 1);
-          i += associativity == left ? -1 : 0;
-        }
-      };
+  auto loop_body = [&](int &i) -> void {
+    if ((long unsigned)i >= input.size()) {
+      std::cerr << "Line " << input[0].lineNumber << ", Column "
+                << input[0].columnNumber
+                << ", Internal compiler error: The parser tried to "
+                   "access an array member with an index greater than "
+                   "the size of the array.\n The array is:\n"
+                << TreeNode::JSONifyArrayOfTokens(input) << std::endl;
+      std::exit(1);
+    }
+    if (std::count(operators.begin(), operators.end(), input.at(i).text) and
+        !input.at(i).children.size()) {
+      if (!i or i == int(input.size()) - 1) {
+        std::cerr << "Line " << input[i].lineNumber << ", Column "
+                  << input[i].columnNumber
+                  << ", Parser error: The binary operator \"" << input[i].text
+                  << "\" has less than two operands." << std::endl;
+        std::exit(1);
+      }
+      if (!isComposedOfAlnumsAndOneDot(input.at(i - 1).text) and
+          !input[i - 1].children.size() and input[i - 1].text.back() != '(' and
+          input[i - 1].text.front() != '"') {
+        std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
+                  << input[i - 1].columnNumber
+                  << ", Parser error: Unexpected token \"" << input[i - 1].text
+                  << "\"." << std::endl;
+      }
+      if (!isComposedOfAlnumsAndOneDot(input.at(i + 1).text) and
+          !input[i + 1].children.size() and input[i - 1].text.back() != '(' and
+          input[i + 1].text.back() != '(' and
+          input[i + 1].text.front() != '"') {
+        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
+                  << input[i + 1].columnNumber
+                  << ", Parser error: Unexpected token \"" << input[i - 1].text
+                  << "\"." << std::endl;
+      }
+      input[i].children.push_back(input.at(i - 1));
+      input[i].children.push_back(input.at(i + 1));
+      input.erase(input.begin() + i + 1);
+      input.erase(input.begin() + i - 1);
+      i += associativity == left ? -1 : 0;
+    }
+  };
   // https://discord.com/channels/172018499005317120/258361499519549440/811664251789639740
-  if (associativity == left) for (int i = 0; i < input.size(); i++)
+  if (associativity == left)
+    for (int i = 0; i < int(input.size()); i++)
       loop_body(i);
-  else if (associativity == right) for (int i = input.size() - 1; i >= 0; i--)
+  else if (associativity == right)
+    for (int i = input.size() - 1; i >= 0; i--)
       loop_body(i);
   else {
-    std::cerr << "Line " << input[0].lineNumber << ", Column "
-              << input[0].columnNumber
+    std::cerr << "Line " << input.at(0).lineNumber << ", Column "
+              << input.at(0).columnNumber
               << ", Internal compiler error: The parser has apparently "
                  "lost the track of what is the associativity!"
               << std::endl;
@@ -102,7 +100,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                     << std::endl;
           break;
         }
-        if (parsedExpression[nextParenthesis].text.back() == '(')
+        if (parsedExpression.at(nextParenthesis).text.back() == '(')
           counterOfOpenParentheses++;
         if (parsedExpression[nextParenthesis].text == ")")
           counterOfOpenParentheses--;
@@ -117,7 +115,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       if (nodesThatTheRecursionDealsWith.size() > 1 and
-          parsedExpression[i].text == "(") {
+          parsedExpression.at(i).text == "(") {
         std::cerr << "Line " << nodesThatTheRecursionDealsWith[1].lineNumber
                   << ", Column "
                   << nodesThatTheRecursionDealsWith[1].columnNumber
@@ -128,8 +126,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       for (auto iterator = nodesThatTheRecursionDealsWith.begin();
            iterator < nodesThatTheRecursionDealsWith.end(); iterator++)
         if (iterator->text == ",") { // Multi-argument function
-          iterator--;
-          nodesThatTheRecursionDealsWith.erase(iterator + 1);
+          iterator = nodesThatTheRecursionDealsWith.erase(iterator);
         }
       if (parsedExpression[i].text ==
           "(") { // If it's not a function, but only a parenthesis, delete it.
@@ -164,9 +161,9 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                     << "\" is not closed by \"]\"." << std::endl;
           break;
         }
-        if (parsedExpression[closedBracket].text == "]")
+        if (parsedExpression.at(closedBracket).text == "]")
           counterOfArrayNames--;
-        if (parsedExpression[closedBracket].text.back() == '[')
+        if (parsedExpression.at(closedBracket).text.back() == '[')
           counterOfArrayNames++;
         closedBracket++;
       }
@@ -179,11 +176,11 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       if (nodesThatTheRecursionDealsWith.size() == 0) {
-        std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
-                  << parsedExpression[i].columnNumber
+        std::cerr << "Line " << parsedExpression.at(i).lineNumber << ", Column "
+                  << parsedExpression.at(i).columnNumber
                   << ", Parser error: Array index of the array \""
-                  << parsedExpression[i].text.substr(
-                         0, parsedExpression[i].text.size() -
+                  << parsedExpression.at(i).text.substr(
+                         0, parsedExpression.at(i).text.size() -
                                 1) // Don't print the '[' character at the end
                                    // of the array name (as the array name is
                                    // visible to the parser).
@@ -191,11 +188,11 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
         break;
       }
       if (nodesThatTheRecursionDealsWith.size() > 1) {
-        std::cerr << "Line " << nodesThatTheRecursionDealsWith[1].lineNumber
+        std::cerr << "Line " << nodesThatTheRecursionDealsWith.at(1).lineNumber
                   << ", Column "
-                  << nodesThatTheRecursionDealsWith[1].columnNumber
+                  << nodesThatTheRecursionDealsWith.at(1).columnNumber
                   << ", Parser error: Unexpected token \""
-                  << nodesThatTheRecursionDealsWith[1].text << "\"!"
+                  << nodesThatTheRecursionDealsWith.at(1).text << "\"!"
                   << std::endl;
       }
       parsedExpression[i].children.insert(
@@ -212,7 +209,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       );
     }
   for (unsigned int i = 0; i < parsedExpression.size(); i++)
-    if (parsedExpression[i].text == "{") // Array initializer
+    if (parsedExpression.at(i).text == "{") // Array initializer
     {
       unsigned int openCurlyBrace = i;
       unsigned int closedCurlyBrace = i + 1;
@@ -280,7 +277,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                                             Associativity::left);
   for (int i = parsedExpression.size() - 1; i >= 0;
        i--) // The ternary conditional "?:" operator (it's right-associative).
-    if (parsedExpression[i].text == ":") {
+    if (parsedExpression.at(i).text == ":") {
       if (i == int(parsedExpression.size()) - 1) {
         std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
                   << parsedExpression[i].columnNumber
@@ -316,21 +313,22 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       }
       std::vector<TreeNode> nodesThatTheRecursionDealsWith;
       for (int i = questionMark + 1; i < colon; i++)
-        nodesThatTheRecursionDealsWith.push_back(parsedExpression[i]);
+        nodesThatTheRecursionDealsWith.push_back(parsedExpression.at(i));
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       if (nodesThatTheRecursionDealsWith.size() > 1) {
-        std::cerr << "Line " << nodesThatTheRecursionDealsWith[1].lineNumber
+        std::cerr << "Line " << nodesThatTheRecursionDealsWith.at(1).lineNumber
                   << ", Column "
-                  << nodesThatTheRecursionDealsWith[1].columnNumber
+                  << nodesThatTheRecursionDealsWith.at(1).columnNumber
                   << ", Parser error: Unexpected token \""
-                  << nodesThatTheRecursionDealsWith[1].text << "\"!"
+                  << nodesThatTheRecursionDealsWith.at(1).text << "\"!"
                   << std::endl;
         break;
       }
       if (nodesThatTheRecursionDealsWith.size() == 0) {
-        std::cerr << "Line " << parsedExpression[questionMark].lineNumber
-                  << ", Column " << parsedExpression[questionMark].columnNumber
+        std::cerr << "Line " << parsedExpression.at(questionMark).lineNumber
+                  << ", Column "
+                  << parsedExpression.at(questionMark).columnNumber
                   << ", Parser error: The ternary operator \"?:\" has less "
                      "than three operands!"
                   << std::endl;
@@ -372,12 +370,12 @@ TreeNode::parseVariableDeclaration(std::vector<TreeNode> input) {
     return inputWithParenthesesParsed;
   }
   for (unsigned i = 0; i < inputWithParenthesesParsed.size(); i++)
-    if (inputWithParenthesesParsed[i].text == ":=") // Initial assignments.
+    if (inputWithParenthesesParsed.at(i).text == ":=") // Initial assignments.
     {
       TreeNode nodeWithVariableName =
-          inputWithParenthesesParsed[i]
-              .children[0]; // Let's assume the parser has done a good job
-                            // thus far.
+          inputWithParenthesesParsed.at(i).children.at(
+              0); // Let's assume the parser has done a good job
+                  // thus far.
       TreeNode NodeWithAssignment = inputWithParenthesesParsed[i].children[1];
       TreeNode temporaryNode =
           TreeNode(":=", inputWithParenthesesParsed[i].lineNumber,
@@ -413,8 +411,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
   }
 #endif
   for (unsigned i = 0; i < input.size(); i++)
-    if ((input[i].basicDataTypeSizes.count(input[i].text) ||
-         isPointerType(input[i].text)) and
+    if ((input.at(i).basicDataTypeSizes.count(input.at(i).text) ||
+         isPointerType(input.at(i).text)) and
         input[i].children.empty()) { // Declaration of a variable of a basic
                                      // type (Integer32...).
 #ifndef NDEBUG
@@ -426,14 +424,14 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       unsigned int semicolon = i + 1;
       while (true) {
         if (semicolon >= input.size()) {
-          std::cerr << "Line " << input[typeName].lineNumber << ", Column "
-                    << input[typeName].columnNumber
+          std::cerr << "Line " << input.at(typeName).lineNumber << ", Column "
+                    << input.at(typeName).columnNumber
                     << ", Parser error: Expected a semi-colon to end the "
                        "variable declaration of type "
-                    << input[typeName].text << "!" << std::endl;
+                    << input.at(typeName).text << "!" << std::endl;
           break;
         }
-        if (input[semicolon].text == ";")
+        if (input.at(semicolon).text == ";")
           break;
         semicolon++;
       }
@@ -443,8 +441,8 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
           parseVariableDeclaration(nodesThatTheRecursionDealsWith);
       input[typeName] = nodesThatTheRecursionDealsWith[0];
       input.erase(input.begin() + typeName + 1, input.begin() + semicolon);
-    } else if (input[i].text == "InstantiateStructure" and
-               input[i].children.empty()) {
+    } else if (input.at(i).text == "InstantiateStructure" and
+               input.at(i).children.empty()) {
       if (i == input.size() - 1) {
         std::cerr << "Line " << input[i].lineNumber << ", Column "
                   << input[i].columnNumber
@@ -455,14 +453,14 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       unsigned int semicolon = i + 1;
       while (true) {
         if (semicolon >= input.size()) {
-          std::cerr << "Line " << input[typeName].lineNumber << ", Column "
-                    << input[typeName].columnNumber
+          std::cerr << "Line " << input.at(typeName).lineNumber << ", Column "
+                    << input.at(typeName).columnNumber
                     << ", Parser error: Expected a semicolon to end the "
                        "variable declaration of type "
-                    << input[typeName + 1].text << "!" << std::endl;
+                    << input.at(typeName + 1).text << "!" << std::endl;
           break;
         }
-        if (input[semicolon].text == ";")
+        if (input.at(semicolon).text == ";")
           break;
         semicolon++;
       }
@@ -470,20 +468,21 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                                                input.begin() + semicolon);
       nodesThatTheRecursionDealsWith =
           parseVariableDeclaration(nodesThatTheRecursionDealsWith);
-      input[typeName].children.push_back(nodesThatTheRecursionDealsWith[0]);
+      input[typeName].children.push_back(nodesThatTheRecursionDealsWith.at(0));
       input.erase(input.begin() + typeName + 1, input.begin() + semicolon);
-    } else if (input[i].text == "Function") {
+    } else if (input.at(i).text == "Function") {
       if (i == input.size() - 1) {
-        std::cerr << "Line " << input[i].lineNumber << ", Column "
-                  << input[i].columnNumber
+        std::cerr << "Line " << input.at(i).lineNumber << ", Column "
+                  << input.at(i).columnNumber
                   << ", Parser error: Unexpected end of file!" << std::endl;
         return input;
       }
-      if (input[i + 1].text.back() != '(' or input[i + 1].text.size() == 1) {
-        std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
-                  << input[i + 1].columnNumber
+      if (input.at(i + 1).text.back() != '(' or
+          input.at(i + 1).text.size() == 1) {
+        std::cerr << "Line " << input.at(i + 1).lineNumber << ", Column "
+                  << input.at(i + 1).columnNumber
                   << ", Parser error: Expected a function name instead of \""
-                  << input[i + 1].text << "\"!" << std::endl;
+                  << input.at(i + 1).text << "\"!" << std::endl;
         return input;
       }
       unsigned int functionName = i + 1;
@@ -491,15 +490,15 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       unsigned int counterOfParentheses = 1;
       while (counterOfParentheses) {
         if (endOfFunctionSignature >= input.size()) {
-          std::cerr << "Line " << input[functionName].lineNumber
-                    << ", Column: " << input[functionName].columnNumber
+          std::cerr << "Line " << input.at(functionName).lineNumber
+                    << ", Column: " << input.at(functionName).columnNumber
                     << ", Parser error: Parenthesis in \""
-                    << input[functionName].text << "\" not closed!";
+                    << input.at(functionName).text << "\" not closed!";
           break;
         }
-        if (input[endOfFunctionSignature].text == ")")
+        if (input.at(endOfFunctionSignature).text == ")")
           counterOfParentheses--;
-        if (input[endOfFunctionSignature].text.back() == '(')
+        if (input.at(endOfFunctionSignature).text.back() == '(')
           counterOfParentheses++;
         endOfFunctionSignature++;
       }
@@ -509,18 +508,19 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   input.begin() + endOfFunctionSignature);
       TreeNodes argument;
       for (unsigned int i = 0; i < functionArguments.size() + 1; i++) {
-        if (i == functionArguments.size() or functionArguments[i].text == ",") {
+        if (i == functionArguments.size() or
+            functionArguments.at(i).text == ",") {
           argument = parseVariableDeclaration(argument);
           if (!argument.empty())
             input[functionName].children.push_back(argument[0]);
           argument = TreeNodes();
         } else
-          argument.push_back(functionArguments[i]);
+          argument.push_back(functionArguments.at(i));
       }
       if (functionName > input.size() - 5) {
         std::cerr
-            << "Line " << input[functionName].lineNumber << ", Column "
-            << input[functionName].columnNumber
+            << "Line " << input.at(functionName).lineNumber << ", Column "
+            << input.at(functionName).columnNumber
             << ", Parser error: Expected a function declaration of the "
                "format "
                "\"Function function_name(argument list) Which Returns "
@@ -529,14 +529,14 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
             << std::endl;
         return input;
       }
-      if (input[functionName + 1].text != "Which") {
+      if (input.at(functionName + 1).text != "Which") {
         std::cerr << "Line " << input[functionName + 1].lineNumber
                   << ", Column " << input[functionName + 1].columnNumber
                   << ", Parser error: Expected \"Which\" instead of \""
                   << input[functionName + 1].text << "\"!" << std::endl;
         return input;
       }
-      if (input[functionName + 2].text != "Returns") {
+      if (input.at(functionName + 2).text != "Returns") {
         std::cerr << "Line " << input[functionName + 2].lineNumber
                   << ", Column " << input[functionName + 2].columnNumber
                   << ", Parser error: Expected \"Returns\" instead of \""
@@ -546,9 +546,9 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       input[functionName - 1].children.push_back(input[functionName]);
       input[functionName + 2].children.push_back(input[functionName + 3]);
       input[functionName - 1].children.push_back(input[functionName + 2]);
-      if (input[functionName + 4].text == "Is") // External function
+      if (input.at(functionName + 4).text == "Is") // External function
       {
-        if (input[functionName + 5].text != "External" and
+        if (input.at(functionName + 5).text != "External" and
             input[functionName + 5].text != "Declared") {
           std::cerr << "Line " << input[functionName + 5].lineNumber
                     << ", Column " << input[functionName + 5].columnNumber
@@ -557,19 +557,19 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                     << input[functionName + 5].text << "\"!" << std::endl;
           return input;
         }
-        if (input[functionName + 6].text != ";") {
+        if (input.at(functionName + 6).text != ";") {
           std::cerr << "Line " << input[functionName + 6].lineNumber
                     << ", Column " << input[functionName + 6].columnNumber
                     << ", Parser error: Expected \";\" instead of \""
-                    << input[functionName + 5].text << "\"!" << std::endl;
+                    << input[functionName + 6].text << "\"!" << std::endl;
           return input;
         }
-        input[functionName - 1].children.push_back(input[functionName + 5]);
+        input[functionName - 1].children.push_back(input.at(functionName + 5));
         input.erase(
             input.begin() + functionName,
             input.begin() + functionName +
                 7); // Delete all up to, and including, the semicolon ";".
-      } else if (input[functionName + 4].text ==
+      } else if (input.at(functionName + 4).text ==
                  "Does") // Function implemented in this file (right here).
       {
         unsigned int endOfTheFunction = functionName + 5;
@@ -582,7 +582,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                       << std::endl;
             break;
           }
-          if (input[endOfTheFunction].text == "EndFunction")
+          if (input.at(endOfTheFunction).text == "EndFunction")
             break;
           endOfTheFunction++;
         }
@@ -606,7 +606,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << input[functionName + 4].text << "\"." << std::endl;
         return input;
       }
-    } else if (input[i].text == "While" and input[i].children.empty()) {
+    } else if (input.at(i).text == "While" and input[i].children.empty()) {
       auto iteratorOfTheLoopToken =
           std::find_if(input.begin(), input.end(),
                        [](TreeNode node) { return node.text == "Loop"; });
@@ -670,7 +670,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
               ? iteratorOfTheEndWhileToken
               : iteratorOfTheEndWhileToken +
                     1); // If the "EndWhile" token exists, delete it now.
-    } else if (input[i].text == "Return" and input[i].children.empty()) {
+    } else if (input.at(i).text == "Return" and input[i].children.empty()) {
       auto iteratorOfTheSemicolon =
           std::find_if(input.begin() + i, input.end(),
                        [](TreeNode node) { return node.text == ";"; });
@@ -689,12 +689,12 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << "\"" << std::endl;
       if (expression.size())
         input[i].children.push_back(
-            expression[0]); // The function can return nothing at all, the
-                            // parser must not segfault then!
+            expression.at(0)); // The function can return nothing at all, the
+                               // parser must not segfault then!
       input.erase(input.begin() + i + 1, (iteratorOfTheSemicolon == input.end())
                                              ? iteratorOfTheSemicolon
                                              : iteratorOfTheSemicolon + 1);
-    } else if (input[i].text == "If" and input[i].children.empty()) {
+    } else if (input.at(i).text == "If" and input[i].children.empty()) {
       auto iteratorPointingToTheThenToken =
           std::find_if(input.begin() + i, input.end(),
                        [](TreeNode node) { return node.text == "Then"; });
@@ -714,10 +714,10 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                      "\"Then\" tokens!"
                   << std::endl;
         condition.push_back(
-            TreeNode("0", input[i].lineNumber, input[i].columnNumber));
+            TreeNode("0", input.at(i).lineNumber, input.at(i).columnNumber));
       }
       if (condition.size() > 1)
-        std::cerr << "Line " << condition[1].lineNumber << ", Column "
+        std::cerr << "Line " << condition.at(1).lineNumber << ", Column "
                   << condition[1].columnNumber
                   << ", Parser error: Unexpected token \"" << condition[1].text
                   << "\"!" << std::endl;
@@ -851,7 +851,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                           : iteratorPointingToTheEndIfToken + 1);
         }
       }
-    } else if (input[i].text == "Structure" and input[i].children.empty()) {
+    } else if (input.at(i).text == "Structure" and input[i].children.empty()) {
       if (i == input.size() - 1) {
         std::cerr << "Line " << input[i].lineNumber << ", Column "
                   << input[i].columnNumber
@@ -883,7 +883,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << ", Parser error: Unexpected end of file!" << std::endl;
         return input;
       }
-      if (input[i + 1].text != "Of") {
+      if (input.at(i + 1).text != "Of") {
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
                   << ", Parser error: Expected \"Of\" instead of \""
@@ -911,7 +911,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
           structureMemberDeclaration =
               parseVariableDeclaration(structureMemberDeclaration);
           if (structureMemberDeclaration.size() > 1)
-            std::cerr << "Line " << structureMemberDeclaration[1].lineNumber
+            std::cerr << "Line " << structureMemberDeclaration.at(1).lineNumber
                       << ", Column "
                       << structureMemberDeclaration[1].columnNumber
                       << ", Parser error: Unexpected token \""
@@ -921,9 +921,9 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                    .empty()) // I am not sure if that's possible, but let's
                              // not segfault then.
             input[i + 1].children.push_back(
-                structureMemberDeclaration[0]); // Make the structure member
-                                                // declaration a child of the
-                                                // "Of" token.
+                structureMemberDeclaration.at(0)); // Make the structure member
+                                                   // declaration a child of the
+                                                   // "Of" token.
           structureMemberDeclaration =
               TreeNodes(); // Delete the structure member declaration from the
                            // AST.
@@ -945,7 +945,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                     << ", Parser error: Unexpected token \""
                     << structureMemberDeclaration[1].text << "\"!" << std::endl;
         if (!structureMemberDeclaration.empty())
-          input[i + 1].children.push_back(structureMemberDeclaration[0]);
+          input[i + 1].children.push_back(structureMemberDeclaration.at(0));
       }
       input[i].children.push_back(input[i + 1]); // Make the "Of" node a child
                                                  // of the "Structure" node.
