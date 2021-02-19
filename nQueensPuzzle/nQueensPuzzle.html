@@ -44,6 +44,11 @@
         >Enter the numberi <i>n</i> (between 1 and 12):</label
       ><br />
       <input type="text" id="enterTheNumber" name="enterTheNumber" /><br />
+      <input
+        type="checkbox"
+        id="printChessBoards"
+        name="printChessBoards"
+      /><label for="printChessBoards">Print chess-boards using ASCII art</label>
     </form>
     <button onclick="invokeAECfunctions()">Invoke AEC program!</button
     ><br /><br />
@@ -70,12 +75,16 @@
       function clearScreen() {
         document.getElementById("format_as_code").innerHTML = "";
       }
+      function shouldWePrintChessBoards() {
+        return document.getElementById("printChessBoards").checked;
+      }
       let importObject = {
         JavaScript: {
           stack_pointer: stack_pointer,
           memory: memory,
           printString: printString,
           clearScreen: clearScreen,
+          shouldWePrintChessBoards: shouldWePrintChessBoards,
         },
       };
       let printPermutationsOfDigits;

@@ -10,6 +10,7 @@
 Function printString(CharacterPointer str)
   Which Returns Nothing Is External;
 Function clearScreen() Which Returns Nothing Is External;
+Function shouldWePrintChessBoards() Which Returns Integer32 Is External;
 
 // Declare the "Queen" structure and write relevant functions.
 Structure Queen Consists Of
@@ -46,6 +47,20 @@ Structure ChessBoard Consists Of
   Integer32 length;
   Queen queens[12]; // There are too many solutions for over 12 queens.
 EndStructure
+
+Function chessBoardContainsThatQueen(ChessBoardPointer chessBoard,
+                                      QueenPointer queen)
+                                      Which Returns Integer32 Does
+  Integer32 i := 0;
+  While i < chessBoard->length Loop
+    If chessBoard->queens[i].column = queen->column and
+       chessBoard->queens[i].row = queen->row Then
+      Return 1;
+    EndIf
+    i+=1;
+  EndWhile
+  Return 0;
+EndFunction
 
 // Now, let's forward-declare the functions we will write later.
 // Putting them here would make the code less legible.
@@ -91,9 +106,9 @@ EndFunction
 Function printAsASolution(ChessBoardPointer chessBoard)
   Which Returns Nothing Does
     Character stringToBePrinted[64] := {0};
+    Character stringToBeAdded[8];
     Integer32 i := 0;
     While i < chessBoard->length Loop
-      Character stringToBeAdded[8];
       stringToBeAdded[0] := 'A' + chessBoard->queens[i].column;
       convertIntegerToString(AddressOf(stringToBeAdded[1]),
                              chessBoard->queens[i].row + 1);
@@ -104,6 +119,67 @@ Function printAsASolution(ChessBoardPointer chessBoard)
     EndWhile
     strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
+    If shouldWePrintChessBoards() Then
+        stringToBePrinted[0] := 0;
+        CharacterPointer stringToBePrinted := AddressOf(stringToBePrinted[0]);
+        strcat(stringToBePrinted, "  +");
+        i := 0;
+        While i < chessBoard->length Loop
+          strcat(stringToBePrinted, "-+");
+          i += 1;
+        EndWhile
+        strcat(stringToBePrinted, "\n");
+        printString(stringToBePrinted);
+        i := chessBoard->length;
+        While i > 0 Loop
+          stringToBePrinted[0] := 0;
+          // Align the row numbers to the right.
+          If i < 10 Then
+            strcat(stringToBePrinted, " ");
+          EndIf
+          convertIntegerToString(stringToBePrinted + strlen(stringToBePrinted), i);
+          strcat(stringToBePrinted, "|");
+          Integer32 j := 0;
+          While j < chessBoard->length Loop
+            InstantiateStructure Queen newQueen;
+            newQueen.column :=     j;
+            newQueen.row    := i - 1;
+            strcat(stringToBePrinted,
+                   chessBoardContainsThatQueen(chessBoard, AddressOf(newQueen))?
+                   "Q|":
+                   mod(i + j - 1, 2)?
+                   " |": // White field.
+                   "*|"  // Black field.
+            );
+            j += 1;
+          EndWhile
+          strcat(stringToBePrinted, "\n");
+          printString(stringToBePrinted);
+          stringToBePrinted[0] := 0;
+          strcat(stringToBePrinted, "  +");
+          j := 0;
+          While j < chessBoard->length Loop
+            strcat(stringToBePrinted, "-+");
+            j += 1;
+          EndWhile
+          strcat(stringToBePrinted, "\n");
+          printString(stringToBePrinted);
+          i -= 1;
+        EndWhile
+        stringToBePrinted[0] := 0;
+        CharacterPointer stringToBeAdded := AddressOf(stringToBeAdded[0]);
+        stringToBeAdded[2] := 0;
+        stringToBeAdded[0] := ' ';
+        strcat(stringToBePrinted, "  ");
+        i := 0;
+        While i < chessBoard->length Loop
+          stringToBeAdded[1] := 'A' + i;
+          strcat(stringToBePrinted, stringToBeAdded);
+          i += 1;
+        EndWhile
+        strcat(stringToBePrinted, "\n");
+        printString(stringToBePrinted);
+    EndIf
 EndFunction
 
 // Now, let's implement the brute-force algorithm.
