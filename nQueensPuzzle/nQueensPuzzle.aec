@@ -54,10 +54,10 @@ Function chessBoardContainsThatQueen(ChessBoardPointer chessBoard,
   Integer32 i := 0;
   While i < chessBoard->length Loop
     If chessBoard->queens[i].column = queen->column and
-       chessBoard->queens[i].row = queen->row Then
+       chessBoard->queens[i].row    = queen->row    Then
       Return 1;
     EndIf
-    i+=1;
+    i += 1;
   EndWhile
   Return 0;
 EndFunction
