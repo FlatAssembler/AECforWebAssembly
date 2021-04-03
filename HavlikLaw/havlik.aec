@@ -1,0 +1,133 @@
+/* Ovo je primjer kako bi se Havlikov zakon mogao zapisati na programskom
+ * jeziku AEC, kojeg sam ja dizajnirao i napravio sam compiler za njega koji
+ * ga prevodi u WebAssembly (standardizirani bytecode od JavaScripta).
+ */
+
+// Uvezimo funkcije iz JavaScripta koje će nam trebati.
+Function random() Which Returns Decimal32 Is External;
+Function printString(CharacterPointer string)
+	 Which Returns Nothing Is External;
+Function printInteger(Integer32 integer)
+	 Which Returns Nothing Is External;
+
+// Napravimo neke deklaracije unaprijed, da kod bude uredniji.
+Function duljina_stringa(CharacterPointer string) Which
+	 Returns Integer32 Is Declared;
+Function izbrisi_znak_iz_stringa(CharacterPointer mjesto_u_stringu) Which
+	Returns Nothing Is Declared;
+Function kopiraj_string(CharacterPointer cilj, CharacterPointer izvor)
+	Which Returns Nothing Is Declared;
+Function pronadi_znak_u_stringu(CharacterPointer string, Character znak)
+	Which Returns Integer32 Is Declared;
+
+Integer32 ispisujemo_li_poruke_za_debugiranje := 0;
+
+// S obzirom na to da moj programski jezik (još) ne podržava Unicode,
+// poluglase ćemo označavati nekim ASCII znakovima.
+Function je_li_poluglas(Character znak) Which Returns Integer32 Does
+	 // Moj programski jezik ne razlikuje Boolean (true/false)
+	 // vrijednosti od 32-bitnih cjelobrojnih vrijednosti, jer ne
+	 // razlikuje ih ni WebAssembly. To što ih JavaScript razlikuje
+	 // samo je fasada koju stvaraju compileri za JavaScript, slično
+	 // kao privatna svojstva u C++-u.
+	 Return znak = 'I' or znak = 'U';
+EndFunction
+
+// Napišimo sada funkciju koju će pozvati JavaScript kad sve inicijalizira.
+// Moj compiler (još) ne radi programe koji se mogu samostalno pokrenuti u
+// JavaScript engineu koji podržava WebAssembly, nego programi koje moj
+// compiler prevodi u WebAssembly zahtijevaju da JavaScript inicijalizira
+// neke stvari prije no što se oni mogu pokrenuti.
+Function glavni_program() Which Returns Nothing Does
+	CharacterPointer samoglasnici := "aeiou";
+	Character u_sto_se_pretvaraju_jaki_poluglasi :=
+		   ValueAt(
+				samoglasnici +
+		   		random() * duljina_stringa(samoglasnici)
+			);
+	Character rijec[12];
+	// U C-u i C++-u nizovi se u većini slučajeva mogu koristiti kao
+	// pokazivači, ali u nekim slučajevima, koje određuju neka iznimno
+	// komplicirana pravila, ne mogu. To me je živciralo, pa sam odlučio
+	// u svom programskom jeziku uvesti pravilo da se niz nikada ne
+	// može koristiti kao pokazivač i obrnuto. No, možemo deklarirati
+	// niz i pokazivač koji se isto zovu, ovako:
+	CharacterPointer rijec := AddressOf(rijec[0]);
+	kopiraj_string(rijec, "UuvUlUud");
+	Integer32 indeks_poluglasa := 1,
+		  i := duljina_stringa(rijec),
+		  pocetna_duljina_stringa := i;
+	While i > 0 or i = 0 Loop
+	      // U svoj programski jezik još nisam ugradio for-petlju.
+	      If ispisujemo_li_poruke_za_debugiranje Then
+	         printString("U koraku ");
+	      	 printInteger(pocetna_duljina_stringa - i + 1);
+		 printString(", rijec izgleda ovako: ");
+	      	 printString(rijec);
+		 printString(".\n");
+	      EndIf
+	      If not(
+			pronadi_znak_u_stringu(samoglasnici, rijec[i]) = -1
+		 ) Then
+		   indeks_poluglasa := 1;
+	      ElseIf je_li_poluglas(rijec[i]) Then
+	      	     If mod(indeks_poluglasa, 2) = 1 Then
+	      	     	// Slabi poluglas
+			izbrisi_znak_iz_stringa(rijec + i);
+		     Else
+			// Jaki poluglas
+                        rijec[i] := u_sto_se_pretvaraju_jaki_poluglasi;
+		     EndIf
+		     indeks_poluglasa += 1;
+	      EndIf
+	      i -= 1;
+	EndWhile
+	If ispisujemo_li_poruke_za_debugiranje Then
+	   printString("Nakon primjene Havlikovog zakona, rijec izgleda ovako: ");
+	EndIf
+	printString(rijec);
+	If ispisujemo_li_poruke_za_debugiranje Then
+	   printString("\n");
+	EndIf
+EndFunction
+
+// Napišimo sada pomoćne funkcije koje smo deklarirali unaprijed...
+Function duljina_stringa(CharacterPointer string)
+	 Which Returns Integer32 Does
+	       Return ValueAt(string) = 0 ?
+	       	      0 :
+		      1 + duljina_stringa(string + 1);
+EndFunction
+
+Function kopiraj_string(CharacterPointer cilj, CharacterPointer izvor)
+	 Which Returns Nothing Does
+	       While ValueAt(izvor) Loop
+	       	     ValueAt(cilj) := ValueAt(izvor);
+		     cilj += 1;
+		     izvor += 1;
+	       EndWhile
+	       ValueAt(cilj) := 0;
+EndFunction
+
+Function pronadi_znak_u_stringu(CharacterPointer string, Character znak)
+	 Which Returns Integer32 Does
+	       Integer32 i := 0;
+	       While ValueAt(string + i) Loop
+	       	     If ValueAt(string + i) = znak Then
+		     	Return i;
+		     EndIf
+		     i += 1;
+	       EndWhile
+	       Return -1;
+EndFunction
+
+Function izbrisi_znak_iz_stringa(CharacterPointer mjesto_u_stringu)
+	 Which Returns Nothing Does
+	       While ValueAt(mjesto_u_stringu) Loop
+	       	     ValueAt(mjesto_u_stringu) :=
+		     			       ValueAt(
+						mjesto_u_stringu + 1
+						);
+		     mjesto_u_stringu += 1;
+	       EndWhile
+EndFunction
