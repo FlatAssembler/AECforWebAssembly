@@ -29,7 +29,11 @@ void tokenizerTests() {
         "['a','+','b']"},
        {"array_name := {1, 1 + 1, 1 + 1 + 1}",
         "['array_name',':=','{','1',',','1','+','"
-        "1',',','1','+','1','+','1','}']"}});
+        "1',',','1','+','1','+','1','}']"},
+       {"array_name [index] /*Make sure whitespacing does not break it.*/",
+        "['array_name[','index',']']"},
+       {"function_name (argument) /*Again, whitespace.*/",
+        "['function_name(','argument',')']"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));
