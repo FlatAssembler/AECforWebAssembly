@@ -33,7 +33,13 @@ void tokenizerTests() {
        {"array_name [index] /*Make sure whitespacing does not break it.*/",
         "['array_name[','index',']']"},
        {"function_name (argument) /*Again, whitespace.*/",
-        "['function_name(','argument',')']"}});
+        "['function_name(','argument',')']"},
+       {
+           R"(
+array_name
+//A comment about the name of the array.
+[index])",
+           "['array_name[','index',']']"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));
