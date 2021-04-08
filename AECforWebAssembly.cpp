@@ -9,6 +9,7 @@
 
 #define NDEBUG // If deleted, the tokenizer and parser will output verbose
                // output.
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include "TreeRootNode.cpp"
 #include "compiler.cpp"
 #include "parser.cpp"
