@@ -50,10 +50,11 @@ int main(int argc, char **argv) {
       return -1;
     }
   } catch (regex_error &error) {
-    cerr << "The C++ compiler this executable has been compiled with\n"
-            "doesn't appear to support JavaScript-style regular\n"
-            "expressions. Parts of this program that rely on them\n"
-            "will not work."
+    cerr <<
+R"(The C++ compiler this executable has been compiled
+with doesn't appear to support JavaScript-style regular
+expressions. Parts of this program that rely on them
+will not work.)"
          << endl;
   }
   cout << "Running the tests..." << endl;
@@ -98,7 +99,8 @@ int main(int argc, char **argv) {
            high_resolution_clock::period::num * 1000 /
            high_resolution_clock::period::den)
        << R"( milliseconds.
-I have made a forum thread about how to speed up the tokenizer, in case you are interested:
+I have made a forum thread about how to speed up the tokenizer,
+in case you are interested:
 https://www.forum.hr/showthread.php?t=1243509
 Parsing the program...)"
        << endl;
@@ -121,7 +123,7 @@ Parsing the program...)"
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
     cerr << R"(If you have time, please report this to me on GitHub as an issue:
- https://github.com/FlatAssembler/AECforWebAssembly/issues)"
+https://github.com/FlatAssembler/AECforWebAssembly/issues)"
          << std::endl;
     return 1;
   }
