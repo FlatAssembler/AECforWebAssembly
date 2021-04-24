@@ -409,12 +409,12 @@ public:
               : basicDataTypeSizes.count(argument.text)
                   ? basicDataTypeSizes.at(argument.text)
                   : context.structureSizes.at(argument.text);
-          if (argument.children[0]
+          if (argument.children.at(0)
                   .children.size()) // If there is a default value.
             functionDeclaration.defaultArgumentValues.push_back(
-                argument.children[0]
-                    .children[0]
-                    .children[0]
+                argument.children.at(0)
+                    .children.at(0)
+                    .children.at(0)
                     .interpretAsACompileTimeDecimalConstant());
           else
             functionDeclaration.defaultArgumentValues.push_back(0);
@@ -422,7 +422,7 @@ public:
         context.functions.push_back(functionDeclaration);
         contextOfThatFunction.functions.push_back(functionDeclaration);
         contextOfThatFunction.currentFunctionName = functionDeclaration.name;
-        if (childNode.children[2].text == "External") {
+        if (childNode.children.at(2).text == "External") {
           globalDeclarations += "\t(import \"JavaScript\" \"" +
                                 functionDeclaration.name.substr(
                                     0, functionDeclaration.name.size() - 1) +
@@ -447,7 +447,7 @@ public:
                                    return str.name ==
                                           functionDeclaration.returnType;
                                  })) {
-                std::cerr << "Line " << childNode.children[1].lineNumber
+                std::cerr << "Line " << childNode.children.at(1).lineNumber
                           << ", Column " << childNode.children[1].columnNumber
                           << ", Compiler error: Unknown type name \""
                           << functionDeclaration.returnType << "\"!"
@@ -462,19 +462,32 @@ public:
             }
           }
           globalDeclarations += "))\n";
-        } else if (childNode.children[2].text == "Does") {
+        } else if (childNode.children.at(2).text == "Does") {
           globalDeclarations += "\t(func $" +
                                 functionDeclaration.name.substr(
                                     0, functionDeclaration.name.size() - 1) +
                                 " ";
           for (std::string argumentType : functionDeclaration.argumentTypes)
-            globalDeclarations +=
-                "(param " +
-                stringRepresentationOfWebAssemblyType.at(
-                    mappingOfAECTypesToWebAssemblyTypes.at(
-                        isPointerType(argumentType) ? "Integer32"
-                                                    : argumentType)) +
-                ") ";
+            if (not(isPointerType(argumentType)) and
+                mappingOfAECTypesToWebAssemblyTypes.count(argumentType) == 0) {
+              std::cerr
+                  << "Line " << childNode.children[1].lineNumber << ", Column "
+                  << childNode.children[1].columnNumber
+                  << R"(, Internal compiler error: Sorry about that, custom argument types (such as ")"
+                  << argumentType
+                  << R"(") other than pointers to structures are not yet supported. I have made a forum thread about that, if you would like to help me with that:
+https://www.forum.hr/showthread.php?t=1243515
+In the meantime, you can try modifying your program to use ")"
+                  << argumentType << R"(Pointer" instead.)" << std::endl;
+              exit(1);
+            } else
+              globalDeclarations +=
+                  "(param " +
+                  stringRepresentationOfWebAssemblyType.at(
+                      mappingOfAECTypesToWebAssemblyTypes.at(
+                          isPointerType(argumentType) ? "Integer32"
+                                                      : argumentType)) +
+                  ") ";
           if (functionDeclaration.returnType != "Nothing") {
             if (isPointerType(functionDeclaration.returnType))
               globalDeclarations +=
@@ -504,6 +517,21 @@ public:
                           << ", Compiler error: Unknown type name \""
                           << functionDeclaration.returnType << "\"!"
                           << std::endl;
+                exit(1);
+              }
+              if (not(isPointerType(functionDeclaration.returnType)) and
+                  mappingOfAECTypesToWebAssemblyTypes.count(
+                      functionDeclaration.returnType) == 0) {
+                std::cerr
+                    << "Line " << childNode.children[1].lineNumber
+                    << ", Column " << childNode.children[1].columnNumber
+                    << R"(, Internal compiler error: Sorry about that, custom return types (such as ")"
+                    << functionDeclaration.returnType
+                    << R"(") other than pointers to structures are not yet supported. I have made a Reddit thread about that, if you would like to help me with that:
+https://www.reddit.com/r/WebAssembly/comments/j24p4z/how_to_compile_returning_a_structure_from_a/
+In the meantime, you can try modifying your program to use ")"
+                    << functionDeclaration.returnType << R"(Pointer" instead.)"
+                    << std::endl;
                 exit(1);
               }
               globalDeclarations += "(result " +

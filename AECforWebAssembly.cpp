@@ -9,13 +9,13 @@
 
 #define NDEBUG // If deleted, the tokenizer and parser will output verbose
                // output.
-#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include "TreeRootNode.cpp"
 #include "compiler.cpp"
 #include "parser.cpp"
 #include "tests.cpp"
 #include "tokenizer.cpp"
 #include <chrono>
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include <exception>
 #include <fstream>
 #include <iostream>
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     cerr << "Can't open the file \"" << argv[1] << "\" for reading!" << endl;
     return -1;
   }
-  cout << "Reading the file..." << endl;
+  cout << "Reading the file \"" << argv[1] << "\"..." << endl;
   auto beginningOfReading = chrono::high_resolution_clock::now();
   string rawInput;
   while (true) {
@@ -97,7 +97,11 @@ int main(int argc, char **argv) {
        << ((endOfTokenizing - beginningOfTokenizing).count() *
            high_resolution_clock::period::num * 1000 /
            high_resolution_clock::period::den)
-       << " milliseconds.\nParsing the program..." << endl;
+       << R"( milliseconds.
+I have made a forum thread about how to speed up the tokenizer, in case you are interested:
+https://www.forum.hr/showthread.php?t=1243509
+Parsing the program...)"
+       << endl;
   auto beginningOfParsing = chrono::high_resolution_clock::now();
   vector<TreeNode> parsed = TreeNode::parse(tokenized);
   auto endOfParsing = chrono::high_resolution_clock::now();
@@ -116,6 +120,9 @@ int main(int argc, char **argv) {
   } catch (exception &error) {
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
+    cerr << R"(If you have time, please report this to me on GitHub as an issue:
+ https://github.com/FlatAssembler/AECforWebAssembly/issues)"
+         << std::endl;
     return 1;
   }
   auto endOfCompilation = chrono::high_resolution_clock::now();
