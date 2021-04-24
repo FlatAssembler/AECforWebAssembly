@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     }
   } catch (regex_error &error) {
     cerr <<
-R"(The C++ compiler this executable has been compiled
+        R"(The C++ compiler this executable has been compiled
 with doesn't appear to support JavaScript-style regular
 expressions. Parts of this program that rely on them
 will not work.)"
