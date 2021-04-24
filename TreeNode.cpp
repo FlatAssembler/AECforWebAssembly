@@ -10,6 +10,7 @@
 #include "AssemblyCode.cpp"
 #include "bitManipulations.cpp"
 #include "compilingContext.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include <cmath>
 #include <iostream>
 #include <map>

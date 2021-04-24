@@ -4,6 +4,7 @@
  * doubt that would be make the code significantly better.
  */
 
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include <map>
 #include <string>
 #include <vector>

@@ -10,6 +10,7 @@
 
 #include "bitManipulations.cpp"
 #include "semanticAnalyzer.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 AssemblyCode convertToInteger32(const TreeNode node,
                                 const CompilationContext context) {

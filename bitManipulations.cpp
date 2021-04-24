@@ -4,6 +4,8 @@
  * probably thinks) need to do bit manipulation. It's significantly
  * easier to do complicated bit manipulation in C++ than in JavaScript.
  */
+
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include <cstring> //Some compilers apparently require this for "memcpy".
 #include <iostream>
 #include <regex>

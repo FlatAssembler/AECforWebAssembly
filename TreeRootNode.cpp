@@ -5,6 +5,7 @@
  */
 
 #include "TreeNode.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 AssemblyCode
 instantiateGlobalStructure(const structure str, const int offset,

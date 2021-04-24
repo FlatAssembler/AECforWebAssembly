@@ -4,7 +4,9 @@
  * it's not nearly as easy to implement automated tests for the core of
  * the compiler.
  */
+
 #include "TreeNode.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 struct test { // When the debugger doesn't work (and I can't get it to
               // work on my Linux machine), "cassert" doesn't help a lot.

@@ -5,6 +5,7 @@
  */
 
 #include "TreeNode.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 std::string getStrongerType(const int lineNumber, const int columnNumber,
                             const std::string firstType,

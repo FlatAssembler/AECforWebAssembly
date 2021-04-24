@@ -7,6 +7,7 @@
  */
 
 #include "TreeNode.cpp"
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 bool isAllWhitespace(
     const std::string token) // No obvious way to do it in REGEX so that CLANG

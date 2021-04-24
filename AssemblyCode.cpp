@@ -6,6 +6,7 @@
  * information about type and indenting it.
  */
 
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 #include <iterator>
 #include <sstream>
 #include <string>

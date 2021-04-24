@@ -14,6 +14,7 @@
 
 #include "TreeNode.cpp"
 #include <algorithm>
+#include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
