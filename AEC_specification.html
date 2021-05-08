@@ -719,10 +719,24 @@ gcc -o analogClock analogClock.s -m32
         Needless to say, this will not work on Linux running on ARM processors,
         such as Android or Raspberry Pi. Also, the Analog Clock program probably
         cannot be run on Windows (I haven't managed to try it using
-        <a href="https://www.cygwin.com/">Cygwin</a>, but I am quite sure it
-        wouldn't run on Windows even if I managed to install Cygwin), but some
-        other programs in <span class="inline_code">Duktape.zip</span> can.
-        However, those cannot be assembled by GNU Assembler (invoked by
+        <a href="https://www.cygwin.com/">CygWin</a>, but I am quite sure it
+        wouldn't run on Windows even if I managed to install Cygwin. (<i
+          >UPDATE on 08/05/2021: I have found a relatively simple way to modify
+          the <span class="inline_code">analogClock.aec</span> so that it can be
+          assembled by the version of GNU Assembler that comes with 32-bit
+          <a href="https://mingw-w64.org/doku.php">MinGW-W64</a>, and thus run
+          on both 32-bit and 64-bit Windows, so I saved it in
+          <span class="inline_code">analogClockForWindows.aec</span>.
+          Unfortunately, it still shows a lot of errors if you attempt to
+          assemble it using the version of GNU Assembler that comes with TDM-GCC
+          or CygWin. Apparently, the versions of GNU Assembler that comes with
+          various ports of GCC on Windows are different from each other to a
+          greater extent than the version of GNU Assembler that runs on Linux
+          and one that comes with MinGW-W64 are. I find that both surprising and
+          somewhat unfortunate.</i
+        >)), but some other programs in
+        <span class="inline_code">Duktape.zip</span> can. However, those cannot
+        be assembled by GNU Assembler (invoked by
         <span class="inline_code">gcc</span>), you need to use
         <a href="https://flatassembler.net/">FlatAssembler</a> instead. See the
         <span class="inline_code">ReadMe.html</span> inside
@@ -781,7 +795,7 @@ node analogClock
             ><img
               style="height: 1em"
               src="https://atheistforums.org/images/smilies/huh.gif"
-              onerror="this.onerror=null;this.src='https://www.theflatearthsociety.org/forum/Smileys/default/undecided.gif'"
+              onerror="this.onerror=function(){this.onerror=null;this.src='https://www.theflatearthsociety.org/forum/Smileys/default/undecided.gif';};this.src='https://philosophicalvegan.com/images/smilies/icon_question.gif'"
               alt="&#10068;&#128580;"
           /></span>
           Make my compiler output <a href="http://asmjs.org/">asm.js</a> as
@@ -790,7 +804,7 @@ node analogClock
             ><img
               style="height: 1em"
               src="https://atheistforums.org/images/icons/thumbsdown.gif"
-              onerror="this.onerror=null;this.src='https://www.theflatearthsociety.org/forum/Smileys/default/angry.gif'"
+              onerror="this.onerror=function(){this.onerror=null;this.src='https://www.theflatearthsociety.org/forum/Smileys/default/angry.gif';};this.src='https://philosophicalvegan.com/images/smilies/icon_rolleyes.gif'"
               alt="&#128078;" /></span
         ></i>
         Of course, in order for
