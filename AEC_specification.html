@@ -663,8 +663,10 @@
         JavaScript bytecode, which Mozilla has been pushing to get standardized,
         so that people can run programming languages better than JavaScript in a
         browser), and not only x86. As targeting WebAssembly is easier than
-        targeting x86 (or probably any physical processor), I was able to add
-        many new features. However, I think it's still not nearly as
+        targeting x86 (or probably any physical processor, as WebAssembly was
+        designed to be an easy compilation target, rather than to be easily
+        implemented in hardware), I was able to add many new features. However,
+        I think it's still not nearly as
         <i>intrusive</i> as C compilers are. Emscripten (the primary C and C++
         compiler for WebAssembly) always assumes the standard C library is
         present on the JavaScript Virtual Machine when compiling any kind of
@@ -734,15 +736,36 @@ gcc -o analogClock analogClock.s -m32
           various ports of GCC on Windows are different from each other to a
           greater extent than the version of GNU Assembler that runs on Linux
           and one that comes with MinGW-W64 are. I find that both surprising and
-          somewhat unfortunate.</i
+          somewhat unfortunate. What is especially unfortunate is the fact that
+          <a href="https://stackoverflow.com/a/67451423/8902065"
+            >some preprocessor directives in GNU Assembler have the same syntax,
+            but different meanings depending on whether it is targetting Linux
+            or Windows</a
+          >. With a little more modifications, which I have also done,
+          <span class="inline_code">analogClockForWindows.aec</span>
+          can also be assembled by the version of
+          <a href="https://llvm.org/docs/CommandGuide/llvm-as.html"
+            >LLVM Assembler</a
+          >
+          that comes with CLANG on Windows. However, the GNU Assembler that
+          comes with MinGW-W64 and the LLVM Assembler that comes with CLANG on
+          Windows do not output the same machine code. The executable produced
+          by LLVM Assembler appears to run significantly faster on Windows 10,
+          but it refuses to run at all on Windows XP. I have not studied it
+          enough to explain what is going on there, and it is a bit creepy.</i
         >)), but some other programs in
         <span class="inline_code">Duktape.zip</span> can. However, those cannot
         be assembled by GNU Assembler (invoked by
         <span class="inline_code">gcc</span>), you need to use
         <a href="https://flatassembler.net/">FlatAssembler</a> instead. See the
         <span class="inline_code">ReadMe.html</span> inside
-        <span class="inline_code">Duktape.zip</span> for more details. You can
-        also use
+        <span class="inline_code">Duktape.zip</span> for more details. The
+        <a
+          href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/ArithmeticExpressionCompiler.zip"
+          >executables of Duktape for various x86 OS-es and example x86 AEC
+          programs</a
+        >
+        are available in a ZIP archive on my GitHub profile. You can also use
         <a
           href="https://github.com/FlatAssembler/SimpleCalculator/raw/master/SimpleCalculator.zip"
           >SimpleCalculator</a
@@ -1629,6 +1652,25 @@ Function convertIntegerToString(CharacterPointer string,
     reverseString(string);
     Return i;
 EndFunction</pre
+        >
+        To delete a character from a string, you can use the following function
+        from the
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/tree/master/HavlikLaw"
+          >Havlik's Law</a
+        >:
+        <pre>
+Function izbrisi_znak_iz_stringa(CharacterPointer mjesto_u_stringu)
+         Which Returns Nothing Does
+               While ValueAt(mjesto_u_stringu) Loop
+                     ValueAt(mjesto_u_stringu) :=
+                                               ValueAt(
+                                                mjesto_u_stringu + 1
+                                                );
+                     mjesto_u_stringu += 1;
+               EndWhile
+EndFunction
+	  </pre
         >
         <b>TODO</b>: Build some useful string manipulation into AEC, at least
         ones for converting numbers to strings and vice versa.<br />
