@@ -22,7 +22,10 @@
 #include <typeinfo>
 using namespace std;
 
-bool ends_with(string first, string second) {
+bool ends_with(
+    const string &first,
+    const string &
+        second) { // https://stackoverflow.com/questions/67451951/how-to-use-pointers-to-figure-out-if-a-c-string-ends-with-another-c-string/67452057?noredirect=1#comment119223072_67452057
   if (second.size() > first.size())
     return false;
   return first.substr(first.size() - second.size()) == second;
