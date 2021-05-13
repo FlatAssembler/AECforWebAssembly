@@ -765,7 +765,24 @@ gcc -o analogClock analogClock.s -m32
           >executables of Duktape for various x86 OS-es and example x86 AEC
           programs</a
         >
-        are available in a ZIP archive on my GitHub profile. You can also use
+        are available in a ZIP archive on my GitHub profile (<i
+          >UPDATE on 13/05/2021: Like I have said, the
+          <span class="inline_code">analogClockForWindows.exe</span> file,
+          assembled by CLANG on Windows, although it works on both 32-bit and
+          64-bit Windows 10, for some reason that escapes me, it refuses to run
+          on Windows XP. You can assemble the assembly code produced by my
+          compiler for the
+          <span class="inline_code">analogClockForWindows.aec</span>, which will
+          be called <span class="inline_code">analogClockForWindows.s</span>,
+          using MinGW-w64, and then it will run on Windows XP, but it will be
+          slower. Again, the explanation for that escapes me. An obvious
+          explanation would be that MinGW-w64 includes some kind of a polyfill
+          for functions missing on Windows XP, that make the executable able to
+          run on it, but make it slower. But the problem with that explanation
+          is that, actually, the executable produced by CLANG is bigger than the
+          executable produced by MinGW-w64. If the executable by MinGW-w64 were
+          polyfilled, we would expect it to be bigger, rather than smaller.</i
+        >). You can also use
         <a
           href="https://github.com/FlatAssembler/SimpleCalculator/raw/master/SimpleCalculator.zip"
           >SimpleCalculator</a
@@ -2077,22 +2094,18 @@ EndFunction
           //                           window.setTimeout(function(){document.body.removeChild(document.body.children[document.body.children.length-1]);},2000);
           document.getElementById("naslov").style.width = "100%";
           document.getElementById("naslov").style.float = "none";
-          document.getElementsByTagName(
-            "header"
-          )[0].style.backgroundColor = document.getElementById(
-            "naslov"
-          ).style.backgroundColor;
+          document.getElementsByTagName("header")[0].style.backgroundColor =
+            document.getElementById("naslov").style.backgroundColor;
           document.getElementsByTagName("footer")[0].children[1].style.display =
             "inline";
           document.getElementsByTagName("footer")[0].children[1].style.width =
             "100%";
           document.getElementsByTagName("footer")[0].children[1].style.float =
             "none";
-          document.getElementsByTagName(
-            "footer"
-          )[0].style.backgroundColor = document.getElementsByTagName(
-            "footer"
-          )[0].children[0].style.backgroundColor;
+          document.getElementsByTagName("footer")[0].style.backgroundColor =
+            document.getElementsByTagName(
+              "footer"
+            )[0].children[0].style.backgroundColor;
         }
         function footerScript() {
           var crtanje = document.getElementById("donjiLijevi");
