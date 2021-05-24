@@ -7,8 +7,10 @@
  * isn't easily solvable with this design.
  */
 
+#ifndef NDEBUG //So that CMAKE does not complain about it being redefined...
 #define NDEBUG // If deleted, the tokenizer and parser will output verbose
                // output.
+#endif
 #include "TreeRootNode.cpp"
 #include "compiler.cpp"
 #include "parser.cpp"

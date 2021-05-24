@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 add_executable(aec AECforWebAssembly.cpp)
 
+enable_testing()
 add_test(NAME structureDeclarationTest
 	      COMMAND aec structureDeclarationTest.aec
 	      WORKING_DIRECTORY $<CMAKE_SOURCE_DIR>)
