@@ -10,4 +10,4 @@ add_executable(aec AECforWebAssembly.cpp)
 enable_testing()
 add_test(NAME structureDeclarationTest
 	      COMMAND aec structureDeclarationTest.aec
-	      WORKING_DIRECTORY $CMAKE_SOURCE_DIR)
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
