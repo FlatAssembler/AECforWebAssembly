@@ -8,6 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 add_executable(aec AECforWebAssembly.cpp)
 
 enable_testing()
-add_test(NAME structureDeclarationTest
-	      COMMAND aec structureDeclarationTest.aec && npx -p wabt wat2wasm structureDeclarationTest.wat && node structureDeclarationTest.js
+add_test(NAME structureDeclarationTestCompiles
+	      COMMAND aec structureDeclarationTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME structureDeclarationTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm structureDeclarationTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME structureDeclarationTestRuns
+	      COMMAND node structureDeclarationTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
