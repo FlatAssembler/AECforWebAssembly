@@ -9,5 +9,5 @@ add_executable(aec AECforWebAssembly.cpp)
 
 enable_testing()
 add_test(NAME structureDeclarationTest
-	      COMMAND aec structureDeclarationTest.aec
+	      COMMAND aec structureDeclarationTest.aec && npx -p wabt wat2wasm structureDeclarationTest.wat && node structureDeclarationTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
