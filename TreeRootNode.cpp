@@ -129,7 +129,9 @@ public:
   ;;AEC program, there is an "extern"-ed bytearray of size 1 page (64KB) called "memory".
   ;;Have a better idea?
   (global $stack_pointer (import "JavaScript" "stack_pointer") (mut i32)) ;;The stack pointer being
-  ;;visible from JavaScript will be useful when debugging the compiler.
+  ;;visible from JavaScript will be useful when debugging the compiler. This breaks compatility with
+  ;;WebAssembly environments which do not support "WebAssembly.Global", such as Firefox 52 (the last
+  ;;version of Firefox to run on Windows XP, and the first one supporting WebAssembly).
 )";
     auto allTheStrings = getStringsInSubnodes();
     for (auto string : allTheStrings) {
@@ -163,10 +165,20 @@ public:
                       << variableName.text
                       << "\" is already visible in this scope, this "
                          "declaration shadows it."
+                      << (context.placesOfVariableDeclarations.count(
+                              variableName.text)
+                              ? " The previous declaration was at the line " +
+                                    std::to_string(
+                                        context.placesOfVariableDeclarations.at(
+                                            variableName.text)) +
+                                    "."
+                              : "")
                       << std::endl;
           context.globalVariables[variableName.text] =
               context.globalVariablePointer;
           context.variableTypes[variableName.text] = childNode.text;
+          context.placesOfVariableDeclarations[variableName.text] =
+              variableName.lineNumber;
           if (variableName.text.back() == '[')
             context.globalVariablePointer +=
                 (isPointerType(childNode.text)
@@ -385,11 +397,15 @@ public:
             exit(1);
           }
           functionDeclaration.argumentNames.push_back(
-              argument.children[0].text);
+              argument.children.at(0).text);
           functionDeclaration.argumentTypes.push_back(argument.text);
-          contextOfThatFunction.variableTypes[argument.children[0].text] =
+          contextOfThatFunction.variableTypes[argument.children.at(0).text] =
               argument.text;
-          contextOfThatFunction.localVariables[argument.children[0].text] = 0;
+          contextOfThatFunction
+              .placesOfVariableDeclarations[argument.children.at(0).text] =
+              argument.children.at(0).lineNumber;
+          contextOfThatFunction.localVariables[argument.children.at(0).text] =
+              0;
           for (auto &pair : contextOfThatFunction
                                 .localVariables) // The reference operator '&'
                                                  // is needed because... C++.
@@ -770,6 +786,8 @@ In the meantime, you can try modifying your program to use ")"
             [=](structure str) { return str.name == structureName.text; });
         for (TreeNode instanceName : structureName.children) {
           context.variableTypes[instanceName.text] = structureName.text;
+          context.placesOfVariableDeclarations[instanceName.text] =
+              instanceName.lineNumber;
           context.globalVariables[instanceName.text] =
               context.globalVariablePointer;
           globalDeclarations +=

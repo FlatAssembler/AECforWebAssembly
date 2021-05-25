@@ -269,8 +269,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                       << ", Compiler warning: Variable named \""
                       << variableName.text
                       << "\" is already visible in this scope (to be of type \""
-                      << context.variableTypes.at(variableName.text)
-                      << "\"), this "
+                      << context.variableTypes.at(variableName.text) << "\""
+                      << (context.placesOfVariableDeclarations.count(
+                              variableName.text)
+                              ? (", at the line " +
+                                 std::to_string(
+                                     context.placesOfVariableDeclarations.at(
+                                         variableName.text)))
+                              : "")
+                      << "), this "
                          "declaration shadows it."
                       << std::endl;
           if (variableName.text.back() != '[') { // If it's not an array.
@@ -280,6 +287,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                  ? 4
                                  : basicDataTypeSizes.at(childNode.text);
             context.variableTypes[variableName.text] = childNode.text;
+            context.placesOfVariableDeclarations[variableName.text] =
+                variableName.lineNumber;
             context.stackSizeOfThisFunction +=
                 isPointerType(childNode.text)
                     ? 4
@@ -334,6 +343,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             for (auto &pair : context.localVariables)
               pair.second += arraySizeInBytes;
             context.variableTypes[variableName.text] = childNode.text;
+            context.placesOfVariableDeclarations[variableName.text] =
+                childNode.lineNumber;
             context.stackSizeOfThisFunction += arraySizeInBytes;
             context.stackSizeOfThisScope += arraySizeInBytes;
             assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
@@ -445,6 +456,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           }
           context.variableTypes[instanceName.text] =
               iteratorPointingToTheStructure->name;
+          context.placesOfVariableDeclarations[instanceName.text] =
+              instanceName.lineNumber;
           context.localVariables[instanceName.text] = 0;
           int arraySizeInBytes = 0, arraySizeInStructures = 0;
           if (instanceName.text.back() == '[' &&

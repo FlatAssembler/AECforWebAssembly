@@ -38,6 +38,11 @@ struct CompilationContext {
   int globalVariablePointer = stackSize;
   std::map<std::string, std::string> variableTypes; // Integer32...
   std::map<std::string, int>
+      placesOfVariableDeclarations; // To provide more useful warnings about
+                                    // variable shadowing (when a variable is
+                                    // declared with the variable of the same
+                                    // name already being in scope).
+  std::map<std::string, int>
       globalVariables; // Where they are in the heap memory.
   std::map<std::string, int> localVariables; // Where they are on the stack.
   std::vector<function> functions;

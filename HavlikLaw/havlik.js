@@ -53,9 +53,10 @@ quitting now!`);
     JavaScript : {
       stack_pointer : stack_pointer,
       memory : memory,
-      printString : printString,
-      printInteger : printInteger,
-      random : Math.random,
+      printString : printString,   // Ne smijemo napisati ovdje, recimo,
+      printInteger : printInteger, // "printString()", jer bi to značilo da se
+      random : Math.random, // funkcije pozivaju odmah, a ne da se dohvaćaju
+                            // pokazivači na njih.
     },
   };
   WebAssembly.instantiate(buffer, importObject).then((results) => {
