@@ -25,4 +25,4 @@ build:
 test:
   stage: test
   script:
-    - ctest
+    - make test # No idea why simply "ctest" does not work.
