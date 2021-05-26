@@ -24,7 +24,8 @@ build:
 # run tests using the binary built before
 test:
   stage: test
-  dependencies: build
+  dependencies:
+    - build
   before_script:
     - apt update && apt -y install cmake make
   script:
