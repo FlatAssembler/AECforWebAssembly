@@ -593,7 +593,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                      nodeWithMemberName %>; // Is this valid in standard C++? I
                                             // am not sure. GCC (at least as
                                             // early as 4.8.5) accepts that, and
-                                            // so does CLANG 10.
+                                            // so does CLANG 10, and so does
+                                            // the C++ compiler that comes with
+                                            // Visual Studio 2019.
                 TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                             instanceName.columnNumber);
                 TreeNode nodeRepresentendingDefaultValue(
