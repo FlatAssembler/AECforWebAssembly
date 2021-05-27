@@ -871,16 +871,58 @@ node analogClock
         <span class="inline_code">git</span> installed than they have
         <span class="inline_code">wget</span> installed, but, if you are a
         programmer, you probably have
-        <span class="inline_code">git</span> installed as well. If you want to
-        use it on an OS that's not compatible with Linux, well, good luck. I
-        have provided some executable files of my compiler for different OS-es
-        in case it helps, as the
+        <span class="inline_code">git</span> installed as well (if you do not
+        have <span class="inline_code">wget</span>, you may try using
+        <span class="inline_code">curl</span> instead). If you want to use it on
+        an OS that's not compatible with Linux, well, good luck. I have provided
+        some executable files of my compiler for different OS-es, including
+        FreeDOS (compiled using
+        <a href="https://github.com/andrewwutw/build-djgpp"
+          >DJGPP C++ compiler</a
+        >), in case it helps, as the
         <a href="https://github.com/FlatAssembler/AECforWebAssembly/releases"
           >assets to the releases of AECforWebAssembly</a
-        >. Especially good luck using WABT there. Sorry, but dealing with binary
-        files is complicated, and me building an assembler for WebAssembly into
-        my compiler (instead of simply outputting assembly) would give me a lot
-        of hassle and very little benefit. I hope you understand.<br /><br />
+        >. Especially good luck using WABT and NodeJS there (I believe WABT can
+        be made to run on FreeDOS, but with a lot of difficulty, and that NodeJS
+        cannot be made to run on FreeDOS even with a lot of effort.) Sorry, but
+        dealing with binary files is complicated, and me building an assembler
+        for WebAssembly into my compiler (instead of simply outputting assembly)
+        would give me a lot of hassle and very little benefit. I hope you
+        understand.<br />A friend I met on Discord called <i>zero9178</i>
+        <a
+          href="https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804"
+          >helped me write the CMAKE script</a
+        >
+        for building and testing the AEC-to-WebAssembly compiler, so that you
+        can easily use any IDE that works well with
+        <a href="https://cmake.org/">CMAKE</a> (Visual Studio, QtCreator,
+        NetBeans and CLion can import CMAKE projects automatically, and
+        <a href="https://stackoverflow.com/a/9663686/8902065"
+          >CMAKE can be made to output configuration files necessary for
+          Eclipse</a
+        >). For now, however, Visual Studio 2019 falsely claims tests which
+        invoke WABT fail (that WABT executables are not proper Windows
+        executables, although they can be run from command-line as well as from
+        CMAKE run from command line). I do not know why. The automated tests are
+        integrated with GitHub Actions and GitLab CI, and they seem to work
+        properly there. The
+        <span class="inline_code">structureDeclarationTestCompiles</span> seems
+        to run around an order of magnitude faster on GitHub Actions than on the
+        laptop I am working on, and around five times faster than on GitLab CI.
+        I am not sure why, as I expected my compiler to run very poorly in
+        computer clouds, because computer clouds are, as far as I understand it,
+        made of countless low-powered computers which can be well-used only by
+        programs that support parallel execution, which my compiler does not.
+        Nevertheless, I think the hypothesis that it does not actually run there
+        (and that is the reason why it seems to run so quickly) can be
+        eliminated, as subsequent tests would fail (WABT invoked in
+        <span class="inline_code">structureDeclarationTestAssembles</span> would
+        exit with an error message, and so would NodeJS invoked by
+        <span class="inline_code">structureDeclarationTestRuns</span>) if it
+        were the case. The tokenizer of my compiler runs very slowly, and I do
+        not know how to make it faster. I have made a
+        <a href="https://www.forum.hr/showthread.php?t=1243509">forum thread</a>
+        about it.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
