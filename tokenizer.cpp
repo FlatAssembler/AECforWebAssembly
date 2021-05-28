@@ -7,6 +7,7 @@
  */
 
 #include "TreeNode.cpp"
+#include <algorithm>
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
 
 bool isAllWhitespace(
@@ -172,15 +173,12 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       iterator->text = to_string(int('\''));
     else if (iterator->text == "'\\\\'")
       iterator->text = to_string(int('\\'));
-  for (auto iterator = tokenizedExpression.begin();
-       iterator < tokenizedExpression.end();)
-    if (isAllWhitespace(
-            iterator
-                ->text)) // Delete empty nodes.
-                         // https://discord.com/channels/172018499005317120/172018499005317120/807748605213409282
-      iterator = tokenizedExpression.erase(iterator);
-    else
-      iterator++;
+  // https://discord.com/channels/530598289813536771/847014270922391563/847580726811557998
+  tokenizedExpression.erase(
+      std::remove_if(
+          tokenizedExpression.begin(), tokenizedExpression.end(),
+          [](TreeNode treeNode) { return isAllWhitespace(treeNode.text); }),
+      tokenizedExpression.end());
   for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
     if ((tokenizedExpression[i].text == "(" or // Mark the names of functions...
          tokenizedExpression[i].text ==
