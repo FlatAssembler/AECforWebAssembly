@@ -922,7 +922,35 @@ node analogClock
         were the case. The tokenizer of my compiler runs very slowly, and I do
         not know how to make it faster. I have made a
         <a href="https://www.forum.hr/showthread.php?t=1243509">forum thread</a>
-        about it.<br /><br />
+        about it.<br />
+        <b>UPDATE</b> on 28/05/2021: As a friend I met on Discord called
+        <i>elucent</i> (the author of the
+        <a href="https://github.com/basilTeam/basil"
+          >Basil programming language</a
+        >)
+        <a
+          href="https://discord.com/channels/530598289813536771/847014270922391563/847580726811557998"
+          >suggested</a
+        >, the tokenizer can be made a lot faster by using
+        <span class="inline_code">std::remove_if</span> to erase all whitespace
+        at once rather than by calling
+        <span class="inline_code">std::vector&lt;typename T&gt;::erase</span>
+        for each all-whitespace token (as <i>zero9178</i>
+        <a
+          href="https://discord.com/channels/172018499005317120/172018499005317120/807748605213409282"
+          >had suggested</a
+        >
+        me to do). I
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/commit/9172e49a1108634574fa043b9c5c2dc40590af0c"
+          >implemented</a
+        >
+        that, and now the test
+        <span class="inline_code">structureDeclarationTestCompiles</span> takes
+        only 2 seconds to run on GitLab CI, whereas it previously took 6 seconds
+        (so it is around 3 times faster). He also suggested some other ways to
+        make both the tokenizer and the parser faster, but those are harder to
+        implement.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
