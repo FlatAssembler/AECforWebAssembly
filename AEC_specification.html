@@ -669,9 +669,10 @@
         so that people can run programming languages better than JavaScript in a
         browser), and not only x86. As targeting WebAssembly is easier than
         targeting x86 (or probably any physical processor, as WebAssembly was
-        designed to be an easy compilation target, rather than to be easily
-        implemented in hardware), I was able to add many new features. However,
-        I think it's still not nearly as
+        designed to be an easy target for compilers, rather than to be easily
+        implemented in hardware or easy to write assembly-language code for
+        manually), I was able to add many new features. However, I think it's
+        still not nearly as
         <i>intrusive</i> as C compilers are. Emscripten (the primary C and C++
         compiler for WebAssembly) always assumes the standard C library is
         present on the JavaScript Virtual Machine when compiling any kind of
@@ -699,9 +700,9 @@
         /></a>
         potential bugs per 5'000 lines of code, most of them being unnecessarily
         doing deep copies of C++ objects (wasting time and memory), and quite a
-        few of them being using uninitialized variables in JavaScript. If you
-        want to collaborate with me, perhaps one of the first things to do is
-        fix those bugs found by static analysis. <br /><br />
+        few of them being using potentially uninitialized variables in
+        JavaScript. If you want to collaborate with me, perhaps one of the first
+        things to do is fix those bugs found by static analysis. <br /><br />
         <b id="HowToCompile">How to use the compilers</b><br />
         Probably the simplest way to use the AEC-to-x86 compiler on a Linux
         machine is to type the following code into a terminal emulator:
@@ -837,10 +838,12 @@ node analogClock
         10, and CentOS-like distributions with NodeJS 6, and the code my
         compiler generates relies on
         <span class="inline_code">WebAssembly.Global</span> being present, which
-        is only true on NodeJS 11 and newer. I think I made the right decision
-        not to waste time supporting the earliest implementations of
-        WebAssembly, as almost nobody will notice my effort, and I'd need to put
-        a lot of it.
+        is only true on NodeJS 11 and newer. For the exactly same reason, the
+        code my compiler produces will not run in Firefox 52, which is the last
+        version of Firefox to run on Windows XP, and the first one to support
+        WebAssembly. I think I made the right decision not to waste time
+        supporting the earliest implementations of WebAssembly, as almost nobody
+        will notice my effort, and I'd need to put a lot of it.
         <i
           >Where to draw the line there?
           <span style="font-style: normal"
@@ -907,15 +910,22 @@ node analogClock
         integrated with GitHub Actions and GitLab CI, and they seem to work
         properly there. The
         <span class="inline_code">structureDeclarationTestCompiles</span> seems
-        to run around an order of magnitude faster on GitHub Actions than on the
-        laptop I am working on, and around five times faster than on GitLab CI.
-        I am not sure why, as I expected my compiler to run very poorly in
-        computer clouds, because computer clouds are, as far as I understand it,
-        made of countless low-powered computers which can be well-used only by
-        programs that support parallel execution, which my compiler does not.
-        Nevertheless, I think the hypothesis that it does not actually run there
-        (and that is the reason why it seems to run so quickly) can be
-        eliminated, as subsequent tests would fail (WABT invoked in
+        to run around an order of magnitude faster (that is, 10 times faster) on
+        GitHub Actions than on the laptop I am working on, and around five times
+        faster than on GitLab CI (that is, GitLab CI seems to be around 2 times
+        faster than my laptop). I am not sure why, as I expected my compiler to
+        run very poorly in computer clouds, because computer clouds are, as far
+        as I understand it, made of countless low-powered computers which can be
+        well-used only by programs that support parallel execution, which my
+        compiler does not. I asked a
+        <a
+          href="https://www.quora.com/Why-do-the-tests-of-my-C-program-run-around-10-times-faster-on-GitHub-actions-and-around-2-times-faster-on-GitLab-CI-than-on-my-laptop-My-program-uses-no-parallelism-to-make-use-of-a-cloud-platform-so-I-expected-it"
+          >question on Quora</a
+        >
+        about that. Nevertheless, I think the hypothesis that it does not
+        actually run there (and that is the reason why it seems to run so
+        quickly) can be eliminated, as subsequent tests would fail (WABT invoked
+        in
         <span class="inline_code">structureDeclarationTestAssembles</span> would
         exit with an error message, and so would NodeJS invoked by
         <span class="inline_code">structureDeclarationTestRuns</span>) if it
@@ -1553,6 +1563,49 @@ EndStructure</pre
           to help me with implementing structures as arguments to the
           functions.)</i
         ><br />
+        <b>UPDATE</b> on 03/06/2021: It is important to note that the assignment
+        operator when used between structures works very differently in AEC and
+        C++. I made it so because I found the C++ behaviour very confusing while
+        making this compiler, as it
+        <a
+          href="https://stackoverflow.com/questions/63951270/using-default-copy-constructor-corrupts-a-tree-in-c"
+          >appeared to corrupt the Abstract Syntax Tree while compiling</a
+        >. Excerpt from
+        <a href="structureDeclarationTest.aec.html"
+          >Structure Declaration Test</a
+        >
+        that illustrates the AEC-specific behaviour (the
+        <span class="inline_code">spaghetti</span> function returns
+        <span class="inline_code">2</span>):
+        <pre>
+Structure ListNode Consists Of {
+  ListNodePointer next;
+  Integer32 value;
+}
+EndStructure;
+
+Function spaghetti() Which Returns Integer32 Does {
+  // See the link above, about how C++ behaviour appeared to corrupt the AST.
+  // By common sense, this should return 2. By C++ semantics, this should
+  // return 3.
+  InstantiateStructure ListNode list[3];
+  list[0].value : = 1;
+  list[1].value : = 2;
+  list[2].value : = 3;
+  list[0].next : = AddressOf(list[1]);
+  list[1].next : = AddressOf(list[2]);
+  list[0] : = ValueAt(list[0].next);
+  CharacterPointer pointer : = AddressOf(list[0]);
+  Return ValueAt(ListNodePointer(pointer)).value;
+}
+EndFunction;
+	</pre
+        >
+        The assembly code that the AEC compiler produces for structure
+        assignments is slower than one produced by C++ compilers, but, in my
+        opinion, the assembly code by AEC behaves way more intuitively in cases
+        like this.
+        <br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
         <span class="inline_code">AsmStart</span> and
@@ -1928,7 +1981,8 @@ EndFunction
             token == "asm_i32" ||
             token == "asm_i64" ||
             token == "asm_f32" ||
-            token == "asm_f64"
+            token == "asm_f64" ||
+            token == "InstantiateStructure"
           )
             return '<span class="Keyword">' + token + "</span>";
           if (
