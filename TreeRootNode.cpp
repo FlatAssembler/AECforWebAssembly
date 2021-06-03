@@ -129,7 +129,7 @@ public:
   ;;AEC program, there is an "extern"-ed bytearray of size 1 page (64KB) called "memory".
   ;;Have a better idea?
   (global $stack_pointer (import "JavaScript" "stack_pointer") (mut i32)) ;;The stack pointer being
-  ;;visible from JavaScript will be useful when debugging the compiler. This breaks compatility with
+  ;;visible from JavaScript will be useful when debugging the compiler. This breaks compatibility with
   ;;WebAssembly environments which do not support "WebAssembly.Global", such as Firefox 52 (the last
   ;;version of Firefox to run on Windows XP, and the first one supporting WebAssembly).
 )";
