@@ -726,7 +726,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         assembly += std::string(childNode.compile(context)) + "\n";
       else {
         std::cerr
-            << "Line " << lineNumber << ", Column " << columnNumber
+            << "Line " << childNode.lineNumber << ", Column "
+            << childNode.columnNumber
             << ", Compiler error: Sorry about that, but WebAssembly doesn't "
                "support expressions which aren't assigned to anything (the "
                "assembler complains if you write something like that). The "
