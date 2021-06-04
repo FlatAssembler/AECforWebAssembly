@@ -4,7 +4,9 @@
              // WASI, because declaring anything in WebAssembly is not possible
              // until we know whether we are targeting WASI or a browser.
 
-Structure IOV Consists Of {
+Structure IOV Consists Of { // The curly braces here are ignored by the
+                            // tokenizer, they are just here for ClangFormat
+                            // and text editors optimized for C-like languages.
   CharacterPointer iov_base;
   Integer32 iov_len;
 }
@@ -28,13 +30,22 @@ Function printString(CharacterPointer string) Which Returns Nothing Does {
   InstantiateStructure IOV iov;
   iov.iov_base : = string;
   iov.iov_len : = strlen(string);
-  Integer32 tmp : = fd_write(stdout, AddressOf(iov), 1, AddressOf(tmp));
+  Integer32 tmp : = fd_write(stdout, AddressOf(iov),
+                             1 /*Because we are printing only 1 string.*/,
+                             AddressOf(tmp));
 }
 EndFunction;
 
 Function main() Which Returns Nothing Does {
-  printString("Hello World from WASI!\n");
+  printString(
+      "Hello world, I am writing this from from WASI!\n"); // You need to put
+                                                           // '\n' in the
+                                                           // string, or else
+                                                           // nothing will be
+                                                           // printed!
 }
 EndFunction;
 
 asm("(export \"_start\" (func $main))"); // https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format#calling_the_function
+// We could have also renamed "main" to "_start", but thank God I tried this so
+// that I found a bug related to inline assembly in global scope in my compiler.
