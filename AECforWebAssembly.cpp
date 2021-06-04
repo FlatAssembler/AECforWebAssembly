@@ -11,6 +11,9 @@
 #define NDEBUG // If deleted, the tokenizer and parser will output verbose
                // output.
 #endif
+#include <string>
+std::string compilation_target; // WASI (WebAssembly System Interface) or
+                                // browser (default).
 #include "TreeRootNode.cpp"
 #include "compiler.cpp"
 #include "parser.cpp"
@@ -109,6 +112,36 @@ in case you are interested:
 https://www.forum.hr/showthread.php?t=1243509
 Parsing the program...)"
        << endl;
+  if (tokenized.size() and
+      tokenized[0].text == "#") { // If we are setting the compilation target
+    if (tokenized.size() >= 2 and tokenized[1].text != "target") {
+      cerr << "Preprocessor error: Line " << tokenized[1].lineNumber
+           << ", Column " << tokenized[1].columnNumber
+           << ": Unrecognized preprocessor directive \"" << tokenized[1].text
+           << "\"!" << endl;
+      exit(1);
+    } else if (tokenized.size() < 2) {
+      cerr << "Preprocessor error: Line " << tokenized[0].lineNumber
+           << ", Column " << tokenized[0].columnNumber
+           << ": The preprocessor directive seems to be missing!" << endl;
+      exit(1);
+    }
+    if (tokenized.size() >= 3 and tokenized[2].text != "browser" and
+        tokenized[2].text != "WASI") {
+      cerr << "Preprocessor error: Line " << tokenized[2].lineNumber
+           << ", Column " << tokenized[2].columnNumber
+           << ": Unrecognized target name \"" << tokenized[2].text
+           << "\". Supported targets are \"browser\" and \"WASI\"." << endl;
+      exit(1);
+    } else if (tokenized.size() < 3) {
+      cerr << "Preprocessor error: Line " << tokenized[1].lineNumber
+           << ", Column " << tokenized[1].columnNumber
+           << ": The compilation target seems not to be specified!" << endl;
+      exit(1);
+    }
+    compilation_target = tokenized[2].text;
+    tokenized.erase(tokenized.begin(), tokenized.begin() + 3);
+  }
   auto beginningOfParsing = chrono::high_resolution_clock::now();
   vector<TreeNode> parsed = TreeNode::parse(tokenized);
   auto endOfParsing = chrono::high_resolution_clock::now();
