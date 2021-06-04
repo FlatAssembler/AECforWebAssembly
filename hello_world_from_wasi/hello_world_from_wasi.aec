@@ -27,7 +27,7 @@ Integer32 stdout : = 1;
 Function printString(CharacterPointer string) Which Returns Nothing Does {
   InstantiateStructure IOV iov;
   iov.iov_base : = string;
-  iov.ion_len : = strlen(string);
+  iov.iov_len : = strlen(string);
   Integer32 tmp : = fd_write(stdout, AddressOf(iov), 1, AddressOf(tmp));
 }
 EndFunction;
