@@ -1,0 +1,40 @@
+// Loosely based on:
+// https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
+#target WASI // This has to be the first directive in an AEC program targeting
+             // WASI, because declaring anything in WebAssembly is not possible
+             // until we know whether we are targeting WASI or a browser.
+
+Structure IOV Consists Of {
+  CharacterPointer iov_base;
+  Integer32 iov_len;
+}
+EndStructure;
+
+Function
+fd_write(Integer32 file_descriptor, IOVPointer iovs, Integer32 iovs_len,
+         Integer32Pointer nwritten) Which Returns Integer32 Is External;
+
+Function strlen(CharacterPointer str) Which Returns Integer32 Does {
+  Integer32 size : = 0;
+  While ValueAt(str + size) Loop { size += 1; }
+  EndWhile;
+  Return size;
+}
+EndFunction;
+
+Integer32 stdout : = 1;
+
+Function printString(CharacterPointer string) Which Returns Nothing Does {
+  InstantiateStructure IOV iov;
+  iov.iov_base : = string;
+  iov.ion_len : = strlen(string);
+  Integer32 tmp : = fd_write(stdout, AddressOf(iov), 1, AddressOf(tmp));
+}
+EndFunction;
+
+Function main() Which Returns Nothing Does {
+  printString("Hello World from WASI!\n");
+}
+EndFunction;
+
+asm("(export \"_start\" (func $main))"); // https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format#calling_the_function
