@@ -141,9 +141,7 @@ public:
     } else if (compilation_target == "WASI")
       globalDeclarations +=
           R"(
-  (memory 1)
-  (export "memory" (memory 0)) ;;Copied from there, I am not sure how it actually works: https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
-  
+  ;;Since we are targeting WASI, we must not declare anything (memory nor stack pointer) before all imports are over. 
 )";
     else {
       std::cerr << "Internal Compiler Error: The current compilation target is "
@@ -512,9 +510,14 @@ public:
           if (!hasStackPointerBeenDeclared) {
             hasStackPointerBeenDeclared = true;
             globalDeclarations +=
-                "\t(global $stack_pointer (mut i32)) ;;We can declare stack "
-                "pointer only here because, in WebAssembly, \"imports must "
-                "occur before all non-import definitions\".\n";
+                R"(
+  (global $stack_pointer (mut i32)) ;;We can declare stack pointer only here because,
+                                    ;;in WebAssembly, "imports must occur before all
+                                    ;;non-import definitions".
+  (memory 1)
+  (export "memory" (memory 0)) ;;Copied from there, I am not sure how it actually works:
+;;https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
+)";
           }
           globalDeclarations += "\t(func $" +
                                 functionDeclaration.name.substr(
