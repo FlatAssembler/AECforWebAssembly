@@ -669,7 +669,7 @@ In the meantime, you can try modifying your program to use ")"
           exit(1);
         }
         globalDeclarations +=
-            convertInlineAssemblyToAssembly(childNode.children[0]);
+            convertInlineAssemblyToAssembly(childNode.children[0]) + "\n";
       } else if (childNode.text == "Structure") {
         if (childNode.children.size() != 2) {
           std::cerr
