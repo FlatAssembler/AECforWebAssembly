@@ -141,7 +141,8 @@ Parsing the program...)"
     }
     compilation_target = tokenized[2].text;
     tokenized.erase(tokenized.begin(), tokenized.begin() + 3);
-  }
+  } else
+    compilation_target = "browser";
   auto beginningOfParsing = chrono::high_resolution_clock::now();
   vector<TreeNode> parsed = TreeNode::parse(tokenized);
   auto endOfParsing = chrono::high_resolution_clock::now();
