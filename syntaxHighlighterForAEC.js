@@ -17,7 +17,8 @@ function highlightedToken(token) {
   if (token.charAt(0) == '"' || token.charAt(0) == "'")
     return ('<span class="String">' +
             token.replace(/\\n/g, "<b>\\<i>n</i></b>")
-                .replace(/\\t/g, "<b>\\<i>t</i></b>") +
+                .replace(/\\t/g, "<b>\\<i>t</i></b>")
+                .replace(/\\\"/g, "<b>\\<i>\"</i></b>") +
             "</span>");
   if (token == "Character" || token == "CharacterPointer" ||
       token == "Integer16" || token == "Integer16Pointer" ||
