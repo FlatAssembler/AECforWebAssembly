@@ -1,0 +1,2 @@
+# Hello World from WASI
+This is a more-or-less literal translation of the [official WASI Hello World program](https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example) from assembly language into AEC. It is supposed to be run as `wasmtime hello_world_from_wasi.wat` or `wasmtime hello_world_from_wasi.wasm`. In other words, you can run `wat2wasm`, but, in this case, you do not have to.
