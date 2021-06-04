@@ -511,7 +511,7 @@ public:
             hasStackPointerBeenDeclared = true;
             globalDeclarations +=
                 R"(
-  (global $stack_pointer 0 (mut i32)) ;;We can declare stack pointer only here because,
+  (global $stack_pointer (mut i32) 0) ;;We can declare stack pointer only here because,
                                       ;;in WebAssembly, "imports must occur before all
                                       ;;non-import definitions".
   (memory 1)
