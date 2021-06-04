@@ -474,8 +474,11 @@ public:
           for (std::string argumentType : functionDeclaration.argumentTypes)
             globalDeclarations +=
                 "(param " +
-                stringRepresentationOfWebAssemblyType.at(
-                    mappingOfAECTypesToWebAssemblyTypes.at(argumentType)) +
+                (isPointerType(argumentType)
+                     ? "i32"
+                     : stringRepresentationOfWebAssemblyType.at(
+                           mappingOfAECTypesToWebAssemblyTypes.at(
+                               argumentType))) +
                 ") ";
           if (functionDeclaration.returnType != "Nothing") {
             if (isPointerType(functionDeclaration.returnType))
