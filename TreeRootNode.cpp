@@ -462,8 +462,8 @@ public:
         if (childNode.children.at(2).text == "External") {
           globalDeclarations +=
               "\t(import \"" +
-              (compilation_target == "browser" ? "JavaScript"
-                                               : "wasi_unstable") +
+              (compilation_target == "browser" ? std::string("JavaScript")
+                                               : std::string("wasi_unstable")) +
               "\" \"" +
               functionDeclaration.name.substr(
                   0, functionDeclaration.name.size() - 1) +
