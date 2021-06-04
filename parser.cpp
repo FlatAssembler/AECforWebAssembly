@@ -894,7 +894,11 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       auto iteratorPointingToTheEndStructureToken =
           std::find_if(input.begin() + i + 1, input.end(), [](TreeNode node) {
             return node.text == "EndStructure";
-          }); // Let's not deal with nested structures for now.
+          }); // TODO: Deal with nested structures. As it is now,
+              // "iteratorPointingToTheEndStructureToken" will point to an
+              // incorrect token in case there is a "Structure" inside a
+              // "Structure", and the actual "EndStructure" will be perceived as
+              // "unexpected token".
       if (iteratorPointingToTheEndStructureToken == input.end())
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
