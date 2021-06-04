@@ -511,9 +511,9 @@ public:
             hasStackPointerBeenDeclared = true;
             globalDeclarations +=
                 R"(
-  (global $stack_pointer (mut i32)) ;;We can declare stack pointer only here because,
-                                    ;;in WebAssembly, "imports must occur before all
-                                    ;;non-import definitions".
+  (global $stack_pointer 0 (mut i32)) ;;We can declare stack pointer only here because,
+                                      ;;in WebAssembly, "imports must occur before all
+                                      ;;non-import definitions".
   (memory 1)
   (export "memory" (memory 0)) ;;Copied from there, I am not sure how it actually works:
 ;;https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
