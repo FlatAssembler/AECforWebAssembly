@@ -141,7 +141,7 @@ public:
           R"(
   (memory 1)
   (export "memory" (memory 0)) ;;Copied from there, I am not sure how it actually works: https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
-  (global $stack_pointer (import "JavaScript" "stack_pointer") (mut i32))
+  (global $stack_pointer (mut i32))
 )";
     else {
       std::cerr << "Internal Compiler Error: The current compilation target is "
