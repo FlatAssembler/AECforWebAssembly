@@ -137,7 +137,7 @@ public:
   ;;version of Firefox to run on Windows XP, and the first one supporting WebAssembly).
 )";
     else if (compilation_target == "WASI")
-      globalDeclatations +=
+      globalDeclarations +=
           R"(
   (memory 1)
   (export "memory" (memory 0)) ;;Copied from there, I am not sure how it actually works: https://github.com/bytecodealliance/wasmtime/blob/main/docs/WASI-tutorial.md#web-assembly-text-example
