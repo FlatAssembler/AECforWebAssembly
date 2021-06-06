@@ -1,5 +1,5 @@
 /*
- * Ovo je JavaScriptska ovojnica oko programa "havlik.js", koju treba
+ * Ovo je JavaScriptska ovojnica oko programa "havlik.aec", koju treba
  * pokrenuti u NodeJS-u da inicijalizira JavaScriptinu virtualnu
  * mašinu, tako da se glavni program pisan u AEC-u može pokrenuti.
  */

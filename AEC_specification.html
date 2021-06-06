@@ -673,16 +673,37 @@
         implemented in hardware or easy to write assembly-language code for
         manually), I was able to add many new features. However, I think it's
         still not nearly as
-        <i>intrusive</i> as C compilers are. Emscripten (the primary C and C++
-        compiler for WebAssembly) always assumes the standard C library is
-        present on the JavaScript Virtual Machine when compiling any kind of
-        program, so it's an overkill for most cases when it could come useful.
-        The
+        <i>intrusive</i> as C compilers are.
+        <a href="https://emscripten.org/">Emscripten</a> (the primary C and C++
+        compiler for WebAssembly, a modified version of the CLANG compiler)
+        always assumes the standard C library is present on the JavaScript
+        Virtual Machine when compiling any kind of program, so it's an overkill
+        for most cases when it could come useful. The
         <a href="https://github.com/FlatAssembler/AECforWebAssembly"
           >AEC-to-WebAssembly compiler</a
         >
         has around 5'000 lines of code, and it's written in C++ (a language much
         more suitable for writing compilers than JavaScript). <br />
+        WebAssembly is one of the reasons I am a libertarian, because it shows
+        that, when a private company makes a mistake, no matter how hopeless the
+        situation seems, there will come a solution... from capitalism itself.
+        Making JavaScript, which is widely agreed to be a very poorly-designed
+        programming language, a standard language of the Internet, which is what
+        Netscape did back when it had a near-monopoly on the Internet
+        browsers... for a long time, it seemed like a way to retard the
+        development of the Internet forever. Fortunately, once the Internet got
+        used more, somebody came up with this brilliant idea of WebAssembly,
+        which seems to solve basically all the problems created by Netscape with
+        that wrong decision. And, incidentally, that solution also significantly
+        lowers the barrier towards making a new programming language, so that
+        many more people can experiment with those things. When governments make
+        a mistake, quite often, there is no solution. When the UN decided back
+        in 1948 that the solution to the Holocaust is to make Palestinians pay
+        for the Hitler's crimes with their land... it led to wars which continue
+        to this day, and will likely continue all until a nuclear holocaust
+        destroys most life on Earth (as has almost happened a few times by now).
+        A private company most likely cannot make a mistake with such horrible
+        consequences.<br />
         <b>UPDATE</b> on 11/10/2020: Of course, my compiler is not a very
         high-quality software. The LGTM static analyzer places it in the
         <a
@@ -960,7 +981,28 @@ node analogClock
         only 2 seconds to run on GitLab CI, whereas it previously took 6 seconds
         (so it is around 3 times faster). He also suggested some other ways to
         make both the tokenizer and the parser faster, but those are harder to
-        implement.<br /><br />
+        implement.<br />
+        <b>UPDATE</b> on 06/06/2021: The AEC-to-WebAssembly compiler can now
+        target
+        <a href="https://wasi.dev/">WebAssembly System Interface (WASI)</a>, as
+        the example
+        <a href="hello_world_from_wasi.aec.html">Hello World from WASI</a>
+        shows. Basically, you need to put
+        <span class="inline_code">#target WASI</span> before any declarations.
+        Unlike with AEC-to-x86
+        <span class="inline_code">syntax gas</span> directive, comments can go
+        before that. I believe this a significant step forward on a way for the
+        WebAssembly dialect of AEC to run on rarely used operating systems such
+        as FreeDOS, using portable WASI environments such as
+        <a href="https://github.com/wasm3/wasm3">Wasm3</a>. Of course, that is
+        assuming we also manage to compile
+        <span class="inline_code">wat2wasm</span> from WebAssembly Binary
+        Toolkit to run there (which will not be easy because CMAKE does not run
+        there). Also, some
+        <a
+          href="https://medium.com/@rauljordan/webassembly-the-future-of-blockchain-computing-1a0ae28f7e40"
+          >blockchains support WebAssembly Binary Interface</a
+        >, so perhaps my compiler can now be useful there.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
@@ -1911,8 +1953,30 @@ EndFunction
         <br /><b id="Conclusion">Conclusion</b><br />
         I think AEC is a promising project, but a lot of work is still needed to
         make it successful. I don't think I can do everything that's needed for
-        it to be successful by myself.
-        <br /><br />
+        it to be successful by myself. (<i
+          >UPDATE on 06/06/2021: It would, for example, be useful to make a
+          web-based IDE for the AEC-to-WebAssembly compiler, so that somebody
+          can try my programming language directly in the browser. I have opened
+          a
+          <a
+            href="https://www.quora.com/Can-I-make-the-compiler-for-my-programming-language-run-in-a-browser-it-already-runs-in-NodeJS-if-compiled-with-EMSCRIPTEN-so-that-somebody-can-try-my-programming-language-directly-in-browser-My-compiler-can-output"
+            >Quora question</a
+          >
+          asking for advice about how to do that. We would need to get the
+          AEC-to-WebAssembly compiler, which can already run in NodeJS if
+          compiled with EMSCRIPTEN, to run in a browser, and, to be honest, I do
+          not know enough WebAssembly to do that by myself. Actually, I think
+          almost no web-developer these days has the knowledge needed to make
+          that. We would also need to embed the
+          <span class="inline_code">wat2wasm</span> from WebAssembly Binary
+          Toolkit to run in that web-app, as my compiler relies on it to convert
+          the WebAssembly assembly language it outputs to the bytecode that
+          browsers understand. Somebody has already made
+          <a href="https://webassembly.github.io/wabt/demo/wat2wasm/"
+            ><span class="inline_code">wat2wasm</span> run in modern browsers</a
+          >, but they, apparently, left no instructions how they managed to do
+          that.</i
+        >). <br /><br />
         <b>UPDATE</b> on 16/10/2020: I've published a
         <a href="https://youtu.be/YFZ-45ea5mo">YouTube video</a>
         about programming in your programming languages for the client-side web.

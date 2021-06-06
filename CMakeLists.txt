@@ -1,6 +1,6 @@
 # https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804
 cmake_minimum_required(VERSION 3.10)
-project(AECForWebAssembly VERSION 1.4.0)
+project(AECForWebAssembly VERSION 1.4.1)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 add_executable(aec AECforWebAssembly.cpp)
 
 enable_testing()
-# TODO: Some tests are dependent on others being already run, I do not know
-# enough about CMAKE to denote that.
+# TODO: Some tests are dependent on others having been already run, I do not
+# know enough about CMAKE to denote that.
 add_test(NAME globalVariablesDeclarationTestCompiles
 	      COMMAND aec globalVariablesDeclarationTest.aec
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
