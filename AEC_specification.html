@@ -1101,7 +1101,9 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
         </pre>
         I like the C-like approach to declaring multiple variables in the same
         statement way more than the Ada-and-VHDL-like approach, yet alone the
-        Rust-like approach.<br />
+        Rust-like approach. I realize the Rust-like approach makes theoretically
+        much more sense, but it definitely feels weird to somebody coming from
+        another programming language.<br />
         <b>TODO</b>: Decide what to do about aligning the variables in memory
         (making sure that, for example, a
         <span class="inline_code">Integer32</span> is on the memory location
@@ -1166,8 +1168,32 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         >
         Makes a lot more sense to me than to use the same operator as for the
         multiplication, like C or C++ do (they use
-        <span class="inline_code">*</span> for both of those things). To get a
-        pointer to something, you use the
+        <span class="inline_code">*</span> for both of those things). Using the
+        same operator for declaring a pointer as for multiplication in fact
+        makes C and C++ significantly more difficult to parse in some cases,
+        this is called the <i>typedef problem</i>. In C and C++, the statement
+        &quot;<span class="inline_code">first * second;</span>&quot; can mean
+        both &quot;<i
+          >Declare a pointer to the type named
+          <span class="inline_code">first</span>, and name that pointer
+          <span class="inline_code">second</span>.</i
+        >&quot; and the far less sensible statement &quot;<i
+          >Multiply variables named <span class="inline_code">first</span> and
+          <span class="inline_code">second</span>, store the result on the
+          system stack and then ignore it.</i
+        >&quot;, depending on the context (whether
+        <span class="inline_code">first</span> is a name of a type or a name of
+        a variable, which one cannot know during the parsing phase of
+        compiling). In the dialect of AEC targeting x86, it can only mean the
+        second one (with the modification that the result is not stored on the
+        system stack, but to a memory location where the pointer
+        <span class="inline_code">result</span>, which is supposed to be
+        declared in inline assembly, points to), and, in the dialect of AEC
+        targeting WebAssembly, the compiler complains if you write something
+        like that because WebAssembly itself does not let you store a result on
+        system stack and then pretend it is not there, that is, it does not
+        support expressions which are not assigned to anything. To get a pointer
+        to something, you use the
         <span class="inline_code">AddressOf(</span> operator. Makes a lot more
         sense to me than the way C and C++ do that, using the same operator as
         for the <i>bitwise and</i> operation (they use
@@ -1394,7 +1420,16 @@ EndFunction</pre
             EndIf</pre
         >
         Note that, unlike in Ada or VHDL, there is no semicolon after the
-        <span class="inline_code">EndIf</span> token.<br />
+        <span class="inline_code">EndIf</span> token. That is, you can put the
+        semicolon <span class="inline_code">;</span> after
+        <span class="inline_code">EndIf</span> if you want to, but you do not
+        have to. I often put it so that ClangFormat does not get confused. When
+        programming in VHDL, Ada or Pascal, it bothered me why I needed to put a
+        semi-colon after <span class="inline_code">end if</span> (ADA and VHDL)
+        or <span class="inline_code">end</span> (Pascal). I mean,
+        <span class="inline_code">EndIf</span> by itself means an end of a
+        statement, so why put another sign for ending a statement there? Is not
+        it some kind of a pleonasm?<br />
         Simple branching can also be done using the
         <span class="inline_code">?:</span> operator. As it is
         right-associative, it can be used to concisely write
