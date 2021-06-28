@@ -676,7 +676,7 @@ In the meantime, you can try modifying your program to use ")"
                     << childNode.columnNumber
                     << ", Compiler error: The \"asm(\" keyword doesn't"
                        " have exactly one argument, quitting now before"
-                       " segfaulting"
+                       " segfaulting!"
                     << std::endl;
           exit(1);
         }
