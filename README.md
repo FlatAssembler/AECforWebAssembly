@@ -1,6 +1,6 @@
 # AEC for WebAssembly
 
-This is my attempt to port the [ArithmeticExpressionCompiler](https://github.com/FlatAssembler/ArithmeticExpressionCompiler) language to WebAssembly (the JavaScript bytecode). Right now, it's <del>about as powerful as</del> more powerful than the original compiler (targeting x86 assembly), as it includes support for more data types, including the support for structures. The specification for the ArithmeticExpressionCompiler language is (hopefully) available on [my website](https://flatassembler.github.io/AEC_specification.html).
+This is my attempt to port the [ArithmeticExpressionCompiler](https://github.com/FlatAssembler/ArithmeticExpressionCompiler) language to WebAssembly (the JavaScript bytecode). The compiler has been rewritten from scratch in C++ (the original compiler was written in a combination of C and JavaScript, using the Duktape framework). Right now, it's <del>about as powerful as</del> more powerful than the original compiler (targeting x86 assembly), as it includes support for more data types, including the support for structures. The specification for the ArithmeticExpressionCompiler language is (hopefully) available on [my website](https://flatassembler.github.io/AEC_specification.html).
 
 ## Compiling instructions
 
@@ -19,7 +19,7 @@ clang++ -o aec AECforWebAssembly.cpp -O3
 
 <del>At least some compilers are known to miscompile the program. Namely, GCC 4.8.5 (that comes with recent versions of Oracle Linux) compiles the code successfully, but the program exits with [the message](https://github.com/FlatAssembler/AECforWebAssembly/blob/c9212990ec6655d14331fae71f1d782a697a518c/AECforWebAssembly.cpp#L21) that your C++ compiler appears not to support regular expressions. GCC 4.9.2 (that comes with recent versions of Debian) already seems to work. CLANG 10 on Oracle Linux again miscompiles the program, but apparently that happens only on Oracle Linux. Oddly enough, CLANG 9 appears to work fine on Oracle Linux. Honestly, supporting misbehaving C++ compilers makes way less sense than supporting misbehaving browsers. C++ compilers, unlike browsers, are used only by users who can easily install another one. Also, newest versions of GCC, unlike the latest browsers, run on Windows 98 without problems.</del> (UPDATE: I've mitigated that problem by avoiding complicated regular expressions, which some C++ compilers fail to compile. Besides, those complicated regular expressions appear to slow down the program significantly and make it less legible.)
 
-To make sure compiling my compiler is not the problem, I've included some binary files in the releases section. There is also a WebAssebly file compiled with Emscripten, which should work basically wherever NodeJS works.
+To make sure compiling my compiler is not the problem, I've included some binary files in the releases section on GitHub, and they are also available on SourceForge (but not on GitLab). There is also a WebAssebly file compiled with Emscripten, which should work basically wherever NodeJS works.
 
 ## Usage instructions
 
@@ -57,6 +57,6 @@ WASM files can be run in NodeJS, as you can see in [this example](https://github
 ## Notes for Contributors
 
 If you don't know about compiler theory and don't want to read about such complicated stuff in English, you can read the [paper about compiler theory](https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/seminar/PojednostavljeniSeminar.pdf) I've published in Osječki Matematički List. It's in Croatian, and I hope it helps.
-(**UPDATE** on 23/10/2020: I've published a [YouTube video](https://youtu.be/Br6Zh3Rczig) in English with approximately the same content as the paper. In cse your browser cannot play streamed MP4 videos, you can download the [MP4 file](https://flatassembler.github.io/compiler_theory.mp4) and try opening it in VLC or something like that.)
+(**UPDATE** on 23/10/2020: I've published a [YouTube video](https://youtu.be/Br6Zh3Rczig) in English with approximately the same content as the paper. In case your browser cannot play streamed MP4 videos, you can download the [MP4 file](https://flatassembler.github.io/compiler_theory.mp4) and try opening it in VLC or something like that.)
 
 To format the code, I generally prefer to use [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) for languages that it supports (JavaScript, C++), because I find the code it produces nicer. For languages it doesn't support (HTML, CSS), I use [Prettier](https://prettier.io/). The code Prettier outputs isn't particularly nice, but something is better than nothing. It's also interesting that `clang-format`, if you supply it with code in this version of AEC and tell it to format the code, it will format the code assuming it's a C-like language, but (as far as I can tell) it won't break it. The result isn't particularly nice, but maybe some automated formatting is better than nothing.
