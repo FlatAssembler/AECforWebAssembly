@@ -1172,8 +1172,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         same operator for declaring a pointer as for multiplication in fact
         makes C and C++ significantly more difficult to parse in some cases,
         this is called the <i>typedef problem</i>. In C and C++, the statement
-        <span class="inline_code">first * second;</span> can mean
-        both &quot;<i
+        <span class="inline_code">first * second;</span> can mean both &quot;<i
           >Declare a pointer to the type named
           <span class="inline_code">first</span>, and name that pointer
           <span class="inline_code">second</span>.</i
@@ -1464,7 +1463,21 @@ EndFunction</pre
         <span class="inline_code">ElseIf</span> branchings. Most of the time,
         they are a sign of bad code design, but sometimes they are not, and it's
         not acceptable for a language to discourage them.<br />
-          <b>UPDATE</b> on 09/07/2021: A <a href="https://stackoverflow.com/a/62104607/8902065">StackOverflow user called <i>rici</i> warned me</a> that AEC-to-x86 compiler actually produces incorrect code for the <span class="inline_code">?:</span> operator. Namely, the code it produces calculates the results of the second operand and the third operand before calculating the result of the first operand (the condition), which can, according to that <i>rici</i>, lead to unexpected divide-by-zero errors for expressions such as <span class="inline_code">d = 0 ? 0 : n / d</span> (if <span class="inline_code">d</span> is equal to zero). There does not seem to be a simple solution, given the way my AEC-to-x86 compiler is structured. The AEC-to-WebAssembly compiler does not suffer from that problem.<br/>
+        <b>UPDATE</b> on 09/07/2021: A
+        <a href="https://stackoverflow.com/a/62104607/8902065"
+          >StackOverflow user called <i>rici</i> warned me</a
+        >
+        that AEC-to-x86 compiler actually produces incorrect code for the
+        <span class="inline_code">?:</span> operator. Namely, the code it
+        produces calculates the results of the second operand and the third
+        operand before calculating the result of the first operand (the
+        condition), which can, according to that <i>rici</i>, lead to unexpected
+        divide-by-zero errors for expressions such as
+        <span class="inline_code">d = 0 ? 0 : n / d</span> (if
+        <span class="inline_code">d</span> is equal to zero). There does not
+        seem to be a simple solution, given the way my AEC-to-x86 compiler is
+        structured. The AEC-to-WebAssembly compiler does not suffer from that
+        problem.<br />
         <br /><b id="Loops">Loops</b><br />
         For now, there is only one type of loop in AEC, the
         <span class="inline_code">While</span>-loop. A
@@ -1608,15 +1621,17 @@ Structure Point Consists Of
     Integer16 number_of_dimensions;
 EndStructure</pre
         >
-        <del>However, the compiler crashes if you insert them in a real program
-        (rather than just in a parser test).</del> Structures are supposed to be
-        instantiated using a directive called
+        <del
+          >However, the compiler crashes if you insert them in a real program
+          (rather than just in a parser test).</del
+        >
+        Structures are supposed to be instantiated using a directive called
         <span class="inline_code">InstantiateStructure</span>, that is, an
         <span class="inline_code">InstantiateStructure</span> token followed by
         the structure name followed by the variable name (and the variable will
         be of type represented by the structure name).<br />
-        <b>TODO</b>: <del>Implement structures in the compiler, not just in the
-        parser.</del>
+        <b>TODO</b>:
+        <del>Implement structures in the compiler, not just in the parser.</del>
         <i
           >(UPDATE on 30/09/2020: Some progress on that has been made, namely,
           local and global structures are now supported
@@ -1752,7 +1767,10 @@ EndFunction</pre
         <span class="inline_code">ln(</span> (natural logarithm),
         <span class="inline_code">log(</span> (base-10 logarithm),
         <span class="inline_code">exp(</span> (returns the Euler number to the
-        power of the argument), <span class="inline_code">pow(</span> (which, unfortunately, due to the limitations of mathematical functions built into x86 assembly, causes an error whenever the first argument is negative or zero, and there does not appear to be a simple solution),
+        power of the argument), <span class="inline_code">pow(</span> (which,
+        unfortunately, due to the limitations of mathematical functions built
+        into x86 assembly, causes an error whenever the first argument is
+        negative or zero, and there does not appear to be a simple solution),
         <span class="inline_code">abs(</span> and
         <span class="inline_code">mod(</span> (floating-point modulo). Unlike in
         most programming languages, trigonometric functions expect arguments in
