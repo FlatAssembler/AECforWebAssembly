@@ -240,7 +240,7 @@ public:
     if (text == "*" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() *
              children[1].interpretAsACompileTimeIntegerConstant();
-    if (text == "/" and children.size() == 0) {
+    if (text == "/" and children.size() == 2) {
       if (children[1].interpretAsACompileTimeIntegerConstant() == 0) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Interpreter error: Division by zero in a compile-time "
