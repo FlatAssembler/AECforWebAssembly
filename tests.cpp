@@ -104,7 +104,10 @@ void interpreterTests() {
        {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)+('A'+2='C'?0:-1)", "0"},
        {"0xff", "255"},
        {"0x41='A' and 0xff=255", "1"},
-       {"0x42='A' or 0x2b=127", "0"}});
+       {"0x42='A' or 0x2b=127", "0"},
+       {"5/2","2" /*A simple division in a compile-time integer constant was
+                    crashing the compiler all the way up to version v1.4.3*/}
+      });
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = std::to_string(
         TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
