@@ -54,22 +54,27 @@ int main(int argc, char **argv) {
                                // then in a 5'000-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows, from the command line:\n"
-          << argv[0] << " name_of_the_program.aec" << '\n'
-          << "Or, alternatively, open an AEC source code with this program.\n"
-             "For more information, see:\n"
-             "https://flatassembler.github.io/AEC_specification.html#HowToCompile \n"
-             "TL;DR\n"
-             "An example AEC program can be downloaded here:\n"
-             "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw \n"
-             "You need to assemble the result using a program called \"wat2wasm\"\n"
-             "from WebAssembly Binary Toolkit, perhaps like this\n"
-             "(if you have NodeJS installed and an Internet connection):\n"
-             "npx -p wabt wat2wasm analogClock.wat\n"
-             "Then you need to write a JavaScript program runnable in NodeJS\n"
-             "which will invoke that AEC program, an example is available here:\n"
-             "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.js?format=raw \n"
-             "And then, of course, you can run that program in NodeJS."
-          <<endl;
+           << argv[0] << " name_of_the_program.aec" << '\n'
+           << "Or, alternatively, open an AEC source code with this program.\n"
+              "For more information, see:\n"
+              "https://flatassembler.github.io/"
+              "AEC_specification.html#HowToCompile \n"
+              "TL;DR\n"
+              "An example AEC program can be downloaded here:\n"
+              "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/"
+              "analogClock/analogClock.aec?format=raw \n"
+              "You need to assemble the result using a program called "
+              "\"wat2wasm\"\n"
+              "from WebAssembly Binary Toolkit, perhaps like this\n"
+              "(if you have NodeJS installed and an Internet connection):\n"
+              "npx -p wabt wat2wasm analogClock.wat\n"
+              "Then you need to write a JavaScript program runnable in NodeJS\n"
+              "which will invoke that AEC program, an example is available "
+              "here:\n"
+              "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/"
+              "analogClock/analogClock.js?format=raw \n"
+              "And then, of course, you can run that program in NodeJS."
+           << endl;
 #ifdef WIN32
       system("PAUSE");
 #endif // WIN32
@@ -179,9 +184,10 @@ Parsing the program...)"
   } catch (exception &error) {
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
-    cerr << R"(If you have time, please report this to me on GitHub as an issue:
+    cerr
+        << R"(If you have time, please report this to me on GitHub as an issue:
 https://github.com/FlatAssembler/AECforWebAssembly/issues)"
-         << std::endl;
+        << std::endl;
     return 1;
   }
   auto endOfCompilation = chrono::high_resolution_clock::now();

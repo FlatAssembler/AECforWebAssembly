@@ -681,9 +681,9 @@ In the meantime, you can try modifying your program to use ")"
           exit(1);
         }
         globalDeclarations +=
-            AssemblyCode(convertInlineAssemblyToAssembly(
-                    childNode.children[0])
-                ).indentBy(1) + "\n";
+            AssemblyCode(convertInlineAssemblyToAssembly(childNode.children[0]))
+                .indentBy(1) +
+            "\n";
       } else if (childNode.text == "Structure") {
         if (childNode.children.size() != 2) {
           std::cerr
