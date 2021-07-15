@@ -265,6 +265,21 @@ std::string TreeNode::getType(const CompilationContext context) const {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: Function \"" << text
               << "\" is not declared!" << std::endl;
+    auto most_similar_function_iterator = std::max_element(
+        context.functions.begin(), context.functions.end(),
+        [=](const function first_potentially_similar_function,
+            const function second_potentially_similar_function) {
+          return longest_common_subsequence_length(
+                     first_potentially_similar_function.name, text) <
+                 longest_common_subsequence_length(
+                     second_potentially_similar_function.name, text);
+        });
+    if (most_similar_function_iterator != context.functions.end() &&
+        longest_common_subsequence_length(most_similar_function_iterator->name,
+                                          text)) {
+      std::cerr << "By the way, maybe you meant \""
+                << most_similar_function_iterator->name << "\"?" << std::endl;
+    }
     exit(1);
   }
   if (text == "?:") {
@@ -306,6 +321,26 @@ std::string TreeNode::getType(const CompilationContext context) const {
                 << iteratorPointingToTheStructure->name
                 << "\", doesn't have a member named \"" << memberName
                 << "\". Quitting now!" << std::endl;
+      auto most_similar_variable_iterator = std::max_element(
+          iteratorPointingToTheStructure->memberTypes.begin(),
+          iteratorPointingToTheStructure->memberTypes.end(),
+          [=](const std::pair<std::string, std::string>
+                  first_potentially_similar_variable,
+              const std::pair<std::string, std::string>
+                  second_potentially_similar_variable) {
+            return longest_common_subsequence_length(
+                       first_potentially_similar_variable.first, memberName) <
+                   longest_common_subsequence_length(
+                       second_potentially_similar_variable.first, memberName);
+          });
+      if (most_similar_variable_iterator !=
+              iteratorPointingToTheStructure->memberTypes.end() &&
+          longest_common_subsequence_length(
+              most_similar_variable_iterator->first, memberName)) {
+        std::cerr << "By the way, maybe you meant \""
+                  << most_similar_variable_iterator->first << "\"?"
+                  << std::endl;
+      }
       exit(1);
     }
     return iteratorPointingToTheStructure->memberTypes.at(memberName);
