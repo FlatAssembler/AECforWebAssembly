@@ -401,6 +401,15 @@ it may produce wrong code or crash because of that.)"
         << std::endl;
 }
 
+void testLongestCommonSubsequence() {
+  if (longest_common_subsequence_length("ABCD", "ACBAD") != 3) {
+    std::cerr << "Internal compiler error: The function calculating the "
+                 "longest common subsequence of strings seems not to work!"
+              << std::endl;
+    std::exit(1);
+  }
+}
+
 void runTests() {
   tokenizerTests();
   simpleParserTests();
@@ -411,4 +420,5 @@ void runTests() {
   testTypeChecking();
   testBitManipulations();
   testMaps();
+  testLongestCommonSubsequence();
 }
