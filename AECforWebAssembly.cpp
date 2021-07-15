@@ -69,7 +69,9 @@ npx -p wabt wat2wasm analogClock.wat
 Then you need to write a JavaScript program runnable in NodeJS
 which will invoke that AEC program, an example is available here:
 https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.js?format=raw 
-And then, of course, you can run that program in NodeJS.)"
+And then, of course, you can run that program in NodeJS.
+NodeJS 11 or newer is required because the code this program produces relies
+on "WebAssembly.Global" being available.)"
            << endl;
 #ifdef WIN32
       system("PAUSE");
