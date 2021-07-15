@@ -1045,10 +1045,14 @@ node analogClock
         <span class="inline_code">"^\\d+\\.\\d*$"</span> is of the type
         <span class="inline_code">Decimal64</span> and is also passed unchanged
         to the assembler. Notice that in AEC for WebAssembly,
-        <span class="inline_code">3/2=1</span> (as in C and C++), while, in AEC
-        for x86, <span class="inline_code">3/2=1.5</span> (as in JavaScript).
-        It's hard to tell which approach is better, both can produce
-        hard-to-find bugs.<br />
+        <span class="inline_code">3/2=1</span> (as in C, C++, Java, C#, Rust and
+        Python 2.x), while, in AEC for x86,
+        <span class="inline_code">3/2=1.5</span> (as in JavaScript, PHP, LISP
+        and Python 3.x). It's hard to tell which approach is better, both can
+        produce hard-to-find bugs. The Pascal-like approach of using different
+        operators for integer division and decimal division probably makes the
+        most sense, but it will also undeniably feel alien to most
+        programmers.<br />
         <br /><b id="Variables">Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
@@ -1243,6 +1247,39 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           C++ and JavaScript. They can make code significantly shorter.</del
         >
         (<i>UPDATE on 14/09/2020: They have been implemented.</i>)<br />
+        <b>UPDATE</b> on 15/07/2021: In most programming languages these days,
+        the assignment operator is <span class="inline_code">=</span>, whereas
+        the equality-testing operator is <span class="inline_code">==</span>.
+        The rationale for that, dating back to the C programming language, is
+        that most programs more commonly do variable assignments than they do
+        testing for equality between variables, so that it makes sense to use a
+        shorter operator for a more common operation that is assignment. While
+        that may have made sense back then, I don't think that makes any sense
+        with modern computers. Beginners in programming are in particular often
+        confused by <span class="inline_code">=</span> meaning assignment,
+        rather than something they are used to from mathematics. Also, I believe
+        everybody who has programmed in a C-like language can agree that thing
+        about equality operator being two assignment operators often leads to
+        bugs. Namely, one of the most common errors in C-like languages is that
+        the programmer mistypes
+        <span class="inline_code">if (variable==0)</span> as
+        <span class="inline_code">if (variable=0)</span>, leading to the value
+        in <span class="inline_code">variable</span> being lost and the block of
+        code after that <span class="inline_code">if</span> never being
+        executed. C# attempts to solve that problem by disallowing implicitly
+        converting to the boolean type in the if-conditions, which is an
+        interesting solution, but it often makes the code longer, as well as not
+        addressing the fact that the same problem can happen with boolean
+        variables. So, I think that making
+        <span class="inline_code">:=</span> the assignment operator and
+        <span class="inline_code">=</span> the equality-testing operator is a
+        good choice. The AEC-to-WebAssembly compiler allows whitespace between
+        <span class="inline_code">:</span> and
+        <span class="inline_code">=</span> in the assignment operator
+        <span class="inline_code">:=</span>, so that, when ClangFormat mistakes
+        <span class="inline_code">:</span> for the label-ending sign and puts a
+        whitespace after it, the code does not lose its meaning. I am not sure
+        now whether that was a good choice.<br />
         <br /><b id="Operators">Operators</b><br />
         AEC has the following operators:<br />
         <table>
