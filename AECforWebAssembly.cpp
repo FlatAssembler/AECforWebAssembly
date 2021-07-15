@@ -54,26 +54,22 @@ int main(int argc, char **argv) {
                                // then in a 5'000-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows, from the command line:\n"
-           << argv[0] << " name_of_the_program.aec" << '\n'
-           << "Or, alternatively, open an AEC source code with this program.\n"
-              "For more information, see:\n"
-              "https://flatassembler.github.io/"
-              "AEC_specification.html#HowToCompile \n"
-              "TL;DR\n"
-              "An example AEC program can be downloaded here:\n"
-              "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/"
-              "analogClock/analogClock.aec?format=raw \n"
-              "You need to assemble the result using a program called "
-              "\"wat2wasm\"\n"
-              "from WebAssembly Binary Toolkit, perhaps like this\n"
-              "(if you have NodeJS installed and an Internet connection):\n"
-              "npx -p wabt wat2wasm analogClock.wat\n"
-              "Then you need to write a JavaScript program runnable in NodeJS\n"
-              "which will invoke that AEC program, an example is available "
-              "here:\n"
-              "https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/"
-              "analogClock/analogClock.js?format=raw \n"
-              "And then, of course, you can run that program in NodeJS."
+           << argv[0] << " name_of_the_program.aec"
+           << R"(
+Or, alternatively, open an AEC source code with this program.
+For more information, see:
+https://flatassembler.github.io/AEC_specification#HowToCompile 
+TL;DR
+An example AEC program can be downloaded here:
+https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw 
+You need to assemble the result using a program called "wat2wasm"
+from WebAssembly Binary Toolkit (WABT), perhaps like this
+(if you have NodeJS installed and an Internet connection):
+npx -p wabt wat2wasm analogClock.wat
+Then you need to write a JavaScript program runnable in NodeJS
+which will invoke that AEC program, an example is available here:
+https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.js?format=raw 
+And then, of course, you can run that program in NodeJS.)"
            << endl;
 #ifdef WIN32
       system("PAUSE");
