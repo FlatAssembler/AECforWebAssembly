@@ -96,6 +96,24 @@ bool isComposedOfAlnumsAndOneDot(
   return true;
 }
 
+int longest_common_subsequence_length(std::string first, std::string second) {
+  std::map<int, std::map<int, int>>
+      DP; // There are, of course, faster ways to make multi-dimensional arrays
+          // in C++, but let's not worry about performance of a function that
+          // will be run only upon an error (to suggest a true name of a
+          // misspelled variable name). Still, they are probably all easier than
+          // dealing with multi-dimensional arrays in JavaScript.
+  for (unsigned i = 0; i < first.size(); i++)
+    for (unsigned j = 0; j < second.size(); j++)
+      if (first[i] == second[j])
+        DP[i][j] = DP[i - 1][j - 1] +
+                   1; // Had we used vectors instead of maps, we could not do
+                      // this so simply (What if 'i' or 'j' are zero?).
+      else
+        DP[i][j] = std::max(DP[i - 1][j], DP[i][j - 1]);
+  return DP[first.size() - 1][second.size() - 1];
+}
+
 class TreeNode {
   enum Associativity { left, right };
   static std::vector<TreeNode>

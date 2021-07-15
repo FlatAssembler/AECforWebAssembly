@@ -175,6 +175,32 @@ std::string TreeNode::getType(const CompilationContext context) const {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Compiler error: The variable name \"" << text
               << "\" is not declared!" << std::endl;
+    auto most_similar_variable_iterator = std::max_element(
+        context.variableTypes.begin(), context.variableTypes.end(),
+        [=](const std::pair<std::string, std::string>
+                first_potentially_similar_variable,
+            const std::pair<std::string, std::string>
+                second_potentially_similar_variable) {
+          return longest_common_subsequence_length(
+                     first_potentially_similar_variable.first, text) <
+                 longest_common_subsequence_length(
+                     second_potentially_similar_variable.first, text);
+        });
+    if (most_similar_variable_iterator != context.variableTypes.end() &&
+        longest_common_subsequence_length(most_similar_variable_iterator->first,
+                                          text)) {
+      std::cerr << "By the way, maybe you meant \""
+                << most_similar_variable_iterator->first
+                << "\", declared at the line "
+                << (context.placesOfVariableDeclarations.count(
+                        most_similar_variable_iterator->first)
+                        ? context.placesOfVariableDeclarations.at(
+                              most_similar_variable_iterator->first)
+                        : 0)
+                << " and of the type \""
+                << most_similar_variable_iterator->second << "\""
+                << "? " << std::endl;
+    }
     exit(1);
   }
   if (text == "+" or text == "*" or text == "/") {

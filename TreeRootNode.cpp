@@ -820,6 +820,24 @@ In the meantime, you can try modifying your program to use ")"
                     << "\" hasn't been declared in this scope. Aborting the "
                        "compilation!"
                     << std::endl;
+          auto most_similar_structure_iterator = std::max_element(
+              context.structures.begin(), context.structures.end(),
+              [=](structure first_potentially_similar_structure,
+                  structure second_potentially_similar_structure) {
+                return longest_common_subsequence_length(
+                           first_potentially_similar_structure.name,
+                           structureName.text) <
+                       longest_common_subsequence_length(
+                           second_potentially_similar_structure.name,
+                           structureName.text);
+              });
+          if (most_similar_structure_iterator != context.structures.end() &&
+              longest_common_subsequence_length(
+                  most_similar_structure_iterator->name, structureName.text)) {
+            std::cerr << "By the way, maybe you meant \""
+                      << most_similar_structure_iterator->name << "\"?"
+                      << std::endl;
+          }
           exit(1);
         }
         auto iteratorPointingToTheStructure = std::find_if(

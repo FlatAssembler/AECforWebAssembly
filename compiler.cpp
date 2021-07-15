@@ -422,6 +422,25 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     << nodeWithStructureName.text
                     << "\" is not visible in the current scope. Quitting now!"
                     << std::endl;
+          auto most_similar_structure_iterator = std::max_element(
+              context.structures.begin(), context.structures.end(),
+              [=](const structure first_potentially_similar_structure,
+                  const structure second_potentially_similar_structure) {
+                return longest_common_subsequence_length(
+                           first_potentially_similar_structure.name,
+                           nodeWithStructureName.text) <
+                       longest_common_subsequence_length(
+                           second_potentially_similar_structure.name,
+                           nodeWithStructureName.text);
+              });
+          if (most_similar_structure_iterator != context.structures.end() &&
+              longest_common_subsequence_length(
+                  most_similar_structure_iterator->name,
+                  nodeWithStructureName.text)) {
+            std::cerr << "By the way, maybe you meant \""
+                      << most_similar_structure_iterator->name << "\"?"
+                      << std::endl;
+          }
           exit(1);
         } else if (iteratorPointingToTheStructure == context.structures.end()) {
           std::cerr
