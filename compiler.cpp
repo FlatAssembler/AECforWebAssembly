@@ -438,7 +438,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     Levenstein_distance(
                         first_potentially_similar_structure.name,
                         nodeWithStructureName.text) >
-                    longest_common_subsequence_length(
+                    Levenstein_distance(
                         second_potentially_similar_structure.name,
                         nodeWithStructureName.text);
 #endif
