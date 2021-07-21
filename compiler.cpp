@@ -426,12 +426,22 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               context.structures.begin(), context.structures.end(),
               [=](const structure first_potentially_similar_structure,
                   const structure second_potentially_similar_structure) {
-                return longest_common_subsequence_length(
-                           first_potentially_similar_structure.name,
-                           nodeWithStructureName.text) <
-                       longest_common_subsequence_length(
-                           second_potentially_similar_structure.name,
-                           nodeWithStructureName.text);
+                return
+#ifndef USING_LEVENSTEIN_DISTANCE
+                    longest_common_subsequence_length(
+                        first_potentially_similar_structure.name,
+                        nodeWithStructureName.text) <
+                    longest_common_subsequence_length(
+                        second_potentially_similar_structure.name,
+                        nodeWithStructureName.text);
+#else
+                    Levenstein_distance(
+                        first_potentially_similar_structure.name,
+                        nodeWithStructureName.text) >
+                    longest_common_subsequence_length(
+                        second_potentially_similar_structure.name,
+                        nodeWithStructureName.text);
+#endif
               });
           if (most_similar_structure_iterator != context.structures.end() &&
               longest_common_subsequence_length(

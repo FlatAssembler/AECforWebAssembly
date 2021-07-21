@@ -402,9 +402,20 @@ it may produce wrong code or crash because of that.)"
 }
 
 void testLongestCommonSubsequence() {
-  if (longest_common_subsequence_length("ABCD", "ACBAD") != 3) {
+  if (longest_common_subsequence_length("ABCD", "ACBAD") != 3 ||
+      longest_common_subsequence_length("", "") != 0 ||
+      longest_common_subsequence_length("", "ABC") != 0 ||
+      longest_common_subsequence_length("ABC", "") != 0) {
     std::cerr << "Internal compiler error: The function calculating the "
                  "longest common subsequence of strings seems not to work!"
+              << std::endl;
+    std::exit(1);
+  }
+  if (Levenstein_distance("", "") != 0 || Levenstein_distance("", "ABC") != 3 ||
+      Levenstein_distance("ABC", "") != 3 ||
+      Levenstein_distance("kitten", "sitting") != 3) {
+    std::cerr << "Internal compiler error: The function calculating the "
+                 "Levenstein Distance of strings seems not to work!"
               << std::endl;
     std::exit(1);
   }

@@ -181,10 +181,18 @@ std::string TreeNode::getType(const CompilationContext context) const {
                 first_potentially_similar_variable,
             const std::pair<std::string, std::string>
                 second_potentially_similar_variable) {
-          return longest_common_subsequence_length(
-                     first_potentially_similar_variable.first, text) <
-                 longest_common_subsequence_length(
-                     second_potentially_similar_variable.first, text);
+          return
+#ifndef USING_LEVENSTEIN_DISTANCE
+              longest_common_subsequence_length(
+                  first_potentially_similar_variable.first, text) <
+              longest_common_subsequence_length(
+                  second_potentially_similar_variable.first, text);
+#else
+              Levenstein_distance(first_potentially_similar_variable.first,
+                                  text) >
+              Levenstein_distance(second_potentially_similar_variable.first,
+                                  text);
+#endif
         });
     if (most_similar_variable_iterator != context.variableTypes.end() &&
         longest_common_subsequence_length(most_similar_variable_iterator->first,
@@ -269,10 +277,18 @@ std::string TreeNode::getType(const CompilationContext context) const {
         context.functions.begin(), context.functions.end(),
         [=](const function first_potentially_similar_function,
             const function second_potentially_similar_function) {
-          return longest_common_subsequence_length(
-                     first_potentially_similar_function.name, text) <
-                 longest_common_subsequence_length(
-                     second_potentially_similar_function.name, text);
+          return
+#ifndef USING_LEVENSTEIN_DISTANCE
+              longest_common_subsequence_length(
+                  first_potentially_similar_function.name, text) <
+              longest_common_subsequence_length(
+                  second_potentially_similar_function.name, text);
+#else
+              Levenstein_distance(first_potentially_similar_function.name,
+                                  text) >
+              Levenstein_distance(second_potentially_similar_function.name,
+                                  text);
+#endif
         });
     if (most_similar_function_iterator != context.functions.end() &&
         longest_common_subsequence_length(most_similar_function_iterator->name,
@@ -328,10 +344,18 @@ std::string TreeNode::getType(const CompilationContext context) const {
                   first_potentially_similar_variable,
               const std::pair<std::string, std::string>
                   second_potentially_similar_variable) {
-            return longest_common_subsequence_length(
-                       first_potentially_similar_variable.first, memberName) <
-                   longest_common_subsequence_length(
-                       second_potentially_similar_variable.first, memberName);
+            return
+#ifndef USING_LEVENSTEIN_DISTANCE
+                longest_common_subsequence_length(
+                    first_potentially_similar_variable.first, memberName) <
+                longest_common_subsequence_length(
+                    second_potentially_similar_variable.first, memberName);
+#else
+                Levenstein_distance(first_potentially_similar_variable.first,
+                                    memberName) >
+                Levenstein_distance(second_potentially_similar_variable.first,
+                                    memberName);
+#endif
           });
       if (most_similar_variable_iterator !=
               iteratorPointingToTheStructure->memberTypes.end() &&

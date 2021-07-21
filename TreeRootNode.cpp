@@ -824,12 +824,22 @@ In the meantime, you can try modifying your program to use ")"
               context.structures.begin(), context.structures.end(),
               [=](structure first_potentially_similar_structure,
                   structure second_potentially_similar_structure) {
-                return longest_common_subsequence_length(
-                           first_potentially_similar_structure.name,
-                           structureName.text) <
-                       longest_common_subsequence_length(
-                           second_potentially_similar_structure.name,
-                           structureName.text);
+                return
+#ifndef USING_LEVENSTEIN_DISTANCE
+                    longest_common_subsequence_length(
+                        first_potentially_similar_structure.name,
+                        structureName.text) <
+                    longest_common_subsequence_length(
+                        second_potentially_similar_structure.name,
+                        structureName.text);
+#else
+                    Levenstein_distance(
+                        first_potentially_similar_structure.name,
+                        structureName.text) >
+                    Levenstein_distance(
+                        second_potentially_similar_structure.name,
+                        structureName.text);
+#endif
               });
           if (most_similar_structure_iterator != context.structures.end() &&
               longest_common_subsequence_length(

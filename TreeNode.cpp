@@ -114,6 +114,40 @@ int longest_common_subsequence_length(std::string first, std::string second) {
   return DP[first.size() - 1][second.size() - 1];
 }
 
+int Levenstein_distance(std::string A, std::string B) {
+  // https://discord.com/channels/530598289813536771/847014270922391563/867319320485167115
+  //  |
+  //  V
+  // https://github.com/royalpranjal/Interview-Bit/blob/master/DynamicProgramming/EditDistance.cpp
+  using std::min;
+  using std::vector;
+
+  int row = A.size();
+  int col = B.size();
+
+  vector<vector<int>> temp(row + 1, vector<int>(col + 1));
+
+  for (int i = 0; i < temp.size(); i++) {
+    for (int j = 0; j < temp[0].size(); j++) {
+      if (j == 0) {
+        temp[i][j] = i;
+      } else if (i == 0) {
+        temp[i][j] = j;
+      } else if (A[i - 1] == B[j - 1]) {
+        temp[i][j] = temp[i - 1][j - 1];
+      } else {
+        temp[i][j] = min(temp[i - 1][j - 1], temp[i - 1][j]);
+        temp[i][j] = min(temp[i][j - 1], temp[i][j]);
+        temp[i][j] = temp[i][j] + 1;
+      }
+    }
+  }
+
+  return temp[row][col];
+}
+
+#define USING_LEVENSTEIN_DISTANCE
+
 class TreeNode {
   enum Associativity { left, right };
   static std::vector<TreeNode>
