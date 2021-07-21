@@ -859,11 +859,11 @@ npx -p wabt wat2wasm analogClock.wat
 node analogClock
         </pre>
         Again, if everything is fine, the Analog Clock program should print the
-        current in the terminal. However, in order for this to work, you need to
-        have NodeJS installed, which is often not the case. You also need to
-        have a version of NodeJS newer than one which is usually shipped with
-        Linux, as Debian-like Linux distributions today usually ship with NodeJS
-        10, and CentOS-like distributions with NodeJS 6, and the code my
+        current time in the terminal. However, in order for this to work, you
+        need to have NodeJS installed, which is often not the case. You also
+        need to have a version of NodeJS newer than one which is usually shipped
+        with Linux, as Debian-like Linux distributions today usually ship with
+        NodeJS 10, and CentOS-like distributions with NodeJS 6, and the code my
         compiler generates relies on
         <span class="inline_code">WebAssembly.Global</span> being present, which
         is only true on NodeJS 11 and newer. For the exactly same reason, the
@@ -919,7 +919,20 @@ node analogClock
         dealing with binary files is complicated, and me building an assembler
         for WebAssembly into my compiler (instead of simply outputting assembly)
         would give me a lot of hassle and very little benefit. I hope you
-        understand.<br />A friend I met on Discord called <i>zero9178</i>
+        understand. And, if you are going to try to run the
+        <span class="inline_code">analogClock.html</span> file in a browser,
+        please note it will not work unless you are using a web server such as
+        <span class="inline_code">php -S 127.0.0.1:8080</span>. It has to do
+        with sandboxing and external WebAssembly not being trusted by browsers.
+        If you are running untrusted WebAssembly (not produced by the JavaScript
+        compiler in the browser itself) from your harddrive, the JavaScript
+        Virtual Machine cannot be sandboxed not to read or modify or delete the
+        data on your harddrive. That is why contemporary web-browsers disallow
+        that (just like, when JavaScript was in its infancy, browsers did not
+        allow JavaScript on your harddrive to be run without your explicit
+        permission). If you are running WebAssembly from a web server, it can be
+        sandboxed so that it cannot harm your computer.<br />A friend I met on
+        Discord called <i>zero9178</i>
         <a
           href="https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804"
           >helped me write the CMAKE script</a
@@ -1150,10 +1163,18 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         <span class="inline_code">name_of_the_array</span>, and attempting to
         use <span class="inline_code">name_of_the_array</span> to refer to the
         pointer to the first element of the array (as you can usually do in C or
-        C++) leads to "undeclared variable" error. This can be confusing to
-        those who come from C or C++, but it makes a lot more sense to me. Or,
-        you can make it behave in the C-like manner (if it makes your code
-        shorter) like this (excerpt from the
+        C++) leads to "undeclared variable" error (since the compiler is using
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/644f80b37a6d1233cb6c440aa877504ce9a46a98/TreeNode.cpp#L117"
+          >Levnstein Distance</a
+        >
+        to provide suggestions for misspelled variable names, it will almost
+        certainly suggest you the array name then, with the
+        <span class="inline_code">[</span> at the end, since it will have the
+        Levnstein Distance of <span class="inline_code">1</span>). This can be
+        confusing to those who come from C or C++, but it makes a lot more sense
+        to me. Or, you can make it behave in the C-like manner (if it makes your
+        code shorter) like this (excerpt from the
         <a href="analogClock.html">Analog Clock in AEC</a>):
         <pre>
     Character signature[100] := {0};
