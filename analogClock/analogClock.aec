@@ -40,7 +40,12 @@ EndFunction;
 // logInteger).
 Decimal32 PRECISION : = 512; // So that we can balance between speed and
                              // precision.
-Integer32 USE_WEBASSEMBLY_SQRT_INSTRUCTION : = 1; // When I first ported this program to WebAssembly, I did not know WebAssembly had the instruction for computing the square root, and not just the four basic arithmetic operations. Let us test how fast it is, whether it is any faster than simple binary search I can write myself.
+Integer32 USE_WEBASSEMBLY_SQRT_INSTRUCTION
+    : = 1; // When I first ported this program to WebAssembly, I did not know
+           // WebAssembly had the instruction for computing the square root, and
+           // not just the four basic arithmetic operations. Let us test how
+           // fast it is, whether it is any faster than simple binary search I
+           // can write myself.
 Function ln(Decimal32 x) Which Returns Decimal32 Does {
   // Natural logarithm is the integral of 1/x from 1 to x, highschool math.
   Decimal32 sum : = 0, epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
@@ -68,13 +73,12 @@ Function exp(Decimal32 x) Which Returns Decimal32 Does {
 EndFunction;
 
 Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
-  If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then
-  {
+  If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then {
     Return asm_f32("(f32.sqrt\n"
                    "\t(local.get 0)\n"
                    ")");
   }
-  EndIf
+  EndIf;
   // Binary Search Algorithm...
   Decimal32 max
       : = 80 * 80 + 24 * 24, // This function will be used for calculating the
