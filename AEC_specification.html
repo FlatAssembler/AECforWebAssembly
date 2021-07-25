@@ -493,7 +493,7 @@
       >
       <a href="informatics.html"
         ><div class="link2 link1">
-          <div class="popup">The webpage you are currently browsing.</div>
+          <div class="popup">Why I like computers.</div>
           Informatics
         </div></a
       >
@@ -737,7 +737,7 @@
         <pre class="LinuxShell">
 mkdir ArithmeticExpressionCompiler
 cd ArithmeticExpressionCompiler
-wget https://flatassembler.github.io/Duktape.zip
+wget <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
 unzip Duktape.zip
 gcc -o aec -lm aec.c duktape.c
 ./aec analogClock.aec
@@ -850,7 +850,7 @@ gcc -o analogClock analogClock.s -m32
         Using the AEC-to-WebAssembly compiler is, on most Linux machines, a
         little trickier. The following code might work:
         <pre class="LinuxShell">
-git clone https://github.com/FlatAssembler/AECforWebAssembly.git
+git clone <a href="https://github.com/FlatAssembler/AECforWebAssembly.git">https://github.com/FlatAssembler/AECforWebAssembly.git</a>
 cd AECforWebAssembly
 g++ -std=c++11 -o aec AECforWebAssembly.cpp
 cd analogClock
@@ -1297,10 +1297,11 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         good choice. The AEC-to-WebAssembly compiler allows whitespace between
         <span class="inline_code">:</span> and
         <span class="inline_code">=</span> in the assignment operator
-        <span class="inline_code">:=</span>, so that, when ClangFormat mistakes
-        <span class="inline_code">:</span> for the label-ending sign and puts a
-        whitespace after it, the code does not lose its meaning. I am not sure
-        now whether that was a good choice.<br />
+        <span class="inline_code">:=</span>, so that, when
+        <a href="https://clang.llvm.org/docs/ClangFormat.html">ClangFormat</a>
+        mistakes <span class="inline_code">:</span> for the label-ending sign
+        and puts a whitespace after it, the code does not lose its meaning. I am
+        not sure now whether that was a good choice.<br />
         <br /><b id="Operators">Operators</b><br />
         AEC has the following operators:<br />
         <table>
@@ -1312,42 +1313,63 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
           <tr>
             <td>1</td>
             <td>left</td>
-            <td>. -&gt;</td>
+            <td>
+              <span class="inline_code">.</span>
+              <span class="inline_code">-&gt;</span>
+            </td>
           </tr>
           <tr>
             <td>2</td>
             <td>left</td>
-            <td>* /</td>
+            <td>
+              <span class="inline_code">*</span>
+              <span class="inline_code">/</span>
+            </td>
           </tr>
           <tr>
             <td>3</td>
             <td>left</td>
-            <td>- +</td>
+            <td>
+              <span class="inline_code">-</span>
+              <span class="inline_code">+</span>
+            </td>
           </tr>
           <tr>
             <td>4</td>
             <td>left</td>
-            <td>&lt; &gt; =</td>
+            <td>
+              <span class="inline_code">&lt;</span>
+              <span class="inline_code">&gt;</span>
+              <span class="inline_code">=</span>
+            </td>
           </tr>
           <tr>
             <td>5</td>
             <td>left</td>
-            <td>and (in the x86 dialect: &amp;)</td>
+            <td>
+              <span class="inline_code">and</span> (in the x86 dialect:
+              <span class="inline_code">&amp;</span>)
+            </td>
           </tr>
           <tr>
             <td>6</td>
             <td>left</td>
-            <td>or (in the x86 dialect: |)</td>
+            <td>
+              <span class="inline_code">or</span> (in the x86 dialect:
+              <span class="inline_code">|</span>)
+            </td>
           </tr>
           <tr>
             <td>7</td>
             <td>right</td>
-            <td>?: (ternary conditional operator)</td>
+            <td>
+              <span class="inline_code">?:</span> (ternary conditional operator)
+            </td>
           </tr>
           <tr>
             <td>8</td>
             <td>right</td>
-            <td>:= (assignment operator)</td>
+            <td><span class="inline_code">:=</span> (assignment operator)</td>
           </tr>
         </table>
         <i
@@ -1541,8 +1563,23 @@ EndFunction</pre
         <span class="inline_code">d = 0 ? 0 : n / d</span> (if
         <span class="inline_code">d</span> is equal to zero). There does not
         seem to be a simple solution, given the way my AEC-to-x86 compiler is
-        structured. The AEC-to-WebAssembly compiler does not suffer from that
-        problem.<br />
+        structured. Here is the
+        <a
+          href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/blob/3530fabc2fc403c70cee5d34ad13aafdeeb87f6a/compiler.html#L860"
+          >code with which the ternary operator is implemented in the AEC-to-x86
+          compiler</a
+        >. The AEC-to-WebAssembly compiler is a lot more professionally made (I
+        made the core of it when I was 20, while I made the core of the
+        AEC-to-x86 compiler back when I was 18) and it does not suffer from that
+        problem. It is also easier to implement the ternary operator when
+        targetting WebAssembly than when targetting x86 because WebAssembly
+        itself essentially has the ternary operator just with a different
+        (LISP-like) syntax. Here is
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/38ceebb9ae27a70a6e864a2fe78961fffb5e2fd4/compiler.cpp#L1149"
+          >how I implemented the ternary conditional operator in the
+          AEC-to-WebAssembly compiler</a
+        >.<br />
         <br /><b id="Loops">Loops</b><br />
         For now, there is only one type of loop in AEC, the
         <span class="inline_code">While</span>-loop. A
@@ -1892,6 +1929,60 @@ EndFunction</pre
         (for a good reason).<br />
         <b>TODO</b>: Build some mathematical functions into AEC for
         WebAssembly.<br />
+        <b>UPDATE</b> on 25/07/2021: If you just want to use the square root
+        function in AEC for WebAssembly, you can simply invoke the
+        <span class="inline_code">f64.sqrt</span> or
+        <span class="inline_code">f32.sqrt</span> in inline assembly. It is not
+        recommended to do it because it is supposedly slow (it calculates the
+        square root to maximal possible precision, when usually you just need
+        the first few decimal digits; it was specified in WebAssembly
+        specification only to obey the IEEE754 standard which requires it), but,
+        in the new version of Analog Clock program, I find it fast enough. Here
+        is how the square root function is implemented in the Analog Clock
+        program:
+        <pre>
+Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
+  If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then {
+    Return asm_f32("(f32.sqrt\n"
+                   "\t(local.get 0)\n"
+                   ")");
+  }
+  EndIf;
+  // Binary Search Algorithm...
+  Decimal32 max
+      : = 80 * 80 + 24 * 24, // This function will be used for calculating the
+                             // Euclidean distance between cells in the display
+                             // grid, and there will be 80x24 cells.
+      min : = 0, i : = (min + max) / 2;
+  If(max * max < x) Then // Shouldn't happen, but let's deal with that anyway.
+  {
+    Return exp(
+        ln(x) /
+        2); // Much less precise (and probably slower) than binary search.
+  }
+  EndIf;
+  While((max - min) > 1 / PRECISION) Loop {
+    If(i * i > x) Then {
+      max /*
+           * ClangFormat apparently misinterprets the assignment operator ":="
+           * as the C label marker ':' followed by the C '=' operator,
+           * there doesn't appear to be a simple solution to this problem.
+           */
+          : = i;
+    }
+    Else {
+    min:
+      = i;
+    }
+    EndIf;
+  i:
+    = (max + min) / 2;
+  }
+  EndWhile;
+  Return i;
+}
+EndFunction;
+        </pre>
         <br /><b id="String">String manipulation</b><br />
         AEC for x86 doesn't support string manipulation at all, it doesn't have
         a character type. AEC for WebAssembly is about as good at C manipulation
