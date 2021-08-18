@@ -2,11 +2,9 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     types: [opened, synchronize, reopened]
-  schedule:                # This trigger is here only to make sure
-    - cron: '17 0 * * SUN' # the example itself doesn't become stale
 jobs:
   build:
     name: Build
