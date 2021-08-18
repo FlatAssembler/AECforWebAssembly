@@ -6,6 +6,7 @@
 
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <stdexcept>
 
 std::string getStrongerType(const int lineNumber, const int columnNumber,
                             const std::string firstType,
@@ -263,8 +264,16 @@ std::string TreeNode::getType(const CompilationContext context) const {
   auto potentialFunction =
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function fn) { return fn.name == text; });
-  if (potentialFunction != context.functions.end())
+  if (potentialFunction != context.functions.end()) {
+    for (TreeNode child : children)
+      if (child.text == ":=")
+        throw std::runtime_error("Line " + std::to_string(child.lineNumber) +
+                                 ", Column " +
+                                 std::to_string(child.columnNumber) +
+                                 ": Sorry about that, but this compiler does "
+                                 "not yet support named function arguments!");
     return potentialFunction->returnType;
+  }
   if (text.back() == '(' and
       (basicDataTypeSizes.count(text.substr(0, text.size() - 1)) or
        isPointerType(text.substr(0, text.size() - 1)))) // Casting

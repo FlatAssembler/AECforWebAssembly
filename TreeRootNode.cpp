@@ -6,6 +6,7 @@
 
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <stdexcept>
 
 AssemblyCode
 instantiateGlobalStructure(const structure str, const int offset,
@@ -715,6 +716,12 @@ In the meantime, you can try modifying your program to use ")"
         globalDeclarations += "\t;;Declaring a structure named \"" +
                               currentStructure.name + "\"...\n";
         for (TreeNode typeName : childNode.children[1].children) {
+          if (typeName.text == "Structure")
+            throw std::runtime_error(
+                "Line " + std::to_string(typeName.lineNumber) + ", Column " +
+                std::to_string(typeName.columnNumber) +
+                ": Sorry about that, but this compiler does not support "
+                "nested structures yet!");
           if (!isPointerType(typeName.text) and
               !basicDataTypeSizes.count(typeName.text) and
               !std::count_if(
