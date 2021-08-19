@@ -4,9 +4,9 @@
  * here.
  */
 
+#include "NotImplementedException.cpp"
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
-#include <stdexcept>
 
 std::string getStrongerType(const int lineNumber, const int columnNumber,
                             const std::string firstType,
@@ -267,11 +267,11 @@ std::string TreeNode::getType(const CompilationContext context) const {
   if (potentialFunction != context.functions.end()) {
     for (TreeNode child : children)
       if (child.text == ":=")
-        throw std::runtime_error("Line " + std::to_string(child.lineNumber) +
-                                 ", Column " +
-                                 std::to_string(child.columnNumber) +
-                                 ": Sorry about that, but this compiler does "
-                                 "not yet support named function arguments!");
+        throw NotImplementedException(
+            "Line " + std::to_string(child.lineNumber) + ", Column " +
+            std::to_string(child.columnNumber) +
+            ": Sorry about that, but this compiler does "
+            "not yet support named function arguments!");
     return potentialFunction->returnType;
   }
   if (text.back() == '(' and

@@ -4,9 +4,9 @@
  * to make a special class for it.
  */
 
+#include "NotImplementedException.cpp"
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
-#include <stdexcept>
 
 AssemblyCode
 instantiateGlobalStructure(const structure str, const int offset,
@@ -717,7 +717,7 @@ In the meantime, you can try modifying your program to use ")"
                               currentStructure.name + "\"...\n";
         for (TreeNode typeName : childNode.children[1].children) {
           if (typeName.text == "Structure")
-            throw std::runtime_error(
+            throw NotImplementedException(
                 "Line " + std::to_string(typeName.lineNumber) + ", Column " +
                 std::to_string(typeName.columnNumber) +
                 ": Sorry about that, but this compiler does not support "
