@@ -1,6 +1,6 @@
 # AEC for WebAssembly
 
-![Logo](logo.png)
+![Logo](logo.PNG)
 
 This is my attempt to port the [ArithmeticExpressionCompiler](https://github.com/FlatAssembler/ArithmeticExpressionCompiler) language to WebAssembly (the JavaScript bytecode). The compiler has been rewritten from scratch in C++ (the original compiler was written in a combination of C and JavaScript, using the Duktape framework). Right now, it's <del>about as powerful as</del> more powerful than the original compiler (targeting x86 assembly), as it includes support for more data types, including the support for structures. The specification for the ArithmeticExpressionCompiler language is (hopefully) available on [my website](https://flatassembler.github.io/AEC_specification.html).
 
