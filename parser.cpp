@@ -16,6 +16,10 @@
 #include <algorithm>
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
 
+// TODO: Refactor the parser so that it is more legible. Perhaps we can start by
+// moving functions that deal with the details, such as "applyBinaryOperators",
+// to the end instead of to beginning.
+
 std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                std::vector<std::string> operators,
@@ -60,14 +64,14 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
       input[i].children.push_back(input.at(i + 1));
       input.erase(input.begin() + i + 1);
       input.erase(input.begin() + i - 1);
-      i += associativity == left ? -1 : 0;
+      i += associativity == Associativity::left ? -1 : 0;
     }
   };
   // https://discord.com/channels/172018499005317120/258361499519549440/811664251789639740
-  if (associativity == left)
+  if (associativity == Associativity::left)
     for (int i = 0; i < int(input.size()); i++)
       loop_body(i);
-  else if (associativity == right)
+  else if (associativity == Associativity::right)
     for (int i = input.size() - 1; i >= 0; i--)
       loop_body(i);
   else {
@@ -893,6 +897,13 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       }
       auto iteratorPointingToTheEndStructureToken =
           std::find_if(input.begin() + i + 1, input.end(), [](TreeNode node) {
+            if (node.text == "Structure")
+              std::cerr << "Line " << node.lineNumber << ", Column "
+                        << node.columnNumber
+                        << ", Parser error: The parser does not yet support "
+                           "nested structures, so the syntax tree given to the "
+                           "semantic analyzer will probably be corrupt!"
+                        << std::endl;
             return node.text == "EndStructure";
           }); // TODO: Deal with nested structures. As it is now,
               // "iteratorPointingToTheEndStructureToken" will point to an

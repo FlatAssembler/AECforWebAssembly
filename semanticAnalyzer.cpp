@@ -271,7 +271,9 @@ std::string TreeNode::getType(const CompilationContext context) const {
             "Line " + std::to_string(child.lineNumber) + ", Column " +
             std::to_string(child.columnNumber) +
             ": Sorry about that, but this compiler does "
-            "not yet support named function arguments!");
+            "not yet support named function arguments!"); // TODO: Implement
+                                                          // named function
+                                                          // arguments.
     return potentialFunction->returnType;
   }
   if (text.back() == '(' and

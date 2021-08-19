@@ -149,7 +149,7 @@ int Levenstein_distance(std::string A, std::string B) {
 #define USING_LEVENSTEIN_DISTANCE
 
 class TreeNode {
-  enum Associativity { left, right };
+  enum class Associativity { left, right };
   static std::vector<TreeNode>
   applyBinaryOperators(std::vector<TreeNode> input,
                        std::vector<std::string> operators,
@@ -178,12 +178,15 @@ protected:
   }
 
 public:
-  std::map<std::string, int> basicDataTypeSizes;
-  std::map<std::string, AssemblyCode::AssemblyType>
+  // HappySkeptic suggested me to try to make shared parts of TreeNode static to
+  // save on stack memory:
+  // https://atheistforums.org/thread-63150-post-2053689.html#pid2053689
+  static std::map<std::string, int> basicDataTypeSizes;
+  static std::map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
-  std::map<AssemblyCode::AssemblyType, std::string>
+  static std::map<AssemblyCode::AssemblyType, std::string>
       stringRepresentationOfWebAssemblyType;
-  std::set<std::string> AECkeywords;
+  static std::set<std::string> AECkeywords;
   std::vector<TreeNode> children;
   std::string text;
   int lineNumber, columnNumber;
@@ -475,3 +478,10 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   inlineAssembly = temporaryString;
   return inlineAssembly;
 }
+
+std::map<std::string, int> TreeNode::basicDataTypeSizes;
+std::map<std::string, AssemblyCode::AssemblyType>
+    TreeNode::mappingOfAECTypesToWebAssemblyTypes;
+std::map<AssemblyCode::AssemblyType, std::string>
+    TreeNode::stringRepresentationOfWebAssemblyType;
+std::set<std::string> TreeNode::AECkeywords;
