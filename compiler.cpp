@@ -12,8 +12,12 @@
 #include "semanticAnalyzer.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
 
-AssemblyCode convertToInteger32(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToInteger32(
+    const TreeNode &
+        node, // HappySkeptic suggested me to use constant references to avoid
+              // Stack Overflow:
+              // https://atheistforums.org/thread-63150-post-2054368.html#pid2054368
+    const CompilationContext &context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -54,8 +58,8 @@ AssemblyCode convertToInteger32(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToInteger64(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToInteger64(const TreeNode &node,
+                                const CompilationContext &context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -99,8 +103,8 @@ AssemblyCode convertToInteger64(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal32(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToDecimal32(const TreeNode &node,
+                                const CompilationContext &context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -144,8 +148,8 @@ AssemblyCode convertToDecimal32(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertToDecimal64(const TreeNode node,
-                                const CompilationContext context) {
+AssemblyCode convertToDecimal64(const TreeNode &node,
+                                const CompilationContext &context) {
   auto originalCode = node.compile(context);
   const AssemblyCode::AssemblyType i32 = AssemblyCode::AssemblyType::i32,
                                    i64 = AssemblyCode::AssemblyType::i64,
@@ -185,8 +189,8 @@ AssemblyCode convertToDecimal64(const TreeNode node,
   return AssemblyCode("()");
 }
 
-AssemblyCode convertTo(const TreeNode node, const std::string type,
-                       const CompilationContext context) {
+AssemblyCode convertTo(const TreeNode &node, const std::string &type,
+                       const CompilationContext &context) {
   if (type == "Character" or type == "Integer16" or type == "Integer32" or
       isPointerType(type)) // When, in JavaScript Virtual Machine, you can't
                            // push types of less than 4 bytes (32 bits) onto
@@ -1287,13 +1291,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   return AssemblyCode(assembly, returnType);
 }
 
-AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
+AssemblyCode
+TreeNode::compileAPointer(const CompilationContext &context) const {
   if (text == "ValueAt(")
     return children[0].compile(context);
   if (context.localVariables.count(text) and text.back() != '[')
     return AssemblyCode(
         "(i32.sub\n\t(global.get $stack_pointer)\n\t(i32.const " +
-            std::to_string(context.localVariables[text]) + ") ;;" + text +
+            std::to_string(context.localVariables.at(text)) + ") ;;" + text +
             "\n)",
         AssemblyCode::AssemblyType::i32);
   if (context.localVariables.count(text) and text.back() == '[') {
@@ -1309,7 +1314,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
     return AssemblyCode(
         "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
-            std::to_string(context.localVariables[text]) + ") ;;" + text +
+            std::to_string(context.localVariables.at(text)) + ") ;;" + text +
             "\n\t)\n\t(i32.mul\n\t\t(i32.const " +
             std::to_string(basicDataTypeSizes.count(getType(context))
                                ? basicDataTypeSizes.at(getType(context))
@@ -1321,7 +1326,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
   }
   if (context.globalVariables.count(text) and text.back() != '[')
     return AssemblyCode("(i32.const " +
-                            std::to_string(context.globalVariables[text]) +
+                            std::to_string(context.globalVariables.at(text)) +
                             ") ;;" + text,
                         AssemblyCode::AssemblyType::i32);
   if (context.globalVariables.count(text) and text.back() == '[') {
@@ -1336,7 +1341,7 @@ AssemblyCode TreeNode::compileAPointer(CompilationContext context) const {
     }
     return AssemblyCode(
         "(i32.add\n\t(i32.const " +
-            std::to_string(context.globalVariables[text]) + ") ;;" + text +
+            std::to_string(context.globalVariables.at(text)) + ") ;;" + text +
             "\n\t(i32.mul\n\t\t(i32.const " +
             std::to_string(basicDataTypeSizes.count(getType(context))
                                ? basicDataTypeSizes.at(getType(context))

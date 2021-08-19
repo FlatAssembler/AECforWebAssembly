@@ -930,10 +930,13 @@ In the meantime, you can try modifying your program to use ")"
         "()"); // So that the compiler doesn't throw a bunch of warnings about
                // the control reaching the end of a non-void function.
   }
-  AssemblyCode compileAPointer(CompilationContext context) const override {
-    context.stackSizeOfThisFunction = 0;
+  AssemblyCode
+  compileAPointer(const CompilationContext &context) const override {
     std::cerr << "Internal compiler error: Some part of the compiler attempted "
-                 "to get the assembly of the pointer of a module, which "
+                 "to get the assembly of the pointer of a module, when "
+                 "compiling a function named\""
+              << context.currentFunctionName
+              << "\", which "
                  "doesn't make sense. Quitting now!"
               << std::endl;
     exit(1);
