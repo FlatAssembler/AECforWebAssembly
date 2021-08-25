@@ -34,4 +34,51 @@ Function namedArgumentsTest() Which Returns Integer32 Does
   Return solution[0].firstSolution.imaginary = 0 and solution[0].secondSolution.imaginary = 0 and abs(solution[0].firstSolution.real + 0.618) < 0.01 and abs(solution[0].secondSolution.real - 1.618) < 0.01;
 EndFunction
 
-//TODO: Implement those helper functions...
+Function abs(Decimal32 x) Which Returns Decimal32 Does
+  Return x < 0 ? -x : x;
+EndFunction
+
+Function areStructuresEqual(CharacterPointer first, CharacterPointer second, Integer32 size) Which Returns Integer32 Does
+  Integer32 i := 0;
+  While i < size Loop
+    If not(ValueAt(first + i) = ValueAt(second + i)) Then
+      Return 0;
+    EndIf
+    i += 1;
+  EndWhile
+  Return 1;
+EndFunction
+
+Function sqrt(Decimal32 realNumber, ComplexNumberPointer result) Which Returns Nothing Is Declared;
+
+Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c, QuadraticEquationSolutionPointer solution) Which Returns Nothing Does
+  solution->firstSolution.real := -b;
+  solution->firstSolution.imaginary := 0;
+  solution->secondSolution := solution.firstSolution;
+  InstantiateStructure ComplexNumber rootOfDiscriminant;
+  sqrt(b*b - 4*a*c, AddressOf(rootOfDiscriminant);
+  solution->firstSolution.real += rootOfDiscriminant.real;
+  solution->firstSolution.imaginary += rootOfDiscriminant.imaginary;
+  solution->secondSolution.real -= rootOfDiscriminant.real;
+  solution->secondSolution.imaginary -= rootOfDiscriminant.imaginary;
+  solution->firstSolution.real /= 2*a;
+  solution->firstSolution.imaginary /= 2*a;
+  solution->secondSolution.real /= 2*a;
+  solution->secondSolution.imaginary /= 2*a;
+EndFunction
+
+Function sqrt(Decimal32 x, ComplexNumberPointer result) Which Returns Nothing Does
+  If x < 0 Then
+    result->real := 0;
+    result->imaginary := asm_f32("(f32.sqrt\n"
+                                 "\t(f32.sub\n"
+                                 "\t\t(f32.const 0)\n
+                                 "\t\t(local.get 0)\n"
+                                 "\t)\n"
+                                 ")");
+  Else
+    result->real := asm_f32("(f32.sqrt\n"
+                            "\t(local.get 0)\n"
+                            ")");
+  EndIf
+EndFunction
