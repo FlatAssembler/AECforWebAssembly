@@ -80,5 +80,6 @@ Function sqrt(Decimal32 x, ComplexNumberPointer result) Which Returns Nothing Do
     result->real := asm_f32("(f32.sqrt\n"
                             "\t(local.get 0)\n"
                             ")");
+    result->imaginary := 0;
   EndIf
 EndFunction
