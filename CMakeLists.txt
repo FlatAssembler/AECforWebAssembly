@@ -1,6 +1,6 @@
 # https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804
 cmake_minimum_required(VERSION 3.10)
-project(AECForWebAssembly VERSION 1.5.4)
+project(AECForWebAssembly VERSION 1.7)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -37,5 +37,12 @@ add_test(NAME structureDeclarationTestAssembles
 add_test(NAME structureDeclarationTestRuns
 	      COMMAND node structureDeclarationTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-# TODO: Test coverage is far from complete. For example, the if-branching is
-# not being tested at all.
+add_test(NAME namedArgumentsTestCompiles
+	      COMMAND aec namedArgumentsTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME namedArgumentsTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm namedArgumentsTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME namedArgumentsTestRuns
+	      COMMAND node namedArgumentsTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
