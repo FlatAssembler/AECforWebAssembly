@@ -1,0 +1,37 @@
+/*
+ * This is a test whether the compiler properly supports named function parameters (arguments),
+ * so that arguments of functions do not always need to be written in the same order.
+ */
+
+Structure ComplexNumber Consists Of
+  Decimal32 real, imaginary;
+EndStructure
+
+Structure QuadraticEquationSolution Consists Of
+  ComplexNumber firstSolution, secondSolution;
+EndStructure
+
+Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c, QuadraticEquationSolutionPointer solution) Which Returns Nothing Is Declared;
+Function abs(Decimal32 x) Which Returns Decimal32 Is Declared;
+Function areStructuresEqual(NothingPointer first, NothingPointer second, Integer32 sizeOfStructuresInBytes) Which Returns Integer32 Is Declared;
+
+// Should return 1.
+Function namedArgumentsTest() Which Returns Integer32 Does
+  InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];
+  solveQuadraticEquation(a := 1, b := -1, c := -1, AddressOf(solution[0]));
+  solveQuadraticEquation(a := 1, c := -1, b := -1, AddressOf(solution[1]));
+  solveQuadraticEquation(b := -1, a := 1, c := -1, AddressOf(solution[2]));
+  solveQuadraticEquation(b := -1, c := -1, a := 1, AddressOf(solution[3]));
+  solveQuadraticEquation(c := -1, a := 1, b := -1, AddressOf(solution[4]));
+  solveQuadraticEquation(c := -1, b := -1, a := 1, AddressOf(solution[3]));
+  Integer32 iterator := 0;
+  While iterator < 1 * 2 * 3 - 1 Loop
+    If not(areStructuresEqual(AddressOf(solution[i]), AddressOf(solution[i + 1]), SizeOf(QuadraticEquationSolution))) Then
+      Return 0;
+    EndIf
+    iterator += 1;
+  EndWhile
+  Return solution[0].firstSolution.imaginary = 0 and solution[0].secondSolution.imaginary = 0 and abs(solution[0].firstSolution.real + 0.618) < 0.01 and abs(solution[0].secondSolution.real - 1.618) < 0.01;
+EndFunction
+
+//TODO: Implement those helper functions...
