@@ -1232,7 +1232,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           while (indexOfTheNamedArgument <
                  functionToBeCalled.argumentNames.size()) {
             if (functionToBeCalled.argumentNames.at(indexOfTheNamedArgument) ==
-                children.at(indexOfTheNamedArgument).children.at(0).text)
+                children.at(i).children.at(0).text)
               break;
             indexOfTheNamedArgument++;
           }
@@ -1256,7 +1256,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               else
                 std::cerr << "\"" << functionToBeCalled.argumentNames[i]
                           << "\",";
-            std::cerr << "Quitting now!" << endl;
+            std::cerr << "Quitting now!" << std::endl;
             exit(1);
           }
           formWithoutNamedArguments.children[indexOfTheNamedArgument] =
