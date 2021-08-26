@@ -39,7 +39,7 @@ Function namedArgumentsTest() Which Returns Integer32 Does
   solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
   solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
   solveQuadraticEquation(c := -1, a := 1 , b := -1, AddressOf(solution[4]));
-  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[3]));
+  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[5]));
   Integer32 iterator := 0;
   While iterator < 1 * 2 * 3 - 1 Loop
     If not(areStructuresEqual(AddressOf(solution[iterator]),

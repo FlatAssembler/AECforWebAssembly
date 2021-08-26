@@ -1263,6 +1263,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               children[i].children[1];
         }
       }
+      assembly += ";; Compiling function with named arguments as if it were: " +
+                  formWithoutNamedArguments.getLispExpression() + "\n";
       assembly += formWithoutNamedArguments.compile(context);
     } else { // If arguments are not named.
 #endif
@@ -1282,6 +1284,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           exit(1);
         }
         assembly +=
+            ";;Compiling the function argument " +
+            children[i].getLispExpression() + "\n" +
             convertTo(children[i], functionToBeCalled.argumentTypes[i], context)
                 .indentBy(1) +
             "\n";
@@ -1303,6 +1307,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                             // while C++ refuses to compile a program then. I
                             // suppose I should take a middle ground here.
         assembly +=
+            ";;Compiling the default value of the function argument \"" +
+            functionToBeCalled.argumentNames[i] + "\", that is " +
+            std::to_string(functionToBeCalled.defaultArgumentValues[i]) +
+            ".\n" +
             convertTo(TreeNode(std::to_string(
                                    functionToBeCalled.defaultArgumentValues[i]),
                                lineNumber, columnNumber),
