@@ -103,8 +103,8 @@ int longest_common_subsequence_length(std::string first, std::string second) {
           // will be run only upon an error (to suggest a true name of a
           // misspelled variable name). Still, they are probably all easier than
           // dealing with multi-dimensional arrays in JavaScript.
-  for (unsigned i = 0; i < first.size(); i++)
-    for (unsigned j = 0; j < second.size(); j++)
+  for (size_t i = 0; i < first.size(); i++)
+    for (size_t j = 0; j < second.size(); j++)
       if (first[i] == second[j])
         DP[i][j] = DP[i - 1][j - 1] +
                    1; // Had we used vectors instead of maps, we could not do
