@@ -20,8 +20,9 @@ struct AssemblyCode {
     f64,
     null
   } assemblyType =
-      null; // Those are actual types from WebAssembly (they obviously don't
-            // correspond to the JavaScript types, for some reason).
+      AssemblyType::null; // Those are actual types from WebAssembly (they
+                          // obviously don't correspond to the JavaScript types,
+                          // for some reason).
   std::string code;
   AssemblyCode &indentBy(int numberOfTabs) {
     std::vector<std::string> tokenized;
@@ -45,7 +46,7 @@ struct AssemblyCode {
       code = code.substr(0, code.size() - 1);
     return *this;
   }
-  AssemblyCode(std::string code, AssemblyType type = null) {
+  AssemblyCode(std::string code, AssemblyType type = AssemblyType::null) {
     this->code = code;
     assemblyType = type;
   }
