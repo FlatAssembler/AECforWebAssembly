@@ -320,7 +320,12 @@
         id="naslov"
       >
         <div
-          style="position: relative; top: 50%; transform: translate(0, -50%)"
+          style="
+            position: relative;
+            top: 50%;
+            -webkit-transform: translate(0, -50%);
+            transform: translate(0, -50%);
+          "
           id="titleContainer"
         >
           AEC specification
@@ -1524,7 +1529,7 @@ EndFunction</pre
         for WebAssembly):
         <pre>
 Function signum(Integer32 number) Which Returns Integer32 Does
-    /* 
+    /*
      * The ternary conditional operator "?:" is right-associative,
      * as it is in C, C++ and JavaScript (unlike in PHP), which
      * makes it easy to abbreviate else-if statements using it.
@@ -1711,10 +1716,50 @@ EndFunction</pre
         ><br />
         <b>TODO</b>: Find a way to implement circularly dependent functions,
         and, if possible, function hoisting. Also, implement function pointers.
-        Named function arguments (using, for example, the
-        <span class="inline_code">:=</span> operator) might also come useful (in
-        languages with them, there is basically no need for the abstract
-        builders and directors).<br />
+        <del
+          >Named function arguments (using, for example, the
+          <span class="inline_code">:=</span> operator) might also come useful
+          (in languages with them, there is basically no need for the abstract
+          builders and directors).</del
+        ><br />
+        <b>UPDATE</b> on 26/08/2021: I have implemented named function
+        arguments, as illustrated by the
+        <a href="namedArgumentsTest.aec.html">Named Arguments Test</a>:
+        <pre>
+// Should return 0.
+Function namedArgumentsTest() Which Returns Integer32 Does
+  solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
+  solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
+  solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
+  solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
+  solveQuadraticEquation(c := -1, a := 1 , b := -1, AddressOf(solution[4]));
+  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[5]));
+  Integer32 iterator := 0;
+  While iterator < 1*2*3 - 1 Loop
+    If not(areStructuresEqual(AddressOf(solution[iterator]),
+                              AddressOf(solution[iterator + 1]),
+                              SizeOf(QuadraticEquationSolution))) Then
+      Return iterator + 1;
+    EndIf
+    iterator += 1;
+  EndWhile
+  If not(solution[0].firstSolution.imaginary = 0 and
+         solution[0].secondSolution.imaginary = 0 and
+         abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
+         abs(solution[0].secondSolution.real - goldenRatio) < epsilon) Then
+    printFloat32(solution[0].firstSolution.real);
+    printFloat32(solution[0].firstSolution.imaginary);
+    printFloat32(solution[0].secondSolution.real);
+    printFloat32(solution[0].secondSolution.imaginary);
+    Return 7;
+  EndIf
+  Return 0;
+EndFunction
+        </pre>
+        So, named function arguments are using the
+        <span class="inline_code">:=</span> operator, the same as the
+        assignment. I think that makes a lot of sense.
+        <br />
         <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
         <pre>
@@ -1834,7 +1879,7 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                 //na&#269;in rada, ali nadam se da to nitko ne&#263;e napraviti.
                 //Vjerojatnost da &#263;e JavaScript virtualnoj ma&#353;ini trebati
                 //vi&#353;e nego 4GB RAM-a je zanemariva, a vjerojatnost da &#263;e
-                //se neki korisni programi sru&#353;iti zbog prebacivanja u 
+                //se neki korisni programi sru&#353;iti zbog prebacivanja u
                 //64-bitni na&#269;in rada nije ba&#353; zanemariva.
                 ("(memory.grow\n"
                 "\t(local.get 0)\n" //Prvi (nulti) argument funkcije,
@@ -1894,10 +1939,10 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does
             Return -sqrt(1 - sinOfDegreesMinus90 * sinOfDegreesMinus90);
         EndIf
     EndIf
-    /* 
+    /*
      * Sine and cosine are defined in Mathematics 2 using the system of
      * equations (Cauchy system):
-     * 
+     *
      * sin(0)=0
      * cos(0)=1
      * sin'(x)=cos(x)
