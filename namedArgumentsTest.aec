@@ -4,7 +4,7 @@
  * need to be written in the same order.
  */
 
-#target WASI
+#target WASI //Will make JavaScript a bit shorter.
 
 Structure ComplexNumber Consists Of
   Decimal32 real, imaginary;
@@ -32,6 +32,15 @@ InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
  *       it is an array of nested structures.
  */
 
+Function printFloat32(Decimal32 x) Which Returns Nothing Is Declared;
+/*
+ * We cannot make it external because we are not actually using WASI, and the
+ * compiler thinks we are, and will output code that will not run in NodeJS.
+ * Therefore, we need to import the function from JavaScript manually in
+ * inline assembly. Not hard, fortunately.
+ */
+asm("(func $printFloat32 (import \"JavaScript\" \"printFloat32\") (param f32))");
+
 // Should return 0.
 Function namedArgumentsTest() Which Returns Integer32 Does
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
@@ -53,6 +62,10 @@ Function namedArgumentsTest() Which Returns Integer32 Does
          solution[0].secondSolution.imaginary = 0 and
          abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
          abs(solution[0].secondSolution.real - goldenRatio) < epsilon) Then
+    printFloat32(solution[0].firstSolution.real);
+    printFloat32(solution[0].firstSolution.imaginary);
+    printFloat32(solution[0].secondSolution.real);
+    printFloat32(solution[0].secondSolution.imaginary);
     Return 7;
   EndIf
   Return 0;
@@ -85,10 +98,10 @@ Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c,
   solution->secondSolution := solution->firstSolution;
   InstantiateStructure ComplexNumber rootOfDiscriminant;
   sqrt(b*b - 4*a*c, AddressOf(rootOfDiscriminant));
-  solution->firstSolution.real += rootOfDiscriminant.real;
-  solution->firstSolution.imaginary += rootOfDiscriminant.imaginary;
-  solution->secondSolution.real -= rootOfDiscriminant.real;
-  solution->secondSolution.imaginary -= rootOfDiscriminant.imaginary;
+  solution->firstSolution.real -= rootOfDiscriminant.real;
+  solution->firstSolution.imaginary -= rootOfDiscriminant.imaginary;
+  solution->secondSolution.real += rootOfDiscriminant.real;
+  solution->secondSolution.imaginary += rootOfDiscriminant.imaginary;
   solution->firstSolution.real /= 2*a;
   solution->firstSolution.imaginary /= 2*a;
   solution->secondSolution.real /= 2*a;
