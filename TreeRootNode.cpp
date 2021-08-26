@@ -31,7 +31,7 @@ instantiateGlobalStructure(const structure str, const int offset,
                   << "\", but that structure is not present in the compilation "
                      "context. Quitting now before segfaulting!"
                   << std::endl;
-        exit(1);
+        throw std::runtime_error("Compilation context is corrupt!");
       }
       for (unsigned arrayIndex = 0; arrayIndex < str.arraySize.at(memberName);
            arrayIndex++)
@@ -142,7 +142,7 @@ public:
     } else if (compilation_target == "WASI")
       globalDeclarations +=
           R"(
-  ;;Since we are targeting WASI, we must not declare anything (memory nor stack pointer) before all imports are over. 
+  ;;Since we are targeting WASI, we must not declare anything (memory nor stack pointer) before all imports are over.
 )";
     else {
       std::cerr << "Internal Compiler Error: The current compilation target is "
@@ -152,7 +152,7 @@ public:
                    "now, or else we will produce invalid assembly (or, perhaps "
                    "even more likely, crash)."
                 << std::endl;
-      std::exit(1);
+      throw std::runtime_error("Invalid compilation target!");
     }
     auto allTheStrings = getStringsInSubnodes();
     for (auto string : allTheStrings) {
@@ -295,7 +295,7 @@ public:
                             << ", Internal compiler error: Compiler got into a "
                                "forbidden state!"
                             << std::endl;
-                  exit(1);
+                  throw std::runtime_error("Invalid typename!");
                 }
                 address += basicDataTypeSizes.at(childNode.text);
               }
@@ -320,7 +320,8 @@ public:
                              "being compiled. Aborting the compilation before "
                              "std::map throws exception."
                           << std::endl;
-                exit(1);
+                throw std::runtime_error(
+                    "String constant appears to be undeclared!");
               }
               globalDeclarations +=
                   "\t(data 0 (i32.const " +
@@ -386,7 +387,7 @@ public:
                           << ", Internal compiler error: Compiler got into a "
                              "forbidden state!"
                           << std::endl;
-                exit(1);
+                throw std::runtime_error("Invalid typename!");
               }
             }
           }
@@ -536,7 +537,7 @@ public:
 https://www.forum.hr/showthread.php?t=1243515
 In the meantime, you can try modifying your program to use ")"
                   << argumentType << R"(Pointer" instead.)" << std::endl;
-              exit(1);
+              throw NotImplementedException("Custom argument types.");
             } else
               globalDeclarations +=
                   "(param " +
@@ -589,7 +590,7 @@ https://www.reddit.com/r/WebAssembly/comments/j24p4z/how_to_compile_returning_a_
 In the meantime, you can try modifying your program to use ")"
                     << functionDeclaration.returnType << R"(Pointer" instead.)"
                     << std::endl;
-                exit(1);
+                throw NotImplementedException("Custom return types.");
               }
               globalDeclarations += "(result " +
                                     stringRepresentationOfWebAssemblyType.at(
@@ -632,7 +633,7 @@ In the meantime, you can try modifying your program to use ")"
                            "forbidden state, quitting now so that the compiler "
                            "doesn't segfault!"
                         << std::endl;
-              exit(1);
+              throw std::runtime_error("Invalid typename!");
             }
             globalDeclarations +=
                 "\n" +
@@ -669,7 +670,7 @@ In the meantime, you can try modifying your program to use ")"
                     << ", Internal compiler error: The compiler got into a "
                        "forbidden state, quitting now before segfaulting!"
                     << std::endl;
-          exit(1);
+          throw std::runtime_error("Corrupt AST");
         }
       } else if (childNode.text == "asm(") {
         if (childNode.children.size() != 1) {
@@ -925,7 +926,7 @@ In the meantime, you can try modifying your program to use ")"
                  "to recursively call the compiler from the beginning (leading "
                  "to an infinite loop), quitting now!"
               << std::endl;
-    exit(1);
+    throw std::runtime_error("Infinite loop detected!");
     return AssemblyCode(
         "()"); // So that the compiler doesn't throw a bunch of warnings about
                // the control reaching the end of a non-void function.
@@ -939,7 +940,7 @@ In the meantime, you can try modifying your program to use ")"
               << "\", which "
                  "doesn't make sense. Quitting now!"
               << std::endl;
-    exit(1);
+    throw std::runtime_error("Infinite loop detected!");
     return AssemblyCode("()");
   }
   int interpretAsACompileTimeIntegerConstant() const override {

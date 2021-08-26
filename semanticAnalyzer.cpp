@@ -122,7 +122,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
               << " is being attempted to compile before the string itself has "
                  "been compiled, aborting the compilation!"
               << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        "String constant appears to be an undeclared variable!");
   }
   if (text == "and" or text == "or" or text == "<" or text == ">" or
       text == "=" or text == "not(" or text == "invertBits(") {

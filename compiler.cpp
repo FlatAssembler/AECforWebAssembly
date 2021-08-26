@@ -54,7 +54,7 @@ AssemblyCode convertToInteger32(
             << ", Compiler error: Internal compiler error, control reached the "
                "end of the \"convertToInteger32\" function!"
             << std::endl;
-  exit(-1);
+  throw std::runtime_error("Logic error in \"convertToInteger32\"");
   return AssemblyCode("()");
 }
 
@@ -99,7 +99,7 @@ AssemblyCode convertToInteger64(const TreeNode &node,
             << ", Compiler error: Internal compiler error, control reached the "
                "end of the \"convertToInteger64\" function!"
             << std::endl;
-  exit(-1);
+  throw std::runtime_error("Logic error in \"convertToInteger64\"");
   return AssemblyCode("()");
 }
 
@@ -144,7 +144,7 @@ AssemblyCode convertToDecimal32(const TreeNode &node,
             << ", Compiler error: Internal compiler error, control reached the "
                "end of the \"convertToDecimal32\" function!"
             << std::endl;
-  exit(-1);
+  throw std::runtime_error("Logic error in \"convertToDecimal32\"");
   return AssemblyCode("()");
 }
 
@@ -185,7 +185,7 @@ AssemblyCode convertToDecimal64(const TreeNode &node,
             << ", Compiler error: Internal compiler error, control reached the "
                "end of the \"convertToDecimal64\" function!"
             << std::endl;
-  exit(-1);
+  throw std::runtime_error("Logic error in \"convertToDecimal64\"");
   return AssemblyCode("()");
 }
 
@@ -232,7 +232,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << typeOfTheCurrentNode
           << "\", which is an invalid name of type. It's for the node with AST "
           << getLispExpression() << ". Aborting the compilation!" << std::endl;
-      exit(1);
+      throw std::runtime_error("Invalid typename!");
     }
     returnType = mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   }
@@ -248,7 +248,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
            "function was called without setting the current function name, "
            "aborting compilation (or else the compiler will segfault)!"
         << std::endl;
-    exit(1);
+    throw std::runtime_error("Context of the compilation is corrupt!");
   }
   function currentFunction = *iteratorOfTheCurrentFunction;
   std::string assembly;
@@ -465,7 +465,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               << nodeWithStructureName.text
               << "\" isn't visible, but its size is. Aborting the compilation!"
               << std::endl;
-          exit(1);
+          throw std::runtime_error("Corrupt compilation context!");
         } else if (!context.structureSizes.count(nodeWithStructureName.text)) {
           std::cerr
               << "Line " << nodeWithStructureName.lineNumber << ", Column "
@@ -475,7 +475,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               << nodeWithStructureName.text
               << "\" is visible, but its size isn't. Aborting the compilation!"
               << std::endl;
-          exit(1);
+          throw std::runtime_error("Corrupt compilation context!");
         }
         for (TreeNode instanceName : nodeWithStructureName.children) {
           if (!isValidVariableName(instanceName.text) ||
@@ -808,7 +808,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << ", Internal compiler error: Compiler got into a forbidden "
                    "state while compiling the token \""
                 << text << "\", aborting the compilation!" << std::endl;
-      exit(1);
+      throw std::runtime_error("Invalid typename!");
     }
   } else if (text == ":=") {
     TreeNode rightSide;
@@ -861,7 +861,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << ", Internal compiler error: The compiler got into a "
                    "forbidden state while compiling the token \""
                 << text << "\", aborting the compilation!" << std::endl;
-      exit(1);
+      throw std::runtime_error("Invalid name of type!");
     }
     if (isPointerType(typeOfTheCurrentNode) and
         !isPointerType(rightSide.getType(context)))
@@ -1034,7 +1034,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << "\" is not specified in the compilation context. Aborting "
                      "before we segfault."
                   << std::endl;
-        std::exit(1);
+        throw std::runtime_error("Compilation context is corrupt");
       }
       TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
       sizeOfNode.children.push_back(
@@ -1077,7 +1077,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << "\" is not specified in the compilation context. Aborting "
                      "before we segfault."
                   << std::endl;
-        std::exit(1);
+        throw std::runtime_error("Compilation context is corrupt");
       }
       TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
       sizeOfNode.children.push_back(
@@ -1351,7 +1351,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << ", Internal compiler error: The compiler got into a "
                    "forbidden state while compiling \"ValueAt\", aborting!"
                 << std::endl;
-      exit(1);
+      throw std::runtime_error("Invalid typename");
     }
   } else if (text == "AddressOf(")
     return children[0].compileAPointer(context);
