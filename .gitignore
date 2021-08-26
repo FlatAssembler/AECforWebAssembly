@@ -1,3 +1,7 @@
 *.wat
 *.wasm
 *.aec.html
+#Ignore CodeBlocks files, because other developers probably are not using CodeBlocks and cannot open them anyway.
+*.cbp #CodeBlocks project
+*.depend #CodeBlocks configuration file
+*.layout #CodeBlocks configuration file.
