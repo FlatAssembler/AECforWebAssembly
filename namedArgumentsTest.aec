@@ -25,9 +25,15 @@ Function areStructuresEqual(NothingPointer first, NothingPointer second,
 Decimal32 goldenRatio := (sqrt(5) + 1) / 2,
           epsilon := 1 / 100;
 
+InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];
+/*
+ * TODO: Figure out why the compiler crashes if `solutions` is made to be a
+ *       local variable. I suppose it has something to do with the fact that
+ *       it is an array of nested structures.
+ */
+
 // Should return 1.
 Function namedArgumentsTest() Which Returns Integer32 Does
-  InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
   solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
   solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
