@@ -25,7 +25,7 @@ Function areStructuresEqual(NothingPointer first, NothingPointer second,
 Decimal32 goldenRatio := (sqrt(5) + 1) / 2,
           epsilon := 1 / 100;
 
-InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];
+InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
 /*
  * TODO: Figure out why the compiler crashes if `solutions` is made to be a
  *       local variable. I suppose it has something to do with the fact that

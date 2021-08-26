@@ -265,6 +265,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function fn) { return fn.name == text; });
   if (potentialFunction != context.functions.end()) {
+    //    #define ENABLE_FUNCTION_ARGUMENTS
+#ifndef ENABLE_FUNCTION_ARGUMENTS
     for (TreeNode child : children)
       if (child.text == ":=")
         throw NotImplementedException(
@@ -274,6 +276,7 @@ std::string TreeNode::getType(const CompilationContext &context) const {
             "not yet support named function arguments!"); // TODO: Implement
                                                           // named function
                                                           // arguments.
+#endif
     return potentialFunction->returnType;
   }
   if (text.back() == '(' and

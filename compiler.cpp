@@ -524,9 +524,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                          "compiler attempted "
                          "to compile an array with size less than 1, which "
                          "doesn't make sense. "
-                         "Aborting the compilation!"
+                         "Throwing an exception!"
                       << std::endl;
-            exit(1);
+            throw std::runtime_error("Compiling an array of negative size!");
           }
           for (auto bitand pair : context.localVariables)
             pair.second += arraySizeInBytes;
@@ -1199,47 +1199,120 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     function functionToBeCalled = *find_if(
         context.functions.begin(), context.functions.end(),
         [=](function someFunction) { return someFunction.name == text; });
-    assembly += "(call $" + text.substr(0, text.size() - 1) + "\n";
-    for (unsigned int i = 0; i < children.size(); i++) {
-      if (i >= functionToBeCalled.argumentTypes.size()) {
-        std::cerr
-            << "Line " << children[i].lineNumber << ", Column "
-            << children[i].columnNumber
-            << ", Compiler error: Too many arguments passed to the function \""
-            << text << "\" (it expects "
-            << functionToBeCalled.argumentTypes.size()
-            << " arguments). Aborting the compilation (or else the compiler "
-               "will segfault)!"
-            << std::endl;
-        exit(1);
+#ifdef ENABLE_FUNCTION_ARGUMENTS
+    bool areArgumentsNamed = false;
+    for (unsigned int i = 0; i < children.size(); i++)
+      if (children.at(i).text == ":=")
+        areArgumentsNamed = true;
+    if (areArgumentsNamed) {
+      TreeNode formWithoutNamedArguments(text, lineNumber, columnNumber);
+      for (unsigned int i = 0; i < functionToBeCalled.argumentTypes.size(); i++)
+        formWithoutNamedArguments.children.push_back(TreeNode(
+            std::to_string(functionToBeCalled.defaultArgumentValues[i]),
+            lineNumber, columnNumber));
+      for (unsigned int i = 0; i < children.size(); i++) {
+        if (children.at(i).text != ":=") // Argument is not named
+        {
+          if (i >= functionToBeCalled.argumentTypes.size()) {
+            std::cerr << "Line " << children[i].lineNumber << ", Column "
+                      << children[i].columnNumber
+                      << ", Compiler error: Too many arguments passed to the "
+                         "function \""
+                      << text << "\" (it expects "
+                      << functionToBeCalled.argumentTypes.size()
+                      << " arguments). Aborting the compilation (or else the "
+                         "compiler "
+                         "will segfault)!"
+                      << std::endl;
+            exit(1);
+          }
+          formWithoutNamedArguments.children[i] = children.at(i);
+        } else { // If the argument of the function we are calling is named.
+          int indexOfTheNamedArgument = 0;
+          while (indexOfTheNamedArgument <
+                 functionToBeCalled.argumentNames.size()) {
+            if (functionToBeCalled.argumentNames.at(indexOfTheNamedArgument) ==
+                children.at(indexOfTheNamedArgument).children.at(0).text)
+              break;
+            indexOfTheNamedArgument++;
+          }
+          if (indexOfTheNamedArgument ==
+              functionToBeCalled.argumentNames.size()) {
+            std::cerr << "Line " << children[i].children[0].lineNumber
+                      << ", Column " << children[i].children[0].columnNumber
+                      << ", Compiler error: There is no argument named \""
+                      << children[i].children[0].text
+                      << "\" in the function named \""
+                      << functionToBeCalled.name << "\".\n";
+            std::cerr << "The arguments to that function are called: ";
+            for (unsigned int i = 0;
+                 i < functionToBeCalled.argumentNames.size(); i++)
+              if (i == functionToBeCalled.argumentNames.size() - 1)
+                std::cerr << "\"" << functionToBeCalled.argumentNames[i]
+                          << "\".\n";
+              else if (i == functionToBeCalled.argumentNames.size() - 2)
+                std::cerr << "\"" << functionToBeCalled.argumentNames[i]
+                          << "\" and ";
+              else
+                std::cerr << "\"" << functionToBeCalled.argumentNames[i]
+                          << "\",";
+            std::cerr << "Quitting now!" << endl;
+            exit(1);
+          }
+          formWithoutNamedArguments.children[indexOfTheNamedArgument] =
+              children[i].children[1];
+        }
       }
-      assembly +=
-          convertTo(children[i], functionToBeCalled.argumentTypes[i], context)
-              .indentBy(1) +
-          "\n";
+      assembly += formWithoutNamedArguments.compile(context);
+    } else { // If arguments are not named.
+#endif
+      assembly += "(call $" + text.substr(0, text.size() - 1) + "\n";
+      for (unsigned int i = 0; i < children.size(); i++) {
+        if (i >= functionToBeCalled.argumentTypes.size()) {
+          std::cerr
+              << "Line " << children[i].lineNumber << ", Column "
+              << children[i].columnNumber
+              << ", Compiler error: Too many arguments passed to the function "
+                 "\""
+              << text << "\" (it expects "
+              << functionToBeCalled.argumentTypes.size()
+              << " arguments). Aborting the compilation (or else the compiler "
+                 "will segfault)!"
+              << std::endl;
+          exit(1);
+        }
+        assembly +=
+            convertTo(children[i], functionToBeCalled.argumentTypes[i], context)
+                .indentBy(1) +
+            "\n";
+      }
+      for (unsigned int i = children.size();
+           i < functionToBeCalled.defaultArgumentValues.size(); i++) {
+        if (!functionToBeCalled.defaultArgumentValues[i])
+          std::cerr
+              << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler warning: The argument #" << i + 1 << " (called \""
+              << functionToBeCalled.argumentNames[i]
+              << "\") of the function named \"" << text
+              << "\" isn't being passed to that function, nor does it have "
+                 "some "
+                 "default value. Your program will very likely crash because "
+                 "of "
+                 "that!"
+              << std::endl; // JavaScript doesn't even warn about such errors,
+                            // while C++ refuses to compile a program then. I
+                            // suppose I should take a middle ground here.
+        assembly +=
+            convertTo(TreeNode(std::to_string(
+                                   functionToBeCalled.defaultArgumentValues[i]),
+                               lineNumber, columnNumber),
+                      functionToBeCalled.argumentTypes[i], context)
+                .indentBy(1);
+      }
+      assembly += ")";
+#ifdef ENABLE_FUNCTION_ARGUMENTS
     }
-    for (unsigned int i = children.size();
-         i < functionToBeCalled.defaultArgumentValues.size(); i++) {
-      if (!functionToBeCalled.defaultArgumentValues[i])
-        std::cerr
-            << "Line " << lineNumber << ", Column " << columnNumber
-            << ", Compiler warning: The argument #" << i + 1 << " (called \""
-            << functionToBeCalled.argumentNames[i]
-            << "\") of the function named \"" << text
-            << "\" isn't being passed to that function, nor does it have some "
-               "default value. Your program will very likely crash because of "
-               "that!"
-            << std::endl; // JavaScript doesn't even warn about such errors,
-                          // while C++ refuses to compile a program then. I
-                          // suppose I should take a middle ground here.
-      assembly +=
-          convertTo(TreeNode(std::to_string(
-                                 functionToBeCalled.defaultArgumentValues[i]),
-                             lineNumber, columnNumber),
-                    functionToBeCalled.argumentTypes[i], context)
-              .indentBy(1);
-    }
-    assembly += ")";
+#endif
   } else if (text == "ValueAt(") {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
