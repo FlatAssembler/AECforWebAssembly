@@ -265,7 +265,10 @@ void parserTests() {
         "a))))) (Return a)))"},
        {"Return nestedStructure.structureWithInnerNumber.innerNumber;",
         "(Return (. (. nestedStructure structureWithInnerNumber) "
-        "innerNumber))"}});
+        "innerNumber))"},
+       {"InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];",
+        "(InstantiateStructure (QuadraticEquationSolution (solutions (* (* 1 "
+        "2) 3))))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
