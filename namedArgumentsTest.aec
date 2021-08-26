@@ -32,7 +32,7 @@ InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
  *       it is an array of nested structures.
  */
 
-// Should return 1.
+// Should return 0.
 Function namedArgumentsTest() Which Returns Integer32 Does
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
   solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
@@ -45,14 +45,17 @@ Function namedArgumentsTest() Which Returns Integer32 Does
     If not(areStructuresEqual(AddressOf(solution[iterator]),
                               AddressOf(solution[iterator + 1]),
                               SizeOf(QuadraticEquationSolution))) Then
-      Return 0;
+      Return 1;
     EndIf
     iterator += 1;
   EndWhile
-  Return solution[0].firstSolution.imaginary = 0 and
+  If not(solution[0].firstSolution.imaginary = 0 and
          solution[0].secondSolution.imaginary = 0 and
          abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
-         abs(solution[0].secondSolution.real - goldenRatio) < epsilon;
+         abs(solution[0].secondSolution.real - goldenRatio) < epsilon) Then
+    Return 2;
+  EndIf
+  Return 0;
 EndFunction
 
 Function abs(Decimal32 x) Which Returns Decimal32 Does
