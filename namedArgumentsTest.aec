@@ -75,7 +75,7 @@ Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c,
   solution->firstSolution.imaginary := 0;
   solution->secondSolution := solution.firstSolution;
   InstantiateStructure ComplexNumber rootOfDiscriminant;
-  sqrt(b*b - 4*a*c, AddressOf(rootOfDiscriminant);
+  sqrt(b*b - 4*a*c, AddressOf(rootOfDiscriminant));
   solution->firstSolution.real += rootOfDiscriminant.real;
   solution->firstSolution.imaginary += rootOfDiscriminant.imaginary;
   solution->secondSolution.real -= rootOfDiscriminant.real;
