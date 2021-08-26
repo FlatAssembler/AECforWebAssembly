@@ -952,9 +952,14 @@ node analogClock
         >). For now, however, Visual Studio 2019 falsely claims tests which
         invoke WABT fail (that WABT executables are not proper Windows
         executables, although they can be run from command-line as well as from
-        CMAKE run from command line). I do not know why. The automated tests are
-        integrated with GitHub Actions and GitLab CI, and they seem to work
-        properly there. The
+        CMAKE run from command line). I do not know why. (<i
+          >UPDATE on 26/08/2021: As of time of writing this, the compiler
+          crashes if compiled with Visual Studio, due to a
+          <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/5"
+            >Stack Overflow error</a
+          >.</i
+        >) The automated tests are integrated with GitHub Actions and GitLab CI,
+        and they seem to work properly there. The
         <span class="inline_code">structureDeclarationTestCompiles</span> seems
         to run around an order of magnitude faster (that is, 10 times faster) on
         GitHub Actions than on the laptop I am working on, and around five times
