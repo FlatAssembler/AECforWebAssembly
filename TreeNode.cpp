@@ -187,58 +187,62 @@ public:
   static std::map<AssemblyCode::AssemblyType, std::string>
       stringRepresentationOfWebAssemblyType;
   static std::set<std::string> AECkeywords;
+  static bool staticPropertiesInitialized;
   std::vector<TreeNode> children;
   std::string text;
   int lineNumber, columnNumber;
   TreeNode() {
-    basicDataTypeSizes["Integer32"] = 4;
-    basicDataTypeSizes["Character"] = 1;
-    basicDataTypeSizes["Decimal32"] = 4;
-    basicDataTypeSizes["Integer64"] = 8;
-    basicDataTypeSizes["Decimal64"] = 8;
-    basicDataTypeSizes["Integer16"] = 2;
-    for (auto iterator = basicDataTypeSizes.begin();
-         iterator != basicDataTypeSizes.end(); iterator++)
-      if (iterator->first.find("Pointer") == std::string::npos)
-        basicDataTypeSizes[iterator->first + "Pointer"] =
-            4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
-               // being 32 bits or 4 bytes long), unless somebody switches to
-               // the 64-bit mode (which is almost never done).
-    basicDataTypeSizes["Nothing"] = 0;
-    mappingOfAECTypesToWebAssemblyTypes =
-        std::map<std::string, AssemblyCode::AssemblyType>(
-            {{"Integer32", AssemblyCode::AssemblyType::i32},
-             {"Integer64", AssemblyCode::AssemblyType::i64},
-             {"Decimal32", AssemblyCode::AssemblyType::f32},
-             {"Decimal64", AssemblyCode::AssemblyType::f64},
-             {"Nothing", AssemblyCode::AssemblyType::null}});
-    for (auto pair : basicDataTypeSizes)
-      if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
-        mappingOfAECTypesToWebAssemblyTypes[pair.first] =
-            AssemblyCode::AssemblyType::i32;
-    AECkeywords = std::set<std::string>({"Function",  "Which",
-                                         "Returns",   "Nothing",
-                                         "Is",        "External",
-                                         "Does",      "EndFunction",
-                                         "If",        "Then",
-                                         "ElseIf",    "Else",
-                                         "EndIf",     "While",
-                                         "Loop",      "EndWhile",
-                                         "Structure", "Consists",
-                                         "Of",        "EndStructure",
-                                         "Character", "CharacterPointer",
-                                         "Integer16", "Integer16Pointer",
-                                         "Integer32", "Integer32Pointer",
-                                         "Integer64", "Integer64Pointer",
-                                         "Decimal32", "Decimal32Pointer",
-                                         "Decimal64", "Decimal64Pointer"});
-    stringRepresentationOfWebAssemblyType =
-        std::map<AssemblyCode::AssemblyType, std::string>(
-            {{AssemblyCode::AssemblyType::i32, "i32"},
-             {AssemblyCode::AssemblyType::i64, "i64"},
-             {AssemblyCode::AssemblyType::f32, "f32"},
-             {AssemblyCode::AssemblyType::f64, "f64"},
-             {AssemblyCode::AssemblyType::null, "null"}});
+    if (!staticPropertiesInitialized) { // https://atheistforums.org/thread-63150-post-2055509.html#pid2055509
+      basicDataTypeSizes["Integer32"] = 4;
+      basicDataTypeSizes["Character"] = 1;
+      basicDataTypeSizes["Decimal32"] = 4;
+      basicDataTypeSizes["Integer64"] = 8;
+      basicDataTypeSizes["Decimal64"] = 8;
+      basicDataTypeSizes["Integer16"] = 2;
+      for (auto iterator = basicDataTypeSizes.begin();
+           iterator != basicDataTypeSizes.end(); iterator++)
+        if (iterator->first.find("Pointer") == std::string::npos)
+          basicDataTypeSizes[iterator->first + "Pointer"] =
+              4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
+                 // being 32 bits or 4 bytes long), unless somebody switches to
+                 // the 64-bit mode (which is almost never done).
+      basicDataTypeSizes["Nothing"] = 0;
+      mappingOfAECTypesToWebAssemblyTypes =
+          std::map<std::string, AssemblyCode::AssemblyType>(
+              {{"Integer32", AssemblyCode::AssemblyType::i32},
+               {"Integer64", AssemblyCode::AssemblyType::i64},
+               {"Decimal32", AssemblyCode::AssemblyType::f32},
+               {"Decimal64", AssemblyCode::AssemblyType::f64},
+               {"Nothing", AssemblyCode::AssemblyType::null}});
+      for (auto pair : basicDataTypeSizes)
+        if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
+          mappingOfAECTypesToWebAssemblyTypes[pair.first] =
+              AssemblyCode::AssemblyType::i32;
+      AECkeywords = std::set<std::string>({"Function",  "Which",
+                                           "Returns",   "Nothing",
+                                           "Is",        "External",
+                                           "Does",      "EndFunction",
+                                           "If",        "Then",
+                                           "ElseIf",    "Else",
+                                           "EndIf",     "While",
+                                           "Loop",      "EndWhile",
+                                           "Structure", "Consists",
+                                           "Of",        "EndStructure",
+                                           "Character", "CharacterPointer",
+                                           "Integer16", "Integer16Pointer",
+                                           "Integer32", "Integer32Pointer",
+                                           "Integer64", "Integer64Pointer",
+                                           "Decimal32", "Decimal32Pointer",
+                                           "Decimal64", "Decimal64Pointer"});
+      stringRepresentationOfWebAssemblyType =
+          std::map<AssemblyCode::AssemblyType, std::string>(
+              {{AssemblyCode::AssemblyType::i32, "i32"},
+               {AssemblyCode::AssemblyType::i64, "i64"},
+               {AssemblyCode::AssemblyType::f32, "f32"},
+               {AssemblyCode::AssemblyType::f64, "f64"},
+               {AssemblyCode::AssemblyType::null, "null"}});
+      staticPropertiesInitialized = true;
+    }
     lineNumber = columnNumber = 0;
   }
   TreeNode(std::string newText, int newLine, int newColumn) {
@@ -486,3 +490,4 @@ std::map<std::string, AssemblyCode::AssemblyType>
 std::map<AssemblyCode::AssemblyType, std::string>
     TreeNode::stringRepresentationOfWebAssemblyType;
 std::set<std::string> TreeNode::AECkeywords;
+bool TreeNode::staticPropertiesInitialized = false;

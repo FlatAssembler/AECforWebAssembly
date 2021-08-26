@@ -13,7 +13,7 @@
 #include <vector>
 
 struct AssemblyCode {
-  enum AssemblyType {
+  enum class AssemblyType {
     i32,
     i64,
     f32,
