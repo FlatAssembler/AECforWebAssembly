@@ -897,14 +897,22 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       }
       auto iteratorPointingToTheEndStructureToken =
           std::find_if(input.begin() + i + 1, input.end(), [](TreeNode node) {
-            if (node.text == "Structure")
+            static int counterOfInnerStructures = 0;
+            if (node.text == "Structure") {
+              counterOfInnerStructures++;
               std::cerr << "Line " << node.lineNumber << ", Column "
                         << node.columnNumber
                         << ", Parser error: The parser does not yet support "
                            "nested structures, so the syntax tree given to the "
                            "semantic analyzer will probably be corrupt!"
                         << std::endl;
-            return node.text == "EndStructure";
+            } else if (node.text == "EndStructure")
+              counterOfInnerStructures--;
+            if (counterOfInnerStructures == -1) {
+              counterOfInnerStructures = 0;
+              return true;
+            }
+            return false;
           }); // TODO: Deal with nested structures. As it is now,
               // "iteratorPointingToTheEndStructureToken" will point to an
               // incorrect token in case there is a "Structure" inside a
