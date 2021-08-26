@@ -1,9 +1,10 @@
 /*
- * This is a test whether the compiler properly supports named function parameters (arguments),
- * so that arguments of functions do not always need to be written in the same order.
+ * This is a test whether the compiler properly supports named function
+ * parameters (arguments), so that arguments of functions do not always
+ * need to be written in the same order.
  */
 
-#target wasi
+#target WASI
 
 Structure ComplexNumber Consists Of
   Decimal32 real, imaginary;
