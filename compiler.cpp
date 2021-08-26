@@ -911,7 +911,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    assembly += "(if\n" + convertToInteger32(children[0], context).indentBy(1) +
+    assembly += "(if\n"
+                ";;Compiling the condition of if-branching: " +
+                children[0].getLispExpression() + "\n" +
+                convertToInteger32(children[0], context).indentBy(1) +
                 "\n\t(then\n" + children[1].compile(context).indentBy(2) +
                 "\n\t)" +
                 ((children.size() == 3)
@@ -926,7 +929,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n" +
+    assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n"
+                ";; Compiling the condition of the while-loop: " +
+                children[0].getLispExpression() + "\n" +
                 convertToInteger32(children[0], context).indentBy(4) +
                 "\n\t\t\t)\n\t\t)\n" +
                 children[1].compile(context).indentBy(2) +
