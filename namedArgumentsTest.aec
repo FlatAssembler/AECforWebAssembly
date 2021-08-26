@@ -92,7 +92,7 @@ Function sqrt(Decimal32 x, ComplexNumberPointer result)
     result->real := 0;
     result->imaginary := asm_f32("(f32.sqrt\n"
                                  "\t(f32.sub\n"
-                                 "\t\t(f32.const 0)\n
+                                 "\t\t(f32.const 0)\n"
                                  "\t\t(local.get 0)\n"
                                  "\t)\n"
                                  ")");
