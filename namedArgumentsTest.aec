@@ -45,7 +45,7 @@ Function namedArgumentsTest() Which Returns Integer32 Does
     If not(areStructuresEqual(AddressOf(solution[iterator]),
                               AddressOf(solution[iterator + 1]),
                               SizeOf(QuadraticEquationSolution))) Then
-      Return 1;
+      Return iterator + 1;
     EndIf
     iterator += 1;
   EndWhile
@@ -53,7 +53,7 @@ Function namedArgumentsTest() Which Returns Integer32 Does
          solution[0].secondSolution.imaginary = 0 and
          abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
          abs(solution[0].secondSolution.real - goldenRatio) < epsilon) Then
-    Return 2;
+    Return 7;
   EndIf
   Return 0;
 EndFunction
