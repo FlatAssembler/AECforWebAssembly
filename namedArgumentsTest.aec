@@ -3,6 +3,8 @@
  * so that arguments of functions do not always need to be written in the same order.
  */
 
+#target wasi
+
 Structure ComplexNumber Consists Of
   Decimal32 real, imaginary;
 EndStructure
@@ -11,34 +13,47 @@ Structure QuadraticEquationSolution Consists Of
   ComplexNumber firstSolution, secondSolution;
 EndStructure
 
-Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c, QuadraticEquationSolutionPointer solution) Which Returns Nothing Is Declared;
+Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c,
+                                QuadraticEquationSolutionPointer solution)
+                                Which Returns Nothing Is Declared;
 Function abs(Decimal32 x) Which Returns Decimal32 Is Declared;
-Function areStructuresEqual(NothingPointer first, NothingPointer second, Integer32 sizeOfStructuresInBytes) Which Returns Integer32 Is Declared;
+Function areStructuresEqual(NothingPointer first, NothingPointer second,
+                            Integer32 sizeOfStructuresInBytes)
+                            Which Returns Integer32 Is Declared;
+
+Decimal32 goldenRatio := (sqrt(5) + 1) / 2,
+          epsilon := 1 / 100;
 
 // Should return 1.
 Function namedArgumentsTest() Which Returns Integer32 Does
   InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];
-  solveQuadraticEquation(a := 1, b := -1, c := -1, AddressOf(solution[0]));
-  solveQuadraticEquation(a := 1, c := -1, b := -1, AddressOf(solution[1]));
-  solveQuadraticEquation(b := -1, a := 1, c := -1, AddressOf(solution[2]));
-  solveQuadraticEquation(b := -1, c := -1, a := 1, AddressOf(solution[3]));
-  solveQuadraticEquation(c := -1, a := 1, b := -1, AddressOf(solution[4]));
-  solveQuadraticEquation(c := -1, b := -1, a := 1, AddressOf(solution[3]));
+  solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
+  solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
+  solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
+  solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
+  solveQuadraticEquation(c := -1, a := 1 , b := -1, AddressOf(solution[4]));
+  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[3]));
   Integer32 iterator := 0;
   While iterator < 1 * 2 * 3 - 1 Loop
-    If not(areStructuresEqual(AddressOf(solution[i]), AddressOf(solution[i + 1]), SizeOf(QuadraticEquationSolution))) Then
+    If not(areStructuresEqual(AddressOf(solution[i]),
+                              AddressOf(solution[i + 1]),
+                              SizeOf(QuadraticEquationSolution))) Then
       Return 0;
     EndIf
     iterator += 1;
   EndWhile
-  Return solution[0].firstSolution.imaginary = 0 and solution[0].secondSolution.imaginary = 0 and abs(solution[0].firstSolution.real + 0.618) < 0.01 and abs(solution[0].secondSolution.real - 1.618) < 0.01;
+  Return solution[0].firstSolution.imaginary = 0 and
+         solution[0].secondSolution.imaginary = 0 and
+         abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
+         abs(solution[0].secondSolution.real - goldenRatio) < epsilon;
 EndFunction
 
 Function abs(Decimal32 x) Which Returns Decimal32 Does
   Return x < 0 ? -x : x;
 EndFunction
 
-Function areStructuresEqual(CharacterPointer first, CharacterPointer second, Integer32 size) Which Returns Integer32 Does
+Function areStructuresEqual(CharacterPointer first, CharacterPointer second,
+                            Integer32 size) Which Returns Integer32 Does
   Integer32 i := 0;
   While i < size Loop
     If not(ValueAt(first + i) = ValueAt(second + i)) Then
@@ -49,9 +64,12 @@ Function areStructuresEqual(CharacterPointer first, CharacterPointer second, Int
   Return 1;
 EndFunction
 
-Function sqrt(Decimal32 realNumber, ComplexNumberPointer result) Which Returns Nothing Is Declared;
+Function sqrt(Decimal32 realNumber, ComplexNumberPointer result)
+         Which Returns Nothing Is Declared;
 
-Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c, QuadraticEquationSolutionPointer solution) Which Returns Nothing Does
+Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c,
+                                QuadraticEquationSolutionPointer solution)
+                                Which Returns Nothing Does
   solution->firstSolution.real := -b;
   solution->firstSolution.imaginary := 0;
   solution->secondSolution := solution.firstSolution;
@@ -67,7 +85,8 @@ Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c, Quadratic
   solution->secondSolution.imaginary /= 2*a;
 EndFunction
 
-Function sqrt(Decimal32 x, ComplexNumberPointer result) Which Returns Nothing Does
+Function sqrt(Decimal32 x, ComplexNumberPointer result)
+        Which Returns Nothing Does
   If x < 0 Then
     result->real := 0;
     result->imaginary := asm_f32("(f32.sqrt\n"
