@@ -14,7 +14,8 @@ Structure QuadraticEquationSolution Consists Of
   ComplexNumber firstSolution, secondSolution;
 EndStructure
 
-Function solveQuadraticEquation(Decimal32 a, Decimal32 b, Decimal32 c,
+Function solveQuadraticEquation(Decimal32 a := 1, Decimal32 b := 0,
+                                Decimal32 c := 0,
                                 QuadraticEquationSolutionPointer solution)
                                 Which Returns Nothing Is Declared;
 Function abs(Decimal32 x) Which Returns Decimal32 Is Declared;
@@ -44,11 +45,11 @@ asm("(func $printFloat32 (import \"JavaScript\" \"printFloat32\") (param f32))")
 // Should return 0.
 Function namedArgumentsTest() Which Returns Integer32 Does
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
-  solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
-  solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
+  solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[1]));
+  solveQuadraticEquation(b := -1, c := -1, solution := AddressOf(solution[2]));
   solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
   solveQuadraticEquation(c := -1, a := 1 , b := -1, AddressOf(solution[4]));
-  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[5]));
+  solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[5]));
   Integer32 iterator := 0;
   While iterator < 1*2*3 - 1 Loop
     If not(areStructuresEqual(AddressOf(solution[iterator]),
@@ -56,6 +57,15 @@ Function namedArgumentsTest() Which Returns Integer32 Does
                               SizeOf(QuadraticEquationSolution))) Then
       Return iterator + 1;
     EndIf
+    iterator += 1;
+  EndWhile
+  iterator := 0;
+  While iterator < 1*2*3 - 1 Loop /*
+                                   * This loop should have no effect,
+                                   * but the compiler must not crash
+                                   * when compiling it.
+                                   */
+    solution[iterator] := solution[iterator + 1];
     iterator += 1;
   EndWhile
   If not(solution[0].firstSolution.imaginary = 0 and
