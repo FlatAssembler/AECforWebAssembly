@@ -1,6 +1,16 @@
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
     <title>AEC Language Specification</title>
+    <meta
+      name="description"
+      content="Documentation for the ArithmeticExpressionCompiler programming language"
+    />
+    <meta name="author" content="Teo Samaržija" />
+    <meta
+      name="keywords"
+      content="HTML, CSS, JavaScript, WebAssembly, Programming Language"
+    />
     <style type="text/css">
       title {
         font-family: "Courier New", monospace;
@@ -656,7 +666,14 @@
         trying to do too much and are thus counter-productive. Can we have a
         language with a compiler that does only what you told it, in a very
         predictable way? Well, that's what inspired me to create
-        <i>Arithmetic Expression Compiler</i> (AEC) a few years ago.<br />
+        <i>Arithmetic Expression Compiler</i> (AEC) a few years ago. The first
+        programming language I learned was
+        <a href="https://smallbasic-publicwebsite.azurewebsites.net/"
+          >Microsoft Small Basic</a
+        >, I have made a
+        <a href="https://github.com/FlatAssembler/Labyrinth">Labyrinth game</a>
+        in it, and it has influenced a lot the decisions I made when designing
+        my programming language.<br />
         <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
         wrote one targeting x86 processors (AMD and Intel). That one is written
@@ -735,7 +752,74 @@
         doing deep copies of C++ objects (wasting time and memory), and quite a
         few of them being using potentially uninitialized variables in
         JavaScript. If you want to collaborate with me, perhaps one of the first
-        things to do is fix those bugs found by static analysis. <br /><br />
+        things to do is fix those bugs found by static analysis.<br />
+        <b>UPDATE</b> on 28/08/2021: As a part of a paper I have written in my
+        economics class, I have explained why I chose to target WebAssembly and
+        why I think WebAssembly will revolutionalize compilers:
+        <div class="quotation" lang="hr">
+          WebAssembly je dizajniran da bude jako lagan cilj za compilere, daleko
+          lakši nego asemblerski jezici fizičkih procesora. Kada dizajniramo
+          asemblerski jezik za fizički procesor, imamo tri trade-offsa
+          (pritisaka):
+          <ol>
+            <li>
+              Moramo osigurati da taj asemblerski kod mogu lagano ispisivati
+              compileri. Compilerima je najlakše ispisivati asemblerske kodove
+              za mašine bazirane na stogu, i mislim da će se svatko tko je
+              napravio i najjednostavniji compiler s time složiti. Korištenje
+              registara kakvi postoje u fizičkim procesorima zahtijeva
+              komplicirane algoritme. Compilerima nije važno ima li dovoljno
+              registara da se sve varijable pohrane u registar, jer compileri
+              lako stave varijable u memoriju i vode računa gdje su. Compilerima
+              koji optimiziraju kod smeta postojanje nevažnih instrukcija u
+              asemblerskom jeziku, jer im je onda teško procijeniti je li
+              asemblerski kod koji ih koristi optimalniji ili manje optimalan.
+            </li>
+            <li>
+              Moramo osigurati da taj asemblerski kod mogu relativno lagano
+              pisati ljudi. Jer, suočimo se s time, neki se programi nužni za
+              rad računala, kao što su bootloaderi, ne mogu pisati u višim
+              programskim jezicima, a još su se manje mogli prije 50-ak godina
+              kada su osnove asemblerskih jezika kojima se služe današnji (x86,
+              ARM...) procesori dizajnirane. Ljudima je, mislim da će se svatko
+              tko je pisao asemblerski kod složiti, najlakše pisati asemblerski
+              kod za procesore s mnogo registara, a teško im je koristiti stog
+              za računanje, gotovo suprotno nego što je lagano compilerima. A
+              voditi računa o tome koliko je koja lokalna varijabla udaljena od
+              vrha sistemskog stoga, što je compilerima jako lagano, za ljude je
+              gotovo nemoguća misija. Ljudima koji pišu asemblerske kodove dobro
+              dođu compilerima nevažne instrukcije kao što su
+              <code>fsin</code> (sporo, ali ekstremno precizno računanje
+              sinusa), koje optimizirajućim compilerima koji pokušavaju
+              modelirati procesor smetaju.
+            </li>
+            <li>
+              Procesor koji će razumjeti taj asemblerski kod (točnije, strojni
+              kod koji odgovara tom asemblerskom kodu naredbu-po-naredbu) mora
+              biti moguće efikasno fizički implementirati. Jer, suočimo se s
+              time, na kraju krajeva, procesori su žice. Moderni procesori su
+              bezbroj žica spojenih na način toliko kompliciran da ti glava
+              pukne i da ti bude drago što o tome ne učite na fakultetu.
+              Zapravo, vjerojatno ti ni jedna osoba ne bi mogla objasniti kako
+              moderni procesori funkcioniraju. No, ipak, očito je da asemblerski
+              jezici koji semantički pružaju neograničeno velik stog ili
+              proizvoljan broj registara ne mogu biti efikasno implementirani
+              žicama.
+            </li>
+          </ol>
+          WebAssembly ne podliježe drugom i trećem pritisku, i zato je izuzetno
+          lagan cilj za compilere. Java bytecode zamišljen je da se može
+          implementirati fizički, i zato, za razliku od WebAssemblyja, podliježe
+          trećem pritisku. Dakle, danas, zahvaljujući WebAssemblyju, tko ne
+          želi, ne mora koristiti JavaScript za front-end programiranje, već
+          može i neki drugi programski jezik. Kako je WebAssembly lagan cilj za
+          compilere, relativno je lagano dizajnirati svoj programski jezik i
+          napraviti compiler koji će ga prevoditi u WebAssembly. To sam i ja
+          napravio, i to je najveći program koji sam napisao do sada, ima 5'000
+          redaka i pisan je u C++-u.
+        </div>
+        Sorry about that, but it will take me a lot of time to translate that to
+        English. <br /><br />
         <b id="HowToCompile">How to use the compilers</b><br />
         Probably the simplest way to use the AEC-to-x86 compiler on a Linux
         machine is to type the following code into a terminal emulator:
@@ -1529,7 +1613,13 @@ EndFunction</pre
         or <span class="inline_code">end</span> (Pascal). I mean,
         <span class="inline_code">EndIf</span> by itself means an end of a
         statement, so why put another sign for ending a statement there? Is not
-        it some kind of a pleonasm?<br />
+        it some kind of a pleonasm? I have asked a
+        <a
+          href="https://www.quora.com/Why-does-Pascal-require-a-semi-colon-after-end-and-Ada-and-VHDL-require-it-after-end-if-and-end-loop-Is-not-it-a-pleonasm-My-programming-language-allows-after-EndIf-and-EndWhile-but-it-does-not-require-it"
+          >Quora question</a
+        >
+        about that (apparently, it is to make recovery from parsing errors
+        easier).<br />
         Simple branching can also be done using the
         <span class="inline_code">?:</span> operator. As it is
         right-associative, it can be used to concisely write
@@ -1723,8 +1813,9 @@ EndFunction</pre
           that you replace <span class="inline_code">External</span> with
           <span class="inline_code">Declared</span>.)</i
         ><br />
-        <b>TODO</b>: Find a way to implement circularly dependent functions,
-        and, if possible, function hoisting. Also, implement function pointers.
+        <b>TODO</b>: Find a way to implement
+        <del>circularly dependent functions</del>, and, if possible, function
+        hoisting. Also, implement function pointers.
         <del
           >Named function arguments (using, for example, the
           <span class="inline_code">:=</span> operator) might also come useful
@@ -1737,14 +1828,17 @@ EndFunction</pre
         <pre>
 // Should return 0.
 Function namedArgumentsTest() Which Returns Integer32 Does
+  // Since 'a' is set to default to 1 in the declaration of the
+  // "solveQuadraticEquation" function, it does not need to be written
+  // if it is indeed 1 when calling that function.
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
-  solveQuadraticEquation(a := 1 , c := -1, b := -1, AddressOf(solution[1]));
-  solveQuadraticEquation(b := -1, a := 1 , c := -1, AddressOf(solution[2]));
+  solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[1]));
+  solveQuadraticEquation(b := -1, c := -1, solution := AddressOf(solution[2]));
   solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
   solveQuadraticEquation(c := -1, a := 1 , b := -1, AddressOf(solution[4]));
-  solveQuadraticEquation(c := -1, b := -1, a := 1 , AddressOf(solution[5]));
+  solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[5]));
   Integer32 iterator := 0;
-  While iterator < 1*2*3 - 1 Loop
+  While iterator &lt; 1*2*3 - 1 Loop
     If not(areStructuresEqual(AddressOf(solution[iterator]),
                               AddressOf(solution[iterator + 1]),
                               SizeOf(QuadraticEquationSolution))) Then
@@ -1752,10 +1846,19 @@ Function namedArgumentsTest() Which Returns Integer32 Does
     EndIf
     iterator += 1;
   EndWhile
+  iterator := 0;
+  While iterator &lt; 1*2*3 - 1 Loop /*
+                                   * This loop should have no effect,
+                                   * but the compiler must not crash
+                                   * when compiling it.
+                                   */
+    solution[iterator] := solution[iterator + 1];
+    iterator += 1;
+  EndWhile
   If not(solution[0].firstSolution.imaginary = 0 and
          solution[0].secondSolution.imaginary = 0 and
-         abs(solution[0].firstSolution.real + goldenRatio - 1) < epsilon and
-         abs(solution[0].secondSolution.real - goldenRatio) < epsilon) Then
+         abs(solution[0].firstSolution.real + goldenRatio - 1) &lt; epsilon and
+         abs(solution[0].secondSolution.real - goldenRatio) &lt; epsilon) Then
     printFloat32(solution[0].firstSolution.real);
     printFloat32(solution[0].firstSolution.imaginary);
     printFloat32(solution[0].secondSolution.real);
@@ -1767,7 +1870,17 @@ EndFunction
         </pre>
         So, named function arguments are using the
         <span class="inline_code">:=</span> operator, the same as the
-        assignment. I think that makes a lot of sense.
+        assignment. I think that makes a lot of sense. I have made a
+        <a
+          href="https://www.reddit.com/r/ProgrammingLanguages/comments/pcixm4/i_have_added_named_function_parameters_to_my/"
+          >Reddit thread</a
+        >
+        about it, as well as a
+        <a
+          href="https://www.quora.com/Why-do-Python-and-C-allow-positional-function-parameters-before-named-function-parameters-named-arguments-but-not-after-them-My-programming-language-AECforWebAssembly-allows-both"
+          >Quora question</a
+        >
+        about it.
         <br />
         <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
@@ -1853,7 +1966,29 @@ EndFunction;
         The assembly code that the AEC compiler produces for structure
         assignments is slower than one produced by C++ compilers, but, in my
         opinion, the assembly code by AEC behaves way more intuitively in cases
-        like this.
+        like this.<br />
+        <b>UPDATE</b> on 28/08/2021: There is a weird bug in my compiler causing
+        internal compiler errors in case somebody tries to instantiate an array
+        of nested structures inside a function. I have found it while writing
+        the <a href="namedArgumentsTest.aec.html">Named Arguments Test</a>.
+        There is a simple work-around for now: declare that array globally.
+        <pre>
+Structure ComplexNumber Consists Of
+  Decimal32 real, imaginary;
+EndStructure
+
+Structure QuadraticEquationSolution Consists Of
+  ComplexNumber firstSolution, secondSolution;
+EndStructure
+
+InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
+/*
+ * TODO: Figure out why the compiler crashes if `solutions` is made to be a
+ *       local variable. I suppose it has something to do with the fact that
+ *       it is an array of nested structures.
+ */
+</pre
+        >
         <br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
@@ -2008,7 +2143,7 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
                              // Euclidean distance between cells in the display
                              // grid, and there will be 80x24 cells.
       min : = 0, i : = (min + max) / 2;
-  If(max * max < x) Then // Shouldn't happen, but let's deal with that anyway.
+  If(max * max &lt; x) Then // Shouldn't happen, but let's deal with that anyway.
   {
     Return exp(
         ln(x) /
@@ -2467,7 +2602,7 @@ EndFunction
         >
       </div>
       <div style="background: #aaffaa; float: right; width: 50%">
-        Uploaded by Teo Samarzija on 29/08/2020
+        Uploaded by Teo Samaržija on 29/08/2020
       </div>
       <svg
         id="donjiLijevi"
