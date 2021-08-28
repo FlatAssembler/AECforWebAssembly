@@ -1235,14 +1235,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         } else { // If the argument of the function we are calling is named.
           int indexOfTheNamedArgument = 0;
           while (indexOfTheNamedArgument <
-                 functionToBeCalled.argumentNames.size()) {
+                 int(functionToBeCalled.argumentNames
+                         .size())) { // If you do not explicitly cast to "int"
+                                     // here, GCC issues a warning.
             if (functionToBeCalled.argumentNames.at(indexOfTheNamedArgument) ==
                 children.at(i).children.at(0).text)
               break;
             indexOfTheNamedArgument++;
           }
           if (indexOfTheNamedArgument ==
-              functionToBeCalled.argumentNames.size()) {
+              int(functionToBeCalled.argumentNames.size())) {
             std::cerr << "Line " << children[i].children[0].lineNumber
                       << ", Column " << children[i].children[0].columnNumber
                       << ", Compiler error: There is no argument named \""

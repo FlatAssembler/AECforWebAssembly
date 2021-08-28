@@ -103,7 +103,9 @@ int longest_common_subsequence_length(std::string first, std::string second) {
           // will be run only upon an error (to suggest a true name of a
           // misspelled variable name). Still, they are probably all easier than
           // dealing with multi-dimensional arrays in JavaScript.
-  for (size_t i = 0; i < first.size(); i++)
+  for (size_t i = 0; i < first.size();
+       i++) // Microsoft C++ Compiler issues a warning if you put "unsigned"
+            // instead of "size_t" here, I am not sure why.
     for (size_t j = 0; j < second.size(); j++)
       if (first[i] == second[j])
         DP[i][j] = DP[i - 1][j - 1] +
@@ -127,8 +129,10 @@ int Levenstein_distance(std::string A, std::string B) {
 
   vector<vector<int>> temp(row + 1, vector<int>(col + 1));
 
-  for (int i = 0; i < temp.size(); i++) {
-    for (int j = 0; j < temp[0].size(); j++) {
+  for (size_t i = 0; i < temp.size();
+       i++) { // Apparently, GCC issues a warning under "-Wall" unless you
+              // replace "int" with "size_t" here. I do not know why.
+    for (size_t j = 0; j < temp[0].size(); j++) {
       if (j == 0) {
         temp[i][j] = i;
       } else if (i == 0) {
