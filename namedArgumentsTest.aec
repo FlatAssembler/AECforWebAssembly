@@ -26,13 +26,6 @@ Function areStructuresEqual(NothingPointer first, NothingPointer second,
 Decimal32 goldenRatio := (sqrt(5) + 1) / 2,
           epsilon := 1 / 100;
 
-InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
-/*
- * TODO: Figure out why the compiler crashes if `solutions` is made to be a
- *       local variable. I suppose it has something to do with the fact that
- *       it is an array of nested structures.
- */
-
 Function printFloat32(Decimal32 x) Which Returns Nothing Is Declared;
 /*
  * We cannot make it external because we are not actually using WASI, and the
@@ -47,6 +40,7 @@ Function namedArgumentsTest() Which Returns Integer32 Does
   // Since 'a' is set to default to 1 in the declaration of the
   // "solveQuadraticEquation" function, it does not need to be written
   // if it is indeed 1 when calling that function.
+  InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
   solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[1]));
   solveQuadraticEquation(b := -1, c := -1, solution := AddressOf(solution[2]));

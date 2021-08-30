@@ -580,6 +580,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   TreeNode instanceNameNode(instanceName.text,
                                             instanceName.lineNumber,
                                             instanceName.columnNumber);
+                  instanceNameNode.children.push_back(
+                      TreeNode(std::to_string(i), instanceName.lineNumber,
+                               instanceName.columnNumber));
                   TreeNode memberNameNode(memberName, instanceName.lineNumber,
                                           instanceName.columnNumber);
                   TreeNode arrayIndexNode(std::to_string(k),
