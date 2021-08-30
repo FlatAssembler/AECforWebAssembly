@@ -711,7 +711,7 @@
         <a href="https://github.com/FlatAssembler/AECforWebAssembly"
           >AEC-to-WebAssembly compiler</a
         >
-        has around 5'000 lines of code, and it's written in C++ (a language much
+        has around 5'500 lines of code, and it's written in C++ (a language much
         more suitable for writing compilers than JavaScript). <br />
         WebAssembly is one of the reasons I am a libertarian, because it shows
         that, when a private company makes a mistake, no matter how hopeless the
@@ -748,7 +748,7 @@
             alt="Total alerts"
             src="https://img.shields.io/lgtm/alerts/g/FlatAssembler/AECforWebAssembly.svg?logo=lgtm&logoWidth=18"
         /></a>
-        potential bugs per 5'000 lines of code, most of them being unnecessarily
+        potential bugs per 5'500 lines of code, most of them being unnecessarily
         doing deep copies of C++ objects (wasting time and memory), and quite a
         few of them being using potentially uninitialized variables in
         JavaScript. If you want to collaborate with me, perhaps one of the first
@@ -815,7 +815,7 @@
           može i neki drugi programski jezik. Kako je WebAssembly lagan cilj za
           compilere, relativno je lagano dizajnirati svoj programski jezik i
           napraviti compiler koji će ga prevoditi u WebAssembly. To sam i ja
-          napravio, i to je najveći program koji sam napisao do sada, ima 5'000
+          napravio, i to je najveći program koji sam napisao do sada, ima 5'500
           redaka i pisan je u C++-u.
         </div>
         Sorry about that, but it will take me a lot of time to translate that to
@@ -1831,6 +1831,7 @@ Function namedArgumentsTest() Which Returns Integer32 Does
   // Since 'a' is set to default to 1 in the declaration of the
   // "solveQuadraticEquation" function, it does not need to be written
   // if it is indeed 1 when calling that function.
+  InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
   solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[1]));
   solveQuadraticEquation(b := -1, c := -1, solution := AddressOf(solution[2]));
@@ -1967,11 +1968,13 @@ EndFunction;
         assignments is slower than one produced by C++ compilers, but, in my
         opinion, the assembly code by AEC behaves way more intuitively in cases
         like this.<br />
-        <b>UPDATE</b> on 28/08/2021: There is a weird bug in my compiler causing
-        internal compiler errors in case somebody tries to instantiate an array
-        of nested structures inside a function. I have found it while writing
-        the <a href="namedArgumentsTest.aec.html">Named Arguments Test</a>.
-        There is a simple work-around for now: declare that array globally.
+        <b>UPDATE</b> on 28/08/2021: There <del>is</del> was a weird bug in my
+        compiler causing internal compiler errors in case somebody tries to
+        instantiate an array of nested structures inside a function. I have
+        found it while writing the
+        <a href="namedArgumentsTest.aec.html">Named Arguments Test</a>. There is
+        a simple work-around <del>for now</del> for AECforWebAssembly versions
+        v1.6.2 and older: declare that array globally.
         <pre>
 Structure ComplexNumber Consists Of
   Decimal32 real, imaginary;
@@ -1983,12 +1986,17 @@ EndStructure
 
 InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
 /*
- * TODO: Figure out why the compiler crashes if `solutions` is made to be a
+ * TODO: Figure out why the compiler crashes if `solution` is made to be a
  *       local variable. I suppose it has something to do with the fact that
  *       it is an array of nested structures.
  */
 </pre
         >
+        <b>UPDATE</b> on 31/08/2021: I have found a
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/commit/8747e0ef33238ab3a598e187da6c0b490bafbc31"
+          >relatively simple fix</a
+        >.
         <br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
