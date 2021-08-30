@@ -540,11 +540,6 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               instanceName.text + "\".\n)\n";
           // Now we can set the default values. Let's set the members without
           // specified default values to 0, this may avoid some bugs.
-          /*
-           * TODO: Figure out why the compiler seems to crash whenever compiling
-           *       an instantiation of local nested structure array (see
-           *       "namedArgumentsTest.aec" for more information).
-           */
           for (int i = 0; i < arraySizeInStructures; i++) {
             for (std::string memberName :
                  iteratorPointingToTheStructure->memberNames) {
