@@ -35,14 +35,22 @@
     environments will become as capable as they are, rather than like Internet
     Explorer.<br /><br />
     <svg id="canvas" viewbox="0 0 500 500">
-      <path
-        id="triangularTurtle"
-        d="M -2 0 C -4 -6 2 -6 2 0 C 5 6 -5 6 -2 0 M 3 2 Q 4 1 4 4 M 3 4 Q 4 5 3 5 M -3 2 Q -4 1 -4 4 M -3 4 Q -4 5 -3 5"
-        stroke="white"
-        stroke-width="1"
-        transform="rotate(90)"
-        fill="lightGreen"
-      />
+      <g id="triangularTurtle" transform="rotate(90)">
+        <path
+          d="M -2 0 C -4 -6 4 -6 2 0 C 5 6 -5 6 -2 0 M 3 2 Q 4 1 4 4 M 3 4 Q 4 5 3 5 M -3 2 Q -4 1 -4 4 M -3 4 Q -4 5 -3 5"
+          stroke="white"
+          stroke-width="1"
+          fill="darkGreen"
+        />
+        <path
+          d="M -2 0 C -4 -6 4 -6 2 0"
+          stroke="gray"
+          stroke-width="1"
+          fill="lightGreen"
+        />
+        <circle cx="-1" cy="-1" r="0.5" fill="black" />
+        <circle cx="1" cy="-1" r="0.5" fill="black" />
+      </g>
     </svg>
     <br />
     You can see the source code of the AEC program
