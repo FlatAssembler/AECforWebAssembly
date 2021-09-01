@@ -575,9 +575,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   TreeNode instanceNameNode(instanceName.text,
                                             instanceName.lineNumber,
                                             instanceName.columnNumber);
-                  instanceNameNode.children.push_back(
-                      TreeNode(std::to_string(i), instanceName.lineNumber,
-                               instanceName.columnNumber));
+                  instanceNameNode.children.push_back(TreeNode(
+                      std::to_string(i), instanceName.lineNumber,
+                      instanceName
+                          .columnNumber)); // If we don't do this, the compiler
+                                           // will crash if somebody tries to
+                                           // instantiate local (inside a
+                                           // function, not global) array of
+                                           // nested structures.
                   TreeNode memberNameNode(memberName, instanceName.lineNumber,
                                           instanceName.columnNumber);
                   TreeNode arrayIndexNode(std::to_string(k),
@@ -634,7 +639,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                             // Visual Studio 2019.
                 TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                             instanceName.columnNumber);
-                TreeNode nodeRepresentendingDefaultValue(
+                TreeNode nodeRepresentingDefaultValue(
                     !isPointerType(
                         iteratorPointingToTheStructure->memberTypes[memberName])
                         ? std::to_string(
@@ -652,9 +657,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     instanceName.lineNumber, instanceName.columnNumber);
                 TreeNode zeroNode("0", instanceName.lineNumber,
                                   instanceName.columnNumber);
-                nodeRepresentendingDefaultValue.children.push_back(zeroNode);
+                nodeRepresentingDefaultValue.children.push_back(zeroNode);
                 assignmentOperator.children =
-                    <% dotOperator, nodeRepresentendingDefaultValue %>;
+                    <% dotOperator, nodeRepresentingDefaultValue %>;
                 // So, finally, now we can compile that S-expression.
                 assembly += assignmentOperator.compile(context) + "\n";
               }
@@ -776,12 +781,13 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 "$stack_pointer) (i32.const " +
                 std::to_string(context.stackSizeOfThisScope) + ")))";
   } else if (text.front() == '"')
-    assembly += "(i32.const " + std::to_string(context.globalVariables[text]) +
+    assembly += "(i32.const " +
+                std::to_string(context.globalVariables.at(text)) +
                 ") ;;Pointer to " + text;
   else if ((text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
             text == "asm_f32(" or text == "asm_f64(") and
            children.size() == 1)
-    assembly += convertInlineAssemblyToAssembly(children[0]);
+    assembly += convertInlineAssemblyToAssembly(children.at(0));
   else if (text == "nan")
     assembly += "(f32.reinterpret_i32\n\t(i32.const -1) ;;IEE754 for "
                 "not-a-number is 0xffffffff=-1.\n)";
@@ -810,7 +816,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     }
   } else if (text == ":=") {
     TreeNode rightSide;
-    if (children[1].text == ":=") { // Expressions such as "a:=b:=0" or similar.
+    if (children.at(1).text ==
+        ":=") {                   // Expressions such as "a:=b:=0" or similar.
       TreeNode tmp = children[1]; // In case the "compile" changes the TreeNode.
       assembly += children[1].compile(context) + "\n";
       rightSide = tmp.children[0];
@@ -910,7 +917,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       exit(1);
     }
     assembly += "(if\n"
-                ";;Compiling the condition of if-branching: " +
+                "\t;;Compiling the condition of if-branching: " +
                 children[0].getLispExpression() + "\n" +
                 convertToInteger32(children[0], context).indentBy(1) +
                 "\n\t(then\n" + children[1].compile(context).indentBy(2) +
@@ -928,7 +935,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       exit(1);
     }
     assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n"
-                ";; Compiling the condition of the while-loop: " +
+                "\t\t\t;; Compiling the condition of the while-loop: " +
                 children[0].getLispExpression() + "\n" +
                 convertToInteger32(children[0], context).indentBy(4) +
                 "\n\t\t\t)\n\t\t)\n" +
@@ -1010,7 +1017,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     std::vector<TreeNode> children =
         this->children; // To make sure we don't change the AST during
                         // compiling.
-    if (isPointerType(children[1].getType(context)))
+    if (isPointerType(children.at(1).getType(context)))
       std::iter_swap(children.begin(), children.begin() + 1);
     std::string firstType = children[0].getType(context);
     std::string secondType = children[1].getType(context);
@@ -1050,8 +1057,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
   } else if (text == "-") {
-    std::string firstType = children[0].getType(context);
-    std::string secondType = children[1].getType(context);
+    std::string firstType = children.at(0).getType(context);
+    std::string secondType = children.at(1).getType(context);
     if (!isPointerType(firstType) and isPointerType(secondType)) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: What exactly does it mean to subtract a "
@@ -1144,8 +1151,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=") {
-    std::string firstType = children[0].getType(context);
-    std::string secondType = children[1].getType(context);
+    std::string firstType = children.at(0).getType(context);
+    std::string secondType = children.at(1).getType(context);
     std::string strongerType;
     if (isPointerType(firstType) and isPointerType(secondType))
       strongerType = "Integer32";
@@ -1169,32 +1176,32 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         "\n\t)\n)";
   else if (text == "not(")
     assembly += "(i32.eqz\n" +
-                convertToInteger32(children[0], context).indentBy(1) + "\n)";
+                convertToInteger32(children.at(0), context).indentBy(1) + "\n)";
   else if (text == "mod(")
     assembly +=
         "(" + stringRepresentationOfWebAssemblyType.at(returnType) +
         ".rem_s\n" +
-        convertTo(children[0], typeOfTheCurrentNode, context).indentBy(1) +
+        convertTo(children.at(0), typeOfTheCurrentNode, context).indentBy(1) +
         "\n" +
-        convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
+        convertTo(children.at(1), typeOfTheCurrentNode, context).indentBy(1) +
         "\n)";
   else if (text == "invertBits(")
     assembly += "(i32.xor (i32.const -1)\n" +
-                convertToInteger32(children[0], context).indentBy(1) + "\n)";
+                convertToInteger32(children.at(0), context).indentBy(1) + "\n)";
   else if (text == "and")
     assembly += "(i32.and\n" +
-                convertToInteger32(children[0], context).indentBy(1) + "\n" +
-                convertToInteger32(children[1], context).indentBy(1) + "\n)";
+                convertToInteger32(children.at(0), context).indentBy(1) + "\n" +
+                convertToInteger32(children.at(1), context).indentBy(1) + "\n)";
   else if (text == "or")
     assembly += "(i32.or\n" +
-                convertToInteger32(children[0], context).indentBy(1) + "\n" +
-                convertToInteger32(children[1], context).indentBy(1) + "\n)";
+                convertToInteger32(children.at(0), context).indentBy(1) + "\n" +
+                convertToInteger32(children.at(1), context).indentBy(1) + "\n)";
   else if (text.back() == '(' and
            (basicDataTypeSizes.count(text.substr(0, text.size() - 1)) or
             isPointerType(
                 text.substr(0, text.size() - 1)))) // The casting operator.
     assembly +=
-        convertTo(children[0], text.substr(0, text.size() - 1), context);
+        convertTo(children.at(0), text.substr(0, text.size() - 1), context);
   else if (std::count_if(context.functions.begin(), context.functions.end(),
                          [=](function someFunction) {
                            return someFunction.name == text;
@@ -1243,10 +1250,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           }
           if (indexOfTheNamedArgument ==
               int(functionToBeCalled.argumentNames.size())) {
-            std::cerr << "Line " << children[i].children[0].lineNumber
+            std::cerr << "Line " << children.at(i).children[0].lineNumber
                       << ", Column " << children[i].children[0].columnNumber
                       << ", Compiler error: There is no argument named \""
-                      << children[i].children[0].text
+                      << children[i].children.at(0).text
                       << "\" in the function named \""
                       << functionToBeCalled.name << "\".\n";
             std::cerr << "The arguments to that function are called: ";
