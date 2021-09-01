@@ -5,7 +5,7 @@ class CorruptCompilationContextException : public std::exception {
   static const char *message;
 
 public:
-  const char *what() const override noexcept { return message; }
+  const char *what() const noexcept override { return message; }
 };
 
 const char *CorruptCompilationContextException::message =

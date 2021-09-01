@@ -5,8 +5,12 @@
  * the compiler.
  */
 
+#include "CorruptCompilationContextException.cpp"
+#include "InvalidTypenameException.cpp"
+#include "NotImplementedException.cpp"
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <typeinfo>
 
 struct test { // When the debugger doesn't work (and I can't get it to
               // work on my Linux machine), "cassert" doesn't help a lot.
@@ -405,7 +409,10 @@ it may produce wrong code or crash because of that.)"
 }
 
 void testLongestCommonSubsequence() {
-  if (longest_common_subsequence_length("ABCD", "ACBAD") != 3 ||
+  if (longest_common_subsequence_length(
+          "ABCD",
+          "ACBAD") // https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+          != 3 ||
       longest_common_subsequence_length("", "") != 0 ||
       longest_common_subsequence_length("", "ABC") != 0 ||
       longest_common_subsequence_length("ABC", "") != 0) {
@@ -416,9 +423,43 @@ void testLongestCommonSubsequence() {
   }
   if (Levenstein_distance("", "") != 0 || Levenstein_distance("", "ABC") != 3 ||
       Levenstein_distance("ABC", "") != 3 ||
-      Levenstein_distance("kitten", "sitting") != 3) {
+      Levenstein_distance(
+          "kitten",
+          "sitting") // https://en.wikipedia.org/wiki/Levenshtein_distance#Example
+          != 3) {
     std::cerr << "Internal compiler error: The function calculating the "
                  "Levenstein Distance of strings seems not to work!"
+              << std::endl;
+    std::exit(1);
+  }
+}
+
+void checkTypeId() {
+  if (std::string(typeid(NotImplementedException()).name())
+          .find("NotImplementedException") == std::string::npos) {
+    std::cerr << "Internal Compiler Error: "
+                 "typeid(NotImplementedException()).name()==\""
+              << typeid(NotImplementedException()).name()
+              << "\", which does not mention \"NotImplementedException\"?!"
+              << std::endl;
+    std::exit(1);
+  }
+  if (std::string(typeid(CorruptCompilationContextException()).name())
+          .find("CorruptCompilationContextException") == std::string::npos) {
+    std::cerr
+        << "Internal Compiler Error: "
+           "typeid(CorruptCompilationContextException()).name()==\""
+        << typeid(CorruptCompilationContextException()).name()
+        << "\", which does not mention \"CorruptCompilationContextException\"?!"
+        << std::endl;
+    std::exit(1);
+  }
+  if (std::string(typeid(InvalidTypenameException()).name())
+          .find("InvalidTypenameException") == std::string::npos) {
+    std::cerr << "Internal Compiler Error: "
+                 "typeid(InvalidTypenameException()).name()==\""
+              << typeid(InvalidTypenameException()).name()
+              << "\", which does not mention \"InvalidTypenameException\"?!"
               << std::endl;
     std::exit(1);
   }
@@ -435,4 +476,5 @@ void runTests() {
   testBitManipulations();
   testMaps();
   testLongestCommonSubsequence();
+  checkTypeId();
 }

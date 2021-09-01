@@ -179,10 +179,10 @@ Parsing the program...)"
   string assembly;
   try {
     assembly = AST.compile();
-  } catch (
-      const exception &error) { // TODO: Should we do something specific in case
-                                // of CorruptCompilationContextException? Perhaps
-                                // output JSON of the compilation context?
+  } catch (const exception
+               &error) { // TODO: Should we do something specific in case
+                         // of CorruptCompilationContextException? Perhaps
+                         // output JSON of the compilation context?
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
     if (typeid(error).hash_code() !=
