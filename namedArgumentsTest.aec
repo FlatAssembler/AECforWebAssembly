@@ -37,11 +37,11 @@ asm("(func $printFloat32 (import \"JavaScript\" \"printFloat32\") (param f32))")
 
 // Should return 0.
 Function namedArgumentsTest() Which Returns Integer32 Does
-  // Since 'a' is set to default to 1 in the declaration of the
-  // "solveQuadraticEquation" function, it does not need to be written
-  // if it is indeed 1 when calling that function.
   InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
   solveQuadraticEquation(a := 1 , b := -1, c := -1, AddressOf(solution[0]));
+  // Since 'a' is set to default to 1 in the declaration of the
+  // "solveQuadraticEquation" function, it does not need to be written
+  // if it is indeed 1 when calling that function. In the next line, it is not.
   solveQuadraticEquation(c := -1, b := -1, solution := AddressOf(solution[1]));
   solveQuadraticEquation(b := -1, c := -1, solution := AddressOf(solution[2]));
   solveQuadraticEquation(b := -1, c := -1, a := 1 , AddressOf(solution[3]));
