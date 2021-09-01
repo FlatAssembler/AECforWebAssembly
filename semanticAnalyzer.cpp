@@ -4,6 +4,8 @@
  * here.
  */
 
+#include "CorruptCompilationContextException.cpp"
+#include "InvalidTypenameException.cpp"
 #include "NotImplementedException.cpp"
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
@@ -122,8 +124,7 @@ std::string TreeNode::getType(const CompilationContext &context) const {
               << " is being attempted to compile before the string itself has "
                  "been compiled, aborting the compilation!"
               << std::endl;
-    throw std::runtime_error(
-        "String constant appears to be an undeclared variable!");
+    throw CorruptCompilationContextException();
   }
   if (text == "and" or text == "or" or text == "<" or text == ">" or
       text == "=" or text == "not(" or text == "invertBits(") {

@@ -4,6 +4,8 @@
  * to make a special class for it.
  */
 
+#include "CorruptCompilationContextException.cpp"
+#include "InvalidTypenameException.cpp"
 #include "NotImplementedException.cpp"
 #include "TreeNode.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
@@ -31,7 +33,7 @@ instantiateGlobalStructure(const structure str, const int offset,
                   << "\", but that structure is not present in the compilation "
                      "context. Quitting now before segfaulting!"
                   << std::endl;
-        throw std::runtime_error("Compilation context is corrupt!");
+        throw CorruptCompilationContextException();
       }
       for (unsigned arrayIndex = 0; arrayIndex < str.arraySize.at(memberName);
            arrayIndex++)
@@ -295,7 +297,7 @@ public:
                             << ", Internal compiler error: Compiler got into a "
                                "forbidden state!"
                             << std::endl;
-                  throw std::runtime_error("Invalid typename!");
+                  throw InvalidTypenameException();
                 }
                 address += basicDataTypeSizes.at(childNode.text);
               }
@@ -318,10 +320,9 @@ public:
                           << assignment.text
                           << " hasn't been allocated before a pointer to it is "
                              "being compiled. Aborting the compilation before "
-                             "std::map throws exception."
+                             "std::map::at throws an undescriptive exception."
                           << std::endl;
-                throw std::runtime_error(
-                    "String constant appears to be undeclared!");
+                throw CorruptCompilationContextException();
               }
               globalDeclarations +=
                   "\t(data 0 (i32.const " +
@@ -387,7 +388,7 @@ public:
                           << ", Internal compiler error: Compiler got into a "
                              "forbidden state!"
                           << std::endl;
-                throw std::runtime_error("Invalid typename!");
+                throw InvalidTypenameException();
               }
             }
           }
@@ -633,7 +634,7 @@ In the meantime, you can try modifying your program to use ")"
                            "forbidden state, quitting now so that the compiler "
                            "doesn't segfault!"
                         << std::endl;
-              throw std::runtime_error("Invalid typename!");
+              throw InvalidTypenameException();
             }
             globalDeclarations +=
                 "\n" +
