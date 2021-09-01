@@ -58,17 +58,17 @@ int main(int argc, char **argv) {
            << R"(
 Or, alternatively, open an AEC source code with this program.
 For more information, see:
-https://flatassembler.github.io/AEC_specification#HowToCompile 
+https://flatassembler.github.io/AEC_specification#HowToCompile
 TL;DR
 An example AEC program can be downloaded here:
-https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw 
+https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw
 You need to assemble the result using a program called "wat2wasm"
 from WebAssembly Binary Toolkit (WABT), perhaps like this
 (if you have NodeJS installed and an Internet connection):
 npx -p wabt wat2wasm analogClock.wat
 Then you need to write a JavaScript program runnable in NodeJS
 which will invoke that AEC program, an example is available here:
-https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.js?format=raw 
+https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.js?format=raw
 And then, of course, you can run that program in NodeJS.
 NodeJS 11 or newer is required because the code this program produces relies
 on "WebAssembly.Global" being available.)"
@@ -179,13 +179,18 @@ Parsing the program...)"
   string assembly;
   try {
     assembly = AST.compile();
-  } catch (exception &error) {
+  } catch (
+      const exception &error) { // TODO: Should we do something specific in case
+                                // of CorruptCompilationContextException? Perhaps
+                                // output JSON of the compilation context?
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
-    cerr
-        << R"(If you have time, please report this to me on GitHub as an issue:
+    if (typeid(error).hash_code() !=
+        typeid(NotImplementedException()).hash_code())
+      cerr
+          << R"(If you have time, please report this to me on GitHub as an issue:
 https://github.com/FlatAssembler/AECforWebAssembly/issues)"
-        << std::endl;
+          << std::endl;
     return 1;
   }
   auto endOfCompilation = chrono::high_resolution_clock::now();
