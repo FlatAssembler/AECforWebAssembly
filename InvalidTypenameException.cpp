@@ -5,7 +5,6 @@ class InvalidTypenameException : public std::exception {
   static const char *message;
 
 public:
-public
   const char *what() { return message; }
 };
 

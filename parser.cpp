@@ -648,7 +648,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
       auto iteratorPointingToTheEndWhileToken = iteratorPointingToTheLoopToken;
       unsigned int counterOfWhileLoops = 1;
       do {
-        iteratorPoointingToTheEndWhileToken++;
+        iteratorPointingToTheEndWhileToken++;
         if (iteratorPointingToTheEndWhileToken == input.end())
           break;
         if (iteratorPointingToTheEndWhileToken->text == "While")
@@ -670,7 +670,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
           iteratorPointingToTheLoopToken->children.begin(),
           nodesThatTheRecursionDealsWith.begin(),
           nodesThatTheRecursionDealsWith.end());
-      input[i].children.push_back(*iteratorOfTheLoopToken);
+      input[i].children.push_back(*iteratorPointingToTheLoopToken);
       input.erase(
           input.begin() + i + 1,
           iteratorPointingToTheEndWhileToken == input.end()
