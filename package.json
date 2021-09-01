@@ -1,6 +1,6 @@
 {
   "name": "aecforwebassembly",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "A port of ArithmeticExpressionCompiler to WebAssembly, so that the programs written in the language can run in a browser.",
   "keywords": ["programming language", "WebAssembly"],
   "homepage": "https://flatassembler.github.io/AEC_specification",
