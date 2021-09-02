@@ -2,6 +2,8 @@
  * Some data-classes used by the compiler. There doesn't appear to be
  * an easy way to make them follow object-oriented principles, and I
  * doubt that would be make the code significantly better.
+ * I will, before anything else, aim at making the code easy to debug.
+ * Outputting JSON-es seems, in my experience, to be a good way to do that.
  */
 
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
@@ -9,13 +11,113 @@
 #include <string>
 #include <vector>
 
+#pragma once
+
+std::string JSONifyString(const std::string &str) {
+  std::string ret = "\"";
+  for (size_t i = 0; i < str.length(); i++)
+    if (str[i] == '\n')
+      ret += "\\n";
+    else if (str[i] == '\"')
+      ret += "\\\"";
+    else if (str[i] == '\'')
+      ret += "\\'";
+    else if (str[i] == '\t')
+      ret += "\\t";
+    else
+      ret += str[i];
+  ret += "\"";
+  return ret;
+}
+
+std::string JSONifyVectorOfStrings(const std::vector<std::string> &vector) {
+  if (vector.empty())
+    return "[]";
+  std::string ret = "[";
+  for (size_t i = 0; i < vector.size(); i++)
+    if (i == vector.size() - 1)
+      ret += JSONifyString(vector[i]) + "]";
+    else
+      ret += JSONifyString(vector[i]) + ",";
+  return ret;
+}
+
+std::string JSONifyVectorOfDoubles(const std::vector<double> &vector) {
+  if (vector.empty())
+    return "[]";
+  std::string ret = "[";
+  for (size_t i = 0; i < vector.size(); i++)
+    if (i == vector.size() - 1)
+      ret += std::to_string(vector[i]) + "]";
+    else
+      ret += std::to_string(vector[i]) + ",";
+  return ret;
+}
+
 struct function {
   std::string name;
   std::string returnType;
   std::vector<std::string> argumentTypes;
   std::vector<double> defaultArgumentValues;
   std::vector<std::string> argumentNames;
+  std::string JSONify() const {
+    return "{\n\"name\":" + JSONifyString(name) +
+           ",\n\"returnType\":" + JSONifyString(returnType) +
+           ",\n\"argumentTypes\":" + JSONifyVectorOfStrings(argumentTypes) +
+           ",\n\"defaultArgumentValues\":" +
+           JSONifyVectorOfDoubles(defaultArgumentValues) +
+           ",\n\"argumentNames\":" + JSONifyVectorOfStrings(argumentNames) +
+           "\n}";
+  }
 };
+
+std::string JSONifyMapOfStrings(const std::map<std::string, std::string> &map) {
+  std::vector<std::pair<std::string, std::string>> vector(map.size());
+  std::copy(map.begin(), map.end(), vector.begin());
+  std::string ret = "[\n";
+  for (size_t i = 0; i < vector.size(); i++) {
+    ret += "{\n\"first\":" + JSONifyString(vector[i].first) +
+           ",\n\"second\":" + JSONifyString(vector[i].second) + "\n}";
+    if (i != vector.size() - 1)
+      ret += ",\n";
+    else
+      ret += "\n";
+  }
+  ret += "]";
+  return ret;
+}
+
+std::string JSONifyMapOfUnsigneds(const std::map<std::string, unsigned> &map) {
+  std::vector<std::pair<std::string, unsigned>> vector(map.size());
+  std::copy(map.begin(), map.end(), vector.begin());
+  std::string ret = "[\n";
+  for (size_t i = 0; i < vector.size(); i++) {
+    ret += "{\n\"first\":" + JSONifyString(vector[i].first) +
+           ",\n\"second\":" + std::to_string(vector[i].second) + "\n}";
+    if (i != vector.size() - 1)
+      ret += ",\n";
+    else
+      ret += "\n";
+  }
+  ret += "]";
+  return ret;
+}
+
+std::string JSONifyMapOfDoubles(const std::map<std::string, double> &map) {
+  std::vector<std::pair<std::string, double>> vector(map.size());
+  std::copy(map.begin(), map.end(), vector.begin());
+  std::string ret = "[\n";
+  for (size_t i = 0; i < vector.size(); i++) {
+    ret += "{\n\"first\":" + JSONifyString(vector[i].first) +
+           ",\n\"second\":" + std::to_string(vector[i].second) + "\n}";
+    if (i != vector.size() - 1)
+      ret += ",\n";
+    else
+      ret += "\n";
+  }
+  ret += "]";
+  return ret;
+}
 
 struct structure {
   std::string name;
@@ -26,7 +128,34 @@ struct structure {
   std::map<std::string, double> defaultValuesOfMembers;
   std::map<std::string, unsigned>
       arraySize; // Should contain '1' for members that aren't arrays.
+  std::string JSONify() const {
+    return "{\n\"name\":" + JSONifyString(name) +
+           ",\n\"sizeInBytes\":" + std::to_string(sizeInBytes) +
+           ",\n\"memberNames\":" + JSONifyVectorOfStrings(memberNames) +
+           ",\n\"memberTypes\":" + JSONifyMapOfStrings(memberTypes) +
+           ",\n\"memberOffsetInBytes\":" +
+           JSONifyMapOfUnsigneds(memberOffsetInBytes) +
+           ",\n\"defaultValuesOfMembers\":" +
+           JSONifyMapOfDoubles(defaultValuesOfMembers) +
+           ",\n\"arraySize\":" + JSONifyMapOfUnsigneds(arraySize) + "\n}";
+  }
 };
+
+std::string JSONifyMapOfInts(const std::map<std::string, int> &map) {
+  std::vector<std::pair<std::string, int>> vector(map.size());
+  std::copy(map.begin(), map.end(), vector.begin());
+  std::string ret = "[\n";
+  for (size_t i = 0; i < vector.size(); i++) {
+    ret += "{\n\"first\":" + JSONifyString(vector[i].first) +
+           ",\n\"second\":" + std::to_string(vector[i].second) + "\n}";
+    if (i != vector.size() - 1)
+      ret += ",\n";
+    else
+      ret += "\n";
+  }
+  ret += "]";
+  return ret;
+}
 
 struct CompilationContext {
   int stackSize =
@@ -53,4 +182,35 @@ struct CompilationContext {
   std::map<std::string, unsigned>
       structureSizes; // A bit redundant, but it can make the code significantly
                       // shorter sometimes.
+  std::string JSONify() const {
+    std::string ret =
+        "{\n\"stackSize\":" + std::to_string(stackSize) +
+        ",\n\"globalVariablePointer\":" +
+        std::to_string(globalVariablePointer) +
+        ",\n\"variableTypes\":" + JSONifyMapOfStrings(variableTypes) +
+        ",\n\"placesOfVariableDeclarations\":" +
+        JSONifyMapOfInts(placesOfVariableDeclarations) +
+        ",\n\"globalVariables\":" + JSONifyMapOfInts(globalVariables) +
+        ",\n\"localVariables\":" + JSONifyMapOfInts(localVariables) +
+        ",\n\"functions\":[\n";
+    for (size_t i = 0; i < functions.size(); i++)
+      if (i == functions.size() - 1)
+        ret += functions[i].JSONify() + "\n";
+      else
+        ret += functions[i].JSONify() + ",\n";
+    ret +=
+        "],\n\"stackSizeOfThisFunction\":" +
+        std::to_string(stackSizeOfThisFunction) +
+        ",\n\"stackSizeOfThisScope\":" + std::to_string(stackSizeOfThisScope) +
+        ",\n\"currentFunctionName\":" + JSONifyString(currentFunctionName) +
+        ",\n\"structures\":[\n";
+    for (size_t i = 0; i < structures.size(); i++)
+      if (i == structures.size() - 1)
+        ret += structures[i].JSONify() + "\n";
+      else
+        ret += structures[i].JSONify() + ",\n";
+    ret += "],\n\"structureSizes\":" + JSONifyMapOfUnsigneds(structureSizes) +
+           "\n}\n";
+    return ret;
+  }
 };

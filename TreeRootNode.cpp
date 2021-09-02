@@ -33,7 +33,9 @@ instantiateGlobalStructure(const structure str, const int offset,
                   << "\", but that structure is not present in the compilation "
                      "context. Quitting now before segfaulting!"
                   << std::endl;
-        throw CorruptCompilationContextException();
+        CompilationContext contextWithStructures;
+        contextWithStructures.structures = structures;
+        throw CorruptCompilationContextException(contextWithStructures);
       }
       for (unsigned arrayIndex = 0; arrayIndex < str.arraySize.at(memberName);
            arrayIndex++)
@@ -322,7 +324,7 @@ public:
                              "being compiled. Aborting the compilation before "
                              "std::map::at throws an undescriptive exception."
                           << std::endl;
-                throw CorruptCompilationContextException();
+                throw CorruptCompilationContextException(context);
               }
               globalDeclarations +=
                   "\t(data 0 (i32.const " +

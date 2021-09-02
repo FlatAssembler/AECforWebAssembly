@@ -248,7 +248,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
            "function was called without setting the current function name, "
            "aborting compilation (or else the compiler will segfault)!"
         << std::endl;
-    throw CorruptCompilationContextException();
+    throw CorruptCompilationContextException(context);
   }
   function currentFunction = *iteratorOfTheCurrentFunction;
   std::string assembly;
@@ -256,6 +256,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       text == "Else") // Blocks of code are stored by the parser as child nodes
                       // of "Does", "Then", "Else" and "Loop".
   {
+    std::string JSON = context.JSONify();
+    std::string commentedJSON = ";;\t";
+    for (size_t i = 0; i < JSON.length(); i++)
+      if (JSON[i] == '\n')
+        commentedJSON += "\n;;\t";
+      else
+        commentedJSON += JSON[i];
+    assembly += ";;The JSON of the current compilation context is:\n" +
+                commentedJSON + "\n";
     if (text != "Does")
       context.stackSizeOfThisScope =
           0; //"TreeRootNode" is supposed to set up the arguments in the scope
@@ -465,7 +474,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               << nodeWithStructureName.text
               << "\" isn't visible, but its size is. Aborting the compilation!"
               << std::endl;
-          throw CorruptCompilationContextException();
+          throw CorruptCompilationContextException(context);
         } else if (!context.structureSizes.count(nodeWithStructureName.text)) {
           std::cerr
               << "Line " << nodeWithStructureName.lineNumber << ", Column "
@@ -475,7 +484,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               << nodeWithStructureName.text
               << "\" is visible, but its size isn't. Aborting the compilation!"
               << std::endl;
-          throw CorruptCompilationContextException();
+          throw CorruptCompilationContextException(context);
         }
         for (TreeNode instanceName : nodeWithStructureName.children) {
           if (!isValidVariableName(instanceName.text) ||
@@ -1039,7 +1048,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << "\" is not specified in the compilation context. Aborting "
                      "before we segfault."
                   << std::endl;
-        throw CorruptCompilationContextException();
+        throw CorruptCompilationContextException(context);
       }
       TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
       sizeOfNode.children.push_back(
@@ -1082,7 +1091,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << "\" is not specified in the compilation context. Aborting "
                      "before we segfault."
                   << std::endl;
-        throw CorruptCompilationContextException();
+        throw CorruptCompilationContextException(context);
       }
       TreeNode sizeOfNode("SizeOf(", lineNumber, columnNumber);
       sizeOfNode.children.push_back(

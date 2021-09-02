@@ -124,7 +124,7 @@ std::string TreeNode::getType(const CompilationContext &context) const {
               << " is being attempted to compile before the string itself has "
                  "been compiled, aborting the compilation!"
               << std::endl;
-    throw CorruptCompilationContextException();
+    throw CorruptCompilationContextException(context);
   }
   if (text == "and" or text == "or" or text == "<" or text == ">" or
       text == "=" or text == "not(" or text == "invertBits(") {
