@@ -24,6 +24,8 @@ std::string JSONifyString(const std::string &str) {
       ret += "\\'";
     else if (str[i] == '\t')
       ret += "\\t";
+    else if (str[i] == '\\')
+      ret += "\\\\";
     else
       ret += str[i];
   ret += "\"";
