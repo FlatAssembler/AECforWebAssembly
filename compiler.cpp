@@ -256,6 +256,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       text == "Else") // Blocks of code are stored by the parser as child nodes
                       // of "Does", "Then", "Else" and "Loop".
   {
+#ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
     std::string JSON = context.JSONify();
     std::string commentedJSON = ";;\t";
     for (size_t i = 0; i < JSON.length(); i++)
@@ -265,6 +266,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         commentedJSON += JSON[i];
     assembly += ";;The JSON of the current compilation context is:\n" +
                 commentedJSON + "\n";
+#endif
     if (text != "Does")
       context.stackSizeOfThisScope =
           0; //"TreeRootNode" is supposed to set up the arguments in the scope
@@ -398,6 +400,22 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             }
           }
         }
+#ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
+        std::string JSON =
+            JSONifyMapOfInts(context.localVariables) +
+            "\n"; //"\n" is added to make the output more comprehensible in case
+                  //the next assembly directive is also a comment, to put an
+                  //empty line between the two comments.
+        std::string commentedJSON = ";;\t";
+        for (size_t i = 0; i < JSON.length(); i++)
+          if (JSON[i] == '\n')
+            commentedJSON += "\n;;\t";
+          else
+            commentedJSON += JSON[i];
+        assembly += ";;The JSON of the new \"localVariables\" object in the "
+                    "current compilation context is:\n" +
+                    commentedJSON + "\n";
+#endif
       } else if (childNode.text == "InstantiateStructure") {
         if (childNode.children.size() != 1) {
           std::cerr << "Line " << childNode.lineNumber << ", Column "
@@ -697,6 +715,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             assembly += nodeWithFakeDoesToken.compile(fakeContext) + "\n";
           }
         }
+#ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
+        std::string JSON = JSONifyMapOfInts(context.localVariables) + "\n";
+        std::string commentedJSON = ";;\t";
+        for (size_t i = 0; i < JSON.length(); i++)
+          if (JSON[i] == '\n')
+            commentedJSON += "\n;;\t";
+          else
+            commentedJSON += JSON[i];
+        assembly += ";;The JSON of the new \"localVariables\" object in the "
+                    "current compilation context is:\n" +
+                    commentedJSON + "\n";
+#endif
       } else if (childNode.text == ":=" &&
                  context.structureSizes.count(
                      childNode.getType(context))) { // Structure assignments.

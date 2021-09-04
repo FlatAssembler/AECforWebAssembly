@@ -15,6 +15,7 @@
 std::string compilation_target; // WASI (WebAssembly System Interface) or
                                 // browser (default).
 #include "TreeRootNode.cpp"
+#define OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
 #include "compiler.cpp"
 #include "parser.cpp"
 #include "tests.cpp"
