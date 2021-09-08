@@ -1225,7 +1225,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             rightHandSide(".", lineNumber, columnNumber);
         TreeNode nodeWithMemberName(structureMemberName, lineNumber,
                                     columnNumber);
-        nodeWithMemberName.children.push_back(TreeNode(std::to_string(arrayIndex),lineNumber,columnNumber));
+        nodeWithMemberName.children.push_back(
+            TreeNode(std::to_string(arrayIndex), lineNumber, columnNumber));
         leftHandSide.children = {children[0], nodeWithMemberName};
         rightHandSide.children = {children.at(1), nodeWithMemberName};
         TreeNode comparisonNode("=", lineNumber, columnNumber);
