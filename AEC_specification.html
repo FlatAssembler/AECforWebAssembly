@@ -1129,8 +1129,12 @@ node analogClock
         make both the tokenizer and the parser faster, but those are harder to
         implement (<i
           >UPDATE on 26/08/2020: A user of the Atheist Forums called
-          HappySkeptic found a way to significantly speed up the parser in a
-          relatively easy way.</i
+          <a
+            href="https://atheistforums.org/thread-63150-post-2054368.html#pid2054368"
+            >HappySkeptic</a
+          >
+          found a way to significantly speed up the parser in a relatively easy
+          way.</i
         >).<br />
         <b>UPDATE</b> on 06/06/2021: The AEC-to-WebAssembly compiler can now
         target
@@ -1880,6 +1884,14 @@ Function namedArgumentsTest() Which Returns Integer32 Does
     iterator += 1;
   EndWhile
   iterator := 0;
+  // Let's test whether structure comparisons work...
+  While iterator &lt; 1*2*3 - 1 Loop
+    If not(solution[iterator] = solution[iterator + 1]) Then
+      Return iterator + 7;
+    EndIf
+    iterator += 1;
+  EndWhile
+  iterator := 0;
   While iterator &lt; 1*2*3 - 1 Loop /*
                                    * This loop should have no effect,
                                    * but the compiler must not crash
@@ -1896,11 +1908,11 @@ Function namedArgumentsTest() Which Returns Integer32 Does
     printFloat32(solution[0].firstSolution.imaginary);
     printFloat32(solution[0].secondSolution.real);
     printFloat32(solution[0].secondSolution.imaginary);
-    Return 7;
+    Return 15;
   EndIf
   Return 0;
-EndFunction
-        </pre>
+EndFunction</pre
+        >
         So, named function arguments are using the
         <span class="inline_code">:=</span> operator, the same as the
         assignment. I think that makes a lot of sense. I have made a
