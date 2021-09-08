@@ -208,6 +208,14 @@ https://github.com/FlatAssembler/AECforWebAssembly/issues)"
            high_resolution_clock::period::num * 1000 /
            high_resolution_clock::period::den)
        << " milliseconds!" << endl;
+#ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
+  cout << "If you want faster compilation times and smaller assembly output, "
+          "you can delete the\n"
+          "#define OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS\n"
+          "line from the file `AECforWebAssembly.cpp` and recompile this "
+          "compiler."
+       << endl;
+#endif
   string assemblyFileName =
       string(argv[1]).substr(0,
                              string(argv[1]).size() - string(".aec").size()) +

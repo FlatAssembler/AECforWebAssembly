@@ -404,8 +404,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         std::string JSON =
             JSONifyMapOfInts(context.localVariables) +
             "\n"; //"\n" is added to make the output more comprehensible in case
-                  //the next assembly directive is also a comment, to put an
-                  //empty line between the two comments.
+                  // the next assembly directive is also a comment, to put an
+                  // empty line between the two comments.
         std::string commentedJSON = ";;\t";
         for (size_t i = 0; i < JSON.length(); i++)
           if (JSON[i] == '\n')
