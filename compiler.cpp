@@ -1254,6 +1254,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       if (children.at(i).text == ":=")
         areArgumentsNamed = true;
     if (areArgumentsNamed) {
+      std::vector<bool> isArgumentSet(functionToBeCalled.argumentNames.size());
       TreeNode formWithoutNamedArguments(text, lineNumber, columnNumber);
       for (unsigned int i = 0; i < functionToBeCalled.argumentTypes.size(); i++)
         formWithoutNamedArguments.children.push_back(TreeNode(
@@ -1275,7 +1276,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                       << std::endl;
             exit(1);
           }
+          if (isArgumentSet.at(i))
+            std::cerr
+                << "Line " << children[i].lineNumber << ", Column "
+                << children[i].columnNumber
+                << ", Compiler warning: The argument number #" << i + 1
+                << ", named \"" << functionToBeCalled.argumentNames.at(i)
+                << "\", has been set multiple times, each time overwriting the "
+                   "previous value. This is, in all likelihood, an error. "
+                   "Please check this call to function \""
+                << functionToBeCalled.name << "\"!" << std::endl;
           formWithoutNamedArguments.children[i] = children.at(i);
+          isArgumentSet[i] = true;
         } else { // If the argument of the function we are calling is named.
           int indexOfTheNamedArgument = 0;
           while (indexOfTheNamedArgument <
@@ -1310,8 +1322,20 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             std::cerr << "Quitting now!" << std::endl;
             exit(1);
           }
+          if (isArgumentSet.at(indexOfTheNamedArgument))
+            std::cerr
+                << "Line " << children[i].lineNumber << ", Column "
+                << children[i].columnNumber
+                << ", Compiler warning: The argument number #"
+                << indexOfTheNamedArgument + 1 << ", named \""
+                << functionToBeCalled.argumentNames.at(indexOfTheNamedArgument)
+                << "\", has been set multiple times, each time overwriting the "
+                   "previous value. This is, in all likelihood, an error. "
+                   "Please check this call to function \""
+                << functionToBeCalled.name << "\"!" << std::endl;
           formWithoutNamedArguments.children[indexOfTheNamedArgument] =
               children[i].children[1];
+          isArgumentSet[indexOfTheNamedArgument] = true;
         }
       }
       assembly += ";; Compiling function with named arguments as if it were: " +
