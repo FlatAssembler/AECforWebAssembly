@@ -252,6 +252,11 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   }
   function currentFunction = *iteratorOfTheCurrentFunction;
   std::string assembly;
+#ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
+  assembly += ";; Line " + std::to_string(lineNumber) + ", Column " +
+              std::to_string(columnNumber) + ", token " + JSONifyString(text) +
+              "\n";
+#endif
   if (text == "Does" or text == "Then" or text == "Loop" or
       text == "Else") // Blocks of code are stored by the parser as child nodes
                       // of "Does", "Then", "Else" and "Loop".
