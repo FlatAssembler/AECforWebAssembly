@@ -236,12 +236,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     }
     returnType = mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   }
-  auto iteratorOfTheCurrentFunction =
+  auto iteratorPointingToFunctionBeingCompiled =
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function someFunction) {
                      return someFunction.name == context.currentFunctionName;
                    });
-  if (iteratorOfTheCurrentFunction == context.functions.end()) {
+  if (iteratorPointingToFunctionBeingCompiled == context.functions.end()) {
     std::cerr
         << "Line " << lineNumber << ", Column " << columnNumber
         << ", Internal compiler error: The \"compile(CompilationContext)\" "
@@ -250,7 +250,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         << std::endl;
     throw CorruptCompilationContextException(context);
   }
-  function currentFunction = *iteratorOfTheCurrentFunction;
+  function currentFunction = *iteratorPointingToFunctionBeingCompiled;
   std::string assembly;
 #ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
   assembly += ";; Line " + std::to_string(lineNumber) + ", Column " +
@@ -1188,12 +1188,54 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           (text == "<" ? ".lt_s\n" : ".gt_s\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
-    else
+    else // If we are comparing decimal (floating-point) numbers, rather than
+         // integers...
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) +
           (text == "<" ? ".lt\n" : ".gt\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  } else if (text == "=" &&
+             context.structureSizes.count(children.at(0).getType(context))) {
+    auto iteratorPointingToTheStructureWeAreComparing =
+        std::find_if(context.structures.begin(), context.structures.end(),
+                     [=](const structure &str) {
+                       return str.name == children[0].getType(context);
+                     });
+    if (iteratorPointingToTheStructureWeAreComparing ==
+        context.structures.end()) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Internal compiler error: The structure named \""
+                << children[0].getType(context)
+                << "\" is present in \"structureSizes\" array, but not in "
+                   "\"structures\" array!"
+                << std::endl;
+      throw CorruptCompilationContextException(context);
+    }
+    TreeNode structureComparisonConvertedIntoManyAndNodes("1", lineNumber,
+                                                          columnNumber);
+    for (std::string structureMemberName :
+         iteratorPointingToTheStructureWeAreComparing->memberNames)
+      for (int arrayIndex = 0;
+           arrayIndex <
+           (int)iteratorPointingToTheStructureWeAreComparing->arraySize.at(
+               structureMemberName);
+           arrayIndex++) {
+        TreeNode leftHandSide(".", lineNumber, columnNumber),
+            rightHandSide(".", lineNumber, columnNumber);
+        TreeNode nodeWithMemberName(structureMemberName, lineNumber,
+                                    columnNumber);
+        nodeWithMemberName.children.push_back(TreeNode(std::to_string(arrayIndex),lineNumber,columnNumber));
+        leftHandSide.children = {children[0], nodeWithMemberName};
+        rightHandSide.children = {children.at(1), nodeWithMemberName};
+        TreeNode comparisonNode("=", lineNumber, columnNumber);
+        comparisonNode.children = {leftHandSide, rightHandSide};
+        TreeNode andNode("and", lineNumber, columnNumber);
+        andNode.children = {comparisonNode,
+                            structureComparisonConvertedIntoManyAndNodes};
+        structureComparisonConvertedIntoManyAndNodes = andNode;
+      }
+    assembly += structureComparisonConvertedIntoManyAndNodes.compile(context);
   } else if (text == "=") {
     std::string firstType = children.at(0).getType(context);
     std::string secondType = children.at(1).getType(context);
