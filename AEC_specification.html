@@ -556,6 +556,10 @@
         <a
           href="https://www.reddit.com/r/ProgrammingLanguages/comments/iehbmj/my_programming_language_can_now_run_in_a_browser/?utm_source=share&utm_medium=web2x&context=3"
           >Reddit</a
+        >,
+        <a
+          href="https://www.reddit.com/r/croatia/comments/piirms/je_li_još_netko_ovdje_izradio_svoj_programski/?utm_source=share&utm_medium=web2x&context=3"
+          >Croatian Reddit</a
         >
         and
         <a
@@ -703,7 +707,9 @@
         >, I have made a
         <a href="https://github.com/FlatAssembler/Labyrinth">Labyrinth game</a>
         in it, and it has influenced a lot the decisions I made when designing
-        my programming language.<br />
+        my programming language. Microsoft Small Basic is a simplified
+        programming language that compiles to .NET bytecode (the same one that
+        C# compiles to).<br />
         <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
         wrote one targeting x86 processors (AMD and Intel). That one is written
@@ -848,8 +854,8 @@
           napravio, i to je najveći program koji sam napisao do sada, ima 5'500
           redaka i pisan je u C++-u.
         </div>
-        Sorry about that, but it will take me a lot of time to translate that to
-        English. <br /><br />
+        Sorry about that, but it would take me a lot of time to translate that
+        to English. <br /><br />
         <b id="HowToCompile">How to use the compilers</b><br />
         <a name="AEC_to_x86"></a>Probably the simplest way to use the AEC-to-x86
         compiler on a Linux machine is to type the following code into a
@@ -867,10 +873,12 @@ gcc -o analogClock analogClock.s -m32
         If everything is fine, the Analog Clock program should now print the
         current time in the terminal. I think this would work on the vast
         majority of Linux machines, as well as on many non-Linux (FreeBSD,
-        Solaris...) machines. A potential problem is that the 32-bit libraries
-        are not installed on a 64-bit Linux machine (so that
-        <span class="inline_code">-m32</span> fails), but this is rarely the
-        case, as Linux machines today usually have
+        Solaris...) machines. If you do not have
+        <span class="inline_code">wget</span>, you may try using
+        <span class="inline_code">curl</span> instead. A potential problem is
+        that the 32-bit libraries are not installed on a 64-bit Linux machine
+        (so that <span class="inline_code">-m32</span> fails), but this is
+        rarely the case, as Linux machines today usually have
         <a href="https://www.winehq.org/">WINE</a> (a Windows compatibility
         layer requiring 32-bit libraries), or at least some 32-bit programs.
         Needless to say, this will not work on Linux running on ARM processors,
@@ -1023,12 +1031,10 @@ node analogClock
         <span class="inline_code">git</span> installed than they have
         <span class="inline_code">wget</span> installed, but, if you are a
         programmer, you probably have
-        <span class="inline_code">git</span> installed as well (if you do not
-        have <span class="inline_code">wget</span>, you may try using
-        <span class="inline_code">curl</span> instead). If you want to use it on
-        an OS that's not compatible with Linux, well, good luck. I have provided
-        some executable files of my compiler for different OS-es, including
-        FreeDOS (compiled using
+        <span class="inline_code">git</span> installed as well. If you want to
+        use it on an OS that's not compatible with Linux, well, good luck. I
+        have provided some executable files of my compiler for different OS-es,
+        including FreeDOS (compiled using
         <a href="https://github.com/andrewwutw/build-djgpp"
           >DJGPP C++ compiler</a
         >), in case it helps, as the
@@ -1835,7 +1841,22 @@ EndFunction</pre
         Now, if you call such a function with fewer than 6 arguments, the
         compiler will not complain, but will supply the rest with default
         values. Note that this will not work when calling an AEC function from
-        JavaScript.
+        JavaScript. SmallBasic, the first programming language I learned, back
+        when I was 9 years old, from the now-shut-down
+        <a
+          href="https://web.archive.org/web/20100421060226/http://www.enter.bug.hr/"
+          >Croatian website about computers called Enter</a
+        >, and I mentioned it in the <a href="#Introduction">introduction</a>,
+        does not support arguments for user-made functions at all, because, as
+        it says, &quot;<i
+          >What do you need function arguments for when all variables are
+          global?</i
+        >&quot;. I think that is not a good idea, because all variables being
+        global and there being no function arguments makes it significantly
+        harder to implement recursive functions, and that was one of the
+        problems I faced it when making my Labyrinth game (also mentioned in the
+        introduction) in it. I solved it by storing what should be local
+        variables on global stacks (which SmallBasic standard library includes).
         <del
           >AEC doesn't support function hoisting nor circularly dependent
           functions, for the simple reason that there is no obvious way to
@@ -1925,7 +1946,14 @@ EndFunction</pre
           href="https://www.quora.com/Why-do-Python-and-C-allow-positional-function-parameters-before-named-function-parameters-named-arguments-but-not-after-them-My-programming-language-AECforWebAssembly-allows-both"
           >Quora question</a
         >
-        about it.
+        about it. On Quora, I also asked why Python and C# allow positional
+        function parameters before named function parameters but not after them,
+        while my programming language allows both and the compiler just
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/f6369e90551b5da49d7b2ea2e62d6c01ae99f596/compiler.cpp#L1327"
+          >issues a warning</a
+        >
+        in case an argument has been overwritten.
         <br />
         <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
