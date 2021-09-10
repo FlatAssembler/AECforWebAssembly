@@ -46,3 +46,12 @@ add_test(NAME namedArgumentsTestAssembles
 add_test(NAME namedArgumentsTestRuns
 	      COMMAND node namedArgumentsTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME leftHandSideConditionalTestCompiles
+	      COMMAND aec leftHandSideConditionalTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME leftHandSideConditionalTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm leftHandSideConditionalTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME leftHandSideConditionalTestRuns
+	      COMMAND node leftHandSideConditionalTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
