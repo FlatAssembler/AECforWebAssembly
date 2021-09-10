@@ -190,7 +190,13 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
         tokenizedExpression[i - 1].text != "While" and
         tokenizedExpression[i - 1].text != "Return" and
         tokenizedExpression[i - 1].text != "and" and
-        tokenizedExpression[i - 1].text != "or") {
+        tokenizedExpression[i - 1].text != "or" and
+        // If an left-hand-side ternary conditional operator is used right after
+        // "Does", "Loop", "Then" or "Else"...
+        tokenizedExpression[i - 1].text != "Does" and
+        tokenizedExpression[i - 1].text != "Loop" and
+        tokenizedExpression[i - 1].text != "Then" and
+        tokenizedExpression[i - 1].text != "Else") {
       tokenizedExpression[i - 1].text += tokenizedExpression[i].text;
       tokenizedExpression.erase(tokenizedExpression.begin() + i);
     }
