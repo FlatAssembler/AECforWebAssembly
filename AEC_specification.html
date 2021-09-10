@@ -661,6 +661,11 @@
                   <span class="inline_code">?:</span> operator</a
                 >
               </li>
+              <li>
+                <a href="#left_hand_side_conditional_operator"
+                  >Left Hand Side Conditional Operator</a
+                >
+              </li>
             </ol>
           </li>
           <li><a href="#Loops">Loops</a></li>
@@ -1726,6 +1731,44 @@ EndFunction</pre
           >how I implemented the ternary conditional operator in the
           AEC-to-WebAssembly compiler</a
         >.<br />
+        <b id="left_hand_side_conditional_operator">UPDATE</b> on 10/09/2021: I
+        have decided to add the left-hand-side ternary conditional operator in
+        assignments, which exists in C++, to my programming language (for now,
+        and presumably forever, only in the AEC-to-WebAssembly compiler in the
+        version <span class="inline_code">v2.0.0</span> and newer, not in the
+        no-longer-maintained AEC-to-x86 compiler). Sometimes, it can make the
+        code shorter, and it looks very cool. An excerpt from
+        <a href="leftHandSideConditionalTest.aec.html"
+          >Left Hand Side Conditional Test</a
+        >
+        which illustrates it by implementing the original Euclid's Algorithm
+        (which uses subtraction) using it:
+        <pre>
+Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
+	While b > 0 Loop
+		((a > b) ? a : b) := ((a > b) ? (a - b) : (b - a));
+		/*
+		 * The compiler should transform the line above to:
+		 *	```
+		 *	If a > b Then
+		 *		a := ((a > b) ? (a - b) : (b - a));
+		 *		// a := a - b;
+		 *	Else
+		 *		b := ((a > b) ? (a - b) : (b - a));
+		 *		// b := b - a;
+		 *	EndIf
+		 *	```	
+		 */
+	EndWhile
+	Return a;
+EndFunction</pre
+        >
+        Even in C++, it is generally agreed upon that using the conditional
+        operator on the left-hand side of the assignment is very bad style which
+        makes programs unnecessarily more difficult to read, and JavaScript does
+        not allow it at all. Nevertheless, I think allowing it is not
+        fundamentally different from allowing the conditional operator on the
+        right-hand-side and other expressions.<br />
         <br /><b id="Loops">Loops</b><br />
         For now, there is only one type of loop in AEC, the
         <span class="inline_code">While</span>-loop. A

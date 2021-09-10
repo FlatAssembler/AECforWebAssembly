@@ -14,8 +14,10 @@ Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
 		 *	```
 		 *	If a > b Then
 		 *		a := ((a > b) ? (a - b) : (b - a));
+		 *		// a := a - b;
 		 *	Else
 		 *		b := ((a > b) ? (a - b) : (b - a));
+		 *		// b := b - a;
 		 *	EndIf
 		 *	```	
 		 */
