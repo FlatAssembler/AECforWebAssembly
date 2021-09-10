@@ -858,6 +858,23 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << text << "\", aborting the compilation!" << std::endl;
       throw InvalidTypenameException();
     }
+  } else if (text == ":=" &&
+             children[0].text ==
+                 "?:") { // Left-hand-side conditional operators will be
+                         // converted to if-else statements on the AST level...
+    TreeNode firstAssignmentNode(":=", lineNumber, columnNumber);
+    TreeNode secondAssignmentNode(firstAssignmentNode);
+    firstAssignmentNode.children.push_back(children[0].children.at(1));
+    firstAssignmentNode.children.push_back(children[1]);
+    secondAssignmentNode.children.push_back(children[0].children.at(2));
+    secondAssignmentNode.children.push_back(children[1]);
+    TreeNode thenNode("Then", lineNumber, columnNumber);
+    thenNode.children.push_back(firstAssignmentNode);
+    TreeNode elseNode("Else", lineNumber, columnNumber);
+    elseNode.children.push_back(secondAssignmentNode);
+    TreeNode ifNode("If", lineNumber, columnNumber);
+    ifNode.children = {children[0].children[0], thenNode, elseNode};
+    assembly += ifNode.compile(context);
   } else if (text == ":=") {
     TreeNode rightSide;
     if (children.at(1).text ==
