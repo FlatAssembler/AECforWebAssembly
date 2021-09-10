@@ -1,0 +1,24 @@
+/*
+ * I have decided to add the left-hand-side ternary conditional operator in
+ * assignments, which exists in C++, to my programming language. Sometimes,
+ * it can make the code shorter, and it looks very cool. 
+ */
+
+#target WASI //Will make the JavaScript tester slightly shorter.
+
+Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
+	While b > 0 Loop
+		((a > b) ? a : b) := ((a > b) ? (a - b) : (b - a));
+		/*
+		 * The compiler should transform the line above to:
+		 *	```
+		 *	If a > b Then
+		 *		a := ((a > b) ? (a - b) : (b - a));
+		 *	Else
+		 *		b := ((a > b) ? (a - b) : (b - a));
+		 *	EndIf
+		 *	```	
+		 */
+	EndWhile
+	Return a;
+EndFunction
