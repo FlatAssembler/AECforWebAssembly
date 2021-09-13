@@ -1769,6 +1769,54 @@ EndFunction</pre
         not allow it at all. Nevertheless, I think allowing it is not
         fundamentally different from allowing the conditional operator on the
         right-hand-side and other expressions.<br />
+        <b>UPDATE</b> on 13/09/2021: As I have mentioned on
+        <a
+          href="https://discord.com/channels/530598289813536771/847014270922391563/886245635882369034"
+          >Discord</a
+        >, the behaviour of the left-hand-side ternary conditional operator in
+        AEC does not exactly match the behaviour of left-hand-side ternary
+        conditional operator in C++, and I think the behaviour in AEC is better.
+        In C++, the following program compiles:
+        <pre
+          class="cxx_program"
+        ><span class="PreProc">#include </span><span class="Constant">&lt;iostream&gt;</span>
+
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+
+<span class="Type">int</span> main() {
+        <span class="Type">int</span> a=<span class="Constant">15</span>;
+        <span class="Type">int</span> b=<span class="Constant">25</span>;
+        <span class="Statement">while</span> (b&gt;<span class="Constant">0</span>)
+                ((a&gt;b)?a:b)=((a&gt;b)?(a-b):(b-a));
+        cout &lt;&lt;a &lt;&lt;endl;
+}</pre>
+        However, this program refuses to compile with some confusing error
+        message:
+        <pre
+          class="cxx_program"
+        ><span class="PreProc">#include </span><span class="Constant">&lt;iostream&gt;</span>
+
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+
+<span class="Type">int</span> main() {
+        <span class="Type">int</span> a=<span class="Constant">15</span>;
+        <span class="Type">float</span> b=<span class="Constant">25</span>;
+        <span class="Statement">while</span> (b&gt;<span class="Constant">0</span>)
+                ((a&gt;b)?a:b)=((a&gt;b)?(a-b):(b-a));
+        cout &lt;&lt;a &lt;&lt;endl;
+}</pre>
+        The only difference between those two programs is whether we declare the
+        variable <span class="inline_code">b</span> as
+        <span class="inline_code">float</span> (equivalent to AEC
+        <span class="inline_code">Decimal32</span>) or as
+        <span class="inline_code">int</span> (on most compilers, that is
+        equivalent to AEC <span class="inline_code">Integer32</span>). Compilers
+        will refuse to compile the second program with some error message from
+        which it is not obvious that the issue will be solved by changing
+        <span class="inline_code">float</span> to
+        <span class="inline_code">int</span>. In my opinion, that is hardly
+        acceptable, and the AEC-to-WebAssembly compiler accepts the equivalents
+        of both programs.<br />
         <br /><b id="Loops">Loops</b><br />
         For now, there is only one type of loop in AEC, the
         <span class="inline_code">While</span>-loop. A
@@ -2685,7 +2733,10 @@ EndFunction
         }
         var preTags = document.getElementsByTagName("pre");
         for (var i = 0; i < preTags.length; i++)
-          if (!/LinuxShell/.test(preTags[i].className))
+          if (
+            !/LinuxShell/.test(preTags[i].className) &&
+            !/cxx_program/.test(preTags[i].className)
+          )
             preTags[i].innerHTML = highlightAEC(preTags[i].innerText).replace(
               /\n/g,
               navigator.appName === "Microsoft Internet Explorer"
