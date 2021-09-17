@@ -20,6 +20,9 @@ function highlightedToken(token) {
                 .replace(/\\t/g, "<b>\\<i>t</i></b>")
                 .replace(/\\\"/g, "<b>\\<i>\"</i></b>") +
             "</span>");
+  if (token.substr(0, 2) == 'R"')
+    return ('<span class="String">' +
+            token.replace(/\n/g, '</span>\n<span class="String">') + "</span>");
   if (token == "Character" || token == "CharacterPointer" ||
       token == "Integer16" || token == "Integer16Pointer" ||
       token == "Integer32" || token == "Integer32Pointer" ||
@@ -27,7 +30,8 @@ function highlightedToken(token) {
       token == "Decimal32" || token == "Decimal64" ||
       token == "Decimal32Pointer" || token == "Decimal64Pointer" ||
       token == "CharacterPointerPointer" || token == "DataType" ||
-      token == "Nothing" || token == "InstantiateStructure")
+      token == "Nothing" || token == "InstantiateStructure" ||
+      /Pointer$/.test(token))
     return '<span class="Type">' + token + "</span>";
   if (token.charAt(0) >= "0" && token.charAt(0) <= "9")
     return '<span class="Constant">' + token + "</span>";
@@ -85,16 +89,27 @@ function highlightAEC(sourceCode) {
       continue;
     }
     if (!areWeInAString &&
-        (sourceCode.charAt(i) == '"' || sourceCode.charAt(i) == "'")) {
+        (sourceCode.charAt(i) == '"' || sourceCode.charAt(i) == "'" ||
+         sourceCode.substr(i, 2) == 'R"')) {
       areWeInAString = true;
-      howTheStringStarted = sourceCode.charAt(i);
+      if (sourceCode.substr(i, 2) == 'R"') {
+        howTheStringStarted = "";
+        var whereIsTheOpenParenthesis = i;
+        while (sourceCode.charAt(whereIsTheOpenParenthesis) != '(') {
+          howTheStringStarted += sourceCode.charAt(whereIsTheOpenParenthesis);
+          whereIsTheOpenParenthesis++;
+        }
+        howTheStringStarted = ')' + howTheStringStarted + '"';
+      } else
+        howTheStringStarted = sourceCode.charAt(i);
       highlightedCode += highlightedToken(currentToken);
       currentToken = sourceCode.charAt(i);
       continue;
     }
     if (areWeInAString &&
         currentToken.charAt(currentToken.length - 1) != "\\" &&
-        sourceCode.charAt(i) == howTheStringStarted) {
+        sourceCode.substr(i, howTheStringStarted.length) ==
+            howTheStringStarted) {
       areWeInAString = false;
       currentToken += sourceCode.charAt(i);
       highlightedCode += highlightedToken(currentToken);
