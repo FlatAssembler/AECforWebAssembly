@@ -1,6 +1,6 @@
 # https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804
 cmake_minimum_required(VERSION 3.10)
-project(AECForWebAssembly VERSION 2.0.0)
+project(AECForWebAssembly VERSION 2.1.0)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -54,4 +54,13 @@ add_test(NAME leftHandSideConditionalTestAssembles
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_test(NAME leftHandSideConditionalTestRuns
 	      COMMAND node leftHandSideConditionalTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME multiLineStringTestCompiles
+	      COMMAND aec multiLineStringTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME multiLineStringTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm multiLineStringTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME multiLineStringTestRuns
+	      COMMAND node multiLineStringTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
