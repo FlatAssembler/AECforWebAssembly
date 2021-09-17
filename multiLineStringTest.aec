@@ -1,0 +1,29 @@
+/*
+ * This is a test whether multi-line strings work correctly.
+ */
+
+#target WASI // Will make the JavaScript tester shorter.
+
+Function strlen(CharacterPointer str) Which Returns Integer32 Does
+  Integer32 i := 0;
+  While ValueAt(str + i) Loop
+    i += 1;
+  EndWhile
+  Return i;
+EndFunction
+
+CharacterPointer first := R"(
+"Hello world!"
+)",
+                 second := R"ab(
+"Hello world!"
+)ab",
+                 third := R"a(
+"Hello world!"
+)a";
+
+//Should return 1
+Function multiLineStringTest() Which Returns Integer32 Does
+  Return strlen(first)=strlen(second) and strlen(second)=strlen(third) 
+         and strlen(third)=strlen("\"Hello world!\"")+2;
+EndFunction

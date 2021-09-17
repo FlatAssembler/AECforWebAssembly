@@ -2763,7 +2763,7 @@ EndFunction
               areWeInAString = true;
               if (sourceCode.substr(i, 2) == 'R"') {
                 howTheStringStarted = "";
-                var whereIsTheOpenParenthesis = i;
+                var whereIsTheOpenParenthesis = i + 2;
                 while (sourceCode.charAt(whereIsTheOpenParenthesis) != "(") {
                   howTheStringStarted += sourceCode.charAt(
                     whereIsTheOpenParenthesis
@@ -2783,7 +2783,8 @@ EndFunction
                 howTheStringStarted
             ) {
               areWeInAString = false;
-              currentToken += sourceCode.charAt(i);
+              currentToken += howTheStringStarted;
+              i += howTheStringStarted.length - 1;
               highlightedCode += highlightedToken(currentToken);
               currentToken = "";
               continue;

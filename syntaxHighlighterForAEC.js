@@ -94,7 +94,7 @@ function highlightAEC(sourceCode) {
       areWeInAString = true;
       if (sourceCode.substr(i, 2) == 'R"') {
         howTheStringStarted = "";
-        var whereIsTheOpenParenthesis = i;
+        var whereIsTheOpenParenthesis = i + 2;
         while (sourceCode.charAt(whereIsTheOpenParenthesis) != '(') {
           howTheStringStarted += sourceCode.charAt(whereIsTheOpenParenthesis);
           whereIsTheOpenParenthesis++;
@@ -111,7 +111,8 @@ function highlightAEC(sourceCode) {
         sourceCode.substr(i, howTheStringStarted.length) ==
             howTheStringStarted) {
       areWeInAString = false;
-      currentToken += sourceCode.charAt(i);
+      currentToken += howTheStringStarted;
+      i += howTheStringStarted.length - 1;
       highlightedCode += highlightedToken(currentToken);
       currentToken = "";
       continue;
@@ -143,7 +144,8 @@ else if (process.argv.length != 3 || !/\.AEC$/i.test(process.argv[2])) {
   const FileSystem = require("fs");
   let originalCode;
   try {
-    originalCode = FileSystem.readFileSync(process.argv[2], "utf8");
+    originalCode =
+        FileSystem.readFileSync(process.argv[2], "utf8").replace(/\r/g, "");
   } catch (error) {
     console.log(`Can't open the file "${process.argv[2]}" for reading! `,
                 error.message);

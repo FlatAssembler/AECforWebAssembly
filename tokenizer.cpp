@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
 
+#define NDEBUG_for_multiline_strings
+
 bool isAllWhitespace(
     const std::string token) // No obvious way to do it in REGEX so that CLANG
                              // on Linux won't miscompile it.
@@ -63,12 +65,17 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       areWeInAString = true;
       currentColumn++;
       stringDelimiter = ")";
-      size_t where_is_the_open_paranthesis = i;
+      size_t where_is_the_open_paranthesis = i + 2;
       while (where_is_the_open_paranthesis < input.length() and
              input[where_is_the_open_paranthesis] != '(') {
         stringDelimiter += input[where_is_the_open_paranthesis];
         where_is_the_open_paranthesis++;
       }
+      stringDelimiter += '"';
+#ifndef NDEBUG_for_multiline_strings
+      std::cerr << "DEBUG: String delimiter of this multi-line string is: "
+                << stringDelimiter << std::endl;
+#endif
       tokenizedExpression.push_back(
           TreeNode(input.substr(i, 1), currentLine, currentColumn));
     } else if (tokenizedExpression.size() == 0) {
@@ -95,12 +102,12 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       if (areWeInAString and
           stringDelimiter == input.substr(i, stringDelimiter.length()) and
           (i == 0 or input[i - 1] != '\\')) {
-        tokenizedExpression.back().text.push_back(input[i]);
+        tokenizedExpression.back().text += stringDelimiter;
         if (stringDelimiter.length() > 1) // If it was a multi-line string
         {
           tokenizedExpression.back().text =
               JSONifyString(tokenizedExpression.back().text.substr(
-                  stringDelimiter.length(),
+                  stringDelimiter.length() + 1,
                   tokenizedExpression.back().text.length() -
                       2 * stringDelimiter.length() - 1));
           i += stringDelimiter.length() - 1;

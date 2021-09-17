@@ -45,7 +45,19 @@ void tokenizerTests() {
 array_name
 //A comment about the name of the array.
 [index])",
-           "['array_name[','index',']']"}});
+           "['array_name[','index',']']"},
+       {
+           R"abc(R"(
+Hello world!
+)";)abc",
+           "['\"\\nHello world!\\n\"',';']"},
+       {
+           R"(R"abc(
+Hello world!
+)abc";)",
+           "['\"\\nHello world!\\n\"',';']"
+
+       }});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));
