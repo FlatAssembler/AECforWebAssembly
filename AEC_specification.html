@@ -650,7 +650,17 @@
               </li>
             </ol>
           </li>
-          <li><a href="#Platforms">What platforms can be targeted now</a></li>
+          <li>
+            <a href="#Platforms">What platforms can be targeted now</a>
+            <ol>
+              <li>
+                <a href="#why_WebAssembly"
+                  >Croatian text that explains why WebAssembly is an
+                  exceptionally easy target for compilers</a
+                >
+              </li>
+            </ol>
+          </li>
           <li>
             <a href="#HowToCompile">How to use the compilers</a>
             <ol>
@@ -661,7 +671,12 @@
             </ol>
           </li>
           <li><a href="#Comments">Comments</a></li>
-          <li><a href="#Constants">Constants</a></li>
+          <li>
+            <a href="#Constants">Constants</a>
+            <ol>
+              <li><a href="#multiline_strings">Multi-line strings</a></li>
+            </ol>
+          </li>
           <li><a href="#Variables">Variable declarations</a></li>
           <li><a href="#Arrays">Arrays and pointers</a></li>
           <li><a href="#Assignments">Assignments</a></li>
@@ -851,7 +866,7 @@
         <b>UPDATE</b> on 28/08/2021: As a part of a paper I have written in my
         economics class, I have explained why I chose to target WebAssembly and
         why I think WebAssembly will revolutionalize compilers:
-        <div class="quotation" lang="hr">
+        <div class="quotation" lang="hr" id="why_WebAssembly">
           WebAssembly je dizajniran da bude jako lagan cilj za compilere, daleko
           lakši nego asemblerski jezici fizičkih procesora. Kada dizajniramo
           asemblerski jezik za fizički procesor, imamo tri trade-offsa
@@ -1265,6 +1280,55 @@ node analogClock
         operators for integer division and decimal division probably makes the
         most sense, but it will also undeniably feel alien to most
         programmers.<br />
+        <b id="multiline_strings">UPDATE</b> on 17/09/2021: The
+        AEC-to-WebAssembly compiler version
+        <span class="inline_code">v2.1.0</span> (not released as of the time of
+        writing this, but it can be built from source) supports multi-line
+        strings, the same way C++ does. An excerpt from
+        <a href="multiLineStringTest.aec.html">Multi-line String Test</a>:
+        <pre>
+CharacterPointer first := R"(
+"Hello world!"
+)",
+                 second := R"ab(
+"Hello world!"
+)ab",
+                 third := R"a(
+"Hello world!"
+)a";
+
+//Should return 1
+Function multiLineStringTest() Which Returns Integer32 Does
+  Return strlen(first)=strlen(second) and strlen(second)=strlen(third) 
+         and strlen(third)=strlen("\"Hello world!\"")+2;
+EndFunction</pre
+        >
+        The support for multi-line strings will probably never be added to the
+        AEC-to-x86 compiler, since AEC-to-x86 compiler does not tokenize the
+        whole program before compiling, but tokenizes line-by-line, so it would
+        need to be significantly restructured to support multi-line-strings. I
+        like the way C++ supports multi-line strings more than I like the way
+        JavaScript supports them. In JavaScript, namely, multi-line strings
+        begin and end with a backtick <span class="inline_code">`</span>, which
+        was presumably made under the assumption that long hard-coded strings
+        (for which multi-line strings are used) would never include a back-tick.
+        That does not seem like a reasonable assumption. C++ allows us to
+        specify which string surrounded by a closed paranthesis
+        <span class="inline_code">)</span> and the quote sign
+        <span class="inline_code">&quot;</span> we think will never appear in
+        the text stored as a multi-line string (in the example above, those were
+        an empty string in <span class="inline_code">first</span>, the string
+        <span class="inline_code">ab</span> in
+        <span class="inline_code">second</span>, and the string
+        <span class="inline_code">a</span> in
+        <span class="inline_code">third</span>), and the programmer will
+        more-than-likely be right about that. Java does not support multi-line
+        strings at all, supposedly to discourage hard-coding of large texts into
+        a program. I think that is not the right thing to do, primarily because
+        multi-line strings have many good uses: they arguably make the
+        AEC-to-WebAssembly compiler, written in C++, more legible. Parser tests
+        and large chunks of assembly code are written as multi-line strings
+        there, and I think rightly so.<br />
         <br /><b id="Variables">Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
