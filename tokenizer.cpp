@@ -58,7 +58,20 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
     if (areWeInAComment)
       std::cerr << "DEBUG: We are in a comment." << std::endl;
 #endif
-    if (tokenizedExpression.size() == 0) {
+    if (not(areWeInAString) and not(areWeInAComment) and input[i] == 'R' and
+        i < input.length() - 1 and input[i + 1] == '"') { // Multi-line string
+      areWeInAString = true;
+      currentColumn++;
+      stringDelimiter = ")";
+      size_t where_is_the_open_paranthesis = i;
+      while (where_is_the_open_paranthesis < input.length() and
+             input[where_is_the_open_paranthesis] != '(') {
+        stringDelimiter += input[where_is_the_open_paranthesis];
+        where_is_the_open_paranthesis++;
+      }
+      tokenizedExpression.push_back(
+          TreeNode(input.substr(i, 1), currentLine, currentColumn));
+    } else if (tokenizedExpression.size() == 0) {
       if (input.size() - i > 2 and
           (input.substr(i, 2) == "//" or input.substr(i, 2) == "/*")) {
         areWeInAComment = true;
@@ -73,10 +86,26 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
         areWeInAString = true;
         stringDelimiter = input.substr(i, 1);
       }
-    } else if ((input[i] == '"' or input[i] == '\'') and !areWeInAComment) {
-      if (areWeInAString and stringDelimiter == input.substr(i, 1) and
+    } else if ((input[i] == '"' or input[i] == '\'' or
+                (not(stringDelimiter.empty()) and
+                 i < input.length() - stringDelimiter.length() and
+                 input.substr(i, stringDelimiter.length()) ==
+                     stringDelimiter)) and
+               !areWeInAComment) {
+      if (areWeInAString and
+          stringDelimiter == input.substr(i, stringDelimiter.length()) and
           (i == 0 or input[i - 1] != '\\')) {
         tokenizedExpression.back().text.push_back(input[i]);
+        if (stringDelimiter.length() > 1) // If it was a multi-line string
+        {
+          tokenizedExpression.back().text =
+              JSONifyString(tokenizedExpression.back().text.substr(
+                  stringDelimiter.length(),
+                  tokenizedExpression.back().text.length() -
+                      2 * stringDelimiter.length() - 1));
+          i += stringDelimiter.length() - 1;
+          currentColumn += stringDelimiter.length() - 1;
+        }
         tokenizedExpression.push_back(
             TreeNode(string(), currentLine, currentColumn));
         currentColumn++;
@@ -95,7 +124,10 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       areWeInAComment = true;
       commentDelimiter = input.substr(i, 2);
     } else if (input[i] == '\n') { // If we came to the end of a line.
-      if (areWeInAString) {
+      if (areWeInAString &&
+          stringDelimiter.length() // The length of a string delimiter is always
+                                   // equal to 1 for single-line strings.
+              < 2) {
         std::cerr << "Line " << currentLine << ", Column "
                   << tokenizedExpression.back().columnNumber
                   << ", Tokenizer error: Unterminated string literal!"
@@ -107,6 +139,12 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       else if (areWeInAComment) {
         currentLine++;
         currentColumn = 1;
+        continue;
+      } else if (areWeInAString) // Multi-line string
+      {
+        currentLine++;
+        currentColumn = 1;
+        tokenizedExpression.back().text.push_back(input[i]);
         continue;
       }
       currentLine++;
