@@ -635,7 +635,21 @@
       >
         <b>Contents</b><br />
         <ol>
-          <li><a href="#Introduction">Introduction</a></li>
+          <li>
+            <a href="#Introduction">Introduction</a>
+            <ol>
+              <li>
+                <a href="#compilers_doing_too_much"
+                  >Compilers trying to do too much</a
+                >
+              </li>
+              <li>
+                <a href="#special_insight"
+                  >How making a programming language is insightful</a
+                >
+              </li>
+            </ol>
+          </li>
           <li><a href="#Platforms">What platforms can be targeted now</a></li>
           <li>
             <a href="#HowToCompile">How to use the compilers</a>
@@ -687,53 +701,74 @@
           <li><a href="#Conclusion">Conclusion</a></li>
         </ol>
         <b id="Introduction">Introduction</b><br />
-        Compilers these days, even C compilers, have lots of features and are
-        often smarter than the programmer when it comes to things they are made
-        to do. While this is usually very useful, sometimes it's
-        counter-productive. Suppose that you are writing a program in Assembly
-        and want to do something high-level (because correctness is way more
-        important than speed). You can't tell your C compiler to simply output
-        the code to assign <span class="inline_code">sqrt(a*a+b*b)</span> to
-        <span class="inline_code">c</span>, if you try to, it will complain
-        those variables aren't declared and that you aren't in a C function. C
-        compilers have ideas how to declare functions and variables in assembly.
-        While these ideas usually work, sometimes you are writing something
-        where the assembler will complain if you give it the code that C
-        compilers produced for those things, and there is no way to modify the
-        code the C compiler outputs for declaring a function in C. So,
-        sometimes, compilers, while they could come useful for some task, are
-        trying to do too much and are thus counter-productive. Can we have a
-        language with a compiler that does only what you told it, in a very
-        predictable way? Well, that's what inspired me to create
-        <i>Arithmetic Expression Compiler</i> (AEC) a few years ago. The first
-        programming language I learned was
-        <a href="https://smallbasic-publicwebsite.azurewebsites.net/"
-          >Microsoft Small Basic</a
-        >, I have made a
-        <a href="https://github.com/FlatAssembler/Labyrinth">Labyrinth game</a>
-        in it, and it has influenced a lot the decisions I made when designing
-        my programming language. Microsoft Small Basic is a simplified
-        programming language that compiles to .NET bytecode (the same one that
-        C# compiles to), and it is the only language that compiles to .NET
-        bytecode that I have managed to learn so far.<br />I have also always
-        been interested in languages, both natural and artificial (such as
-        programming languages), and making a programming language will certainly
-        give me a lot better insight into how programming languages really work.
-        That is not quite true for natural languages: if you try to make your
-        own constructed language to be spoken by humans (similar to Esperanto),
-        and you do not know about <i lang="la">consecutio temporum</i>, you will
-        most likely not specify how <i lang="la">consecutio temporum</i> is
-        supposed to work in your language and you will probably not even realize
-        your grammar has a hole in its specification (you will assume it is
-        understood by itself it will be done the same way as in your native
-        language, thinking, like I used to think before learning about
-        <i lang="la">consecutio temporum</i> in English, that the way tenses are
-        put together in complex sentences in your native language is based on
-        logic, rather than that the rules for that are essentially-arbitrary).
-        But it is true that making a programming language gives you a special
-        insight into how programming languages, and computers in general, work.
-        Especially if you are writing everything yourself (like I am doing),
-        rather than using frameworks for tokenizing, parsing and compiling.<br />
+        <span id="compilers_doing_too_much"
+          >Compilers these days, even C compilers, have lots of features and are
+          often smarter than the programmer when it comes to things they are
+          made to do. While this is usually very useful, sometimes it's
+          counter-productive. Suppose that you are writing a program in Assembly
+          and want to do something high-level (because correctness is way more
+          important than speed). You can't tell your C compiler to simply output
+          the code to assign <span class="inline_code">sqrt(a*a+b*b)</span> to
+          <span class="inline_code">c</span>, if you try to, it will complain
+          those variables aren't declared and that you aren't in a C function. C
+          compilers have ideas how to declare functions and variables in
+          assembly. While these ideas usually work, sometimes you are writing
+          something where the assembler will complain if you give it the code
+          that C compilers produced for those things, and there is no way to
+          modify the code the C compiler outputs for declaring a function in C.
+          So, sometimes, compilers, while they could come useful for some task,
+          are trying to do too much and are thus counter-productive. In my
+          opinion, this is especially true for the mainstream compilers
+          targetting WebAssembly, but
+          <a href="#about_emscripten">more on that later</a>. Can we have a
+          language with a compiler that does only what you told it, in a very
+          predictable way? Well, that's what inspired me to create
+          <i>Arithmetic Expression Compiler</i> (AEC) a few years ago. The first
+          programming language I learned was
+          <a href="https://smallbasic-publicwebsite.azurewebsites.net/"
+            >Microsoft Small Basic</a
+          >, I have made a
+          <a href="https://github.com/FlatAssembler/Labyrinth"
+            >Labyrinth game</a
+          >
+          in it, and it has influenced a lot the decisions I made when designing
+          my programming language. Microsoft Small Basic is a simplified
+          programming language that compiles to .NET bytecode (the same one that
+          C# compiles to), and it is the only language that compiles to .NET
+          bytecode that I have managed to learn so far.</span
+        ><br /><span id="special_insight"
+          >I have also always been interested in languages, both natural and
+          artificial (such as programming languages), and making a programming
+          language will certainly give me a lot better insight into how
+          programming languages really work. That is not quite true for natural
+          languages: if you try to make your own constructed language to be
+          spoken by humans (similar to Esperanto), and you do not know about
+          <i lang="la">consecutio temporum</i>, you will most likely not specify
+          how <i lang="la">consecutio temporum</i> is supposed to work in your
+          language and you will probably not even realize your grammar has a
+          hole in its specification (you will assume it is understood by itself
+          it will be done the same way as in your native language, thinking,
+          like I used to think before learning about
+          <i lang="la">consecutio temporum</i> in English, that the way tenses
+          are put together in complex sentences in your native language is based
+          on logic, rather than that the rules for that are
+          essentially-arbitrary). But it is true that making a programming
+          language gives you a special insight into how programming languages,
+          and computers in general, work. Especially if you are writing
+          everything yourself (like I am doing), rather than using frameworks
+          for tokenizing, parsing and compiling. To be clear, I am not saying
+          making your programming language gives you some special insight into
+          how languages in general work. Although in
+          <a href="Fonoloska_evolucija_jezika.docx">papers</a>
+          <a
+            href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/seminar/PojednostavljeniSeminar.pdf"
+            >I have</a
+          >
+          <a href="PicoBlaze/PicoBlaze.rtf">written</a> I have often made
+          comparisons between human languages and programming languages, I am
+          not entirely convinced the similarity between human languages and
+          programming languages is anything more than superficial.</span
+        ><br />
         <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
         wrote one targeting x86 processors (AMD and Intel). That one is written
@@ -763,11 +798,11 @@
         manually), I was able to add many new features. However, I think it's
         still not nearly as
         <i>intrusive</i> as C compilers are.
-        <a href="https://emscripten.org/">Emscripten</a> (the primary C and C++
-        compiler for WebAssembly, a modified version of the CLANG compiler)
-        always assumes the standard C library is present on the JavaScript
-        Virtual Machine when compiling any kind of program, so it's an overkill
-        for most cases when it could come useful. The
+        <a href="https://emscripten.org/" id="about_emscripten">Emscripten</a>
+        (the primary C and C++ compiler for WebAssembly, a modified version of
+        the CLANG compiler) always assumes the standard C library is present on
+        the JavaScript Virtual Machine when compiling any kind of program, so
+        it's an overkill for most cases when it could come useful. The
         <a href="https://github.com/FlatAssembler/AECforWebAssembly"
           >AEC-to-WebAssembly compiler</a
         >
