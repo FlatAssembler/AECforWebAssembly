@@ -1313,7 +1313,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     function functionToBeCalled = *find_if(
         context.functions.begin(), context.functions.end(),
         [=](function someFunction) { return someFunction.name == text; });
-#ifdef ENABLE_FUNCTION_ARGUMENTS
+#ifdef ENABLE_NAMED_FUNCTION_ARGUMENTS
     bool areArgumentsNamed = false;
     for (unsigned int i = 0; i < children.size(); i++)
       if (children.at(i).text == ":=")
@@ -1458,7 +1458,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 .indentBy(1);
       }
       assembly += ")";
-#ifdef ENABLE_FUNCTION_ARGUMENTS
+#ifdef ENABLE_NAMED_FUNCTION_ARGUMENTS
     }
 #endif
   } else if (text == "ValueAt(") {

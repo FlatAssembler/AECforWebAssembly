@@ -267,8 +267,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function fn) { return fn.name == text; });
   if (potentialFunction != context.functions.end()) {
-#define ENABLE_FUNCTION_ARGUMENTS
-#ifndef ENABLE_FUNCTION_ARGUMENTS
+#define ENABLE_NAMED_FUNCTION_ARGUMENTS
+#ifndef ENABLE_NAMED_FUNCTION_ARGUMENTS
     for (TreeNode child : children)
       if (child.text == ":=")
         throw NotImplementedException(
