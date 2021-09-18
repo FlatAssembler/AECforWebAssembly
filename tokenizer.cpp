@@ -202,6 +202,10 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                 << std::endl;
     }
   }
+  if (areWeInAString)
+    std::cerr << "Tokenizer error: String not terminated before the end of the "
+                 "program!"
+              << std::endl;
   for (auto iterator = tokenizedExpression.begin();
        iterator < tokenizedExpression.end(); iterator++)
     if (iterator->text.size() == 3 and iterator->text.substr(0, 1) == "'" and
