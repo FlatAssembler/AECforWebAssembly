@@ -165,8 +165,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       currentColumn++;
       tokenizedExpression.push_back(
           TreeNode(string(), currentLine, currentColumn));
-    } else if ((input[i] > 0 // Again, Microsoft Visual Studio...
-                    and std::isalnum(input[i]) or
+    } else if (((input[i] > 0 // Again, Microsoft Visual Studio...
+                 and std::isalnum(input[i])) or
                 input[i] == '_') and
                isComposedOfAlnumsAndOneDot(tokenizedExpression.back().text) and
                !areWeInAString and !areWeInAComment) // Names and numbers
