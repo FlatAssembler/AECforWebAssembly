@@ -4,13 +4,28 @@
 
 #target WASI // Will make the JavaScript tester shorter.
 
-Function strlen(CharacterPointer str) Which Returns Integer32 Does
-  Integer32 i := 0;
-  While ValueAt(str + i) Loop
-    i += 1;
-  EndWhile
-  Return i;
-EndFunction
+Function strlen(CharacterPointer str) Which Returns Integer32 Is Declared;
+
+// Let's insert the assembly code produced by EMSCRIPTEN as multiline string.
+asm(R"abc(
+  (func $strlen (param i32) (result i32)
+    (local i32 i32)
+    i32.const 0
+    local.set 1
+    loop
+      local.get 1
+      local.tee 2
+      i32.const 1
+      i32.add
+      local.set 1
+      local.get 0
+      local.get 2
+      i32.add
+      i32.load8_u
+      br_if 0
+    end
+    local.get 2)
+)abc");
 
 CharacterPointer first := R"(
 "Hello world!"
