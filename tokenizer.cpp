@@ -158,12 +158,16 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       currentColumn = 1;
       tokenizedExpression.push_back(
           TreeNode(string(), currentLine, currentColumn));
-    } else if (isspace(input[i]) and !areWeInAString and
+    } else if (input[i] > 0 // So that Microsoft Visual C++ does not complain
+                            // when a unicode character is passed to "isspace".
+               and std::isspace(input[i]) and !areWeInAString and
                !areWeInAComment) { // If we came to some other whitespace.
       currentColumn++;
       tokenizedExpression.push_back(
           TreeNode(string(), currentLine, currentColumn));
-    } else if ((std::isalnum(input[i]) or input[i] == '_') and
+    } else if ((input[i] > 0 // Again, Microsoft Visual Studio...
+                    and std::isalnum(input[i]) or
+                input[i] == '_') and
                isComposedOfAlnumsAndOneDot(tokenizedExpression.back().text) and
                !areWeInAString and !areWeInAComment) // Names and numbers
     {
