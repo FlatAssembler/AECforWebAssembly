@@ -1214,6 +1214,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=" &&
              context.structureSizes.count(children.at(0).getType(context))) {
+    if (children[0].getType(context) != children.at(1).getType(context))
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler warning: Comparing structures of different types: \""
+          << children[0].getType(context) << "\" and \""
+          << children[1].getType(context) << "\"!" << std::endl;
     auto iteratorPointingToTheStructureWeAreComparing =
         std::find_if(context.structures.begin(), context.structures.end(),
                      [=](const structure &str) {
