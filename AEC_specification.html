@@ -2880,7 +2880,9 @@ EndFunction
             !/LinuxShell/.test(preTags[i].className) &&
             !/cxx_program/.test(preTags[i].className)
           )
-            preTags[i].innerHTML = highlightAEC(preTags[i].innerText).replace(
+            preTags[i].innerHTML = highlightAEC(
+              preTags[i].innerText.replace(/\r/g, "")
+            ).replace(
               /\n/g,
               navigator.appName === "Microsoft Internet Explorer"
                 ? "<br/>"
