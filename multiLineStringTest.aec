@@ -28,17 +28,17 @@ asm(R"abc(
 )abc");
 
 CharacterPointer first := R"(
-"Hello world!"
+\"Hello world!"\
 )",
                  second := R"ab(
-"Hello world!"
+\"Hello world!"\
 )ab",
                  third := R"a(
-"Hello world!"
+\"Hello world!"\
 )a";
 
 //Should return 1
 Function multiLineStringTest() Which Returns Integer32 Does
-  Return strlen(first)=strlen(second) and strlen(second)=strlen(third) 
-         and strlen(third)=strlen("\"Hello world!\"")+2;
+  Return strlen(first) = strlen(second) and strlen(second) = strlen(third) 
+         and strlen(third) = strlen("\\\"Hello world!\"\\") + 2;
 EndFunction

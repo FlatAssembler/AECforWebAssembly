@@ -101,7 +101,11 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                !areWeInAComment) {
       if (areWeInAString and
           stringDelimiter == input.substr(i, stringDelimiter.length()) and
-          (i == 0 or input[i - 1] != '\\')) {
+          ((stringDelimiter.length() == 1)
+               ? ((i > 0 and input[i - 1] != '\\') or
+                  ((i > 1 and input[i - 2] == '\\') and
+                   (i > 2 and (input[i - 3] != '\\'))))
+               : true)) {
         tokenizedExpression.back().text += stringDelimiter;
         if (stringDelimiter.length() > 1) // If it was a multi-line string
         {

@@ -55,9 +55,10 @@ Hello world!
            R"(R"abc(
 Hello world!
 )abc";)",
-           "['\"\\nHello world!\\n\"',';']"
-
-       }});
+           "['\"\\nHello world!\\n\"',';']"},
+       {R"(('\"'))", R"(['(',''\"'',')'])"},
+       {R"(("\\\"Hello world!\"\\"))",
+        R"(['(','"\\\"Hello world!\"\\"',')'])"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));

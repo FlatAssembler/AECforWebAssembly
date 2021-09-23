@@ -17,6 +17,7 @@ function highlightedToken(token) {
   if (token.charAt(0) == '"' || token.charAt(0) == "'")
     return ('<span class="String">' +
             token.replace(/\\n/g, "<b>\\<i>n</i></b>")
+                .replace(/\\\\/g, "<b>\\<i>\\</i></b>")
                 .replace(/\\t/g, "<b>\\<i>t</i></b>")
                 .replace(/\\\"/g, "<b>\\<i>\"</i></b>") +
             "</span>");
@@ -107,7 +108,9 @@ function highlightAEC(sourceCode) {
       continue;
     }
     if (areWeInAString &&
-        currentToken.charAt(currentToken.length - 1) != "\\" &&
+        (currentToken.charAt(currentToken.length - 1) != "\\" ||
+         (currentToken.charAt(currentToken.length - 2) == "\\" &&
+          currentToken.charAt(currentToken.length - 3) != "\\")) &&
         sourceCode.substr(i, howTheStringStarted.length) ==
             howTheStringStarted) {
       areWeInAString = false;

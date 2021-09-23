@@ -1288,19 +1288,19 @@ node analogClock
         <a href="multiLineStringTest.aec.html">Multi-line String Test</a>:
         <pre>
 CharacterPointer first := R"(
-"Hello world!"
+\"Hello world!"\
 )",
                  second := R"ab(
-"Hello world!"
+\"Hello world!"\
 )ab",
                  third := R"a(
-"Hello world!"
+\"Hello world!"\
 )a";
 
 //Should return 1
 Function multiLineStringTest() Which Returns Integer32 Does
-  Return strlen(first)=strlen(second) and strlen(second)=strlen(third) 
-         and strlen(third)=strlen("\"Hello world!\"")+2;
+  Return strlen(first) = strlen(second) and strlen(second) = strlen(third)
+         and strlen(third) = strlen("\\\"Hello world!\"\\") + 2;
 EndFunction</pre
         >
         The support for multi-line strings will probably never be added to the
@@ -1875,7 +1875,7 @@ Function gcd(Integer32 a, Integer32 b) Which Returns Integer32 Does
 		 *		b := ((a > b) ? (a - b) : (b - a));
 		 *		// b := b - a;
 		 *	EndIf
-		 *	```	
+		 *	```
 		 */
 	EndWhile
 	Return a;
@@ -2684,6 +2684,7 @@ EndFunction
             return (
               '<span class="String">' +
               token
+                .replace(/\\\\/g, "<b>\\<i>\\</i></b>")
                 .replace(/\\n/g, "<b>\\<i>n</i></b>")
                 .replace(/\\t/g, "<b>\\<i>t</i></b>")
                 .replace(/\\\"/g, '<b>\\<i>"</i></b>') +
@@ -2842,7 +2843,9 @@ EndFunction
             }
             if (
               areWeInAString &&
-              currentToken.charAt(currentToken.length - 1) != "\\" &&
+              (currentToken.charAt(currentToken.length - 1) != "\\" ||
+                (currentToken.charAt(currentToken.length - 2) == "\\" &&
+                  currentToken.charAt(currentToken.length - 3) != "\\")) &&
               sourceCode.substr(i, howTheStringStarted.length) ==
                 howTheStringStarted
             ) {
