@@ -1329,6 +1329,12 @@ EndFunction</pre
         AEC-to-WebAssembly compiler, written in C++, more legible. Parser tests
         and large chunks of assembly code are written as multi-line strings
         there, and I think rightly so.<br />
+        <b>UPDATE</b> on 23/09/2021: Until the version
+        <span class="inline_code">v2.1.2</span> (not released as of the time of
+        writing this, but it can be built from source), there was a bug in the
+        tokenizer preventing multi-line strings consisting exclusively of the
+        <span class="inline_code">\</span> characters from being tokenized
+        correctly.<br />
         <br /><b id="Variables">Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
