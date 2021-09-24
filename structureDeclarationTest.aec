@@ -4,7 +4,7 @@
  */
 
 Structure Point Consists Of {
-  Integer32 dimensions : = 3;
+  Integer16 dimensions : = 3;
   Decimal32 x, y, z;
 }
 EndStructure;
@@ -19,7 +19,7 @@ EndStructure;
 InstantiateStructure String helloWorld;
 Integer32 c : = 2;
 
-Function foo() Which Returns Integer32 Does {
+Function foo() Which Returns Integer16 Does {
   // Should return 3.
   Return points[c].dimensions;
 }
