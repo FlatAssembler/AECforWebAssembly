@@ -43,8 +43,6 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
   std::cerr << "DEBUG: Tokenizing the string \"" << input << "\"..."
             << std::endl;
 #endif
-  using std::regex;
-  using std::regex_match;
   using std::string;
   using std::to_string;
   auto tokenizedExpression = std::vector<TreeNode>();
@@ -214,6 +212,13 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
     std::cerr << "Tokenizer error: String not terminated before the end of the "
                  "program!"
               << std::endl;
+  for (auto bitand treeNode :
+       tokenizedExpression) // Convert "PointerToCharacter" to
+                            // "CharacterPointer", "PointerToInteger32" to
+                            // "Integer32Pointer", and so on...
+    while (treeNode.text.substr(0, string("PointerTo").length()) == "PointerTo")
+      treeNode.text =
+          treeNode.text.substr(string("PointerTo").length()) + "Pointer";
   for (auto iterator = tokenizedExpression.begin();
        iterator < tokenizedExpression.end(); iterator++)
     if (iterator->text.size() == 3 and iterator->text.substr(0, 1) == "'" and

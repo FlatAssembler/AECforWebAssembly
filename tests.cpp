@@ -248,6 +248,13 @@ void parserTests() {
         "(Function (random_function (CharacterPointer ptr)) (Returns Nothing) "
         "(Does (Integer32 (first_array 3 (:= ({} 1 2 3)))) (CharacterPointer "
         "(helloWorldString (:= \"Hello world!\")))))"},
+       {"Function random_function(PointerToCharacter ptr) Which Returns "
+        "Nothing "
+        "Does Integer32 first_array[3]:={1,2,3};PointerToCharacter "
+        "helloWorldString:=\"Hello world!\";EndFunction",
+        "(Function (random_function (CharacterPointer ptr)) (Returns Nothing) "
+        "(Does (Integer32 (first_array 3 (:= ({} 1 2 3)))) (CharacterPointer "
+        "(helloWorldString (:= \"Hello world!\")))))"},
        {"Function empty_function_without_arguments() Which Returns Nothing "
         "Does /*Nothing*/ EndFunction //Who would have thought something like "
         "that would cause the earlier version of my parser to crash? It's "
