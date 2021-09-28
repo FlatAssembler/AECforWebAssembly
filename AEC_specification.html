@@ -1357,9 +1357,21 @@ EndFunction</pre
         <span class="inline_code">Decimal32</span>,
         <span class="inline_code">Decimal32Pointer</span>,
         <span class="inline_code">Decimal64</span> or
-        <span class="inline_code">Decimal64Pointer</span>. The compiler assumes
-        the pointers are 32-bit and characters are 8-bit, which is true in the
-        vast majority of cases. There is also a way to initialize a variable:
+        <span class="inline_code">Decimal64Pointer</span>. (<i
+          ><b>UPDATE</b> on 28/09/2021: Since AECforWebAssembly
+          <span class="inline_code">v2.2.0</span> (not released as of the time
+          of writing this), you can write
+          <span class="inline_code">PointerToCharacter</span> instead of
+          <span class="inline_code">CharacterPointer</span>,
+          <span class="inline_code">PointerToInteger32</span> instead of
+          <span class="inline_code">Integer32Pointer</span>, and so on. I think
+          <span class="inline_code">PointerToCharacter</span> is a name that is
+          far harder to misinterpret, as somebody might think
+          <span class="inline_code">CharacterPointer</span> is a character that
+          is also a pointer.</i
+        >) The compiler assumes the pointers are 32-bit and characters are
+        8-bit, which is true in the vast majority of cases. There is also a way
+        to initialize a variable:
         <pre>DataType name_of_the_variable := initial_value;</pre>
         Without that, global variables are zero by default, and local variables
         contain whatever happens to be on the top of the system stack at the
