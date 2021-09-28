@@ -2720,7 +2720,8 @@ EndFunction
             token == "DataType" ||
             token == "Nothing" ||
             token == "InstantiateStructure" ||
-            /Pointer$/.test(token)
+            /Pointer$/.test(token) ||
+            /^PointerTo/.test(token)
           )
             return '<span class="Type">' + token + "</span>";
           if (token.charAt(0) >= "0" && token.charAt(0) <= "9")
