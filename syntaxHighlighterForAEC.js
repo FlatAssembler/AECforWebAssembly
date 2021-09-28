@@ -32,7 +32,7 @@ function highlightedToken(token) {
       token == "Decimal32Pointer" || token == "Decimal64Pointer" ||
       token == "CharacterPointerPointer" || token == "DataType" ||
       token == "Nothing" || token == "InstantiateStructure" ||
-      /Pointer$/.test(token))
+      /Pointer$/.test(token) || /^PointerTo/.test(token))
     return '<span class="Type">' + token + "</span>";
   if (token.charAt(0) >= "0" && token.charAt(0) <= "9")
     return '<span class="Constant">' + token + "</span>";
