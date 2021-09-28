@@ -12,32 +12,6 @@
 
 #define NDEBUG_for_multiline_strings
 
-bool isAllWhitespace(
-    const std::string token) // No obvious way to do it in REGEX so that CLANG
-                             // on Linux won't miscompile it.
-{
-  for (unsigned i = 0; i < token.size(); i++)
-    if (!std::isspace(token[i]))
-      return false;
-  return true;
-}
-
-bool isAllDigits(const std::string token) {
-  if (!token.size())
-    return false;
-  for (unsigned i = 0; i < token.size(); i++)
-    if (!isdigit(token[i]))
-      return false;
-  return true;
-}
-
-bool isWordCharacterButNotDigit(
-    const char c) // No obvious way to do it in REGEX so that CLANG on Linux
-                  // won't miscompile it.
-{
-  return (std::isalnum(c) or c == '_') and !std::isdigit(c);
-}
-
 std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
 #ifndef NDEBUG
   std::cerr << "DEBUG: Tokenizing the string \"" << input << "\"..."
