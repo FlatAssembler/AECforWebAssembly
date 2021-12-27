@@ -171,20 +171,18 @@ Parsing the program...)"
   string assembly;
   try {
     assembly = AST.compile();
-  } catch (const CorruptCompilationContextException &error) {
-    cerr << "Internal compiler error: Uncaught exception in the compiler: "
-         << typeid(error).name() << ": " << error.what() << std::endl;
-    cerr << "The JSON of the compilation context, at the time of throwing that "
-            "exception, was:\n"
-         << error.getContext().JSONify() << std::endl;
-    cerr
-        << R"(If you have time, please report this to me on GitHub as an issue:
-https://github.com/FlatAssembler/AECforWebAssembly/issues)"
-        << std::endl;
-    return 1;
   } catch (const exception &error) {
     cerr << "Internal compiler error: Uncaught exception in the compiler: "
          << typeid(error).name() << ": " << error.what() << std::endl;
+    if (typeid(error).hash_code() ==
+        typeid(CorruptCompilationContextException).hash_code()) {
+      cerr << "The JSON of the compilation context, at the time of throwing "
+              "that exception, was:\n"
+           << dynamic_cast<const CorruptCompilationContextException &>(error)
+                  .getContext()
+                  .JSONify()
+           << std::endl;
+    }
     if (typeid(error).hash_code() !=
         typeid(NotImplementedException()).hash_code())
       cerr
