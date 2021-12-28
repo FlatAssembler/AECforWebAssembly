@@ -178,7 +178,7 @@ Parsing the program...)"
         typeid(const CorruptCompilationContextException &).hash_code()) {
       cerr << "The JSON of the compilation context, at the time of throwing "
               "that exception, was:\n"
-           << dynamic_cast<const CorruptCompilationContextException &>(error)
+           << ((const CorruptCompilationContextException bitand)(error))
                   .getContext()
                   .JSONify()
            << std::endl;
