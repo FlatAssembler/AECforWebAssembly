@@ -1,9 +1,10 @@
-#target WASI
+#target WASI // Neka compiler ne ispisuje kod potreban za uvođenje stvari
+             // iz JavaScripta, kad i tako ništa ne uvozimo iz njega.
 
 Function nasumican_broj() Which Returns Integer16 Is Declared;
 
 Integer16 koliko_ljudi_ima_rodendan_na_taj_dan[1_000];
-// Recimo da nikome nece trebati izracun za "godinu" s vise od tisucu dana.
+// Recimo da nikome neće trebati izračun za "godinu" s više od tisuću dana.
 
 Function numericki_izracun_rodendanskog_paradoksa(
 		Integer16 koliko_godina_ima_dana,
