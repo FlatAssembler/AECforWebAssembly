@@ -58,25 +58,44 @@
     mogu biti manji od očekivanih.
     <script>
       let kaklulacija;
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+
       fetch("birthday_paradox.wasm")
         .then((response) => response.arrayBuffer())
-        .then((bytes) => WebAssembly.instantiate(bytes))
+        .then((bytes) =>
+          WebAssembly.instantiate(bytes, {
+            JavaScript: {
+              memory: memory,
+              stack_pointer: stack_pointer,
+              printString: (str) => {
+                console.log(str);
+              },
+              printInt: (int) => {
+                console.log(int);
+              },
+            },
+          })
+        )
         .then((results) => {
           kalkulacija =
             results.instance.exports.numericki_izracun_rodendanskog_paradoksa;
           document.getElementById("tipka").onclick = () => {
             document.getElementById("rezultat").innerHTML = `
-Birthday(${document.getElementById("broj_dana_u_godini").value},
-         ${document.getElementById("broj_ljudi").value},
-         ${document.getElementById("broj_kolizija").value}) =
-${
-  kalkulacija(
-    document.getElementById("broj_dana_u_godini").value,
-    document.getElementById("broj_ljudi").value,
-    document.getElementById("broj_kolizija").value
-  ) * 100
-}%
-`;
+      Birthday(${document.getElementById("broj_dana_u_godini").value},
+               ${document.getElementById("broj_ljudi").value},
+               ${document.getElementById("broj_kolizija").value}) =
+      ${
+        kalkulacija(
+          document.getElementById("broj_dana_u_godini").value,
+          document.getElementById("broj_ljudi").value,
+          document.getElementById("broj_kolizija").value
+        ) * 100
+      }%
+      `;
           };
           document.getElementById("tipka").disabled = false;
         });

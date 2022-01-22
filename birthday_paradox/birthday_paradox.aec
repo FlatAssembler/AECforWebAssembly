@@ -1,5 +1,11 @@
-#target WASI // Neka compiler ne ispisuje kod potreban za uvođenje stvari
-             // iz JavaScripta, kad i tako ništa ne uvozimo iz njega.
+/*
+ * Ovo je AEC program koji radi numeričke izračune vezane za Paradoks
+ * rođendana, opisane ovdje: https://flatassembler.github.io/Karasica.doc
+ */
+
+// Uvezimo funkcije za debuggiranje iz JavaScripta...
+Function printInt(Integer32 i) Which Returns Nothing Is External;
+Function printString(PointerToCharacter s) Which Returns Nothing Is External;
 
 Function nasumican_broj() Which Returns Integer16 Is Declared;
 
@@ -15,7 +21,8 @@ Function numericki_izracun_rodendanskog_paradoksa(
 		koliko_smo_puta_dobili_toliko_kolizija := 0      ,
 		vanjski_brojac                         := 0      ;
 	While vanjski_brojac < koliko_smo_puta_izvrtili_simulaciju Loop
-		Integer16 unutarnji_brojac := 0;
+		Integer16 unutarnji_brojac := 0,
+                	dani_za_debuggiranje[1_000];
 		While unutarnji_brojac < koliko_godina_ima_dana Loop
 			koliko_ljudi_ima_rodendan_na_taj_dan[
 					unutarnji_brojac
@@ -24,13 +31,17 @@ Function numericki_izracun_rodendanskog_paradoksa(
 		EndWhile
 		unutarnji_brojac := 0;
 		While unutarnji_brojac < koliko_ima_ljudi Loop
+			Integer16 nasumican_dan := mod(
+							nasumican_broj(),
+							koliko_godina_ima_dana
+						);
 			koliko_ljudi_ima_rodendan_na_taj_dan[
-					mod(
-						nasumican_broj(),
-						koliko_godina_ima_dana
-					)
-				]        += 1;
-			unutarnji_brojac += 1;
+							nasumican_dan
+					] += 1;
+			dani_za_debuggiranje[
+					unutarnji_brojac
+				]         := nasumican_dan;
+			unutarnji_brojac  += 1;
 		EndWhile
 		Integer16 jesmo_li_nasli_potreban_broj_kolizija := 0;
 		unutarnji_brojac := 0;
@@ -43,12 +54,22 @@ Function numericki_izracun_rodendanskog_paradoksa(
 					unutarnji_brojac
 				] = iznad_koliko_kolizija_brojimo
 			Then
-				jesmo_li_nasli_potreban_broj_kolizija := 1;
+				jesmo_li_nasli_potreban_broj_kolizija := 1;	
 			EndIf
 			unutarnji_brojac += 1;
 		EndWhile
 		If jesmo_li_nasli_potreban_broj_kolizija Then
 			koliko_smo_puta_dobili_toliko_kolizija += 1;
+		ElseIf koliko_ima_ljudi > koliko_godina_ima_dana Then
+			printString("---");
+			unutarnji_brojac := 0;
+			While unutarnji_brojac < koliko_godina_ima_dana Loop
+				printInt(dani_za_debuggiranje[
+						unutarnji_brojac
+					]);
+				unutarnji_brojac += 1;
+			EndWhile
+			printString("---");
 		EndIf
 		vanjski_brojac += 1;
 	EndWhile
