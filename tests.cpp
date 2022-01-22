@@ -57,8 +57,8 @@ Hello world!
 )abc";)",
            "['\"\\nHello world!\\n\"',';']"},
        {R"(('\"'))", R"(['(',''\"'',')'])"},
-       {R"(("\\\"Hello world!\"\\"))",
-        R"(['(','"\\\"Hello world!\"\\"',')'])"}});
+       {R"(("\\\"Hello world!\"\\"))", R"(['(','"\\\"Hello world!\"\\"',')'])"},
+       {"2_147_483_647", "['2147483647']"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));

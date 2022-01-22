@@ -180,11 +180,15 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                 << ", Internal compiler error: Tokenizer is in the "
                    "forbidden state!"
                 << std::endl;
+      std::exit(1);
     }
   }
   if (areWeInAString)
-    std::cerr << "Tokenizer error: String not terminated before the end of the "
-                 "program!"
+    std::cerr << "Tokenizer error: String "
+              << tokenizedExpression.back().text.substr(
+                     0,
+                     std::min(12, int(tokenizedExpression.back().text.size())))
+              << "... not terminated before the end of the program!"
               << std::endl;
   for (auto bitand treeNode :
        tokenizedExpression) // Convert "PointerToCharacter" to
@@ -193,6 +197,15 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
     while (treeNode.text.substr(0, string("PointerTo").length()) == "PointerTo")
       treeNode.text =
           treeNode.text.substr(string("PointerTo").length()) + "Pointer";
+  for (auto iterator = tokenizedExpression.begin();
+       iterator < tokenizedExpression.end(); iterator++)
+    if (std::isdigit(iterator->text[0]) and
+        iterator->text.find('_') !=
+            std::string::npos) //'_'-es used as thousand separators or the
+                               //like...
+      iterator->text.erase(
+          std::remove(iterator->text.begin(), iterator->text.end(), '_'),
+          iterator->text.end());
   for (auto iterator = tokenizedExpression.begin();
        iterator < tokenizedExpression.end(); iterator++)
     if (iterator->text.size() == 3 and iterator->text.substr(0, 1) == "'" and
