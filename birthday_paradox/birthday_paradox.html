@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Teo Samaržija" />
+    <title>Numerički izračuni paradoksa rođendana</title>
+  </head>
+  <body>
+    <h1>Paradoks rođendana</h1>
+    Ovo je program pisan u
+    <a href="AEC_specification">programskom jeziku AEC</a> koji radi numeričke
+    kalkulacije vezane za Paradoks rođendana, kakve su opisane u
+    <a href="Karasica.doc">mom tekstu o imenu rijeke Karašica</a>.
+    <table>
+      <tr>
+        <td>Broj dana u godini:</td>
+        <td>
+          <input
+            type="number"
+            id="broj_dana_u_godini"
+            value="365"
+            min="1"
+            max="1000"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>Broj ljudi:</td>
+        <td>
+          <input type="number" id="broj_ljudi" value="23" min="1" max="1000" />
+        </td>
+      </tr>
+      <tr>
+        <td>Iznad koliko kolizija brojimo:</td>
+        <td>
+          <input
+            type="number"
+            value="2"
+            id="broj_kolizija"
+            min="1"
+            max="1000"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <button id="tipka" disabled="true">Izračunaj</button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" id="rezultat"></td>
+      </tr>
+    </table>
+    Možete i pogledati
+    <a href="birthday_paradox.aec.html">izvorni kod pisan u AEC-u</a>. S obzirom
+    na loš generator nasumičnih brojeva koji je tamo implementiran, rezultati
+    mogu biti manji od očekivanih.
+    <script>
+      let kaklulacija;
+      fetch("birthday_paradox.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes))
+        .then((results) => {
+          kalkulacija =
+            results.instance.exports.numericki_izracun_rodendanskog_paradoksa;
+          document.getElementById("tipka").onclick = () => {
+            document.getElementById("rezultat").innerHTML = `
+Birthday(${document.getElementById("broj_dana_u_godini").value},
+         ${document.getElementById("broj_ljudi").value},
+         ${document.getElementById("broj_kolizija").value}) =
+${
+  kalkulacija(
+    document.getElementById("broj_dana_u_godini").value,
+    document.getElementById("broj_ljudi").value,
+    document.getElementById("broj_kolizija").value
+  ) * 100
+}%
+`;
+          };
+          document.getElementById("tipka").disabled = false;
+        });
+    </script>
+  </body>
+</html>
