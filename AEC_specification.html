@@ -678,6 +678,11 @@
             <a href="#Constants">Constants</a>
             <ol>
               <li><a href="#multiline_strings">Multi-line strings</a></li>
+              <li>
+                <a href="#underscores_inside_number_literals"
+                  >Underscores inside number literals</a
+                >
+              </li>
             </ol>
           </li>
           <li><a href="#Variables">Variable declarations</a></li>
@@ -1354,6 +1359,23 @@ EndFunction</pre
         tokenizer preventing multi-line strings consisting exclusively of the
         <span class="inline_code">\</span> characters from being tokenized
         correctly.<br />
+        <b id="underscores_inside_number_literals">UPDATE</b> on 22/01/2022:
+        AECforWebAssembly v2.3.0 and newer will support inserting
+        <span class="inline_code">_</span>-es (underscores) inside number
+        literals for better legibility, like JavaScript supports. Here is an
+        excerpt from <a href="birthday_paradox">Birthday Paradox</a> that
+        illustrates that:
+        <pre>
+Integer32 nasumican_broj := 9_907;
+Function nasumican_broj() Which Returns Integer16 Does
+	Return nasumican_broj := mod(nasumican_broj * 48_271, 2_147_483_647);
+	// Ovo radi isto što i minstd_rand radi u C++-u.
+EndFunction</pre
+        >
+        It implements a
+        <a href="http://cplusplus.com/reference/random/minstd_rand/"
+          >simple pseudo-random generator</a
+        >.<br />
         <br /><b id="Variables">Variable declarations</b><br />
         In the version of AEC targeting x86, there are no variable declarations
         in the language itself, the compiler simply assumes any token that
