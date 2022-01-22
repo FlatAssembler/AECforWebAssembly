@@ -1,0 +1,60 @@
+#target WASI
+
+Function nasumican_broj() Which Returns Integer16 Is Declared;
+
+Integer16 koliko_ljudi_ima_rodendan_na_taj_dan[1_000];
+// Recimo da nikome nece trebati izracun za "godinu" s vise od tisucu dana.
+
+Function numericki_izracun_rodendanskog_paradoksa(
+		Integer16 koliko_godina_ima_dana,
+		Integer16 koliko_ima_ljudi,
+		Integer16 iznad_koliko_kolizija_brojimo)
+		Which Returns Decimal32 Does
+	Integer32 koliko_smo_puta_izvrtili_simulaciju  := 100_000,
+		koliko_smo_puta_dobili_toliko_kolizija := 0      ,
+		vanjski_brojac                         := 0      ;
+	While vanjski_brojac < koliko_smo_puta_izvrtili_simulaciju Loop
+		Integer16 unutarnji_brojac := 0;
+		While unutarnji_brojac < koliko_godina_ima_dana Loop
+			koliko_ljudi_ima_rodendan_na_taj_dan[
+					unutarnji_brojac
+				]        := 0;
+			unutarnji_brojac += 1;
+		EndWhile
+		unutarnji_brojac := 0;
+		While unutarnji_brojac < koliko_ima_ljudi Loop
+			koliko_ljudi_ima_rodendan_na_taj_dan[
+					mod(
+						nasumican_broj(),
+						koliko_godina_ima_dana
+					)
+				]        += 1;
+			unutarnji_brojac += 1;
+		EndWhile
+		Integer16 jesmo_li_nasli_potreban_broj_kolizija := 0;
+		unutarnji_brojac := 0;
+		While unutarnji_brojac < koliko_godina_ima_dana Loop
+			If
+				koliko_ljudi_ima_rodendan_na_taj_dan[
+					unutarnji_brojac
+				] > iznad_koliko_kolizija_brojimo
+			Then
+				jesmo_li_nasli_potreban_broj_kolizija := 1;
+			EndIf
+			unutarnji_brojac += 1;
+		EndWhile
+		If jesmo_li_nasli_potreban_broj_kolizija Then
+			koliko_smo_puta_dobili_toliko_kolizija += 1;
+		EndIf
+		vanjski_brojac += 1;
+	EndWhile
+	Return Decimal32(
+			koliko_smo_puta_dobili_toliko_kolizija
+		) / koliko_smo_puta_izvrtili_simulaciju;
+EndFunction
+
+Integer32 nasumican_broj := 9_907;
+Function nasumican_broj() Which Returns Integer16 Does
+	Return nasumican_broj := mod(nasumican_broj * 48_271, 2_147_483_647);
+	// http://cplusplus.com/reference/random/minstd_rand/
+EndFunction
