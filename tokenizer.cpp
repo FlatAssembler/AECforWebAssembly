@@ -202,7 +202,7 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
     if (std::isdigit(iterator->text[0]) and
         iterator->text.find('_') !=
             std::string::npos) //'_'-es used as thousand separators or the
-                               //like...
+                               // like...
       iterator->text.erase(
           std::remove(iterator->text.begin(), iterator->text.end(), '_'),
           iterator->text.end());

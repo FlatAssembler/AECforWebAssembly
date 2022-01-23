@@ -946,6 +946,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
              text[1] ==
                  '=') // The assignment operators "+=", "-=", "*=" and "/="...
   {
+    std::cerr
+        << "Line " << lineNumber << ", Column " << columnNumber
+        << ", Compiler warning: The operators `+=`, `-=`, `*=` and `/=` are "
+           "compiled incorrectly, see this GitHub issue for more information: "
+           "https://github.com/FlatAssembler/AECforWebAssembly/issues/15"
+        << std::endl;
     TreeNode convertedToSimpleAssignment(":=", lineNumber, columnNumber);
     convertedToSimpleAssignment.children.push_back(children[0]);
     convertedToSimpleAssignment.children.push_back(*this);
