@@ -55,7 +55,11 @@
     Možete i pogledati
     <a href="birthday_paradox.aec.html">izvorni kod pisan u AEC-u</a>. S obzirom
     na loš generator nasumičnih brojeva koji je tamo implementiran, rezultati
-    mogu biti manji od očekivanih.
+    mogu biti manji od očekivanih. Otvorio sam
+    <a
+      href="https://www.reddit.com/r/croatia/comments/s9zfbc/kako_lo%C5%A1_generator_slu%C4%8Dajnih_brojeva_mo%C5%BEe_dati/"
+      >thread na Redditu o tome</a
+    >.
     <script>
       let kaklulacija;
       const stack_pointer = new WebAssembly.Global(
@@ -85,8 +89,8 @@
               },
               printInt: (int) => {
                 console.log(int);
-              }
-            }
+              },
+            },
           })
         )
         .then((results) => {
