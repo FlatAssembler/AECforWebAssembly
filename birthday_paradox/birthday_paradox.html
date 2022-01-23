@@ -63,6 +63,15 @@
         0
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
+      function getStringAtAddress(ptr) {
+        let bytes = new Uint8Array(memory.buffer);
+        let str = "";
+        while (bytes[ptr]) {
+          str += String.fromCharCode(bytes[ptr]);
+          ptr++;
+        }
+        return str;
+      }
 
       fetch("birthday_paradox.wasm")
         .then((response) => response.arrayBuffer())
@@ -72,12 +81,12 @@
               memory: memory,
               stack_pointer: stack_pointer,
               printString: (str) => {
-                console.log(str);
+                console.log(getStringAtAddress(str));
               },
               printInt: (int) => {
                 console.log(int);
-              },
-            },
+              }
+            }
           })
         )
         .then((results) => {

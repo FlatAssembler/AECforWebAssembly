@@ -7,7 +7,11 @@
 Function printInt(Integer32 i) Which Returns Nothing Is External;
 Function printString(PointerToCharacter s) Which Returns Nothing Is External;
 
-Function nasumican_broj() Which Returns Integer16 Is Declared;
+Integer32 nasumican_broj := 9_907;
+Function nasumican_broj() Which Returns Integer16 Does
+	Return nasumican_broj := mod(nasumican_broj * 48_271, 2_147_483_647);
+	// http://cplusplus.com/reference/random/minstd_rand/
+EndFunction
 
 Integer16 koliko_ljudi_ima_rodendan_na_taj_dan[1_000];
 // Recimo da nikome neće trebati izračun za "godinu" s više od tisuću dana.
@@ -21,7 +25,7 @@ Function numericki_izracun_rodendanskog_paradoksa(
 		koliko_smo_puta_dobili_toliko_kolizija := 0      ,
 		vanjski_brojac                         := 0      ;
 	While vanjski_brojac < koliko_smo_puta_izvrtili_simulaciju Loop
-		Integer16 unutarnji_brojac := 0,
+		Integer16 unutarnji_brojac := 0    ,
                 	dani_za_debuggiranje[1_000];
 		While unutarnji_brojac < koliko_godina_ima_dana Loop
 			koliko_ljudi_ima_rodendan_na_taj_dan[
@@ -31,13 +35,16 @@ Function numericki_izracun_rodendanskog_paradoksa(
 		EndWhile
 		unutarnji_brojac := 0;
 		While unutarnji_brojac < koliko_ima_ljudi Loop
-			Integer16 nasumican_dan := mod(
-							nasumican_broj(),
-							koliko_godina_ima_dana
-						);
 			koliko_ljudi_ima_rodendan_na_taj_dan[
-							nasumican_dan
+						mod(
+							nasumican_broj()      ,
+							koliko_godina_ima_dana,
+						)
 					] += 1;
+			Integer16 nasumican_dan := mod(
+							nasumican_broj        ,
+							koliko_godina_ima_dana,
+						);
 			dani_za_debuggiranje[
 					unutarnji_brojac
 				]         := nasumican_dan;
@@ -62,9 +69,18 @@ Function numericki_izracun_rodendanskog_paradoksa(
 			koliko_smo_puta_dobili_toliko_kolizija += 1;
 		ElseIf koliko_ima_ljudi > koliko_godina_ima_dana Then
 			printString("---");
+			printString("Brojevi za debuggiranje:");
+			unutarnji_brojac := 0;
+			While unutarnji_brojac < koliko_ima_ljudi Loop
+				printInt(dani_za_debuggiranje[
+						unutarnji_brojac
+					]);
+				unutarnji_brojac += 1;
+			EndWhile
+			printString("Koliko ljudi ima rodendan na taj dan:");
 			unutarnji_brojac := 0;
 			While unutarnji_brojac < koliko_godina_ima_dana Loop
-				printInt(dani_za_debuggiranje[
+				printInt(koliko_ljudi_ima_rodendan_na_taj_dan[
 						unutarnji_brojac
 					]);
 				unutarnji_brojac += 1;
@@ -76,10 +92,4 @@ Function numericki_izracun_rodendanskog_paradoksa(
 	Return Decimal32(
 			koliko_smo_puta_dobili_toliko_kolizija
 		) / koliko_smo_puta_izvrtili_simulaciju;
-EndFunction
-
-Integer32 nasumican_broj := 9_907;
-Function nasumican_broj() Which Returns Integer16 Does
-	Return nasumican_broj := mod(nasumican_broj * 48_271, 2_147_483_647);
-	// http://cplusplus.com/reference/random/minstd_rand/
 EndFunction
