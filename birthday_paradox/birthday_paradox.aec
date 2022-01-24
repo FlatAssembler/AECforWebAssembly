@@ -35,27 +35,19 @@ Function numericki_izracun_rodendanskog_paradoksa(
 		EndWhile
 		unutarnji_brojac := 0;
 		While unutarnji_brojac < koliko_ima_ljudi Loop
-			/***
-			Ovo ce triggerati bug u compileru, jer će nasumican_broj
-			u assemblerskom kodu biti pozvan dva puta, a ne samo
-			jednom. To ima veze s time kako moj compiler "+="
-			prevodi na asemblerski jezik (pretvori ga na razini AST-a
-			u ":="), i čini mi se da nema jednostavnog rješenja.
-
 			koliko_ljudi_ima_rodendan_na_taj_dan[
 						mod(
 							nasumican_broj()      ,
 							koliko_godina_ima_dana,
 						)
-					] += 1;
-			****/
+					] += 1; // AECforWebAssembly stariji
+						// od v2.3.0 na ovu su
+						// naredbu ispisivali krivi
+						// asemblerski kod.
 			Integer16 nasumican_dan := mod(
-							nasumican_broj()      ,
+							nasumican_broj        ,
 							koliko_godina_ima_dana,
 						);
-			koliko_ljudi_ima_rodendan_na_taj_dan[
-						nasumican_dan
-					] += 1;
 			dani_za_debuggiranje[
 					unutarnji_brojac
 				]         := nasumican_dan;

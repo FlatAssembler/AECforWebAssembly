@@ -946,18 +946,46 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
              text[1] ==
                  '=') // The assignment operators "+=", "-=", "*=" and "/="...
   {
-    std::cerr
-        << "Line " << lineNumber << ", Column " << columnNumber
-        << ", Compiler warning: The operators `+=`, `-=`, `*=` and `/=` are "
-           "compiled incorrectly, see this GitHub issue for more information: "
-           "https://github.com/FlatAssembler/AECforWebAssembly/issues/15"
-        << std::endl;
-    TreeNode convertedToSimpleAssignment(":=", lineNumber, columnNumber);
-    convertedToSimpleAssignment.children.push_back(children[0]);
-    convertedToSimpleAssignment.children.push_back(*this);
-    convertedToSimpleAssignment.children[1].text =
-        convertedToSimpleAssignment.children[1].text.substr(0, 1);
-    assembly += convertedToSimpleAssignment.compile(context);
+    if (children.at(0).text.back() ==
+        '[') { // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
+               // https://discord.com/channels/530598289813536771/847014270922391563/934823770307301416
+      TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
+      std::string subscriptName = "tmp" + std::to_string(rand());
+      TreeNode declarationOfSubscript("Integer32", lineNumber, columnNumber);
+      declarationOfSubscript.children.push_back(
+          TreeNode(subscriptName, lineNumber, columnNumber));
+      fakeInnerFunctionNode.children.push_back(declarationOfSubscript);
+      TreeNode subscriptAssignment(":=", lineNumber, columnNumber);
+      subscriptAssignment.children.push_back(
+          TreeNode(subscriptName, lineNumber, columnNumber));
+      subscriptAssignment.children.push_back(children[0].children.at(0));
+      fakeInnerFunctionNode.children.push_back(subscriptAssignment);
+      TreeNode convertedToSimpleAssignment(":=", lineNumber, columnNumber);
+      convertedToSimpleAssignment.children.push_back(TreeNode(
+          children[0].text, children[0].lineNumber, children[0].columnNumber));
+      convertedToSimpleAssignment.children[0].children.push_back(
+          TreeNode(subscriptName, lineNumber, columnNumber));
+      convertedToSimpleAssignment.children.push_back(
+          TreeNode(text.substr(0, 1), lineNumber, columnNumber));
+      convertedToSimpleAssignment.children[1].children.push_back(TreeNode(
+          children[0].text, children[0].lineNumber, children[0].columnNumber));
+      convertedToSimpleAssignment.children[1].children[0].children.push_back(
+          TreeNode(subscriptName, lineNumber, columnNumber));
+      convertedToSimpleAssignment.children[1].children.push_back(
+          children.at(1));
+      fakeInnerFunctionNode.children.push_back(convertedToSimpleAssignment);
+      CompilationContext fakeContext = context;
+      fakeContext.stackSizeOfThisScope = 0;
+      fakeContext.stackSizeOfThisFunction = 0;
+      assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
+    } else {
+      TreeNode convertedToSimpleAssignment(":=", lineNumber, columnNumber);
+      convertedToSimpleAssignment.children.push_back(children[0]);
+      convertedToSimpleAssignment.children.push_back(*this);
+      convertedToSimpleAssignment.children[1].text =
+          convertedToSimpleAssignment.children[1].text.substr(0, 1);
+      assembly += convertedToSimpleAssignment.compile(context);
+    }
   } else if (text == "If") {
     if (children.size() < 2) {
       std::cerr
