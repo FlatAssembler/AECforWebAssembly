@@ -133,7 +133,9 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
         if (iterator->text == ",") { // Multi-argument function
           iterator = nodesThatTheRecursionDealsWith.erase(iterator);
           if (iterator == nodesThatTheRecursionDealsWith.end())
-            break;
+            break; // Or else the program will crash when compiled using
+                   // Microsoft C++ Compiler with the error message that we are
+                   // iterating past the end of the container.
         }
       if (parsedExpression[i].text ==
           "(") { // If it's not a function, but only a parenthesis, delete it.
