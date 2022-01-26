@@ -21,7 +21,7 @@ Function numericki_izracun_rodendanskog_paradoksa(
 			Integer16 koliko_ima_ljudi             ,
 			Integer16 iznad_koliko_kolizija_brojimo,
 		) Which Returns Decimal32 Does
-	Integer32 koliko_smo_puta_izvrtili_simulaciju  := 100_000,
+	Integer32 koliko_smo_puta_izvrtili_simulaciju  := 1_000,
 		koliko_smo_puta_dobili_toliko_kolizija := 0      ,
 		vanjski_brojac                         := 0      ;
 	While vanjski_brojac < koliko_smo_puta_izvrtili_simulaciju Loop
