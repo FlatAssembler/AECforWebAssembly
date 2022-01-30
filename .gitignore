@@ -5,3 +5,4 @@
 *.cbp #CodeBlocks project
 *.depend #CodeBlocks configuration file
 *.layout #CodeBlocks configuration file.
+/build/

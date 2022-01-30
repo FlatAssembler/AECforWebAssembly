@@ -950,7 +950,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         '[') { // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
                // https://discord.com/channels/530598289813536771/847014270922391563/934823770307301416
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
-      std::string subscriptName = "tmp" + std::to_string(rand());
+      std::string subscriptName =
+          "temporary_subscript" + std::to_string(rand());
+      while (context.variableTypes.count(subscriptName))
+        subscriptName = "temporary_subscript" + std::to_string(rand());
       TreeNode declarationOfSubscript("Integer32", lineNumber, columnNumber);
       declarationOfSubscript.children.push_back(
           TreeNode(subscriptName, lineNumber, columnNumber));
