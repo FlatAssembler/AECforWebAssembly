@@ -949,6 +949,32 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     if (children.at(0).text.back() ==
         '[') { // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
                // https://discord.com/channels/530598289813536771/847014270922391563/934823770307301416
+               /*
+                * So, what follows is a bit of an ugly and incomprehensible code
+                * that does the following. It rewrites code such as:
+                * ```
+                * array_name[random_generator()] += 1;
+                * ```
+                * to a code such as:
+                * ```
+                * Integer32 temporary_subscriptXXXX;
+                * temporary_subscriptXXXX := random_generator();
+                * array_name[temporary_subscriptXXXX] :=
+                * 	array_name[temporary_subscriptXXXX] + 1;
+                * ```
+                * Notice that simply rewriting it as something like:
+                * ```
+                * array_name[random_generator()] := array_name[random_generator()]
+                * 					+ 1;
+                * ```
+                * would not do the trick, because then the random generator would
+                * have been called twice instead of once, each time presumably
+                * giving a different result.
+                * TODO: Refactor that code to be more legible. I have made a
+                * 	StackExchange question asking how to do that, but it got
+                * 	closed for some reason:
+                * 	https://codereview.stackexchange.com/questions/273535/complicated-ast-manipulation-looks-ugly-in-c-how-to-refactor-it
+                */
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
       std::string subscriptName =
           "temporary_subscript" + std::to_string(rand());
