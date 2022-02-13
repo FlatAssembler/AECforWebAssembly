@@ -44,6 +44,18 @@
         </td>
       </tr>
       <tr>
+        <td>Koliko puta vrtimo simulaciju:</td>
+        <td>
+          <input
+            type="number"
+            value="10000"
+            id="koliko_puta"
+            min="1"
+            max="100000"
+          />
+        </td>
+      </tr>
+      <tr>
         <td colspan="2">
           <button id="tipka" disabled="true">Izračunaj</button>
         </td>
@@ -105,7 +117,8 @@
         kalkulacija(
           document.getElementById("broj_dana_u_godini").value,
           document.getElementById("broj_ljudi").value,
-          document.getElementById("broj_kolizija").value
+          document.getElementById("broj_kolizija").value,
+          document.getElementById("koliko_puta").value
         ) * 100
       }%
       `;

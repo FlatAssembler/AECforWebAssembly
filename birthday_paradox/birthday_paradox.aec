@@ -17,13 +17,13 @@ Integer16 koliko_ljudi_ima_rodendan_na_taj_dan[1_000];
 // Recimo da nikome neće trebati izračun za "godinu" s više od tisuću dana.
 
 Function numericki_izracun_rodendanskog_paradoksa(
-			Integer16 koliko_godina_ima_dana       ,
-			Integer16 koliko_ima_ljudi             ,
-			Integer16 iznad_koliko_kolizija_brojimo,
+			Integer16 koliko_godina_ima_dana             ,
+			Integer16 koliko_ima_ljudi                   ,
+			Integer16 iznad_koliko_kolizija_brojimo      ,
+			Integer32 koliko_smo_puta_izvrtili_simulaciju,
 		) Which Returns Decimal32 Does
-	Integer32 koliko_smo_puta_izvrtili_simulaciju  := 1_000,
-		koliko_smo_puta_dobili_toliko_kolizija := 0      ,
-		vanjski_brojac                         := 0      ;
+	Integer32 koliko_smo_puta_dobili_toliko_kolizija := 0,
+		  vanjski_brojac                         := 0;
 	While vanjski_brojac < koliko_smo_puta_izvrtili_simulaciju Loop
 		Integer16 unutarnji_brojac := 0    ,
                 	dani_za_debuggiranje[1_000];
