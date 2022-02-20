@@ -2536,6 +2536,55 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
 }
 EndFunction;
         </pre>
+        <b>UPDATE</b> on 20/02/2022: Here is how I implemented the
+        <a href="https://en.wikipedia.org/wiki/Atan2"
+          ><span class="inline_code">atan2</span> function</a
+        >
+        (which is often useful in programming), also an excerpt from Analog
+        Clock:
+        <pre>
+Decimal32 oneRadianInDegrees
+    : = 180 / pi; //"180/pi" is a compile-time decimal
+                  // constant (since we are assigning an
+                  // initial value to a global variable),
+                  // and, as such, we can use "pi" to
+                  // refer to M_PI from the C library,
+                  // it's available to the compiler.
+
+Function arctan(Decimal32 x) Which Returns Decimal32 Does {
+  // Arcus tangens is equal to the integral of 1/(1+x^2), highschool math.
+  Decimal32 sum : = 0, epsilon : = x / PRECISION, i : = 0;
+  While(i < x) Loop {
+    sum += epsilon / (1 + i * i);
+    i += epsilon;
+  }
+  EndWhile;
+  Return(sum * oneRadianInDegrees);
+}
+EndFunction;
+
+Function atan2(Decimal32 y, Decimal32 x) Which Returns Decimal32 Does {
+  If(y = 0) Then {
+    If(x < 0) Then { Return 180; }
+    Else { Return 0; }
+    EndIf;
+  }
+  ElseIf(x = 0) Then {
+    If y < 0 Then { Return 270; }
+    Else { Return 90; }
+    EndIf;
+  }
+  Else {
+    If(x > 0 and y > 0) Then { Return arctan(y / x); }
+    ElseIf(x < 0 and y > 0) Then { Return 90 + arctan(-x / y); }
+    ElseIf(x < 0 and y < 0) Then { Return 180 + arctan(y / x); }
+    Else { Return 270 + arctan(-x / y); }
+    EndIf;
+  }
+  EndIf;
+}
+EndFunction;</pre
+        >
         <br /><b id="String">String manipulation</b><br />
         AEC for x86 doesn't support string manipulation at all, it doesn't have
         a character type. AEC for WebAssembly is about as good at C manipulation
