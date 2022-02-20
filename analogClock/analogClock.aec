@@ -140,6 +140,28 @@ Function arctan(Decimal32 x) Which Returns Decimal32 Does {
 }
 EndFunction;
 
+Function atan2(Decimal32 y, Decimal32 x) Which Returns Decimal32 Does {
+  If(y = 0) Then {
+    If(x < 0) Then { Return 180; }
+    Else { Return 0; }
+    EndIf;
+  }
+  ElseIf(x = 0) Then {
+    If y < 0 Then { Return 270; }
+    Else { Return 90; }
+    EndIf;
+  }
+  Else {
+    If(x > 0 and y > 0) Then { Return arctan(y / x); }
+    ElseIf(x < 0 and y > 0) Then { Return 90 + arctan(-x / y); }
+    ElseIf(x < 0 and y < 0) Then { Return 180 + arctan(y / x); }
+    Else { Return 270 + arctan(-x / y); }
+    EndIf;
+  }
+  EndIf;
+}
+EndFunction;
+
 Function cos(Decimal32 degrees)
     Which Returns Decimal32 Is Declared; // Because "sin" and "cos" are
                                          // circularly dependent on one another.
@@ -152,13 +174,15 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
   If degrees > 90 Then { Return cos(degrees - 90); }
   EndIf;
   If not(sineMemoisation[asm_f32("(f32.nearest (local.get 0))")] = 0)
-      Then { //"(local.get 0)" means, in WebAssembly, "Get the first argument of
+      Then { //"(local.get 0)" means, in WebAssembly, "Get the first argument
+             // of
              // this function.", and the first argument of this function is
-             //"degrees". I've used inline assembly here because nothing else I
+             //"degrees". I've used inline assembly here because nothing else
+             // I
              // write will output "f32.nearest" (called "round" in most
-             // programming languages) WebAssembly directive, and it's way more
-             // convenient to insert some inline assembly than to modify and
-             // recompile the compiler.
+             // programming languages) WebAssembly directive, and it's way
+             // more convenient to insert some inline assembly than to modify
+             // and recompile the compiler.
     Return sineMemoisation[asm_f32("(f32.nearest (local.get 0))")];
   }
   EndIf;
@@ -238,6 +262,22 @@ EndFunction;
 // which was targeting x86, to WebAssembly.
 Function updateClockToTime(Integer32 hour, Integer32 minute,
                            Integer32 second) Which Returns Nothing Does {
+  If((abs(atan2(sin(5), cos(5)) - 5) > 1) or
+     (abs(atan2(sin(95), cos(95)) - 95) > 1) or
+     (abs(atan2(sin(185), cos(185)) - 185) > 1) or
+     (abs(atan2(sin(275), cos(275)) - 275) > 1)) Then {
+    logString("\"atan2\" function seems not to work!\n");
+    logString("atan2(sin(5), cos(5))=");
+    logInteger(atan2(sin(5), cos(5)));
+    logString("\natan2(sin(95),cos(95))=");
+    logInteger(atan2(sin(95), cos(95)));
+    logString("\natan2(sin(185),cos(185))=");
+    logInteger(atan2(sin(185), cos(185)));
+    logString("\natan2(sin(275),cos(275))=");
+    logInteger(atan2(sin(275), cos(275)));
+    logString("\n\n\n");
+  }
+  EndIf;
   Integer32 windowWidth : = 80, windowHeight : = 23, i : = 0;
   CharacterPointer lightGrayColor : = "#EEEEEE";
   CharacterPointer lightGreenColor : = "#CCFFCC";
