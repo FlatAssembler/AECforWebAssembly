@@ -265,7 +265,8 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
   If((abs(atan2(sin(5), cos(5)) - 5) > 1) or
      (abs(atan2(sin(95), cos(95)) - 95) > 1) or
      (abs(atan2(sin(185), cos(185)) - 185) > 1) or
-     (abs(atan2(sin(275), cos(275)) - 275) > 1)) Then {
+     (abs(atan2(sin(275), cos(275)) - 275) > 1) or
+     (abs(arcsin(sin(60)) - 60) > 1) or (abs(arccos(cos(60)) - 60) > 1)) Then {
     logString("\"atan2\" function seems not to work!\n");
     logString("atan2(sin(5), cos(5))=");
     logInteger(atan2(sin(5), cos(5)));
