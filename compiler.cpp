@@ -978,7 +978,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
       std::string subscriptName =
           "temporary_subscript" + std::to_string(rand());
-      while (context.variableTypes.count(subscriptName))
+      while (context.variableTypes.count(
+          subscriptName)) // TODO: Look for other places in this program where
+                          // `rand()` is used and make sure there as well that
+                          // the same random number is not selected two or more
+                          // times, as that can lead to spurious warnings about
+                          // shadowing variables.
         subscriptName = "temporary_subscript" + std::to_string(rand());
       TreeNode declarationOfSubscript("Integer32", lineNumber, columnNumber);
       declarationOfSubscript.children.push_back(
