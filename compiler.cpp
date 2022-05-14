@@ -587,11 +587,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                // semantic analyzer.
                   fakeContext.stackSizeOfThisFunction = 0;
                   fakeContext.stackSizeOfThisScope = 0;
+                  std::string nameOfTheInnerStructure;
+                  do {
+                    nameOfTheInnerStructure = "innerStructureInstantiated" +
+                                              std::to_string(std::rand());
+                  } while (
+                      context.variableTypes.count(nameOfTheInnerStructure));
                   TreeNode innerStructureNameNode(
-                      "innerStructureInstantiated" +
-                          std::to_string(
-                              std::rand()), // To silence useless warnings about
-                                            // supposed variable shadowing.
+                      nameOfTheInnerStructure, // To silence useless warnings
+                                               // about supposed variable
+                                               // shadowing.
                       instanceName.lineNumber, instanceName.columnNumber);
                   TreeNode innerStructureTypeNode(
                       iteratorPointingToTheStructure->memberTypes.at(
@@ -748,9 +753,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                           childNode.columnNumber);
         TreeNode structureNameNode(structureName, childNode.lineNumber,
                                    childNode.columnNumber);
-        TreeNode temporaryStructureNode(
-            "temporaryAssignmentStructure" + std::to_string(rand()),
-            childNode.lineNumber, childNode.columnNumber);
+        std::string nameOfTheTemporaryStructure;
+        do {
+          nameOfTheTemporaryStructure =
+              "temporaryAssignmentStructure" + std::to_string(rand());
+        } while (context.variableTypes.count(nameOfTheTemporaryStructure));
+        TreeNode temporaryStructureNode(nameOfTheTemporaryStructure,
+                                        childNode.lineNumber,
+                                        childNode.columnNumber);
         structureNameNode.children.push_back(temporaryStructureNode);
         instantiateStructureNode.children.push_back(structureNameNode);
         fakeInnerFunctionNode.children.push_back(instantiateStructureNode);
@@ -976,15 +986,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 * 	https://codereview.stackexchange.com/questions/273535/complicated-ast-manipulation-looks-ugly-in-c-how-to-refactor-it
                 */
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
-      std::string subscriptName =
-          "temporary_subscript" + std::to_string(rand());
-      while (context.variableTypes.count(
-          subscriptName)) // TODO: Look for other places in this program where
-                          // `rand()` is used and make sure there as well that
-                          // the same random number is not selected two or more
-                          // times, as that can lead to spurious warnings about
-                          // shadowing variables.
+      std::string subscriptName;
+      do {
         subscriptName = "temporary_subscript" + std::to_string(rand());
+      } while (context.variableTypes.count(subscriptName));
       TreeNode declarationOfSubscript("Integer32", lineNumber, columnNumber);
       declarationOfSubscript.children.push_back(
           TreeNode(subscriptName, lineNumber, columnNumber));
