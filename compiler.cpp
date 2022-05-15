@@ -756,7 +756,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         std::string nameOfTheTemporaryStructure;
         do {
           nameOfTheTemporaryStructure =
-              "temporaryAssignmentStructure" + std::to_string(rand());
+              "temporaryAssignmentStructure" + std::to_string(std::rand());
         } while (context.variableTypes.count(nameOfTheTemporaryStructure));
         TreeNode temporaryStructureNode(nameOfTheTemporaryStructure,
                                         childNode.lineNumber,
@@ -988,7 +988,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
       std::string subscriptName;
       do {
-        subscriptName = "temporary_subscript" + std::to_string(rand());
+        subscriptName = "temporary_subscript" + std::to_string(std::rand());
       } while (context.variableTypes.count(subscriptName));
       TreeNode declarationOfSubscript("Integer32", lineNumber, columnNumber);
       declarationOfSubscript.children.push_back(
