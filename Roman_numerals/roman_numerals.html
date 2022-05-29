@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html>
+  <head>
+    <title>AEC-to-WebAssembly compiler - Roman Numerals</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Roman Numerals</h1>
+    This is an AEC program that converts Arabic numbers to Roman numbers,
+    compiled using my
+    <a href="https://github.com/FlatAssembler/AECforWebAssembly"
+      >AEC-to-WebAssembly compiler</a
+    >.
+    <br />
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer (those that support <code>WebAssembly.Global</code>).
+    After a few years (if not months), all JavaScript environments will become
+    as capable as they are, rather than like Internet Explorer.<br /><br />
+    <form>
+      <label for="ArabicNumber">Arabic number:</label><br />
+      <input type="text" id="ArabicNumber" name="ArabicNumber" /><br />
+    </form>
+    <button onclick="invokeAECfunctions()">Convert to Roman numerals!</button
+    ><br />
+    <span id="format_as_code">
+      <span id="copy_of_ArabicNumber">0</span>_(10)=&quot;<span
+        id="Roman_number"
+        >N</span
+      >&quot; </span
+    ><br />
+    You can see the source code of the AEC program
+    <a href="roman_numerals.aec.html">here</a>.
+    <script type="text/javascript">
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      let importObject = {
+        JavaScript: { stack_pointer: stack_pointer, memory: memory },
+      };
+      let pointerToResult, convertToRomanNumerals;
+      fetch("roman_numerals.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          const exports = results.instance.exports;
+          pointerToResult = exports.pointerToResult(); //It never changes, so it needs to be fetched from the AEC program only once.
+          convertToRomanNumerals = exports.convertToRomanNumerals;
+        });
+      function invokeAECfunctions() {
+        const number = parseInt(document.getElementById("ArabicNumber").value);
+        document.getElementById("copy_of_ArabicNumber").innerText = number;
+        convertToRomanNumerals(number);
+        let romanNumber = "";
+        let pointer = pointerToResult;
+        const bytes = new Uint8Array(memory.buffer);
+        while (bytes[pointer]) {
+          romanNumber += String.fromCharCode(bytes[pointer]);
+          pointer++;
+        }
+        document.getElementById("Roman_number").innerText = romanNumber;
+      }
+    </script>
+  </body>
+</html>

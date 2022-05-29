@@ -20,8 +20,11 @@ Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
                                          1000};
     result[0] := 0;
     CharacterPointer result := pointerToResult();
-    If number < 1 or number > 4000 - 1 Then
-        strcat(result,"Please enter a number between 1 and 4000.");
+    If number = 0 Then
+        strcat(result,"N");
+        Return;
+    ElseIf number < 0 or number > 4000 - 1 Then
+        strcat(result,"Please enter a number between 0 and 4000.");
         Return;
     EndIf
     Integer32 pointerToElement := 12; // To "M" (1000).
