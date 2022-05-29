@@ -1568,7 +1568,22 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         <span class="inline_code">Integer32</span>), rather than by 1.<br />
         <b>TODO</b>: Implement the multi-dimensional arrays. But let's not use
         the JavaScript-like approach to them, JavaScript really sucks in that
-        regard.<br />
+        regard. For now, only local (not yet global, the compiler crashes if you
+        try to do that) multi-dimensional arrays of characters are supported,
+        like this (excerpt from <a href="roman_numerals">Roman Numerals</a>):
+        <pre>
+    CharacterPointer elements[13] :=    {"I",  "IV", "V",
+                                         "IX", "X",  "XL",
+                                         "L",  "XC", "C",
+                                         "CD", "D",  "CM",
+                                         "M"};
+    Integer16 meaningsOfElements[13] := {1,   4,   5,
+                                         9,   10,  40,
+                                         50,  90,  100,
+                                         400, 500, 900,
+                                         1000};</pre
+        >
+        <br />
         <br /><b id="Assignments">Assignments</b><br />
         For assignments, you use <span class="inline_code">:=</span> operator,
         in both dialects of AEC. In the AEC for WebAssembly, you can nest
