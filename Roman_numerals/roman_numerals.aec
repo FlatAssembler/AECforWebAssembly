@@ -1,0 +1,59 @@
+Character result[64];
+//"Extern" has not been implemented (yet)...
+Function pointerToResult() Which Returns CharacterPointer Does
+    Return AddressOf(result[0]);
+EndFunction
+
+Function strcat(CharacterPointer dest, CharacterPointer src)
+         Which Returns Nothing Is Declared;
+
+Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
+    CharacterPointer elements[13] :=    {"I",  "IV", "V",
+                                         "IX", "X",  "XL",
+                                         "L",  "XC", "C",
+                                         "CD", "D",  "CM",
+                                         "M"};
+    Integer16 meaningsOfElements[13] := {1,   4,   5,
+                                         9,   10,  40,
+                                         50,  90,  100,
+                                         400, 500, 900,
+                                         1000};
+    result[0] := 0;
+    CharacterPointer result := pointerToResult();
+    If number < 1 or number > 4000 - 1 Then
+        strcat(result,"Please enter a number between 1 and 4000.");
+        Return;
+    EndIf
+    Integer32 pointerToElement := 12; // To "M" (1000).
+    While number Loop
+        If number > meaningsOfElements[pointerToElement] - 1 Then
+            strcat(result, elements[pointerToElement]);
+            number -= meaningsOfElements[pointerToElement];
+        Else
+           pointerToElement -= 1;
+        EndIf
+    EndWhile
+EndFunction
+
+Function strlen(CharacterPointer str) Which Returns Integer32 Does
+    Integer32 length : = 0;
+    While ValueAt(str + length) Loop
+        length += 1;
+    EndWhile
+    Return length;
+EndFunction
+
+Function strcpy(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    While ValueAt(src) Loop
+        ValueAt(dest) := ValueAt(src);
+        dest          += 1;
+        src           += 1;
+    EndWhile
+    ValueAt(dest) : = 0;
+EndFunction
+
+Function strcat(CharacterPointer dest,
+                CharacterPointer src) Which Returns Nothing Does
+    strcpy(dest + strlen(dest), src);
+EndFunction
