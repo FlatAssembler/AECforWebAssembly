@@ -257,14 +257,26 @@ public:
                       std::to_string(
                           field.interpretAsACompileTimeIntegerConstant()) +
                       "\n";
-                else if (childNode.text == "Integer32")
+                else if (childNode.text == "Integer32" or
+                         isPointerType(childNode.text))
                   globalDeclarations +=
                       "\t(data 0 (i32.const " + std::to_string(address) + ") " +
                       getCharVectorRepresentationOfInteger32(
-                          field.interpretAsACompileTimeIntegerConstant()) +
+                          field.text.at(0) == '\"'
+                              ? // If we are dealing with a two-dimensional
+                                // character array.
+                              context.globalVariables.at(field.text)
+                              : field
+                                    .interpretAsACompileTimeIntegerConstant()) +
                       ") ;;Hex of " +
                       std::to_string(
-                          field.interpretAsACompileTimeIntegerConstant()) +
+                          field.text.at(0) == '\"'
+                              ? context.globalVariables.at(field.text)
+                              : field
+                                    .interpretAsACompileTimeIntegerConstant()) +
+                      (field.text.at(0) == '\"'
+                           ? ", the address of " + field.text
+                           : std::string("")) +
                       "\n";
                 else if (childNode.text == "Integer64")
                   globalDeclarations +=
