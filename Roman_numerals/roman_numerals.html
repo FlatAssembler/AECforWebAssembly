@@ -36,10 +36,10 @@
     <button onclick="invokeAECfunctions()">Convert to Roman numerals!</button
     ><br />
     <span id="format_as_code">
-      <span id="copy_of_ArabicNumber">0</span>_(10)=&quot;<span
+      <span id="copy_of_ArabicNumber">0</span><sub>(10)</sub>=<span
         id="Roman_number"
         >N</span
-      >&quot; </span
+      ><sub>(Roman)</sub> </span
     ><br />
     You can see the source code of the AEC program
     <a href="roman_numerals.aec.html">here</a>.
@@ -50,7 +50,7 @@
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
       let importObject = {
-        JavaScript: { stack_pointer: stack_pointer, memory: memory },
+        JavaScript: { stack_pointer: stack_pointer, memory: memory }
       };
       let pointerToResult, convertToRomanNumerals;
       fetch("roman_numerals.wasm")

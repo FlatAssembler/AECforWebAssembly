@@ -1,3 +1,13 @@
+CharacterPointer elements[13] :=    {"I",  "IV", "V",
+                                     "IX", "X",  "XL",
+                                     "L",  "XC", "C",
+                                     "CD", "D",  "CM",
+                                     "M"};
+Integer16 meaningsOfElements[13] := { 1,    4,   5,
+                                      9     10,  40,
+                                      50,   90,  100,
+                                      400,  500, 900,
+                                      1000};
 Character result[64];
 //"Extern" has not been implemented (yet)...
 Function pointerToResult() Which Returns CharacterPointer Does
@@ -8,23 +18,13 @@ Function strcat(CharacterPointer dest, CharacterPointer src)
          Which Returns Nothing Is Declared;
 
 Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
-    CharacterPointer elements[13] :=    {"I",  "IV", "V",
-                                         "IX", "X",  "XL",
-                                         "L",  "XC", "C",
-                                         "CD", "D",  "CM",
-                                         "M"};
-    Integer16 meaningsOfElements[13] := {1,   4,   5,
-                                         9,   10,  40,
-                                         50,  90,  100,
-                                         400, 500, 900,
-                                         1000};
     result[0] := 0;
     CharacterPointer result := pointerToResult();
     If number = 0 Then
         strcat(result,"N");
         Return;
     ElseIf number < 0 or number > 4000 - 1 Then
-        strcat(result,"Please enter a number between 0 and 4000.");
+        strcat(result,"\"Please enter a number between 0 and 4000.\"");
         Return;
     EndIf
     Integer32 pointerToElement := 12; // To "M" (1000).
