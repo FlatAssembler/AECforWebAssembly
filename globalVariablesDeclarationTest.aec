@@ -8,3 +8,7 @@ Decimal64 irrationalNumbers[3]:={pi,
                                  (sqrt(5)+1)/2 //Golden ratio (1.618033...)
                                 };
 Decimal32 rationalNumbers[3]:={3/2,pow(sin(pi/4),2),22/7};
+CharacterPointer elementsOfRomanNumerals[13] := {"I","IV","V","IX",
+                                                 "X","XL","L","XC",
+                                                 "C","CD","D","CM",
+                                                 "M"};
