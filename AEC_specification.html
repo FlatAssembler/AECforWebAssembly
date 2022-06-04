@@ -2189,7 +2189,15 @@ EndFunction</pre
         ><br />
         <b>TODO</b>: Find a way to implement
         <del>circularly dependent functions</del>, and, if possible, function
-        hoisting. Also, implement function pointers.
+        hoisting. Also, implement function pointers. Function pointers will
+        allow for an easy-to-implement object-oriented programming (structures
+        containing function pointers, often used in the Linux kernel instead of
+        classes). Mozilla Developer Network recommends function pointers to be
+        implemented in compilers using
+        <a
+          href="https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format#webassembly_tables"
+          >WebAssembly Tables</a
+        >.
         <del
           >Named function arguments (using, for example, the
           <span class="inline_code">:=</span> operator) might also come useful
