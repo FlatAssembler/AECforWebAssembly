@@ -8,6 +8,9 @@
  * I doubt it would help significantly.
  */
 
+// TODO: Analyze and possibly apply what G. Sliepen has to say about this
+// compiler: https://codereview.stackexchange.com/a/277104/219010
+
 #include "bitManipulations.cpp"
 #include "semanticAnalyzer.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
