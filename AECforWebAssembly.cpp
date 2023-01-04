@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
            << R"(
 Or, alternatively, open an AEC source code with this program.
 For more information, see:
-https://flatassembler.github.io/AEC_specification.html#AEC_to_WebAssembly
+https://flatassembler.github.io/AEC_specification#AEC_to_WebAssembly
 TL;DR
 An example AEC program can be downloaded here:
 https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw
