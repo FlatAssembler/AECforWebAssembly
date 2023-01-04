@@ -43,14 +43,14 @@ int main(int argc, char **argv) {
                                // the standards) is to JavaScript. I don't
                                // understand how it manages to compile itself,
                                // yet it miscompiles something every now and
-                               // then in a 5'000-lines-of-code program.
+                               // then in a 5'500-lines-of-code program.
         throw regex_error(error_complexity);
       cerr << "Please invoke this program as follows, from the command line:\n"
            << argv[0] << " name_of_the_program.aec"
            << R"(
 Or, alternatively, open an AEC source code with this program.
 For more information, see:
-https://flatassembler.github.io/AEC_specification#HowToCompile
+https://flatassembler.github.io/AEC_specification.html#AEC_to_WebAssembly
 TL;DR
 An example AEC program can be downloaded here:
 https://sourceforge.net/p/aecforwebassembly/code/ci/master/tree/analogClock/analogClock.aec?format=raw
