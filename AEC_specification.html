@@ -840,9 +840,10 @@
         <i>intrusive</i> as C compilers are.
         <a href="https://emscripten.org/" id="about_emscripten">Emscripten</a>
         (the primary C and C++ compiler for WebAssembly, a modified version of
-        the CLANG compiler) always assumes the standard C library is present on
-        the JavaScript Virtual Machine when compiling any kind of program, so
-        it's an overkill for most cases when it could come useful. The
+        the <a href="https://clang.llvm.org/">CLANG</a> compiler) always assumes
+        the standard C library is present on the JavaScript Virtual Machine when
+        compiling any kind of program, so it's an overkill for most cases when
+        it could come useful. The
         <a href="https://github.com/FlatAssembler/AECforWebAssembly"
           >AEC-to-WebAssembly compiler</a
         >
@@ -998,7 +999,7 @@ gcc -o analogClock analogClock.s -m32
           on both 32-bit and 64-bit Windows, so I saved it in
           <span class="inline_code">analogClockForWindows.aec</span>.
           Unfortunately, it still shows a lot of errors if you attempt to
-          assemble it using the version of GNU Assembler that come with TDM-GCC
+          assemble it using the versions of GNU Assembler that come with TDM-GCC
           or CygWin. Apparently, the versions of GNU Assembler that come with
           various ports of GCC on Windows are different from each other to a
           greater extent than the version of GNU Assembler that runs on Linux
