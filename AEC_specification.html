@@ -971,7 +971,7 @@ mkdir ArithmeticExpressionCompiler
 cd ArithmeticExpressionCompiler
 wget <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
 unzip Duktape.zip
-gcc -o aec -lm aec.c duktape.c
+gcc -o aec aec.c duktape.c -lm # The linker that comes with recent versions of Debian Linux insists that "-lm" is put after the source files.
 ./aec analogClock.aec
 gcc -o analogClock analogClock.s -m32
 ./analogClock
@@ -2867,7 +2867,16 @@ EndFunction
         <a href="https://codereview.stackexchange.com/a/277104/219010"
           >lot of bad comments</a
         >
-        about the way I structured my compiler.
+        about the way I structured my compiler.<br />
+        <br />
+        UPDATE on 05/01/2023: A question I often get asked on Internet forums
+        is, if I have made my programming language, why haven't I also made my
+        own operating system? The answer is fairly simple: While I do have some
+        ideas about what a good programming language would look like and work
+        internally (as you can probably tell by reading the documentation of my
+        programming language), I have no idea what a good operating system would
+        work like. So, I haven't made my own operating system, and I probably
+        never will.
       </div>
       <script type="text/javascript">
         function highlightedToken(token) {
