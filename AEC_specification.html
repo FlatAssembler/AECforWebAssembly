@@ -193,6 +193,9 @@
       .quotation .quotation .quotation {
         background: #aaaa00;
       }
+      .quotation .inline_code {
+        background: #ffee00;
+      }
       .formula {
         background: white;
         color: black;
@@ -1063,8 +1066,8 @@ gcc -o analogClock analogClock.s -m32
           href="https://github.com/FlatAssembler/SimpleCalculator/raw/master/SimpleCalculator.zip"
           >SimpleCalculator</a
         >, a version of the AEC-to-x86-compiler running in
-        <a href="https://www.mozilla.org/rhino/">Rhino</a> (a JavaScript engine
-        written in Java, by Mozilla) and using
+        <a href="https://github.com/mozilla/rhino">Rhino</a> (a JavaScript
+        engine written in Java, by Mozilla) and using
         <a href="https://docs.oracle.com/javase/tutorial/uiswing/">Swing GUI</a
         >. It an be used as a simple calculator, but it also supports converting
         AEC programs to x86 assembly. The AEC-to-x86 compiler, both when run in
@@ -1083,6 +1086,28 @@ gcc -o analogClock analogClock.s -m32
         <span class="inline_code">;</span> means to have multiple
         assembly-language directives in a single line (useful for when invoked
         from a debugger, where you need to inline a few directives).<br />
+        By the way, in case you are interested, here is how <i>zero9178</i> (a
+        friend I met on Discord, who maintains his own GCC port to Windows)
+        explains the fact that putting <span class="inline_code">-lm</span> in
+        front of source files causes an error on some (but, curiously, not all)
+        versions of Linux:
+        <div class="quotation">
+          Only a very educated guess, but GNU ld is very sensitive to link order
+          of archives and lazily loads archives.<br />
+          More specifically what is likely happening here is that it is passing
+          <span class="inline_code">-lm</span> first, before any object files to
+          the linker (you can see the linker invocation GCC does by adding
+          <span class="inline_code">-v</span> that should give you more
+          info).<br />
+          Since at that point in time, there are no undefined symbols, as object
+          files have not been processed yet, the
+          <span class="inline_code">-lm</span> is effectively discard. <br />
+          Later <span class="inline_code">-lm</span> are likely discard too as
+          they are seen as duplicates of the first one. <br />
+          Usually <span class="inline_code">-lm</span> would be placed further
+          back, since later object files or other archives that require symbols
+          from it will have already been imported by the linker.
+        </div>
         <a name="AEC_to_WebAssembly"></a>Using the AEC-to-WebAssembly compiler
         is, on most Linux machines, a little trickier. The following code might
         work:
