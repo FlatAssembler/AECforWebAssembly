@@ -1295,7 +1295,15 @@ node analogClock
         <a
           href="https://medium.com/@rauljordan/webassembly-the-future-of-blockchain-computing-1a0ae28f7e40"
           >blockchains support WebAssembly Binary Interface</a
-        >, so perhaps my compiler can now be useful there.<br /><br />
+        >, so perhaps my compiler can now be useful there.<br />
+        <b>UPDATE</b> on 09/01/2023: Here is how my AEC-to-WebAssembly compiler
+        can be compiled using latest Emscripten:
+        <pre class="LinuxShell">
+emcc -o aec.js AECforWebAssembly.cpp -s NODERAWFS=1 -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_STACK=4MB -O3</pre
+        >
+        Previous versions of Emscripten did not require
+        <span class="inline_code">-s TOTAL_STACK=4MB</span>, but the latest
+        version does.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
