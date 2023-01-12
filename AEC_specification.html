@@ -1125,7 +1125,12 @@ fi
         <pre class="LinuxShell">
 git clone <a href="https://github.com/FlatAssembler/AECforWebAssembly.git">https://github.com/FlatAssembler/AECforWebAssembly.git</a>
 cd AECforWebAssembly
-g++ -std=c++11 -o aec AECforWebAssembly.cpp
+if command -v g++ &amp;&gt; /dev/null
+then
+  g++ -std=c++11 -o aec AECforWebAssembly.cpp
+else
+  clang++ -o aec AECforWebAssembly.cpp
+fi
 cd analogClock
 ../aec analogClock.aec
 npx -p wabt wat2wasm analogClock.wat
