@@ -1303,7 +1303,10 @@ emcc -o aec.js AECforWebAssembly.cpp -s NODERAWFS=1 -s ALLOW_MEMORY_GROWTH=1 -s 
         >
         Previous versions of Emscripten did not require
         <span class="inline_code">-s TOTAL_STACK=4MB</span>, but the latest
-        version does.<br /><br />
+        version does, because of
+        <a href="https://github.com/emscripten-core/emscripten/pull/18191"
+          >this pull request</a
+        >.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
