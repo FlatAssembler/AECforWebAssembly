@@ -972,22 +972,33 @@
         <pre class="LinuxShell">
 mkdir ArithmeticExpressionCompiler
 cd ArithmeticExpressionCompiler
-wget <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
+if command -v wget &amp;> /dev/null
+then
+  wget <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
+else
+  curl -o Duktape.zip <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
+fi
 unzip Duktape.zip
-gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux insists that "-lm" is put AFTER the source files, or else it outputs some confusing error message.</span>
+if command -v gcc &amp;&gt; /dev/null
+then
+  gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux insists that "-lm" is put AFTER the source files, or else it outputs some confusing error message.</span>
+else
+  clang -o aec aec.c duktape.c -lm
+fi
 ./aec analogClock.aec
-gcc -o analogClock analogClock.s -m32
+if command -v gcc &amp;&gt; /dev/null
+then
+  gcc -o analogClock analogClock.s -m32
+else
+  clang -o analogClock analogClock.s -m32
+fi
 ./analogClock
         </pre>
         If everything is fine, the Analog Clock program should now print the
         current time in the terminal. I think this would work on the vast
         majority of Linux machines, as well as on many non-Linux (FreeBSD,
-        Solaris...) machines. If you do not have
-        <span class="inline_code">wget</span>, you may try using
-        <span class="inline_code">curl</span> instead (but note that then you
-        need to put <span class="inline_code">-o Duktape.zip</span> before the
-        URL). A potential problem is that the 32-bit libraries are not installed
-        on a 64-bit Linux machine (so that
+        Solaris...) machines. A potential problem is that the 32-bit libraries
+        are not installed on a 64-bit Linux machine (so that
         <span class="inline_code">-m32</span> fails), but this is rarely the
         case, as Linux machines today usually have
         <a href="https://www.winehq.org/">WINE</a> (a Windows compatibility
