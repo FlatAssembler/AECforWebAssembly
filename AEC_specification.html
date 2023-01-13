@@ -972,28 +972,28 @@
         <pre class="LinuxShell">
 mkdir ArithmeticExpressionCompiler
 cd ArithmeticExpressionCompiler
-if [ $(command -v wget &gt;/dev/null 2>&amp;1 ; echo $?) -eq 0 ] <span class="Comment"># Check if "wget" exists, see those StackOverflow answers for more details:
-                                                                                       # <a href="https://stackoverflow.com/a/75103891/8902065">https://stackoverflow.com/a/75103891/8902065</a>
-                                                                                       # <a href="https://stackoverflow.com/a/75103209/8902065">https://stackoverflow.com/a/75103209/8902065</a></span>
-then
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v wget <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span> <span class="Comment"># Check if "wget" exists, see those StackOverflow answers for more details:
+                                                                                         # <a href="https://stackoverflow.com/a/75103891/8902065">https://stackoverflow.com/a/75103891/8902065</a>
+                                                                                         # <a href="https://stackoverflow.com/a/75103209/8902065">https://stackoverflow.com/a/75103209/8902065</a></span>
+<span class="Keyword">then</span>
   wget <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
-else
+<span class="Keyword">else</span>
   curl -o Duktape.zip <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
-fi
+<span class="Keyword">fi</span>
 unzip Duktape.zip
-if [ $(command -v gcc &gt;/dev/null 2&gt;&amp;1 ; echo $?) -eq 0 ]
-then
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v gcc <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">then</span>
   gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux insists that "-lm" is put AFTER the source files, or else it outputs some confusing error message.</span>
-else
+<span class="Keyword">else</span>
   clang -o aec aec.c duktape.c -lm
-fi
+<span class="Keyword">fi</span>
 ./aec analogClock.aec
-if [ $(command -v gcc &gt;/dev/null 2&gt;&amp;1 ; echo $?) -eq 0 ]
-then
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v gcc <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">then</span>
   gcc -o analogClock analogClock.s -m32
-else
+<span class="Keyword">else</span>
   clang -o analogClock analogClock.s -m32
-fi
+<span class="Keyword">fi</span>
 ./analogClock
         </pre>
         If everything is fine, the Analog Clock program should now print the
@@ -1125,28 +1125,30 @@ fi
         is, on most Linux machines, a little trickier. The following code might
         work:
         <pre class="LinuxShell">
-if [ $(command -v git &gt;/dev/null 2&gt;&amp;1 ; echo $?) -eq 0 ]
-then
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v git <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">then</span>
   git clone <a href="https://github.com/FlatAssembler/AECforWebAssembly.git">https://github.com/FlatAssembler/AECforWebAssembly.git</a>
   cd AECforWebAssembly
-elif [ $(command -v wget &gt;/dev/null 2&gt;&amp;1 ; echo $?) -eq 0 ]
-then
+<span class="Keyword">elif</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v wget <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">then</span>
   mkdir AECforWebAssembly
   cd AECforWebAssembly
   wget <a href="https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip">https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip</a>
-  unzip *.zip
-else
+  unzip master.zip
+  cd AECforWebAssembly-master
+<span class="Keyword">else</span>
   mkdir AECforWebAssembly
   cd AECforWebAssembly
   curl -o AECforWebAssembly.zip -L <a href="https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip">https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip</a> <span class="Comment"># Without the "-L", "curl" will store HTTP Response headers of redirects to the ZIP file instead of the actual ZIP file.</span>
   unzip AECforWebAssembly.zip
-fi
-if [ $(command -v g++ &gt;/dev/null 2&gt;&amp;1 ; echo $?) -eq 0 ]
-then
+  cd AECforWebAssembly-master
+<span class="Keyword">fi</span>
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v g++ <span class="Operator">&gt;</span> /dev/null <span class="Numerals">2</span><span class="Operator">&gt;&amp;</span><span class="Numerals">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Numerals">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">then</span>
   g++ -std=c++11 -o aec AECforWebAssembly.cpp <span class="Comment"># "-std=c++11" should not be necessary for newer versions of "g++". <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues">Let me know</a> if it is, as that probably means I disobeyed some new C++ standard (say, C++23).</span>
-else
+<span class="Keyword">else</span>
   clang++ -o aec AECforWebAssembly.cpp
-fi
+<span class="Keyword">fi</span>
 cd analogClock
 ../aec analogClock.aec
 npx -p wabt wat2wasm analogClock.wat
