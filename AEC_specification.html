@@ -1156,7 +1156,15 @@ unzip Duktape.zip
 cd analogClock
 ../aec analogClock.aec
 npx -p wabt wat2wasm analogClock.wat
-node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node -v<span class="Parenthesis">)</span> <span class="Comment"># <a href="https://stackoverflow.com/q/75124724/8902065">This does not seem to work in Git Bash on Windows</a>.</span>
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v winpty <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span> <span class="Comment"># Check whether we are running on Windows on which &quot;winpty&quot; is installed, see this StackOverflow answer for for more details: <a href="https://stackoverflow.com/a/75125384/8902065">https://stackoverflow.com/a/75125384/8902065</a></span>
+<span class="Keyword">then</span>
+  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>winpty node -v<span class="Parenthesis">)</span>
+<span class="Keyword">elif</span> <span class="Parenthesis">[</span> <span class="String">"<i>$OS</i>"</span> <span class="Operator">=</span> <span class="String">"Windows_NT"</span> <span class="Parenthesis">]</span> <span class="Comment"># Perhaps we are running on Windows, but without &quot;winpty&quot;.</span>
+<span class="Keyword">then</span>
+  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node.exe -v<span class="Parenthesis">)</span> <span class="Comment"># This worked on some versions of NodeJS (no idea how), but, apparently, it does not work on NodeJS 18. Have a better idea what to do on Windows where &quot;winpty&quot; is not installed? <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues">Let me know</a>.</span>
+<span class="Keyword">else</span> <span class="Comment"># We are presumably running on an UNIX-like system, where storing output of some program into a variable works as expected.</span>
+  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node -v<span class="Parenthesis">)</span>
+<span class="Keyword">fi</span>
 <span class="Comment"># "node -v" outputs version in the format "v18.12.1"</span>
 node_version<span class="Operator">=$</span><span class="Parenthesis">{</span>node_version<span class="Operator">:</span><span class="Constant">1</span><span class="Parenthesis">}</span> <span class="Comment"># Remove 'v' at the beginning</span>
 node_version<span class="Operator">=$</span><span class="Parenthesis">{</span>node_version<span class="Operator">%</span><span class="String"><i>\.</i>*</span><span class="Parenthesis">}</span> <span class="Comment"># Remove trailing ".*".</span>
