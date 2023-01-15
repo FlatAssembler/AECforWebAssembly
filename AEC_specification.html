@@ -1156,12 +1156,10 @@ unzip Duktape.zip
 cd analogClock
 ../aec analogClock.aec
 npx -p wabt wat2wasm analogClock.wat
-<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v winpty <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span> <span class="Comment"># Check whether we are running on Windows on which &quot;winpty&quot; is installed, see this StackOverflow answer for for more details: <a href="https://stackoverflow.com/a/75125384/8902065">https://stackoverflow.com/a/75125384/8902065</a></span>
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="String">"<i>$OS</i>"</span> <span class="Operator">=</span> <span class="String">"Windows_NT"</span> <span class="Parenthesis">]</span> <span class="Comment"># <a href="https://stackoverflow.com/a/75125384/8902065">https://stackoverflow.com/a/75125384/8902065</a>
+                            # <a href="https://www.reddit.com/r/bash/comments/10cip05/comment/j4h9f0x/?utm_source=share&utm_medium=web2x&context=3">https://www.reddit.com/r/bash/comments/10cip05/comment/j4h9f0x/?utm_source=share&utm_medium=web2x&context=3</a></span>
 <span class="Keyword">then</span>
-  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>winpty node -v<span class="Parenthesis">)</span>
-<span class="Keyword">elif</span> <span class="Parenthesis">[</span> <span class="String">"<i>$OS</i>"</span> <span class="Operator">=</span> <span class="String">"Windows_NT"</span> <span class="Parenthesis">]</span> <span class="Comment"># Perhaps we are running on Windows, but without &quot;winpty&quot;.</span>
-<span class="Keyword">then</span>
-  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node.exe -v<span class="Parenthesis">)</span> <span class="Comment"># This worked on some versions of NodeJS (no idea how), but, apparently, it does not work on NodeJS 18. Have a better idea what to do on Windows where &quot;winpty&quot; is not installed? <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues">Let me know</a>. I have also asked it on Reddit: <a href="https://www.reddit.com/r/bash/comments/10cip05/comment/j4h9f0x/?utm_source=share&utm_medium=web2x&context=3">https://www.reddit.com/r/bash/comments/10cip05/comment/j4h9f0x/?utm_source=share&utm_medium=web2x&context=3</a></span>
+  node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node.exe -v<span class="Parenthesis">)</span>
 <span class="Keyword">else</span> <span class="Comment"># We are presumably running on an UNIX-like system, where storing output of some program into a variable works as expected.</span>
   node_version<span class="Operator">=$</span><span class="Parenthesis">(</span>node -v<span class="Parenthesis">)</span>
 <span class="Keyword">fi</span>
