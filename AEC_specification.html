@@ -987,7 +987,7 @@ cd ArithmeticExpressionCompiler
 unzip Duktape.zip
 <span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v gcc <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span>
 <span class="Keyword">then</span>
-  gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux insists that "-lm" is put AFTER the source files, or else it outputs some confusing error message.</span>
+  gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux <a href="#GCC_requires_lm">insists that "-lm" is put AFTER the source files</a>, or else it outputs some confusing error message.</span>
 <span class="Keyword">else</span>
   clang -o aec aec.c duktape.c -lm
 <span class="Keyword">fi</span>
@@ -1103,11 +1103,11 @@ unzip Duktape.zip
         <span class="inline_code">;</span> means to have multiple
         assembly-language directives in a single line (useful for when invoked
         from a debugger, where you need to inline a few directives).<br />
-        By the way, in case you are interested, here is how <i>zero9178</i> (a
-        friend I met on Discord, who maintains his own GCC port to Windows)
-        explains the fact that putting <span class="inline_code">-lm</span> in
-        front of source files causes an error on some (but, curiously, not all)
-        versions of Linux:
+        <a name="GCC_requires_lm"></a>By the way, in case you are interested,
+        here is how <i>zero9178</i> (a friend I met on Discord, who maintains
+        his own GCC port to Windows) explains the fact that putting
+        <span class="inline_code">-lm</span> in front of source files causes an
+        error on some (but, curiously, not all) versions of Linux:
         <div class="quotation">
           Only a very educated guess, but GNU ld is very sensitive to link order
           of archives and lazily loads archives.<br />
@@ -1156,11 +1156,12 @@ unzip Duktape.zip
 cd analogClock
 ../aec analogClock.aec
 npx -p wabt wat2wasm analogClock.wat
-node_version=<span class="Operator">$</span><span class="Parenthesis">(</span>node -v<span class="Parenthesis">)</span>
+node_version=<span class="Operator">$</span><span class="Parenthesis">(</span>node -v<span class="Parenthesis">)</span> <span class="Comment"># <a href="https://stackoverflow.com/q/75124724/8902065">This does not seem to work in Git Bash on Windows</a>.</span>
 <span class="Comment"># "node -v" outputs version in the format "v18.12.1"</span>
 node_version=<span class="Operator">$</span><span class="Parenthesis">{</span>node_version<span class="Operator">:</span><span class="Constant">1</span><span class="Parenthesis">}</span> <span class="Comment"># Remove 'v' at the beginning</span>
 node_version=<span class="Operator">$</span><span class="Parenthesis">{</span>node_version<span class="Operator">%\</span><span class="String">.*</span><span class="Parenthesis">}</span> <span class="Comment"># Remove trailing ".*".</span>
 node_version=<span class="Operator">$</span><span class="Parenthesis">{</span>node_version<span class="Operator">%\</span><span class="String">.*</span><span class="Parenthesis">}</span> <span class="Comment"># Remove trailing ".*".</span>
+node_version=<span class="Operator">$</span><span class="Parenthesis">((</span><span class="Operator">$</span>node_version<span class="Parenthesis">))</span> <span class="Comment"># Convert the NodeJS version number from a string to an integer.</span>
 <span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span>node_version <span class="Keyword">-lt</span> <span class="Constant">11</span> <span class="Parenthesis">]</span>
 <span class="Keyword">then</span>
   echo <span class="String">"NodeJS version is lower than 11 (it is <i>$node_version</i>), you will probably run into trouble!"</span>
