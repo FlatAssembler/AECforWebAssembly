@@ -985,20 +985,23 @@ cd ArithmeticExpressionCompiler
   curl -o Duktape.zip <a href="https://flatassembler.github.io/Duktape.zip">https://flatassembler.github.io/Duktape.zip</a>
 <span class="Keyword">fi</span>
 unzip Duktape.zip
-<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v gcc <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span>
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v clang <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span> <span class="Comment"># We prefer "clang" to "gcc" because... what if somebody tries to run this in CygWin terminal? GCC will not work then, CLANG might.</span>
 <span class="Keyword">then</span>
-  gcc -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux <a href="#GCC_requires_lm">insists that "-lm" is put AFTER the source files</a>, or else it outputs some confusing error message.</span>
+  c_compiler<span class="Operator">=</span><span class="String">"clang"</span>
 <span class="Keyword">else</span>
-  clang -o aec aec.c duktape.c -lm
+  c_compiler<span class="Operator">=</span><span class="String">"gcc"</span>
 <span class="Keyword">fi</span>
-./aec analogClock.aec
-<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="Operator">$</span><span class="Parenthesis">(</span>command -v gcc <span class="Operator">&gt;</span> /dev/null <span class="Constant">2</span><span class="Operator">&gt;&amp;</span><span class="Constant">1</span> <span class="Operator">;</span> echo <span class="Operator">$</span>?<span class="Parenthesis">)</span> <span class="Keyword">-eq</span> <span class="Constant">0</span> <span class="Parenthesis">]</span>
+$c_compiler -o aec aec.c duktape.c -lm <span class="Comment"># The linker that comes with recent versions of Debian Linux <a href="#GCC_requires_lm">insists that "-lm" is put AFTER the source files</a>, or else it outputs some confusing error message.</span>
+<span class="Keyword">if</span> <span class="Parenthesis">[</span> <span class="String">"<i>$OS</i>"</span> <span class="Operator">=</span> <span class="String">"Windows_NT"</span> <span class="Parenthesis">]</span>
 <span class="Keyword">then</span>
-  gcc -o analogClock analogClock.s -m32
+  ./aec analogClockForWindows.aec
+  $c_compiler -o analogClockForWindows analogClockForWindows.s -m32
+  ./analogClockForWindows
 <span class="Keyword">else</span>
-  clang -o analogClock analogClock.s -m32
+  ./aec analogClock.aec
+  $c_compiler -o analogClock analogClock.s -m32
+  ./analogClock
 <span class="Keyword">fi</span>
-./analogClock
         </pre>
         If everything is fine, the Analog Clock program should now print the
         current time in the terminal. I think this would work on the vast
