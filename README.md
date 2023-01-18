@@ -49,6 +49,58 @@ Note that browsers will generally not allow you to run a WASM executable stored 
 
 WASM files can be run in NodeJS, as you can see in [this example](https://github.com/FlatAssembler/AECforWebAssembly/blob/master/analogClock/analogClock.js). NodeJS is (unlike browsers) targeted at tech-savvy users, and it trusts you to verify that the WASM file is not malicious before your run it. Well, when compiling an AEC program, you can check both the source code of that program and the source code of the compiler, so that shouldn't be a problem here.
 
+## Shell script
+
+So, to summarize how to compile and use my compiler, I've written a shell script to download the compiler, compile and assemble the Analog Clock example program, and run it in NodeJS:
+```bash
+if [ $(command -v git > /dev/null 2>&1 ; echo $?) -eq 0 ]
+then
+  git clone https://github.com/FlatAssembler/AECforWebAssembly.git
+  cd AECforWebAssembly
+elif [ $(command -v wget > /dev/null 2>&1 ; echo $?) -eq 0 ]
+then
+  mkdir AECforWebAssembly
+  cd AECforWebAssembly
+  wget https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip
+  unzip master.zip
+  cd AECforWebAssembly-master
+else
+  mkdir AECforWebAssembly
+  cd AECforWebAssembly
+  curl -o AECforWebAssembly.zip -L https://github.com/FlatAssembler/AECforWebAssembly/archive/refs/heads/master.zip # Without the "-L", "curl" will store HTTP Response headers of redirects to the ZIP file instead of the actual ZIP file.
+  unzip AECforWebAssembly.zip
+  cd AECforWebAssembly-master
+fi
+if [ $(command -v g++ > /dev/null 2>&1 ; echo $?) -eq 0 ]
+then
+  g++ -std=c++11 -o aec AECforWebAssembly.cpp # "-std=c++11" should not be necessary for newer versions of "g++". Let me know if it is, as that probably means I disobeyed some new C++ standard (say, C++23).
+else
+  clang++ -o aec AECforWebAssembly.cpp
+fi
+cd analogClock
+../aec analogClock.aec
+npx -p wabt wat2wasm analogClock.wat
+if [ "$OS" = "Windows_NT" ] # https://stackoverflow.com/a/75125384/8902065
+                            # https://www.reddit.com/r/bash/comments/10cip05/comment/j4h9f0x/?utm_source=share&utm_medium=web2x&context=3
+then
+  node_version=$(node.exe -v)
+else # We are presumably running on an UNIX-like system, where storing output of some program into a variable works as expected.
+  node_version=$(node -v)
+fi
+# "node -v" outputs version in the format "v18.12.1"
+node_version=${node_version:1} # Remove 'v' at the beginning
+node_version=${node_version%\.*} # Remove trailing ".*".
+node_version=${node_version%\.*} # Remove trailing ".*".
+node_version=$(($node_version)) # Convert the NodeJS version number from a string to an integer.
+if [ $node_version -lt 11 ]
+then
+  echo "NodeJS version is lower than 11 (it is $node_version), you will probably run into trouble!"
+fi
+node analogClock
+        
+```
+If everything is fine, the Analog Clock program should print the current time in the terminal.
+
 ## Limitations
 
 1. The syntax is slightly different from the original AEC to enable new features (useful primarily at string manipulation, but also make it easier to write clean code). Namely, variables have types (`Character`, `CharacterPointer`, `Integer16`, `Integer16Pointer`, `Integer32`, `Integer32Pointer`, `Decimal32`, `Decimal32Pointer`, `Decimal64`, `Decimal64Pointer`) and must be declared before usage. Also, the semicolon `;` is no longer used for single-line comments (now the more-widely-used token `//` is used for that), but for ending the statement (as in most programming languages). Furthermore, the conditions in `If` and `While` are no longer ended with a newline character, but with `Then` and `Loop`. There are many minor differences, such as the original AEC allowing the conditional `?:` operator only in expressions, whereas the [new AEC also allows `?:` on the left-hand-side of the assignment `:=` operator](https://flatassembler.github.io/AEC_specification#left_hand_side_conditional_operator).
