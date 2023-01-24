@@ -1,5 +1,5 @@
 # Havlik's Law
-This is a translation of the [Havlik's Law](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjP2o_t-eHvAhXlsosKHUtMC1YQFjABegQIBhAD&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FHavl%25C3%25ADk%2527s_law&usg=AOvVaw1jPbIZW1c1dmgbMrmILpuW) into my programming language, which I am planning to include into one of my research papers about linguistics. You can read the documentation of it in the [draft of my linguistics paper](https://flatassembler.github.io/Fonoloska_evolucija_jezika.docx) from the end of the page 8 to the middle of the page 13.
+This is a translation of the [Havlik's Law](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjP2o_t-eHvAhXlsosKHUtMC1YQFjABegQIBhAD&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FHavl%25C3%25ADk%2527s_law&usg=AOvVaw1jPbIZW1c1dmgbMrmILpuW) into my programming language, which I am planning to include into one of my research papers about linguistics. You can read the documentation of it in the [draft of my linguistics paper](https://flatassembler.github.io/Fonoloska_evolucija_jezika.docx) from the end of the page 9 to the middle of the page 14.
 
 TL;DR\
 The equivalent JavaScript program would be:
