@@ -12,95 +12,155 @@ Function clearScreen() Which Returns Nothing Is External;
 // JavaScript equivalent of C "strlen" is the "length" property of a string
 // and there is, as far as I know, no way to call it from outside of JS.
 // Nevertheless, I think I can easily write it myself.
-Function strlen(CharacterPointer ptr) Which Returns Integer32 Does Return
-    ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
-EndFunction
+Function strlen(CharacterPointer ptr) Which Returns Integer32 Does {
+  Return ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
+}
+EndFunction;
 
-    Integer32 originalNumberOfDigits[10];
+Integer32 originalNumberOfDigits[10];
 Integer32 NDEBUG : = 1;
 Integer32 numberOfPermutations;
 
-Function recursiveProcedure(CharacterPointer currentAttempt) Which Returns
-    Nothing Does Integer32 lengthOfTheCurrentAttempt : = strlen(currentAttempt);
-If not(NDEBUG) Then printString(
-    "DEBUG: \"recursiveProcedure\" has been invoked with the argument: \"");
-printString(currentAttempt);
-printString("\". \"strlen\" says it has length of ");
-printInt(lengthOfTheCurrentAttempt);
-printString(".\n");
-EndIf Integer32 currentNumberOfDigits[10] : = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-Integer32 i : = 0;
-While i < lengthOfTheCurrentAttempt Loop
-              currentNumberOfDigits[ValueAt(currentAttempt + i) - '0']
-    : = currentNumberOfDigits[ValueAt(currentAttempt + i) - '0'] + 1;
-i : = i + 1;
-EndWhile If not(NDEBUG) Then i : = 0;
-While i < 10 Loop printString("DEBUG: The current number has ");
-printInt(currentNumberOfDigits[i]);
-printString(" digits '");
-printInt(i);
-printString("'.\n");
-i : = i + 1;
-EndWhile EndIf i : = 0;
-While i<10 Loop If currentNumberOfDigits[i]> originalNumberOfDigits[i] Then
-    If not(NDEBUG) Then printString("DEBUG: There are too many digits '");
-printInt(i);
-printString("', ending \"recursiveProcedure\".\n");
-EndIf Return;
-EndIf i : = i + 1;
-EndWhile Integer32 haveWeFoundAPermutation : = 1;
-i : = 0;
-While i < 10 Loop If currentNumberOfDigits[i] <
-    originalNumberOfDigits[i] Then haveWeFoundAPermutation : = 0;
-EndIf i : = i + 1;
-EndWhile If haveWeFoundAPermutation Then printString("Permutation #");
-numberOfPermutations : = numberOfPermutations + 1;
-printInt(numberOfPermutations);
-printString(": ");
-printString(currentAttempt);
-printString("\n");
-Return;
-EndIf Character digitWeAreAdding : = '0';
-While digitWeAreAdding < '9' + 1 Loop  // The less-than-or-equal operator
-                                       //">=" hasn't yet been implemented.
-                                   Character newAttempt[12];
-i : = 0;
-While i < 12 Loop If i < lengthOfTheCurrentAttempt Then newAttempt[i]
-    : = ValueAt(currentAttempt + i);
-Else newAttempt[i] : = 0;
-EndIf i : = i + 1;
-EndWhile newAttempt[lengthOfTheCurrentAttempt] : = digitWeAreAdding;
-If currentNumberOfDigits[digitWeAreAdding - '0'] <
-    originalNumberOfDigits[digitWeAreAdding - '0'] Then  // To speed
-                                                         // things up
-                                                         // a bit.
-        recursiveProcedure(AddressOf(newAttempt[0]));
-EndIf digitWeAreAdding : = digitWeAreAdding + 1;
-EndWhile EndFunction
+Function
+recursiveProcedure(CharacterPointer currentAttempt) Which Returns Nothing Does {
+  Integer32 lengthOfTheCurrentAttempt : = strlen(currentAttempt);
+  If not(NDEBUG) Then {
+    printString(
+        "DEBUG: \"recursiveProcedure\" has been invoked with the argument: \"");
+    printString(currentAttempt);
+    printString("\". \"strlen\" says it has length of ");
+    printInt(lengthOfTheCurrentAttempt);
+    printString(".\n");
+  }
+  EndIf;
+  Integer32 currentNumberOfDigits[10] : = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  Integer32 i : = 0;
+  While i < lengthOfTheCurrentAttempt Loop {
+    currentNumberOfDigits[ValueAt(currentAttempt + i) - '0'] += 1;
+    i += 1;
+  }
+  EndWhile;
+  If not(NDEBUG) Then {
+  i:
+    = 0;
+    While i < 10 Loop {
+      printString("DEBUG: The current number has ");
+      printInt(currentNumberOfDigits[i]);
+      printString(" digits '");
+      printInt(i);
+      printString("'.\n");
+      i += 1;
+    }
+    EndWhile;
+  }
+  EndIf;
+i:
+  = 0;
+  While i < 10 Loop {
+    If currentNumberOfDigits[i] > originalNumberOfDigits[i] Then {
+      If not(NDEBUG) Then {
+        printString("DEBUG: There are too many digits '");
+        printInt(i);
+        printString("', ending \"recursiveProcedure\".\n");
+      }
+      EndIf;
+      Return;
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+  Integer32 haveWeFoundAPermutation : = 1;
+i:
+  = 0;
+  While i < 10 Loop {
+    If currentNumberOfDigits[i] < originalNumberOfDigits[i] Then {
+    haveWeFoundAPermutation:
+      = 0;
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+  If haveWeFoundAPermutation Then {
+    printString("Permutation #");
+  numberOfPermutations:
+    = numberOfPermutations + 1;
+    printInt(numberOfPermutations);
+    printString(": ");
+    printString(currentAttempt);
+    printString("\n");
+    Return;
+  }
+  EndIf;
+  Character digitWeAreAdding : = '0';
+  While digitWeAreAdding < '9' + 1 Loop { // The less-than-or-equal operator
+                                          //">=" hasn't yet been implemented.
+    Character newAttempt[12];
+  i:
+    = 0;
+    While i < 12 Loop {
+      If i < lengthOfTheCurrentAttempt Then {
+        newAttempt[i] : = ValueAt(currentAttempt + i);
+      }
+      Else { newAttempt[i] : = 0; }
+      EndIf;
+      i += 1;
+    }
+    EndWhile;
+    newAttempt[lengthOfTheCurrentAttempt] : = digitWeAreAdding;
+    If currentNumberOfDigits[digitWeAreAdding - '0'] <
+        originalNumberOfDigits[digitWeAreAdding - '0'] Then { // To speed
+                                                              // things up
+                                                              // a bit.
+      recursiveProcedure(AddressOf(newAttempt[0]));
+    }
+    EndIf;
+    digitWeAreAdding += 1;
+  }
+  EndWhile;
+}
+EndFunction;
 
-    Function
-    printPermutationsOfDigits(Integer32 original) Which Returns Nothing Does
-    clearScreen();
-If original < 0 Then original : = -original;
-EndIf printString("Printing all the permutations of digits of the number: ");
-printInt(original);  // Unfortunately, the JavaScript standard library
-                     // doesn't have "printf".
-printString("\n");
-Integer32 i : = 0;
-While i < 10 Loop originalNumberOfDigits[i] : = 0;
-i : = i + 1;
-EndWhile If original = 0 Then originalNumberOfDigits[0] : = 1;
-EndIf While original > 0 Loop originalNumberOfDigits[mod(original, 10)]
-    : = originalNumberOfDigits[mod(original, 10)] + 1;
-original : = original / 10;
-EndWhile If not(NDEBUG) Then i : = 0;
-While i < 10 Loop printString("DEBUG: The original number has ");
-printInt(originalNumberOfDigits[i]);
-printString(" digits '");
-printInt(i);
-printString("'.\n");
-i : = i + 1;
-EndWhile EndIf numberOfPermutations : = 0;
-recursiveProcedure("");
-printString("The end!");
-EndFunction
+Function
+printPermutationsOfDigits(Integer32 original) Which Returns Nothing Does {
+  clearScreen();
+  If original < 0 Then { original *= -1; }
+  EndIf;
+  printString("Printing all the permutations of digits of the number: ");
+  printInt(original); // Unfortunately, the JavaScript standard library
+                      // doesn't have "printf".
+  printString("\n");
+  Integer32 i : = 0;
+  While i < 10 Loop {
+    originalNumberOfDigits[i] : = 0;
+    i += 1;
+  }
+  EndWhile;
+  If original = 0 Then { originalNumberOfDigits[0] : = 1; }
+  EndIf;
+  While original > 0 Loop {
+    originalNumberOfDigits[mod(original, 10)] += 1;
+    original /= 10;
+  }
+  EndWhile;
+  If not(NDEBUG) Then {
+  i:
+    = 0;
+    While i < 10 Loop {
+      printString("DEBUG: The original number has ");
+      printInt(originalNumberOfDigits[i]);
+      printString(" digits '");
+      printInt(i);
+      printString("'.\n");
+      i += 1;
+    }
+    EndWhile;
+  }
+  EndIf;
+numberOfPermutations:
+  = 0;
+  recursiveProcedure("");
+  printString("The end!");
+}
+EndFunction;
