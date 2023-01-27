@@ -17,9 +17,7 @@ Function strlen(CharacterPointer ptr) Which Returns Integer32 Does {
 }
 EndFunction;
 
-Integer32 originalNumberOfDigits[10];
-Integer32 NDEBUG : = 1;
-Integer32 numberOfPermutations;
+Integer32 originalNumberOfDigits[10], NDEBUG : = 1, numberOfPermutations;
 
 Function
 recursiveProcedure(CharacterPointer currentAttempt) Which Returns Nothing Does {
@@ -84,8 +82,7 @@ i:
   EndWhile;
   If haveWeFoundAPermutation Then {
     printString("Permutation #");
-  numberOfPermutations:
-    = numberOfPermutations + 1;
+    numberOfPermutations += 1;
     printInt(numberOfPermutations);
     printString(": ");
     printString(currentAttempt);
