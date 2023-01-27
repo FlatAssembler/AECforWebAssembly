@@ -6,21 +6,21 @@
 
 // So, those are JavaScript functions which I am planning to call from AEC:
 Function printInt(Integer32 int) Which Returns Nothing Is External;
-Function printString(CharacterPointer ptr) Which Returns Nothing Is External;
+Function printString(PointerToCharacter ptr) Which Returns Nothing Is External;
 Function clearScreen() Which Returns Nothing Is External;
 
 // JavaScript equivalent of C "strlen" is the "length" property of a string
 // and there is, as far as I know, no way to call it from outside of JS.
 // Nevertheless, I think I can easily write it myself.
-Function strlen(CharacterPointer ptr) Which Returns Integer32 Does {
+Function strlen(PointerToCharacter ptr) Which Returns Integer32 Does {
   Return ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
 }
 EndFunction;
 
 Integer32 originalNumberOfDigits[10], NDEBUG : = 1, numberOfPermutations;
 
-Function
-recursiveProcedure(CharacterPointer currentAttempt) Which Returns Nothing Does {
+Function recursiveProcedure(
+    PointerToCharacter currentAttempt) Which Returns Nothing Does {
   Integer32 lengthOfTheCurrentAttempt : = strlen(currentAttempt);
   If not(NDEBUG) Then {
     printString(
@@ -31,8 +31,8 @@ recursiveProcedure(CharacterPointer currentAttempt) Which Returns Nothing Does {
     printString(".\n");
   }
   EndIf;
-  Integer32 currentNumberOfDigits[10] : = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Integer32 i : = 0;
+  Integer32 currentNumberOfDigits[10] : = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                      i : = 0;
   While i < lengthOfTheCurrentAttempt Loop {
     currentNumberOfDigits[ValueAt(currentAttempt + i) - '0'] += 1;
     i += 1;
