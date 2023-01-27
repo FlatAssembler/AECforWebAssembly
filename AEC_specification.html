@@ -1397,12 +1397,13 @@ emcc -o aec.js AECforWebAssembly.cpp -s NODERAWFS=1 -s ALLOW_MEMORY_GROWTH=1 -s 
         to the assembler (or, in case it is to be assigned as an initial value
         of a global variable, it is converted to IEEE754 hexadecimal). In AEC
         for x86, a token which matches the regular expression
-        <span class="inline_code">"^\\d+\\.\\d*$"</span> is of type
-        <span class="inline_code">Decimal32</span> and is always converted to
-        IEEE754 hexadecimal (unless it's run in a JavaScript environment that
-        doesn't support <span class="inline_code">ArrayBuffer</span>, in that
-        case, only FlatAssembler can be targetted, as FlatAssembler can convert
-        decimal numbers to IEEE754 hexadecimals itself). Notice that in AEC for
+        <span class="inline_code">"^\\d+\\.\\d*$"</span> is, just like all
+        numbers, of type <span class="inline_code">Decimal32</span> and is
+        always converted to IEEE754 hexadecimal (unless it's run in a JavaScript
+        environment that doesn't support
+        <span class="inline_code">ArrayBuffer</span>, in that case, only
+        FlatAssembler can be targetted, as FlatAssembler can convert decimal
+        numbers to IEEE754 hexadecimals itself). Notice that in AEC for
         WebAssembly, <span class="inline_code">3/2=1</span> (as in C, C++, Java,
         C#, Rust and Python 2.x), while, in AEC for x86,
         <span class="inline_code">3/2=1.5</span> (as in JavaScript, PHP, LISP
