@@ -74,9 +74,10 @@ EndFunction;
 
 Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
   If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then {
-    Return asm_f32("(f32.sqrt\n"
-                   "\t(local.get 0)\n"
-                   ")");
+    Return asm_f32(
+        R"multiline((f32.sqrt
+	(local.get 0)
+))multiline");
   }
   EndIf;
   // Binary Search Algorithm...
