@@ -4,16 +4,16 @@
  */
 
 // Let's import some functions useful for debugging from JavaScript...
-Function logString(CharacterPointer str) Which Returns Nothing Is External;
+Function logString(PointerToCharacter str) Which Returns Nothing Is External;
 Function logInteger(Integer32 int) Which Returns Nothing Is External;
 
 // Now let's define a character array that will be used both by JS and AEC.
 Character output[23 * 80];
-CharacterPointer colors[23 * 80]; // Will contain pointers to the CSS names
-                                  // of colors of the characters in the
-                                  //"output".
+PointerToCharacter colors[23 * 80]; // Will contain pointers to the CSS names
+                                    // of colors of the characters in the
+                                    //"output".
 
-Function getAddressOfOutput() Which Returns CharacterPointer
+Function getAddressOfOutput() Which Returns PointerToCharacter
     Does { // The curly brace here is optional and is just a hint to advanced
            // text editors and IDEs (made mostly for C-like languages) of how to
            // format the code, it's ignored by the AEC parser.
@@ -22,7 +22,7 @@ Function getAddressOfOutput() Which Returns CharacterPointer
 }
 EndFunction;
 
-Function getAddressOfColors() Which Returns CharacterPointerPointer Does {
+Function getAddressOfColors() Which Returns PointerToPointerToCharacter Does {
   Return AddressOf(colors[0]);
 }
 EndFunction;
@@ -240,13 +240,13 @@ EndFunction;
 
 // Now, let's implement some string manipulation functions. We can't
 // call the methods of the JavaScript "String" class here.
-Function strlen(CharacterPointer ptr) Which Returns Integer32 Does {
+Function strlen(PointerToCharacter ptr) Which Returns Integer32 Does {
   Return ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
 }
 EndFunction;
 
-Function strcat(CharacterPointer first,
-                CharacterPointer second) Which Returns Nothing Does {
+Function strcat(PointerToCharacter first,
+                PointerToCharacter second) Which Returns Nothing Does {
   first += strlen(first);
   While ValueAt(second) Loop {
     ValueAt(first) : = ValueAt(second);
@@ -280,8 +280,8 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
   }
   EndIf;
   Integer32 windowWidth : = 80, windowHeight : = 23, i : = 0;
-  CharacterPointer lightGrayColor : = "#EEEEEE";
-  CharacterPointer lightGreenColor : = "#CCFFCC";
+  PointerToCharacter lightGrayColor : = "#EEEEEE",
+                                    lightGreenColor : = "#CCFFCC";
   While(i < windowWidth * windowHeight) Loop { // First, fill the window with
                                                // spaces and newlines.
     If mod(i, windowWidth) = windowWidth - 1 Then { output[i] : = '\n'; }
@@ -310,7 +310,7 @@ i:
     i += 1;
   }
   EndWhile;
-  CharacterPointer redColor : = "#FFAAAA";
+  PointerToCharacter redColor : = "#FFAAAA";
   // Label "12"...
   output[(centerY - clockRadius + 1) * windowWidth + centerX] : = '1';
   output[(centerY - clockRadius + 1) * windowWidth + centerX + 1] : = '2';
@@ -390,10 +390,9 @@ y:
       : = redColor;
   Integer32 j : = 0;
   Decimal32 angle;
-  CharacterPointer blueColor : = "#AAAAFF";
-  CharacterPointer yellowColor : = "#FFFFAA";
+  PointerToCharacter blueColor : = "#AAAAFF", yellowColor : = "#FFFFAA";
   While j < 3 Loop {
-    CharacterPointer currentColor;
+    PointerToCharacter currentColor;
     If j = 0 Then {
     angle:
       = fmod(hour + minute / 60., 12) * (360. / 12);
@@ -501,7 +500,7 @@ y:
   }
   EndWhile;
   // Let's draw some ornaments.
-  CharacterPointer darkGreenColor : = "#AAFFAA";
+  PointerToCharacter darkGreenColor : = "#AAFFAA";
 i:
   = 0;
   While(i < windowWidth * windowHeight) Loop {
@@ -564,7 +563,7 @@ j:
       : = colors[windowWidth * windowHeight - 9] : = redColor;
   // My signature...
   Character signature[100] : = {0};
-  CharacterPointer signature : = AddressOf(signature[0]);
+  PointerToCharacter signature : = AddressOf(signature[0]);
   // AEC, unlike C, always makes a clear distinction between
   // arrays and pointers.
   logString("Empty signature has length of: ");
@@ -586,10 +585,10 @@ i:
   = windowWidth * (windowHeight - 3);
 j:
   = 0;
-  CharacterPointer modraColor : = "#AAFFFF"; // Sorry, I don't know how
-                                             // to say "modra" in English,
-                                             // and I am not wasting my time
-                                             // looking that up.
+  PointerToCharacter modraColor : = "#AAFFFF"; // Sorry, I don't know how
+                                               // to say "modra" in English,
+                                               // and I am not wasting my time
+                                               // looking that up.
   While not(signature[j] = 0) Loop {
     If signature[j] = '\n' Then {
     i:
