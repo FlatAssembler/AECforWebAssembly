@@ -12,10 +12,14 @@ Function clearScreen() Which Returns Nothing Is External;
 // JavaScript equivalent of C "strlen" is the "length" property of a string
 // and there is, as far as I know, no way to call it from outside of JS.
 // Nevertheless, I think I can easily write it myself.
-Function strlen(PointerToCharacter ptr) Which Returns Integer32 Does {
+Function strlen(PointerToCharacter ptr) Which Returns Integer32
+    Does { // The curly brace '{' here is not necessary, it is just here so that
+           // ClangFormat knows how to format the code, and the tokenizer
+           // ignores it.
   Return ValueAt(ptr) = 0 ? 0 : 1 + strlen(ptr + 1);
 }
-EndFunction;
+EndFunction; // The semi-colon after "EndFunction" is not necessary either, it
+             // is a signal to ClangFormat.
 
 Integer32 originalNumberOfDigits[10], NDEBUG : = 1, numberOfPermutations;
 
