@@ -824,9 +824,18 @@
         Explorer 6). To use all the features, one needs to use
         <a href="https://nodejs.org/en/">NodeJS</a> or
         <a href="https://duktape.org/">Duktape</a> with it, to enable it to
-        access the file system. When I started studying at the university, many
-        professors were impressed by that. My Algorithms and Data Structures
-        professor Alfonso Baumgartner urged me to write a
+        access the file system. Thanks to
+        <a href="https://www.vogons.org/viewtopic.php?f=31&t=74881"
+          >the help I received from people on VOGONS forum</a
+        >, my AEC-to-x86 compiler outputs assembly code that runs on both i486
+        in 32-bit mode and on x86_64 processors in 64-bit mode, with no
+        modification (it uses <span class="inline_code">ebx</span> register for
+        indexing arrays, which is allowed (although not recommended) in 64-bit
+        mode, and it does not push and pop 32-bit values from the stack, it only
+        pushes and pops 16-bit ones, which is allowed in both 32-bit and 64-bit
+        mode, and so on..). When I started studying at the university, many
+        professors were impressed by my AEC-to-x86 compiler. My Algorithms and
+        Data Structures professor Alfonso Baumgartner urged me to write a
         <a
           href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/seminar/PojednostavljeniSeminar.pdf"
         >
