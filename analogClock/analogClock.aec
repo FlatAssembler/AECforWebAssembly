@@ -436,7 +436,7 @@ y:
     logString(").\n");
   i:
     = 0;
-    While i < windowWidth *windowHeight Loop {
+    While(i < windowWidth * windowHeight) Loop {
       Decimal32 lowerBoundX
           : = endOfTheHandX < centerX ? endOfTheHandX : Decimal32(centerX),
           upperBoundX : = endOfTheHandX > centerX ? endOfTheHandX
