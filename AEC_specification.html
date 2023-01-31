@@ -1218,9 +1218,21 @@ node analogClock
               onerror="this.onerror=function(){this.onerror=null;this.src='https://www.theflatearthsociety.org/forum/Smileys/default/angry.gif';};this.src='https://philosophicalvegan.com/images/smilies/icon_rolleyes.gif'"
               alt="&#128078;" /></span
         ></i>
-        Of course, in order for
-        <span class="inline_code">npx -p wabt wat2wasm</span> to work, you
-        either need to have
+        (If you really need the AEC programs to work in old browsers, perhaps
+        you could try decompiling them using
+        <a href="https://github.com/WebAssembly/wabt/tree/main/wasm2c"
+          ><span class="inline_code">wasm2c</span> from WebAssembly Binary
+          Toolkit</a
+        >
+        and somehow re-compiling them using Emscripten (I haven't tried it
+        myself, but I speculate it may be possible). Or you may try to somehow
+        polyfill WebAssembly, which the
+        <a href="https://webassembly.org/docs/faq/">FAQ of WebAssembly</a> says
+        is, in principle, possible. But I am quite sure you would need to
+        polyfill the entire WebAssembly, and not just
+        <span class="inline_code">WebAssembly.Global</span>.) Of course, in
+        order for <span class="inline_code">npx -p wabt wat2wasm</span> to work,
+        you either need to have
         <a href="https://www.npmjs.com/package/wabt">WABT</a> already installed,
         or you need to be connected to the Internet so that
         <span class="inline_code">npx</span> can download it (which you probably
