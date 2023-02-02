@@ -2093,6 +2093,15 @@ EndFunction</pre
           >how I implemented the ternary conditional operator in the
           AEC-to-WebAssembly compiler</a
         >.<br />
+        So, as far as I can see, you can run into at least two problems when
+        implementing the <span class="inline_code">?:</span> operator in your
+        language. PHP incorrectly parses it, my AEC-to-x86 compiler incorrectly
+        compiles it... I've asked a
+        <a
+          href="https://www.reddit.com/r/ProgrammingLanguages/comments/10rxexc/did_you_correctly_implement_the_operator_the/?utm_source=share&utm_medium=web2x&context=3"
+          >question on Reddit</a
+        >
+        to see if there are some more.<br />
         <b id="left_hand_side_conditional_operator">UPDATE</b> on 10/09/2021: I
         have decided to add the left-hand-side ternary conditional operator in
         assignments, which exists in C++, to my programming language (for now,
