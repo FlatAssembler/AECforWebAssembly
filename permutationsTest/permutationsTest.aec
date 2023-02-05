@@ -96,7 +96,7 @@ i:
   EndIf;
   Character digitWeAreAdding : = '0';
   While digitWeAreAdding < '9' + 1 Loop { // The less-than-or-equal operator
-                                          //">=" hasn't yet been implemented.
+                                          //"=<" hasn't yet been implemented.
     Character newAttempt[12];
   i:
     = 0;
