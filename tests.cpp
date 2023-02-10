@@ -119,6 +119,7 @@ void interpreterTests() {
        {"(2+2=4)?2:0", "2"},
        {"mod(5,2)", "1"},
        {"(2+2>5?3+3<7?1:-2:2+2-4<1?0:2+2<4?-1:-3)+('A'+2='C'?0:-1)", "0"},
+       {"1 ? 2 ? 3 : 4 : 5","3"}, // https://www.reddit.com/r/ProgrammingLanguages/comments/10rxexc/comment/j72oxrl/?utm_source=reddit&utm_medium=web2x&context=3
        {"0xff", "255"},
        {"0x41='A' and 0xff=255", "1"},
        {"0x42='A' or 0x2b=127", "0"},
