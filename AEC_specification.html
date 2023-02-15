@@ -2652,7 +2652,12 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
         compiler will not insert assembly code loading that variable, but
         assembly code representing a pointer to that variable. In this case, it
         makes the inline assembly slightly more complicated, but, in many other
-        cases, it will make it a lot simpler.<br />
+        cases, it will make it a lot simpler. I have made a
+        <a
+          href="https://www.reddit.com/r/ProgrammingLanguages/comments/1135wvl/how_did_you_implement_inline_assembly_in_your/?utm_source=share&utm_medium=web2x&context=3"
+          >Reddit thread about how to best implement inline assembly in your
+          programming language</a
+        >.<br />
         <br /><b id="Builtin">Built-in functions</b><br />
         AEC for x86 has many built-in functions, wrappers around x86 assembly
         instructions. These are: <span class="inline_code">sin(</span>,
