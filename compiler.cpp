@@ -857,8 +857,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       } else if (not(areWeInsideAComment) and currentCharacter == ';') {
         areWeInsideAComment = true;
         adjustedInlineAssembly += ';';
-      }
-      if (not(areWeInsideAVariableName) and currentCharacter != '%')
+      } else if (not(areWeInsideAVariableName) and currentCharacter != '%')
         adjustedInlineAssembly += currentCharacter;
       else if (not(areWeInsideAVariableName) and currentCharacter == '%' and
                not(areWeInsideAComment)) {
@@ -868,10 +867,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         areWeInsideAVariableName = false;
         TreeNode nodeRepresentingPointer(variableName, lineNumber,
                                          columnNumber);
-        nodeRepresentingPointer.children.push_back(
-            TreeNode("0", lineNumber,
-                     columnNumber)); // What if somebody tries to insert a
-                                     // pointer to an array into inline assembly?
+        nodeRepresentingPointer.children.push_back(TreeNode(
+            "0", lineNumber,
+            columnNumber)); // What if somebody tries to insert a
+                            // pointer to an array into inline assembly?
         adjustedInlineAssembly +=
             nodeRepresentingPointer.compileAPointer(context) + "\n";
       } else if (areWeInsideAVariableName and currentCharacter == '%') {
