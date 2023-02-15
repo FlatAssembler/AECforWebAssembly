@@ -843,9 +843,53 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 ") ;;Pointer to " + text;
   else if ((text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
             text == "asm_f32(" or text == "asm_f64(") and
-           children.size() == 1)
-    assembly += convertInlineAssemblyToAssembly(children.at(0));
-  else if (text == "nan")
+           children.size() == 1) {
+    auto originalInlineAssembly =
+        convertInlineAssemblyToAssembly(children.at(0));
+    std::string adjustedInlineAssembly, variableName;
+    bool areWeInsideAVariableName = false, areWeInsideAComment = false;
+    for (char currentCharacter : originalInlineAssembly) {
+      if (areWeInsideAComment and currentCharacter != '\n')
+        adjustedInlineAssembly += currentCharacter;
+      else if (areWeInsideAComment and currentCharacter == '\n') {
+        adjustedInlineAssembly += '\n';
+        areWeInsideAComment = false;
+      } else if (not(areWeInsideAComment) and currentCharacter == ';') {
+        areWeInsideAComment = true;
+        adjustedInlineAssembly += ';';
+      }
+      if (not(areWeInsideAVariableName) and currentCharacter != '%')
+        adjustedInlineAssembly += currentCharacter;
+      else if (not(areWeInsideAVariableName) and currentCharacter == '%' and
+               not(areWeInsideAComment)) {
+        variableName = "";
+        areWeInsideAVariableName = true;
+      } else if (areWeInsideAVariableName and std::isspace(currentCharacter)) {
+        areWeInsideAVariableName = false;
+        TreeNode nodeRepresentingPointer(variableName, lineNumber,
+                                         columnNumber);
+        nodeRepresentingPointer.children.push_back(
+            TreeNode("0", lineNumber,
+                     columnNumber)); // What if somebody tries to insert a
+                                     // pointer to an array into inline assembly?
+        adjustedInlineAssembly +=
+            nodeRepresentingPointer.compileAPointer(context) + "\n";
+      } else if (areWeInsideAVariableName and currentCharacter == '%') {
+        adjustedInlineAssembly += "%";
+        areWeInsideAVariableName = false;
+      } else if (areWeInsideAVariableName) {
+        variableName += currentCharacter;
+      }
+    }
+    if (areWeInsideAVariableName) {
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler error: In the inline assembly, the variable name "
+          << JSONifyString(variableName) << " is not terminated!" << std::endl;
+      std::exit(1);
+    }
+    assembly += adjustedInlineAssembly + "\n";
+  } else if (text == "nan")
     assembly += "(f32.reinterpret_i32\n\t(i32.const -1) ;;IEE754 for "
                 "not-a-number is 0xffffffff=-1.\n)";
   else if (context.variableTypes.count(text) or text == "." || text == "->") {
