@@ -76,7 +76,9 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
   If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then {
     Return asm_f32(
         R"multiline((f32.sqrt
-	(local.get 0)
+	(f32.load
+		%x ;;The compiler will replace "%x" with assembly code representing a pointer to the variable "x".
+	)
 ))multiline");
   }
   EndIf;
