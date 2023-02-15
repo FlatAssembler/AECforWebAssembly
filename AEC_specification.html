@@ -2622,9 +2622,37 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
   }
   EndIf;</pre
         >
-        <b>TODO</b>: Implement a GCC-and-CLANG-style inline assembly, where you
-        can access variables from assembly by their names (rather than having to
-        manually calculate their memory addresses).<br />
+        <del
+          ><b>TODO</b>: Implement a GCC-and-CLANG-style inline assembly, where
+          you can access variables from assembly by their names (rather than
+          having to manually calculate their memory addresses).</del
+        ><br />
+        <b>UPDATE</b> on 15/02/2023: I have implemented that you can access
+        variables from inline assembly by their names, by inserting the
+        <span class="inline_code">%</span> character and then the name of a
+        variable. So, no need to add additional arguments to
+        <span class="inline_code">asm</span> in order to use variables from
+        inline assembly, like you do in CLANG or GCC. I realize there are
+        benefits to what CLANG and GCC are doing, but it's both more difficult
+        to implement in the compiler and more difficult to use. So, the code
+        above has been changed to this:
+        <pre>
+Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
+  If USE_WEBASSEMBLY_SQRT_INSTRUCTION Then {
+    Return asm_f32(
+        R"multiline((f32.sqrt
+	(f32.load
+		%x ;;The compiler will replace "%x" with assembly code representing a pointer to the variable "x".
+	)
+))multiline");
+  }
+  EndIf;</pre
+        >
+        In order to enable modifying the variables from inline assembly, the
+        compiler will not insert assembly code loading that variable, but
+        assembly code representing a pointer to that variable. In this case, it
+        makes the inline assembly slightly more complicated, but, in many other
+        cases, it will make it a lot simpler.<br />
         <br /><b id="Builtin">Built-in functions</b><br />
         AEC for x86 has many built-in functions, wrappers around x86 assembly
         instructions. These are: <span class="inline_code">sin(</span>,
