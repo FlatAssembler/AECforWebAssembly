@@ -863,7 +863,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                not(areWeInsideAComment)) {
         variableName = "";
         areWeInsideAVariableName = true;
-      } else if (areWeInsideAVariableName and std::isspace(currentCharacter)) {
+      } else if (areWeInsideAVariableName and
+                 (std::isspace(currentCharacter) or currentCharacter == ')')) {
         areWeInsideAVariableName = false;
         TreeNode nodeRepresentingPointer(variableName, lineNumber,
                                          columnNumber);
@@ -873,6 +874,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                             // pointer to an array into inline assembly?
         adjustedInlineAssembly +=
             nodeRepresentingPointer.compileAPointer(context) + "\n";
+        adjustedInlineAssembly += currentCharacter;
       } else if (areWeInsideAVariableName and currentCharacter == '%') {
         adjustedInlineAssembly += "%";
         areWeInsideAVariableName = false;
