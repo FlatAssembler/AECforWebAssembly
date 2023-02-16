@@ -176,17 +176,13 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
   EndIf;
   If degrees > 90 Then { Return cos(degrees - 90); }
   EndIf;
-  If not(sineMemoisation[asm_f32("(f32.nearest (local.get 0))")] = 0)
-      Then { //"(local.get 0)" means, in WebAssembly, "Get the first argument
-             // of
-             // this function.", and the first argument of this function is
-             //"degrees". I've used inline assembly here because nothing else
-             // I
+  If not(sineMemoisation[asm_f32("(f32.nearest (f32.load %degrees))")] = 0)
+      Then { // I've used inline assembly here because nothing else I
              // write will output "f32.nearest" (called "round" in most
              // programming languages) WebAssembly directive, and it's way
              // more convenient to insert some inline assembly than to modify
              // and recompile the compiler.
-    Return sineMemoisation[asm_f32("(f32.nearest (local.get 0))")];
+    Return sineMemoisation[asm_f32("(f32.nearest (f32.load %degrees))")];
   }
   EndIf;
   /*
@@ -210,7 +206,8 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
     i += epsilon;
   }
   EndWhile;
-  Return sineMemoisation[asm_f32("(f32.nearest (local.get 0))")] : = tmpsin;
+  Return sineMemoisation[asm_f32("(f32.nearest (f32.load %degrees))")]
+      : = tmpsin;
 }
 EndFunction;
 
