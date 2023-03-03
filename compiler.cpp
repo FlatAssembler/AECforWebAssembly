@@ -848,7 +848,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         convertInlineAssemblyToAssembly(children.at(0));
     std::string adjustedInlineAssembly, variableName;
     bool areWeInsideAVariableName = false, areWeInsideAComment = false;
+    int depthOfThePointerInSExpression = 0;
     for (char currentCharacter : originalInlineAssembly) {
+      if (!areWeInsideAComment and currentCharacter == '(')
+        depthOfThePointerInSExpression++;
+      if (!areWeInsideAComment and currentCharacter == ')') {
+        depthOfThePointerInSExpression--;
+        if (depthOfThePointerInSExpression < 0)
+          std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                    << ", Compiler warning: Mismatched parantheses in the "
+                       "inline assembly (there is an unexpected ')')."
+                    << std::endl;
+      }
       if (areWeInsideAComment and currentCharacter != '\n')
         adjustedInlineAssembly += currentCharacter;
       else if (areWeInsideAComment and currentCharacter == '\n') {
@@ -873,11 +884,17 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             columnNumber)); // What if somebody tries to insert a
                             // pointer to an array into inline assembly?
         adjustedInlineAssembly +=
-            nodeRepresentingPointer.compileAPointer(context) + "\n";
+            nodeRepresentingPointer.compileAPointer(context).indentBy(
+                depthOfThePointerInSExpression) +
+            "\n";
         adjustedInlineAssembly += currentCharacter;
       } else if (areWeInsideAVariableName and currentCharacter == '%') {
         adjustedInlineAssembly += "%";
         areWeInsideAVariableName = false;
+        if (variableName != "")
+          std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                    << ", Compiler warning: The string \"" << variableName
+                    << "\" will not be passed to the assembler!" << std::endl;
       } else if (areWeInsideAVariableName) {
         variableName += currentCharacter;
       }
@@ -889,6 +906,11 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << JSONifyString(variableName) << " is not terminated!" << std::endl;
       std::exit(1);
     }
+    if (depthOfThePointerInSExpression > 0)
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler warning: Mismatched parantheses in the inline "
+                   "assembly (there are too many '('-s)."
+                << std::endl;
     assembly += adjustedInlineAssembly + "\n";
   } else if (text == "nan")
     assembly += "(f32.reinterpret_i32\n\t(i32.const -1) ;;IEE754 for "
