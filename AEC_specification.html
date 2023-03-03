@@ -2652,7 +2652,10 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
         compiler will not insert assembly code loading that variable, but
         assembly code representing a pointer to that variable. In this case, it
         makes the inline assembly slightly more complicated, but, in many other
-        cases, it will make it a lot simpler. I have made a
+        cases, it will make it a lot simpler. In case you need to insert the
+        actual <span class="inline_code">%</span> character inside inline
+        assembly (which I think you never have to in the WebAssembly Text
+        Format), simply write <span class="inline_code">%%</span>. I have made a
         <a
           href="https://www.reddit.com/r/ProgrammingLanguages/comments/1135wvl/how_did_you_implement_inline_assembly_in_your/?utm_source=share&utm_medium=web2x&context=3"
           >Reddit thread about how to best implement inline assembly in your
