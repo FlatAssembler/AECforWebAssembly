@@ -2655,7 +2655,16 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
         cases, it will make it a lot simpler. In case you need to insert the
         actual <span class="inline_code">%</span> character inside inline
         assembly (which I think you never have to in the WebAssembly Text
-        Format), simply write <span class="inline_code">%%</span>. I have made a
+        Format), simply write <span class="inline_code">%%</span>. Due to the
+        way the AEC-to-WebAssembly compiler is structured internally (and I
+        still wouldn't know how to do it better), this feature of refering to
+        variables from inline assembly is not available if the inline assembly
+        is in the global scope (outside of a function), and the compiler issues
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/65febb8f2c246bdd2789c1ff68bcd5fc88a81a10/TreeRootNode.cpp#L700"
+          >a warning</a
+        >
+        if you try to do that. I have made a
         <a
           href="https://www.reddit.com/r/ProgrammingLanguages/comments/1135wvl/how_did_you_implement_inline_assembly_in_your/?utm_source=share&utm_medium=web2x&context=3"
           >Reddit thread about how to best implement inline assembly in your
