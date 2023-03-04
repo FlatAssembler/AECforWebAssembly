@@ -697,6 +697,13 @@ In the meantime, you can try modifying your program to use ")"
                     << std::endl;
           exit(1);
         }
+        if (childNode.children[0].text.find('%') != std::string::npos)
+          std::cerr << "Line " << childNode.lineNumber << ", Column "
+                    << childNode.columnNumber
+                    << ", Compiler warning: In global scope, inline assembly "
+                       "is passed unchanged to the assembler, so you cannot "
+                       "refer to variables from it using the '%' operator!"
+                    << std::endl;
         globalDeclarations +=
             AssemblyCode(convertInlineAssemblyToAssembly(childNode.children[0]))
                 .indentBy(1) +

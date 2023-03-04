@@ -847,12 +847,16 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     auto originalInlineAssembly =
         convertInlineAssemblyToAssembly(children.at(0));
     std::string adjustedInlineAssembly, variableName;
-    bool areWeInsideAVariableName = false, areWeInsideAComment = false;
+    bool areWeInsideAVariableName = false, areWeInsideAComment = false,
+         areWeInsideAString = false;
     int depthOfThePointerInSExpression = 0;
+    char howDidTheStringStart = '\"';
     for (char currentCharacter : originalInlineAssembly) {
-      if (!areWeInsideAComment and currentCharacter == '(')
+      if (not(areWeInsideAComment) and not(areWeInsideAString) and
+          currentCharacter == '(')
         depthOfThePointerInSExpression++;
-      if (!areWeInsideAComment and currentCharacter == ')') {
+      if (not(areWeInsideAComment) and not(areWeInsideAString) and
+          currentCharacter == ')') {
         depthOfThePointerInSExpression--;
         if (depthOfThePointerInSExpression < 0)
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -860,18 +864,28 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                        "inline assembly (there is an unexpected ')')."
                     << std::endl;
       }
-      if (areWeInsideAComment and currentCharacter != '\n')
+      if (not(areWeInsideAString) and not(areWeInsideAComment) and
+          (currentCharacter == '\'' or currentCharacter == '\"')) {
+        areWeInsideAString = true;
+        adjustedInlineAssembly += currentCharacter;
+        howDidTheStringStart = currentCharacter;
+      } else if (areWeInsideAString and
+                 currentCharacter == howDidTheStringStart) {
+        areWeInsideAString = false;
+        adjustedInlineAssembly += currentCharacter;
+      } else if (areWeInsideAComment and currentCharacter != '\n')
         adjustedInlineAssembly += currentCharacter;
       else if (areWeInsideAComment and currentCharacter == '\n') {
         adjustedInlineAssembly += '\n';
         areWeInsideAComment = false;
-      } else if (not(areWeInsideAComment) and currentCharacter == ';') {
+      } else if (not(areWeInsideAComment) and not(areWeInsideAString) and
+                 currentCharacter == ';') {
         areWeInsideAComment = true;
         adjustedInlineAssembly += ';';
       } else if (not(areWeInsideAVariableName) and currentCharacter != '%')
         adjustedInlineAssembly += currentCharacter;
       else if (not(areWeInsideAVariableName) and currentCharacter == '%' and
-               not(areWeInsideAComment)) {
+               not(areWeInsideAComment) and not(areWeInsideAString)) {
         variableName = "";
         areWeInsideAVariableName = true;
       } else if (areWeInsideAVariableName and
@@ -884,8 +898,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             columnNumber)); // What if somebody tries to insert a
                             // pointer to an array into inline assembly?
         adjustedInlineAssembly +=
-            nodeRepresentingPointer.compileAPointer(context).indentBy(
-                depthOfThePointerInSExpression) +
+            nodeRepresentingPointer.compileAPointer(context)
+                .indentBy(depthOfThePointerInSExpression)
+                .substr(depthOfThePointerInSExpression) +
             "\n";
         adjustedInlineAssembly += currentCharacter;
       } else if (areWeInsideAVariableName and currentCharacter == '%') {
@@ -906,6 +921,11 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << JSONifyString(variableName) << " is not terminated!" << std::endl;
       std::exit(1);
     }
+    if (areWeInsideAString)
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler warning: There is an unterminated string "
+                   "literal inside the inline assembly, a mismatched `"
+                << howDidTheStringStart << "` character." << std::endl;
     if (depthOfThePointerInSExpression > 0)
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler warning: Mismatched parantheses in the inline "

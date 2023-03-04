@@ -46,6 +46,10 @@ struct AssemblyCode {
       code = code.substr(0, code.size() - 1);
     return *this;
   }
+  AssemblyCode substr(const unsigned long long first,
+                      const unsigned long long length = std::string::npos) {
+    return code.substr(first, length);
+  }
   AssemblyCode(std::string code, AssemblyType type = AssemblyType::null) {
     this->code = code;
     assemblyType = type;
