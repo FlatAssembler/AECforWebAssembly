@@ -1,0 +1,91 @@
+/*
+ * Ovo je moj pokušaj implementacije Routh-Hurwitzovog kriterija stabilnosti
+ * linearnih vremenski nepromjenjivih sustava u programskom jeziku AEC.
+ * U biti, to je algoritam da se pomoću matrica provjeri koliko korijena neki
+ * polinom ima desno od imaginarne osi (dakle, s pozitivnim realnim dijelom),
+ * bez potrebe da se oni računaju (što je u principu nemoguće za polinome
+ * višeg reda).
+ */
+
+ #target WASI // Nećemo pozivati nikakve JavaScriptine funkcije, pa će
+              // potprogram pisan u JavaScriptu biti jednostavniji ako AEC
+              // compiler misli da ciljamo WASI, a ne browser.
+
+Integer16 stupanj_polinoma;
+Decimal64 polinom[20], matrica[20 * 20];
+
+Function postavi_stupanj_polinoma(Integer16 n) Which Returns Nothing Does
+  stupanj_polinoma := n;
+EndFunction
+
+Function postavi_polinom(Integer16 indeks, Decimal64 broj) Which Returns Nothing
+  Does
+    polinom[indeks] := broj;
+EndFunction
+
+Function signum(Decimal64 x) Which Returns Integer16 Does
+  Return x < 0 ? -1 :
+         x = 0 ? 0 :
+         1;
+EndFunction
+
+Function provjeri_nuzne_uvjete() Which Returns Integer16 Does
+  Integer16 i := 1;
+  While i < stupanj_polinoma + 1 Loop
+    If not(signum(polinom[i - 1]) = signum(polinom[i])) Then
+      Return 0;
+    EndIf
+    i += 1;
+  EndWhile
+  Return 1;
+EndFunction
+
+Function f(Integer16 i, Integer16 j) Which Returns Integer16 Does
+  // Za pretvaranje indeksa dvodimenzionalnog polja u indeks jednodimenzionalnog
+  // polja. Kada u svoj AEC compiler još nisam implementirao dvodimenzionalna
+  // polja...
+  Return 20 * i + j;
+EndFunction
+
+Function popuni_matricu() Which Returns Nothing Does
+  Integer16 broj_stupaca :=
+              (stupanj_polinoma + 1) / 2 + mod(stupanj_polinoma + 1, 2),
+            broj_redaka := stupanj_polinoma + 1;
+  Integer16 i := 0;
+  While i < broj_redaka Loop
+    Integer16 j := 0;
+    While j < broj_stupaca Loop
+      If i = 0 Then // Prvi redak
+        matrica[f(i, j)] := polinom[j * 2];
+      ElseIf i = 1 Then // Drugi redak
+        matrica[f(i, j)] := (j * 2 + 1 < stupanj_polinoma + 1) ?
+                            polinom[j * 2 + 1] :
+                            0;
+      Else // Ostali reci...
+        matrica[f(i, j)] := (matrica[f(i - 1, 0)] *
+                            (j + 1 < broj_stupaca ?
+                             matrica[f(i - 2, j + 1)] : 0) -
+                            (matrica[f(i - 2, 0)] *
+                            (j + 1 < broj_stupaca ?
+                             matrica[f(i - 1, j + 1)] : 0))) /
+                            matrica[f(i - 1 , 0)];
+      EndIf
+      j += 1;
+    EndWhile
+    i += 1;
+  EndWhile
+EndFunction
+
+Function broj_korijena_u_desnoj_poluravnini() Which Returns Integer16 Does
+  Integer16 i := 1, brojac := 0;
+  While i < stupanj_polinoma + 1 Loop
+    brojac += not(signum(matrica[f(i, 0)]) = signum(matrica[f(i - 1, 0)]));
+    i += 1;
+  EndWhile
+  Return brojac;
+EndFunction
+
+Function broj_iz_matrice(Integer16 i, Integer16 j) Which Returns Decimal64 Does
+  //Ova se funkcija poziva iz JavaScripta...
+  Return matrica[f(i, j)];
+EndFunction
