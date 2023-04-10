@@ -47,11 +47,22 @@ Function f(Integer16 i, Integer16 j) Which Returns Integer16 Does
   Return 20 * i + j;
 EndFunction
 
-Function popuni_matricu() Which Returns Nothing Does
+Function popuni_matricu() Which Returns Integer16 Does
   Integer16 broj_stupaca :=
               (stupanj_polinoma + 1) / 2 + mod(stupanj_polinoma + 1, 2),
             broj_redaka := stupanj_polinoma + 1;
   Integer16 i := 0;
+  //Popunimo matricu prvo not-a-numbersima...
+  While i < broj_redaka Loop
+    Integer16 j := 0;
+    While j < broj_stupaca Loop
+      matrica[f(i, j)] := 0. / 0.;
+      j += 1;
+    EndWhile
+    i += 1;
+  EndWhile
+  //Zatim idemo primjeniti Hurwitzov algoritam...
+  i := 0;
   While i < broj_redaka Loop
     Integer16 j := 0;
     While j < broj_stupaca Loop
@@ -62,6 +73,10 @@ Function popuni_matricu() Which Returns Nothing Does
                             polinom[j * 2 + 1] :
                             0;
       Else // Ostali reci...
+        If matrica[f(i - 1, 0)] = 0 Then
+          //TODO: Implementirati što se radi u posebnim slučajevima...
+          Return 0;
+        EndIf
         matrica[f(i, j)] := (matrica[f(i - 1, 0)] *
                             (j + 1 < broj_stupaca ?
                              matrica[f(i - 2, j + 1)] : 0) -
@@ -74,6 +89,10 @@ Function popuni_matricu() Which Returns Nothing Does
     EndWhile
     i += 1;
   EndWhile
+  If matrica[f(broj_redaka - 1, 0)] = polinom[stupanj_polinoma] Then
+    Return 1;
+  EndIf
+  Return 0;
 EndFunction
 
 Function broj_korijena_u_desnoj_poluravnini() Which Returns Integer16 Does
@@ -86,6 +105,6 @@ Function broj_korijena_u_desnoj_poluravnini() Which Returns Integer16 Does
 EndFunction
 
 Function broj_iz_matrice(Integer16 i, Integer16 j) Which Returns Decimal64 Does
-  //Ova se funkcija poziva iz JavaScripta...
+  //Ova se funkcija poziva iz JavaScripta kad se crta tablica...
   Return matrica[f(i, j)];
 EndFunction

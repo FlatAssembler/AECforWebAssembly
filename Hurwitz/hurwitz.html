@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="hr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hurwitzov kriterij implementiran u AEC-u</title>
+    <style>
+      table,
+      tr,
+      td,
+      th {
+        border-collapse: collapse;
+        broder-color: black;
+        border-width: 1px;
+        border-style: solid;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hurwitzov kriterij</h1>
+    Ovo je moj pokušaj da implementiram
+    <a
+      href="https://en.wikipedia.org/wiki/Routh%E2%80%93Hurwitz_stability_criterion"
+      >Hurwitzov kriterij</a
+    >
+    u mom programskom jeziku, <a href="AEC_specification">AEC-u</a>, i
+    compiliram ga tako da se može pokrenuti u internetskom pregledniku, pomoću
+    svog
+    <a href="https://github.com/FlatAssembler/AECforWebAssembly.git"
+      >compilera koji prevodi AEC na WebAssembly</a
+    >. S obzirom na to da WebAssembly kôd koji ispisuje moj compiler
+    pretpostavlja da je naredba <code>WebAssembly.Global</code> dostupna, ovo će
+    raditi samo u najnovijim internetskim preglednicima.<br />
+    Hurwitzov kriterij je, u biti, algoritam da odredimo koliko se korijena
+    nekog polinoma nalazi desno od imaginarne osi (da im je realni dio
+    pozitivan) bez potrebe da se ti korijeni izračunaju. To je korisno jer se za
+    polinome velikog stupnja korijeni, u principu, ne mogu izračunati, a, da
+    bismo odredili je li neki linearni vremenski nepromjenjivi sustav stabilan,
+    dovoljno je dokazati da nazivnik njegove prijenosne funkcije nema korijene
+    (zvani <i>polovi</i>) desno od imaginarne osi.
+    <form>
+      <label for="koeficijenti">Koeficijenti polinoma odvojeni razmakom:</label>
+      <input id="koeficijenti" value="1 1 11 1 200" />
+      <!-- Primjer preuzet s Wikipedije: https://en.wikipedia.org/wiki/Routh%E2%80%93Hurwitz_stability_criterion -->
+    </form>
+    <button id="tipka">Izračunaj!</button>
+    <br />
+    <div
+      id="odjeljak_s_tablicom"
+      style="margin-top: 10px; margin-bottom: 5px"
+    ></div>
+    Broj korijena desno od imaginarne osi je:
+    <span id="desni_korijeni"></span>.<br /><br />
+    Možete vidjeti i
+    <a href="hurwitz.aec.html">izvorni kôd programa pisanog u AEC-u</a>.
+    <script>
+      "use strict";
+      let postavi_stupanj_polinoma,
+        postavi_polinom,
+        signum,
+        provjeri_nuzne_uvjete,
+        popuni_matricu,
+        broj_korijena_u_desnoj_poluravnini,
+        broj_iz_matrice;
+      fetch("hurwitz.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes))
+        .then((results) => {
+          postavi_stupanj_polinoma =
+            results.instance.exports.postavi_stupanj_polinoma;
+          postavi_polinom = results.instance.exports.postavi_polinom;
+          signum = results.instance.exports.signum;
+          provjeri_nuzne_uvjete =
+            results.instance.exports.provjeri_nuzne_uvjete;
+          popuni_matricu = results.instance.exports.popuni_matricu;
+          broj_korijena_u_desnoj_poluravnini =
+            results.instance.exports.broj_korijena_u_desnoj_poluravnini;
+          broj_iz_matrice = results.instance.exports.broj_iz_matrice;
+        });
+      document.getElementById("tipka").onclick = () => {
+        const polinom = document
+          .getElementById("koeficijenti")
+          .value.split(" ");
+        postavi_stupanj_polinoma(polinom.length - 1);
+        for (let i = 0; i < polinom.length; i++) postavi_polinom(i, polinom[i]);
+        if (!provjeri_nuzne_uvjete()) {
+          alert(
+            "Polinom ne zadovoljava nužne uvjete (da su svi koeficijenti istog predznaka i različiti od nule)!"
+          );
+          return;
+        }
+        if (!popuni_matricu())
+          alert(
+            "Popunjavanje matrice nije uspjelo. Sustav je vjerojatno na granici stabilnosti, pa se klasičnim Hurwitzovim algoritmom ne može odrediti broj polova desno od imaginarne osi. Izmjenjenim Hurwitzovim algoritmom se može, ali to (još) nisam implementirao."
+          );
+        const broj_stupaca = Math.ceil(polinom.length / 2),
+          broj_redaka = polinom.length;
+        let tablica = "<table>";
+        for (let i = 0; i < broj_redaka; i++) {
+          tablica += "<tr><th>s<sup>" + (broj_redaka - i - 1) + "</sup></th>";
+          for (let j = 0; j < broj_stupaca; j++)
+            if (
+              i == 0 ||
+              j != 0 ||
+              signum(broj_iz_matrice(i - 1, j)) == signum(broj_iz_matrice(i, j))
+            )
+              tablica += "<td>" + broj_iz_matrice(i, j) + "</td>";
+            else
+              tablica +=
+                '<td style="border-top-color: red; border-top-width: 3px;">' +
+                broj_iz_matrice(i, j) +
+                "</td>";
+          tablica += "</tr>";
+        }
+        tablica += "</table>";
+        document.getElementById("odjeljak_s_tablicom").innerHTML = tablica;
+        document.getElementById("desni_korijeni").innerHTML =
+          broj_korijena_u_desnoj_poluravnini();
+      };
+    </script>
+  </body>
+</html>
