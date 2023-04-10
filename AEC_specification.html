@@ -1725,6 +1725,29 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
                                          400, 500, 900,
                                          1000};</pre
         >
+        <b>UPDATE</b> on 10/04/2023: For now, if you need to implement an
+        algorithm that uses multi-dimensional arrays, you can write it in a
+        relatively-legible manner by writing helper functions. I was doing that
+        when writing <a href="hurwitz.html">Hurwitz'es Algorithm</a>:
+        <pre>
+Function f(Integer16 i, Integer16 j) Which Returns Integer16 Does
+  // Za pretvaranje indeksa dvodimenzionalnog polja u indeks jednodimenzionalnog
+  // polja. Kada u svoj AEC compiler još nisam implementirao dvodimenzionalna
+  // polja...
+  Return 20 * i + j;
+EndFunction</pre
+        >
+        And, after that...
+        <pre>
+        matrica[f(i, j)] := (matrica[f(i - 1, 0)] *
+                            (j + 1 < broj_stupaca ?
+                             matrica[f(i - 2, j + 1)] : 0) -
+                            (matrica[f(i - 2, 0)] *
+                            (j + 1 < broj_stupaca ?
+                             matrica[f(i - 1, j + 1)] : 0))) /
+                            matrica[f(i - 1 , 0)];
+</pre
+        >
         <br />
         <br /><b id="Assignments">Assignments</b><br />
         For assignments, you use <span class="inline_code">:=</span> operator,
