@@ -11,10 +11,11 @@
               // potprogram pisan u JavaScriptu biti jednostavniji ako AEC
               // compiler misli da ciljamo WASI, a ne browser.
 
-Integer16 stupanj_polinoma;
+Integer16 stupanj_polinoma, jesmo_li_obrnuli_polinom;
 Decimal64 polinom[20], matrica[20 * 20];
 
 Function postavi_stupanj_polinoma(Integer16 n) Which Returns Nothing Does
+  jesmo_li_obrnuli_polinom := 0;
   stupanj_polinoma := n;
 EndFunction
 
@@ -39,6 +40,8 @@ Function provjeri_nuzne_uvjete() Which Returns Integer16 Does
   EndWhile
   Return 1;
 EndFunction
+
+Function obrni_polinom() Which Returns Nothing Is Declared;
 
 Function f(Integer16 i, Integer16 j) Which Returns Integer16 Does
   // Za pretvaranje indeksa dvodimenzionalnog polja u indeks jednodimenzionalnog
@@ -73,9 +76,15 @@ Function popuni_matricu() Which Returns Integer16 Does
                             polinom[j * 2 + 1] :
                             0;
       Else // Ostali reci...
-        If matrica[f(i - 1, 0)] = 0 Then
-          //TODO: Implementirati što se radi u posebnim slučajevima...
-          Return 0;
+        If matrica[f(i - 1, 0)] = 0 Then // Posebni slučajevi, kada se u prvom
+                                         // stupcu matrice pojavi nula.
+          If jesmo_li_obrnuli_polinom Then // Obrtanje polinoma nije "upalilo".
+            Return 0;
+          Else // Možda obrtanje polinoma "upali"...
+            obrni_polinom(); // https://www.forum.hr/showpost.php?p=97955497&postcount=16
+            jesmo_li_obrnuli_polinom := 1;
+            Return popuni_matricu();
+          EndIf
         EndIf
         matrica[f(i, j)] := (matrica[f(i - 1, 0)] *
                             (j + 1 < broj_stupaca ?
@@ -102,6 +111,21 @@ Function broj_korijena_u_desnoj_poluravnini() Which Returns Integer16 Does
     i += 1;
   EndWhile
   Return brojac;
+EndFunction
+
+Function obrni_polinom() Which Returns Nothing Does
+  Decimal64 pomocni_polinom[20];
+  Integer16 i := 0, j := stupanj_polinoma;
+  While i < stupanj_polinoma + 1 Loop
+    pomocni_polinom[i] := polinom[j];
+    i += 1;
+    j -= 1;
+  EndWhile
+  i := 0;
+  While i < stupanj_polinoma + 1 Loop
+    polinom[i] := pomocni_polinom[i];
+    i += 1;
+  EndWhile
 EndFunction
 
 Function broj_iz_matrice(Integer16 i, Integer16 j) Which Returns Decimal64 Does
