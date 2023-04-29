@@ -114,6 +114,8 @@ Function broj_korijena_u_desnoj_poluravnini() Which Returns Integer16 Does
 EndFunction
 
 Function obrni_polinom() Which Returns Nothing Does
+  // Ako vas zanima kako taj trik sa obrtanjem polinoma funkcionira, evo
+  // jednostavnog objašnjenja: https://math.stackexchange.com/a/4689107/791819
   Decimal64 pomocni_polinom[20];
   Integer16 i := 0, j := stupanj_polinoma;
   While i < stupanj_polinoma + 1 Loop
