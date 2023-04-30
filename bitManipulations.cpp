@@ -6,8 +6,8 @@
  */
 
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
-#include <cstdint>
-#include <cstring> //Some compilers apparently require this for "memcpy".
+#include <cstdint> // Apparently, GCC started to require this with version 13.
+#include <cstring> // Some compilers apparently require this for "memcpy".
 #include <iostream>
 #include <regex>
 #include <sstream>
