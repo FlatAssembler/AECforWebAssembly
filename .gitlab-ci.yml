@@ -7,9 +7,13 @@ build:
   script:
     - cmake .
     - cmake --build .
+    - strip aec
+    - g++ -o aec.elf AECforWebAssembly.cpp -static -O3
+    - strip aec.elf
   artifacts:
     paths:
       - aec
+      - aec.elf
 
 test:
   stage: test
