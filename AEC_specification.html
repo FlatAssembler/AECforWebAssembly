@@ -657,6 +657,11 @@
                   >How making a programming language is insightful</a
                 >
               </li>
+              <li>
+                <a href="#language_related_bugs"
+                  >Programming in your programming language avoids many bugs</a
+                >
+              </li>
             </ol>
           </li>
           <li>
@@ -815,6 +820,38 @@
           comparisons between human languages and programming languages, I am
           not entirely convinced the similarity between human languages and
           programming languages is anything more than superficial.</span
+        ><br />
+        <span id="language_related_bugs"
+          >Also, I think programming in a programming language you have made
+          yourself is a good idea because it avoids the bugs that come from
+          misunderstanding the programming language you are using. I think that
+          is a major source of bugs in programs, yet one that is talked about
+          very little. Most of the bugs I've run into came from me
+          misunderstanding the language I was using. Quite a few languages, most
+          notably JavaScript, try to fix syntactically incorrect programs by
+          inserting a semi-colon <span class="inline_code">;</span> according to
+          some rules. Sometimes the result of that is really what the programmer
+          intended, but quite often it is not. I have run into that problem, not
+          in JavaScript, but in Octave, when I was writing
+          <a href="toponyms.html#correction"
+            >a program to study the relationship between the Shannon entropy and
+            the collision entropy</a
+          >. It was only when I tried running my program in MatLab (another
+          implementation of the same programming language) that I even realized
+          there was a bug. Had I used my programming language instead of Octave,
+          something like that simply could not have happened to me. And when
+          writing my AEC-to-WebAssembly compiler in C++, C++ has surprised me
+          quite a few times, and once made a very hard-to-trace bug (you can
+          read about it in the <a href="#Structures">Structures section</a>).
+          When programming in a programming language you have made, you
+          understand how the tools you are using work, and you have an at least
+          basic understanding how the environment you are targetting works (to
+          make a compiler targetting WebAssembly, you need to have at least
+          basic understanding how modern browsers work), so you are not doing
+          bloodletting. WebAssembly is designed to be an exceptionally easy
+          target for compilers, so now you can easily program in a programming
+          language you have made and make the programs you have written in it
+          run in modern browsers.</span
         ><br />
         <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
@@ -1380,7 +1417,34 @@ emcc -o aec.js AECforWebAssembly.cpp -s NODERAWFS=1 -s ALLOW_MEMORY_GROWTH=1 -s 
         version does, because of
         <a href="https://github.com/emscripten-core/emscripten/pull/18191"
           >this pull request</a
-        >.<br /><br />
+        >.<br />
+        <b>UPDATE</b> on 05/05/2023: Here is how you can cross-compile my
+        AEC-to-WebAssembly compiler from Windows to 64-bit Linux using Docker:
+        <pre class="LinuxShell">
+PS E:\My programs\AECforWebAssembly> docker run --rm -v "$($PWD):/usr/src/myapp" -w /usr/src/myapp gcc:13.1 g++ -o aec.elf AECforWebAssembly.cpp -static -O3</pre
+        >
+        Of course, you should replace <span class="inline_code">13.1</span> with
+        the version of GCC you want to use. The newer the GCC version, the more
+        optimized the output will be, but you are risking running into trouble
+        because of the poor backwards compatibility (C++ is not JavaScript,
+        where you can expect a program that works now to work forever). For
+        instance, GCC 13.1 started to require
+        <span class="inline_code">#include &lt;cstdint&gt;</span> in order to
+        use <span class="inline_code">uint8_t</span> and similar typenames,
+        which
+        <a
+          href="https://gitlab.com/FlatAssembler/AECforWebAssembly/-/jobs/4202281750"
+          >broke my GitLab CI/CD</a
+        >
+        once GitLab started using GCC 13.1 (which is how I came to know about
+        GCC 13.1 in the first place). You <b>need</b> to use
+        <span class="inline_code">-static</span>, or else your program will not
+        run on any Linux machine that has the C++ library older than GCC 13.1 in
+        Docker uses (which are, as of time of writing this, all Linux
+        distributions except Fedora). It is also a good idea to run
+        <span class="inline_code">strip aec.elf</span> inside Docker after using
+        GCC to produce <span class="inline_code">aec.elf</span> to make it use
+        less space. <br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
