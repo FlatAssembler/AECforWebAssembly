@@ -1444,7 +1444,14 @@ PS E:\My programs\AECforWebAssembly> docker run --rm -v "$($PWD):/usr/src/myapp"
         distributions except Fedora). It is also a good idea to run
         <span class="inline_code">strip aec.elf</span> inside Docker after using
         GCC to produce <span class="inline_code">aec.elf</span> to make it use
-        less space. <br /><br />
+        less space. I have asked a question on both
+        <a href="https://qr.ae/pyIklG">Quora</a> and
+        <a
+          href="https://www.reddit.com/r/learnprogramming/comments/139l3m7/why_does_gcc_run_in_docker_produce_around_30/?utm_source=share&utm_medium=web2x&context=3"
+          >Reddit</a
+        >
+        about why GCC run in Docker produces around 30% smaller executable files
+        than GCC run on actual Linux.<br /><br />
         <b id="Comments">Comments</b><br />
         In the version of AEC targeting x86, the comments start with
         <span class="inline_code">;</span> and end with a newline character, as
