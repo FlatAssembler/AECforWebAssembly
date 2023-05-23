@@ -1706,7 +1706,15 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
         memory access, it's not guaranteed to be nearly as fast as aligned
         access (on x86, it usually is, on ARM, it's many times slower).<br />
         <br /><b id="Arrays">Arrays and Pointers</b><br />
-        Arrays are declared as follows:
+        In the x86 dialect of AEC, you don't declare arrays in AEC, the compiler
+        assumes any arrays you mention in AEC are declared in inline assembly
+        (just like it does for variables). In the x86 dialect of AEC, you can
+        reference an array called <span class="inline_code">fib</span> either as
+        <span class="inline_code">fib(0)</span> (as in BASIC) or as
+        <span class="inline_code">fib[0]</span> (as in C). In the WebAssembly
+        dialect of AEC, you can only do that as
+        <span class="inline_code">fib[0]</span>.<br />
+        In the WebAssembly dialect of AEC, arrays are declared as follows:
         <pre>DataType name_of_the_array[size];</pre>
         They can be initialized as follows:
         <pre>
@@ -3157,7 +3165,7 @@ EndFunction
         <br />
         <b id="DifferencesInDialects">Example program in both dialects of AEC</b
         ><br />
-        So, here is an example program in the x86 dialect of AEC:
+        So, here is an example piece of code in the x86 dialect of AEC:
         <pre>
 i := 0
 While i < n | i = n
@@ -3172,7 +3180,7 @@ While i < n | i = n
 EndWhile
 fib(n)</pre
         >
-        And here is its equivalent in the WebAssembly dialect of AEC:
+        And here is its near-equivalent in the WebAssembly dialect of AEC:
         <pre>
 Function fib(Integer16 n) Which Returns Decimal64 Does
   Integer16 i := 0;
