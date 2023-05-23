@@ -732,6 +732,11 @@
           <li><a href="#Builtin">Built-in functions</a></li>
           <li><a href="#String">String manipulation</a></li>
           <li><a href="#AdvancedArray">Advanced array manipulation</a></li>
+          <li>
+            <a href="#DifferencesInDialects"
+              >Example program in both dialects of AEC</a
+            >
+          </li>
           <li><a href="#Conclusion">Conclusion</a></li>
           <li><a href="#stuxxnet">Stuxxnet's comments</a></li>
         </ol>
@@ -3149,7 +3154,46 @@ EndFunction
         measured? Why do some do, and some (like JavaScript
         <span class="inline_code">Array.sort</span>) do not, on the same array?
         <br />
-        <br /><b id="Conclusion">Conclusion</b><br />
+        <br />
+        <b id="DifferencesInDialects">Example program in both dialects of AEC</b
+        ><br />
+        So, here is an example program in the x86 dialect of AEC:
+        <pre>
+i := 0
+While i < n | i = n
+	If i = 0
+		fib(i) := 0
+	ElseIf i = 1
+		fib(i) := 1
+	Else
+		fib(i) := fib(i - 1) + fib(i - 2)
+	EndIf
+	i := i + 1
+EndWhile
+fib(n)</pre
+        >
+        And here is its equivalent in the WebAssembly dialect of AEC:
+        <pre>
+Function fib(Integer16 n) Which Returns Decimal64 Does
+  Integer16 i := 0;
+  Decimal64 fib[100];
+  While i < n or i = n Loop
+     If i = 0 Then
+       fib[i] := 0;
+     ElseIf i = 1 Then
+       fib[i] := 1;
+     Else
+       fib[i] := fib[i - 1] + fib[i - 2];
+     EndIf
+     i += 1;
+  EndWhile
+  Return fib[n];
+EndFunction</pre
+        >
+        You can read slightly more about it at the beginning of the
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly#limitations"
+          >Limitations section of the README</a
+        >. <br /><br /><b id="Conclusion">Conclusion</b><br />
         I think AEC is a promising project, but a lot of work is still needed to
         make it successful. I don't think I can do everything that's needed for
         it to be successful by myself. (<i
@@ -3308,7 +3352,9 @@ EndFunction
             return '<span class="Keyword">' + token + "</span>";
           if (
             token == "and" ||
+            token == "&" ||
             token == "or" ||
+            token == "|" ||
             token == "mod" ||
             token == "AddressOf" ||
             token == "ValueAt" ||
