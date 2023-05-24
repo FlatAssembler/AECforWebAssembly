@@ -47,7 +47,7 @@ Of course, you need to have `wat2wasm` from [WebAssembly Binary Toolkit](https:/
 
 Note that browsers will generally not allow you to run a WASM executable stored on your file system, you need to use some web-server (I use `php -S 127.0.0.1:8080`) to run it in a browser. It's for security reasons. When running a program stored on the Internet, the JavaScript Virtual Machine can be sandboxed from the file system. When running a program stored on your computer, the JavaScript Virtual Machine can't be sandboxed from the file system (it needs to read the program that's stored on your file system). Modern browsers generally allow JavaScript programs on your file system to run, because the JavaScript compiler (V8, SpiderMonkey, ChakraCore...) is trusted not to produce WebAssembly code which will cause the JavaScript Virtual Machine to read private files stored on the computer or modify files. An untrusted WASM file might contain some obscure piece of WebAssembly which will cause a particular JavaScript Virtual Machine to misbehave.
 
-WASM files can be run in NodeJS, as you can see in [this example](https://github.com/FlatAssembler/AECforWebAssembly/blob/master/analogClock/analogClock.js). NodeJS is (unlike browsers) targeted at tech-savvy users, and it trusts you to verify that the WASM file is not malicious before your run it. Well, when compiling an AEC program, you can check both the source code of that program and the source code of the compiler, so that shouldn't be a problem here.
+WASM files can be run in NodeJS, as you can see in [this example](https://github.com/FlatAssembler/AECforWebAssembly/blob/master/analogClock/analogClock.js). NodeJS is (unlike browsers) targeted at tech-savvy users, and it trusts you to verify that the WASM file is not malicious before you run it. Well, when compiling an AEC program, you can check both the source code of that program and the source code of the compiler, so that shouldn't be a problem here.
 
 ## Shell script
 
@@ -119,7 +119,7 @@ While i < n | i = n
 EndWhile
 fib(n)
 ```
-is equal to the following code in the WebAssembly dialect of AEC:
+is nearly equal to the following code in the WebAssembly dialect of AEC:
 ```
 Function fib(Integer16 n) Which Returns Decimal64 Does
   Integer16 i := 0;
