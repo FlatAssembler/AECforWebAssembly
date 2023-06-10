@@ -2260,8 +2260,13 @@ EndFunction</pre
           >Some part of the compiler tried to compile the array with a negative
           size.</i
         >&quot; error? Well, it has been 3 years since I wrote the core of that
-        compiler, so no wonder I don't remember the details of how it
-        works.).<br />
+        compiler, so no wonder I don't remember the details of how it works.(<i
+          >UPDATE: I have diagnozed the problem. It is actually two different
+          bugs, one in the compiler and one in the semantic analyzer. The
+          problem is fixed in AECforWebAssembly v2.6.0 (not released as of time
+          of writing this, but you have the source code on GitHub, GitLab and
+          SourceForge).</i
+        >)).<br />
         <b id="left_hand_side_conditional_operator">UPDATE</b> on 10/09/2021: I
         have decided to add the left-hand-side ternary conditional operator in
         assignments, which exists in C++, to my programming language (for now,
