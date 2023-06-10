@@ -209,7 +209,7 @@ https://github.com/FlatAssembler/AECforWebAssembly/issues)"
       string(argv[1]).substr(0,
                              string(argv[1]).size() - string(".aec").size()) +
       ".wat";
-  cout << "Saving the assembly in file \"" << assemblyFileName << "\"..."
+  cout << "Saving the assembly into the file \"" << assemblyFileName << "\"..."
        << endl;
   ofstream assemblyFile(assemblyFileName.c_str());
   if (!assemblyFile) {
