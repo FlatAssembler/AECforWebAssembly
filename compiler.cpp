@@ -512,6 +512,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               << std::endl;
           throw CorruptCompilationContextException(context);
         }
+        if (context.structureSizes[nodeWithStructureName.text] == 0) {
+          std::cerr
+              << "Line " << nodeWithStructureName.lineNumber << ", Column "
+              << nodeWithStructureName.columnNumber
+              << ", Compiler error: Cannot instantiate an empty structure!"
+              << std::endl;
+          exit(1);
+        }
         for (TreeNode instanceName : nodeWithStructureName.children) {
           if (!isValidVariableName(instanceName.text) ||
               AECkeywords.count(instanceName.text)) {
