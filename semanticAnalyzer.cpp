@@ -20,6 +20,21 @@ std::string getStrongerType(const int lineNumber, const int columnNumber,
               << std::endl;
     exit(1);
   }
+  if (firstType != secondType and
+      ((!TreeNode::basicDataTypeSizes.count(firstType) and
+        !isPointerType(firstType)) or
+       (!TreeNode::basicDataTypeSizes.count(secondType) and
+        !isPointerType(secondType)))) {
+    std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+              << ", Compiler error: Some part of the compiler tried to compare "
+                 "two different structure types, \""
+              << firstType << "\" and \"" << secondType
+              << "\", for strength. You have presumably put two different "
+                 "structure types as the second and the third operator of the "
+                 "ternary conditional `?:` operator."
+              << std::endl;
+    exit(1);
+  }
   if (isPointerType(firstType) and !isPointerType(secondType))
     return firstType;
   if (isPointerType(secondType) and !isPointerType(firstType))
