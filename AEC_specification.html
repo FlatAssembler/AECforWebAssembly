@@ -2247,7 +2247,21 @@ EndFunction</pre
         <a href="https://languagedesign.stackexchange.com/q/1469/330"
           >question on StackExchange</a
         >
-        to see if there are some more.<br />
+        to see if there are some more (Apparently, there is, and I bumped into
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/19"
+          >one of them related to structures</a
+        >
+        that <i>kaya3</i> warns about on StackExchange when making my
+        AEC-to-WebAssembly compiler. What is exceptionally bad is that the error
+        message is very misleading, and, right now, it escapes me what exactly
+        is going on in the compiler. How can using two different structure types
+        inside a <span class="inline_code">?:</span> operator lead to the
+        &quot;<i
+          >Some part of the compiler tried to compile the array with a negative
+          size.</i
+        >&quot; error? Well, it has been 3 years since I wrote the core of that
+        compiler, so no wonder I don't remember the details of how it
+        works.).<br />
         <b id="left_hand_side_conditional_operator">UPDATE</b> on 10/09/2021: I
         have decided to add the left-hand-side ternary conditional operator in
         assignments, which exists in C++, to my programming language (for now,
