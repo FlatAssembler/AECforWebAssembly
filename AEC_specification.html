@@ -2024,7 +2024,17 @@ EndFunction</pre
         The first argument of the ternary conditional operator is converted to
         <span class="inline_code">Integer32</span> (that's how WebAssembly
         represents Booleans), and the last two are converted to strongest type
-        of those two. The strongest types are pointers, next comes
+        of those two (<i
+          >UPDATE: In AECforWebAssembly v2.6.0 and newer, in case one of the
+          last two arguments of the ternary conditional operator is a structure,
+          but the other is either a structure of a different type, or not a
+          structure at all, the semantic analyzer reports an error. In previous
+          versions of AECforWebAssembly, that caused the compiler to crash. See
+          <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/19"
+            >this GitHub issue</a
+          >
+          for more information.</i
+        >). The strongest types are pointers, next comes
         <span class="inline_code">Decimal64</span>, then
         <span class="inline_code">Decimal32</span>, then
         <span class="inline_code">Integer64</span>, then
