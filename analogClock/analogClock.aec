@@ -55,7 +55,9 @@ Function ln(Decimal32 x) Which Returns Decimal32 Does {
   }
   EndWhile; // The semicolon after "EndWhile" and "EndIf" and "EndFunction" is
             // optional, but it provides a hint to the IDEs (made for C-like
-            // languages).
+            // languages). I have started a StackExchange question about why
+            // some languages require a semicolon after "EndIf", "EndWhile" and
+            // "EndFunction": https://langdev.stackexchange.com/q/392/330
   Return sum;
 }
 EndFunction;
@@ -79,7 +81,9 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
 	(f32.load
 		%x ;;The compiler will replace "%x" with assembly code representing a pointer to the variable "x".
 	)
-))multiline");
+))multiline"); // I have started a StackExchange question about how to better
+               // implement inline assembly:
+               // https://langdev.stackexchange.com/q/1715/330
   }
   EndIf;
   // Binary Search Algorithm...
@@ -101,6 +105,8 @@ Function sqrt(Decimal32 x) Which Returns Decimal32 Does {
            * ClangFormat apparently misinterprets the assignment operator ":="
            * as the C label marker ':' followed by the C '=' operator,
            * there doesn't appear to be a simple solution to this problem.
+           * I have opened a StackExchange question about that:
+           * https://langdev.stackexchange.com/q/1695/330
            */
           : = i;
     }
