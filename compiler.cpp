@@ -513,11 +513,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           throw CorruptCompilationContextException(context);
         }
         if (context.structureSizes[nodeWithStructureName.text] == 0) {
-          std::cerr
-              << "Line " << nodeWithStructureName.lineNumber << ", Column "
-              << nodeWithStructureName.columnNumber
-              << ", Compiler error: Cannot instantiate an empty structure!"
-              << std::endl;
+          std::cerr << "Line " << nodeWithStructureName.lineNumber
+                    << ", Column " << nodeWithStructureName.columnNumber
+                    << ", Compiler error: Cannot instantiate an empty "
+                       "structure as a local variable! The structure \""
+                    << nodeWithStructureName.text << "\" has the size of zero."
+                    << std::endl;
           exit(1);
         }
         for (TreeNode instanceName : nodeWithStructureName.children) {
