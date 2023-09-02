@@ -58,10 +58,13 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                   // više nego 4GB RAM-a je zanemariva, a vjerojatnost da će
                   // se neki korisni programi srušiti zbog prebacivanja u
                   // 64-bitni način rada nije baš zanemariva.
-        ("(memory.grow\n"
-         "\t(local.get 0)\n" // Prvi (nulti) argument funkcije,
-                             //"broj_stranica".
-         ")\n");
+        (R"(
+(memory.grow
+  (i32.load %broj_stranica) ;; Compiler će zamijeniti `%broj_stranica` s
+                            ;; asemblerskim kodom koji predstavlja pokazivač
+                            ;; na varijablu `broj_stranica`.
+)
+        )");
   If nova_adresa_u_stranicama = -1 Then { // Ako nema više
                                           // slobodne memorije...
     Return(-1); // Ne stavim li zagrade oko "-1", ClangFormat će misliti da je
@@ -111,9 +114,9 @@ Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does {
   If(x < 8192 and
      not(memoizacija_prirodnog_logaritma[asm_f32( // Vidi iduću funkciju za
                                                   // pojašnjenje ovoga...
-             "(f32.nearest (local.get 0))")] = 0)) Then {
+             "(f32.nearest (f32.load %x))")] = 0)) Then {
     Return
-        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (local.get 0))")];
+        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (f32.load %x))")];
   }
   EndIf;
   If x > 8192 Then {
@@ -132,7 +135,7 @@ Function prirodni_logaritam(Decimal32 x) Which Returns Decimal32 Does {
   EndWhile;
   If x < 8192 Then {
     Return
-        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (local.get 0))")]
+        memoizacija_prirodnog_logaritma[asm_f32("(f32.nearest (f32.load %x))")]
         : = zbroj;
   }
   EndIf;
@@ -151,7 +154,7 @@ Function abs(Decimal32 x) Which Returns Decimal32 Is
 Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
   If(abs(x) < 64 and
      not(memoizacija_Eulerovog_algoritma
-             [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") +
+             [asm_f32("(f32.nearest (f32.mul (f32.const 4) (f32.load %x)))") +
               256] = 0))
       Then { // Koristio sam ovdje umetnuti asembler zato što ništa drugo što
              // napišem u AEC-u neće učiniti da compiler koji sam napravio
@@ -160,7 +163,7 @@ Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
              // napisati malo umetnutog asemblera nego mijenjati i recompilirati
              // compiler.
     Return memoizacija_Eulerovog_algoritma
-        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") + 256];
+        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (f32.load %x)))") + 256];
   }
   EndIf;
   // Eulerov Algoritam iz Matematike 2...
@@ -172,7 +175,7 @@ Function Eulerov_broj_na_potenciju(Decimal32 x) Which Returns Decimal32 Does {
   EndWhile;
   If abs(x) < 64 Then {
     Return memoizacija_Eulerovog_algoritma
-        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (local.get 0)))") + 256]
+        [asm_f32("(f32.nearest (f32.mul (f32.const 4) (f32.load %x)))") + 256]
         : = y;
   }
   EndIf;
