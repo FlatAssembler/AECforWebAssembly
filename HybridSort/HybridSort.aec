@@ -58,7 +58,8 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                   // više nego 4GB RAM-a je zanemariva, a vjerojatnost da će
                   // se neki korisni programi srušiti zbog prebacivanja u
                   // 64-bitni način rada nije baš zanemariva.
-        (R"(
+        (R"( ;; Sintaksu za višelinijske stringove preuzeo sam iz C++11-a, ta
+             ;; mi se sintaksa za višelinijske stringove nekako najviše sviđa.
 (memory.grow
   (i32.load %broj_stranica) ;; Compiler će zamijeniti `%broj_stranica` s
                             ;; asemblerskim kodom koji predstavlja pokazivač
