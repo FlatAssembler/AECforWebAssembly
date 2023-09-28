@@ -16,8 +16,8 @@
 // Uvezimo prvo neke funkcije iz JavaScripta, koje će nam trebati...
 Function daj_velicinu_niza() Which Returns Integer32 Is External;
 Function kopiraj_niz_na_adresu(
-    Integer32Pointer adresa) Which Returns Nothing Is External;
-Function printString(CharacterPointer str) Which Returns Nothing Is External;
+    PointerToInteger32 adresa) Which Returns Nothing Is External;
+Function printString(PointerToCharacter str) Which Returns Nothing Is External;
 Function printInteger(Integer32 n) Which Returns Nothing Is External;
 Function printFloat(Decimal32 x) Which Returns Nothing Is External;
 Function pocni_mjerenje_vremena() Which Returns Nothing Is External;
@@ -43,7 +43,7 @@ Integer32 DEBUG : = 0, broj_mjerenja : = 0; // broj_mjerenja bit će koristan za
 
 // Napravimo sada omotnicu oko WebAssemblerske naredbe "memory.grow"...
 Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
-    CharacterPointer
+    PointerToCharacter
     Does { // Vitičasta zagrada ovdje je opcionalna, compiler ju ignorira. No,
            // dobro dođe kada pišemo AEC-ovski program u nekom IDE-u koji je
            // primarno namijenjen za C-olike jezike, tada on može razumijeti da
@@ -58,14 +58,21 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
                   // više nego 4GB RAM-a je zanemariva, a vjerojatnost da će
                   // se neki korisni programi srušiti zbog prebacivanja u
                   // 64-bitni način rada nije baš zanemariva.
-        (R"( ;; Sintaksu za višelinijske stringove preuzeo sam iz C++11-a, ta
-             ;; mi se sintaksa za višelinijske stringove nekako najviše sviđa.
+        (R"multiline(
+        ;; Sintaksu za višelinijske stringove preuzeo sam iz C++11-a, ta mi
+        ;; se sintaksa za višelinijske stringove nekako najviše sviđa.
 (memory.grow
   (i32.load %broj_stranica) ;; Compiler će zamijeniti `%broj_stranica` s
                             ;; asemblerskim kodom koji predstavlja pokazivač
-                            ;; na varijablu `broj_stranica`.
+                            ;; na varijablu `broj_stranica`. Razumijem da
+                            ;; način na koji GCC i CLANG compileri za C++
+                            ;; implementiraju inline assembly ima svoje
+                            ;; prednosti, ali to je teže i za koristiti
+                            ;; (pogotovo za ovakve jednostavne umetnute
+                            ;; asemblerske kodove) i za implementirati u
+                            ;; compileru.
 )
-        )");
+        )multiline");
   If nova_adresa_u_stranicama = -1 Then { // Ako nema više
                                           // slobodne memorije...
     Return(-1); // Ne stavim li zagrade oko "-1", ClangFormat će misliti da je
@@ -80,11 +87,10 @@ Function zauzmi_memorijske_stranice(Integer32 broj_stranica) Which Returns
 EndFunction;
 
 Integer32 velicina_niza;
-Integer32Pointer originalni_niz, pomocni_niz; // To su globalne varijable,
-                                              // po defaultu su u nuli,
-                                              // dakle "originalni_niz" i
-                                              //"pomocni_niz" su na početku
-                                              // programa nulti pokazivači.
+PointerToInteger32 originalni_niz,
+    pomocni_niz; // To su globalne varijable, po defaultu su u nuli, dakle
+                 // "originalni_niz" i "pomocni_niz" su na početku programa
+                 // nulti pokazivači.
 
 Integer32 broj_obrnuto_poredanih_podniza, broj_vec_poredanih_podniza,
     broj_pokretanja_QuickSorta, broj_pokretanja_MergeSorta,
