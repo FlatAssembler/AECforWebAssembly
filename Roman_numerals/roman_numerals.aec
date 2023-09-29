@@ -1,25 +1,25 @@
-CharacterPointer elements[13] :=    {"I",  "IV", "V",
-                                     "IX", "X",  "XL",
-                                     "L",  "XC", "C",
-                                     "CD", "D",  "CM",
-                                     "M"};
-Integer16 meaningsOfElements[13] := { 1,    4,   5,
-                                      9     10,  40,
-                                      50,   90,  100,
-                                      400,  500, 900,
-                                      1000};
+PointerToCharacter elements[13]  :=   {"I",  "IV", "V",
+                                       "IX", "X",  "XL",
+                                       "L",  "XC", "C",
+                                       "CD", "D",  "CM",
+                                       "M"};
+Integer16 meaningsOfElements[13] :=   { 1,    4,    5,
+                                        9     10,   40,
+                                        50,   90,  100,
+                                        400,  500, 900,
+                                        1000};
 Character result[64];
 //"Extern" has not been implemented (yet)...
-Function pointerToResult() Which Returns CharacterPointer Does
+Function pointerToResult() Which Returns PointerToCharacter Does
     Return AddressOf(result[0]);
 EndFunction
 
-Function strcat(CharacterPointer dest, CharacterPointer src)
+Function strcat(PointerToCharacter dest, PointerToCharacter src)
          Which Returns Nothing Is Declared;
 
 Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
     result[0] := 0;
-    CharacterPointer result := pointerToResult();
+    PointerToCharacter result := pointerToResult();
     If number = 0 Then
         strcat(result,"N");
         Return;
@@ -38,7 +38,7 @@ Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
     EndWhile
 EndFunction
 
-Function strlen(CharacterPointer str) Which Returns Integer32 Does
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does
     Integer32 length : = 0;
     While ValueAt(str + length) Loop
         length += 1;
@@ -46,8 +46,8 @@ Function strlen(CharacterPointer str) Which Returns Integer32 Does
     Return length;
 EndFunction
 
-Function strcpy(CharacterPointer dest,
-                CharacterPointer src) Which Returns Nothing Does
+Function strcpy(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
     While ValueAt(src) Loop
         ValueAt(dest) := ValueAt(src);
         dest          += 1;
@@ -56,7 +56,7 @@ Function strcpy(CharacterPointer dest,
     ValueAt(dest) : = 0;
 EndFunction
 
-Function strcat(CharacterPointer dest,
-                CharacterPointer src) Which Returns Nothing Does
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
     strcpy(dest + strlen(dest), src);
 EndFunction
