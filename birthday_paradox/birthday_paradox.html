@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hr">
   <head>
     <meta charset="UTF-8" />
@@ -11,7 +11,13 @@
     Ovo je program pisan u
     <a href="AEC_specification">programskom jeziku AEC</a> koji radi numeričke
     kalkulacije vezane za Paradoks rođendana, kakve su opisane u
-    <a href="Karasica.doc">mom tekstu o imenu rijeke Karašica</a>.
+    <a href="Karasica.doc">mom tekstu o imenu rijeke Karašica</a>. Ovo će raditi
+    samo u najnovijim internetskim preglednicima,
+    <a
+      href="https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Global#browser_compatibility"
+      >onim internetskim preglednicima koji podržavaju naredbu
+      <code>WebAssembly.Global</code> (Firefox 62, Chrome 69...)</a
+    >.
     <table>
       <tr>
         <td>Broj dana u godini:</td>
@@ -76,7 +82,7 @@
       let kaklulacija;
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
-        0
+        0,
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
       function getStringAtAddress(ptr) {
@@ -103,7 +109,7 @@
                 console.log(int);
               },
             },
-          })
+          }),
         )
         .then((results) => {
           kalkulacija =
@@ -118,7 +124,7 @@
           document.getElementById("broj_dana_u_godini").value,
           document.getElementById("broj_ljudi").value,
           document.getElementById("broj_kolizija").value,
-          document.getElementById("koliko_puta").value
+          document.getElementById("koliko_puta").value,
         ) * 100
       }%
       `;
