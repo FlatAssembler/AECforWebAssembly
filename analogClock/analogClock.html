@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- See Arithmetic Operators Test for explanations.-->
 <html>
   <head>
@@ -104,7 +104,9 @@
     </div>
     <br />
     You can see the source code of the AEC program
-    <a href="analogClock.aec.html">here</a>.<br /><br />
+    <a href="analogClock.aec.html">here</a>. I had to implement custom math
+    functions, because WebAssembly has no <code>fsin</code> and similar
+    instructions which x86 assembly has.<br /><br />
     UPDATE on 18/01/2023: If you want to try out this program in NodeJS, you can
     use the following shell script I've written:
     <pre class="LinuxShell">
@@ -156,7 +158,7 @@ node analogClock
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
-        0
+        0,
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
       function getStringAtAddress(ptr) {
