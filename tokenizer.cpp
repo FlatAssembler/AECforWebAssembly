@@ -231,7 +231,7 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
   for (unsigned int i = 1; i < tokenizedExpression.size(); i++)
     if ((tokenizedExpression[i].text == "(" or // Mark the names of functions...
          tokenizedExpression[i].text ==
-             "[") and //...and arrays with ending '(' or '['
+             "[") and //...and arrays with ending '(' or '['...
         isWordCharacterButNotDigit(
             tokenizedExpression[i - 1].text[0]) //...for the parser.
         and tokenizedExpression[i - 1].text != "If" and
