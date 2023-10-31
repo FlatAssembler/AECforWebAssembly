@@ -4,7 +4,7 @@ Function printInteger(Integer32 int) Which Returns Integer32
 Function empty_function(Character charArgument:='A',
                         Integer16 shortArgument:=4096,
                         Integer32 intArgument:=32768,
-                        Integer64 longArgument:=8*pow(10,9),
+                        Integer64 longArgument:=8*pow(10,9), //This line won't compile with AECforWebAssembly v2.6.1, but it will with v2.7.0.
                         Decimal32 floatArgument:=22/7,
                         Decimal64 doubleArgument:=pi)
          Which Returns Nothing Does

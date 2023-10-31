@@ -2651,7 +2651,25 @@ EndFunction</pre
           href="https://github.com/FlatAssembler/AECforWebAssembly/blob/f6369e90551b5da49d7b2ea2e62d6c01ae99f596/compiler.cpp#L1327"
           >issues a warning</a
         >
-        in case an argument has been overwritten.
+        in case an argument has been overwritten.<br />
+        UPDATE on 31/10/2023: Ever since the first versions of
+        AEC-to-WebAssembly, there was a bug in the parser preventing you from
+        using multi-argument functions (such as
+        <span class="inline_code">pow</span>) inside default arguments of
+        functions. The version v2.7.0 will fix that issue. So, it will be
+        possible to write this:
+        <pre>
+Function empty_function(Character charArgument:='A',
+                        Integer16 shortArgument:=4096,
+                        Integer32 intArgument:=32768,
+                        Integer64 longArgument:=8*pow(10,9), //This line won't compile with AECforWebAssembly v2.6.1, but it will with v2.7.0.
+                        Decimal32 floatArgument:=22/7,
+                        Decimal64 doubleArgument:=pi)
+         Which Returns Nothing Does
+    //It does nothing, but the compiler should still generate valid code.
+EndFunction
+	</pre
+        >
         <br />
         <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
@@ -2688,7 +2706,10 @@ EndStructure</pre
           asking for help with that.<br />
           UPDATE on 16/02/2021: My implementation of the
           <a href="nQueensPuzzle.html">N-Queens Puzzle</a> in AEC uses
-          structures.<br />
+          structures. If you have trouble understanding the N-Queens Puzzle
+          program, I'd suggest you to first look into the
+          <a href="permutationsTest.html">Permutations Test</a>, as it is based
+          on the same algorithm.<br />
           UPDATE on 28/04/2021: I have started a
           <a href="https://www.forum.hr/showthread.php?t=1243515"
             >forum thread</a
