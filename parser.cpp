@@ -502,8 +502,9 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
           std::cerr << "Line " << input.at(functionName).lineNumber
                     << ", Column: " << input.at(functionName).columnNumber
                     << ", Parser error: Parenthesis in \""
-                    << input.at(functionName).text << "\" not closed!";
-          break;
+                    << input.at(functionName).text << "\" not closed!"
+                    << std::endl;
+          return input;
         }
         if (input.at(endOfFunctionSignature).text == ")")
           counterOfParentheses--;
