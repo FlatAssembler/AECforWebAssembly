@@ -2652,7 +2652,7 @@ EndFunction</pre
           >issues a warning</a
         >
         in case an argument has been overwritten.<br />
-        UPDATE on 31/10/2023: Ever since the first versions of
+        <b>UPDATE</b> on 31/10/2023: Ever since the first versions of
         AEC-to-WebAssembly, there was a bug in the parser preventing you from
         using multi-argument functions (such as
         <span class="inline_code">pow</span>) inside default arguments of
@@ -2667,9 +2667,10 @@ Function empty_function(Character charArgument:='A',
                         Decimal64 doubleArgument:=pi)
          Which Returns Nothing Does
     //It does nothing, but the compiler should still generate valid code.
-EndFunction
-	</pre
+EndFunction</pre
         >
+        I made that v2.7.0 release while I was high on drugs (0.75 mg of
+        Alprazolam), so I cannot promise you I did everything properly.
         <br />
         <br /><b id="Structures">Structures</b><br />
         The parser can parse structure declarations of the form:
