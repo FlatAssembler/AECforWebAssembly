@@ -293,7 +293,16 @@ void parserTests() {
         "innerNumber))"},
        {"InstantiateStructure QuadraticEquationSolution solutions[1 * 2 * 3];",
         "(InstantiateStructure (QuadraticEquationSolution (solutions (* (* 1 "
-        "2) 3))))"}});
+        "2) 3))))"},
+       {
+           R"(
+	       Function f(Decimal64 milliard := pow(10, 9)) Which Returns Nothing Does
+	       		// This function only parses correctly as of AECforWebAssembly v2.7.0.
+			Nothing;
+	       EndFunction
+	       )",
+           "(Function (f (Decimal64 (milliard (:= (pow 10 9))))) (Returns "
+           "Nothing) (Does Nothing))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
