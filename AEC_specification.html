@@ -2130,6 +2130,22 @@ EndFunction</pre
         <span class="inline_code">xor</span>-s
         <span class="inline_code">x</span> with
         <span class="inline_code">-1</span>.<br />
+        <b>UPDATE</b> on 30/11/2023: With the new versions of AEC (supporting
+        easy-to-use inline assembly), there is an even simpler way to implement
+        the xor-operation in AEC:
+        <pre>
+Function xor_using_assembly(Integer32 first,
+                            Integer32 second)
+     Which Returns Integer32 Does
+	Return asm_i32(R"assembly(
+(i32.xor
+	(i32.load %first)
+	(i32.load %second)
+)
+)assembly");
+EndFunction
+	</pre
+        >
         <b>TODO</b>: Implement a less-than-or-equal-to operator
         <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
         operator <span class="inline_code">&gt;=</span>. For that, we will need
