@@ -96,6 +96,17 @@ Function xor(Integer32 first,
         Return (first and invertBits(second)) or (invertBits(first) and second);
 EndFunction
 
+Function xor_using_assembly(Integer32 first,
+                            Integer32 second)
+     Which Returns Integer32 Does
+	Return asm_i32(R"assembly(
+(i32.xor
+	(i32.load %first)
+	(i32.load %second)
+)
+)assembly");
+EndFunction
+
 Function emptyFunction() Which Returns Nothing Does
     Nothing; //The compiler should no longer crash when compiling the
              //no-operation statement ("Nothing").

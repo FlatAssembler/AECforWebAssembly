@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>AEC-to-WebAssembly compiler - Arithmetic Operators Test</title>
@@ -46,7 +46,10 @@
       minimum(first,second)=<span id="minimum"></span><br />
       signum(first)=<span id="signumOfTheFirst"></span><br />
       signum(second)=<span id="signumOfTheSecond"></span><br />
-      xor(first,second)=<span id="xor"></span><br /></span
+      xor(first,second)=<span id="xor"></span><br />
+      xor_using_assembly(first,second)=<span
+        id="xor_using_assembly"
+      ></span> </span
     ><br />
     You can see the source code of the AEC program
     <a
@@ -60,7 +63,7 @@
     */
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
-        0
+        0,
       );
       let memory = new WebAssembly.Memory({ initial: 1 }); //Initially allocates
       //1 page=64KB of RAM.
@@ -77,7 +80,8 @@
         minimum,
         signum,
         modulo,
-        xor;
+        xor,
+        xor_using_assembly;
       fetch("arithmeticOperatorsTest.wasm")
         .then((response) => response.arrayBuffer())
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
@@ -95,6 +99,7 @@
           signum = exports.signum;
           modulo = exports.modulo;
           xor = exports.xor;
+          xor_using_assembly = exports.xor_using_assembly;
         });
       function invokeAECfunctions() {
         let first = parseInt(document.getElementById("firstNumber").value);
@@ -102,19 +107,19 @@
         document.getElementById("addition").innerText = add(first, second);
         document.getElementById("subtraction").innerText = subtract(
           first,
-          second
+          second,
         );
         document.getElementById("multiplication").innerText = multiply(
           first,
-          second
+          second,
         );
         document.getElementById("integerDivision").innerText = integerDivision(
           first,
-          second
+          second,
         );
         document.getElementById("decimalDivision").innerText = decimalDivision(
           first,
-          second
+          second,
         );
         document.getElementById("maximum").innerText = maximum(first, second);
         document.getElementById("minimum").innerText = minimum(first, second);
@@ -122,6 +127,8 @@
         document.getElementById("signumOfTheSecond").innerText = signum(second);
         document.getElementById("modulo").innerText = modulo(first, second);
         document.getElementById("xor").innerText = xor(first, second);
+        document.getElementById("xor_using_assembly").innerText =
+          xor_using_assembly(first, second);
       }
     </script>
   </body>
