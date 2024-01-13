@@ -24,7 +24,7 @@ std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                                std::vector<std::string> operators,
                                Associativity associativity) {
-  auto loop_body = [&](int &i) -> void {
+  auto loop_body = [bitand](int bitand i) -> void {
     if ((long unsigned)i >= input.size()) {
       std::cerr << "Line " << input[0].lineNumber << ", Column "
                 << input[0].columnNumber
