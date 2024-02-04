@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- See Arithmetic Operators Test for explanations.-->
 <html>
   <head>
@@ -46,14 +46,13 @@
     <span id="format_as_code"></span>
     <br />
     You can see the source code of the AEC program
-    <a
-      href="permutationsTest.aec.html"
-      >here</a
-    >.
+    <a href="permutationsTest.aec.html">here</a>. When you want to see a similar
+    but more complicated example, see
+    <a href="nQueensPuzzle.html">the n-Queens-Puzzle</a>.
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
-        0
+        0,
       );
       let memory = new WebAssembly.Memory({ initial: 1 });
       function printInt(integer) {
@@ -90,7 +89,7 @@
         });
       function invokeAECfunctions() {
         let originalNumber = parseInt(
-          document.getElementById("enterTheNumber").value
+          document.getElementById("enterTheNumber").value,
         );
         printPermutationsOfDigits(originalNumber);
       }
