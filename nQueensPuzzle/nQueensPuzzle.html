@@ -70,7 +70,9 @@
     >
     which contains both the source code and the Windows executable. The x86
     dialect of AEC doesn't support functions and it doesn't support structures.
-    I hope you can appreciate how they make the code easier to understand.
+    I hope you can appreciate how they make the code easier to understand. The
+    WebAssembly version of this program uses recursion, whereas the x86 version
+    of this program uses the stack instead of recursion.
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
