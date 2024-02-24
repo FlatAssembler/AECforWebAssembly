@@ -64,8 +64,9 @@ EndFunction
 
 // Now, let's forward-declare the functions we will write later.
 // Putting them here would make the code less legible.
-Function recursiveFunction(PointerToChessBoard chessBoard,
-                           Integer32 n) Which Returns Integer32 Is Declared;
+Function validatePartialSolutionAndTryToExtend(PointerToChessBoard chessBoard,
+                                               Integer32 n)
+	 Which Returns Integer32 Is Declared;
 
 Function convertIntegerToString(PointerToCharacter str,
                                 Integer32 n)
@@ -91,7 +92,7 @@ Function nQueensPuzzle(Integer32 n) Which Returns Integer32 Does
                          n);
   strcat(stringToBePrinted,":\n");
   printString(stringToBePrinted);
-  Integer32 result := recursiveFunction(AddressOf(chessBoard), n);
+  Integer32 result := validatePartialSolutionAndTryToExtend(AddressOf(chessBoard), n);
   stringToBePrinted[0] := 0;
   strcat(stringToBePrinted, "Found ");
   convertIntegerToString(stringToBePrinted + strlen(stringToBePrinted),
@@ -101,8 +102,8 @@ Function nQueensPuzzle(Integer32 n) Which Returns Integer32 Does
   Return result;
 EndFunction
 
-// I guess moving this code out of "recursiveFunction" makes the
-// code more legible.
+// I guess moving this code out of "validatePartialSolutionAndTryToExtend"
+// makes the code more legible.
 Function printAsASolution(PointerToChessBoard chessBoard)
   Which Returns Nothing Does
     Character stringToBePrinted[64] := {0};
@@ -183,8 +184,10 @@ Function printAsASolution(PointerToChessBoard chessBoard)
 EndFunction
 
 // Now, let's implement the brute-force algorithm.
-Function recursiveFunction(PointerToChessBoard chessBoard,
-                           Integer32 n) Which Returns Integer32 Does
+Function validatePartialSolutionAndTryToExtend // A name suggested by a Reddit user called tobega: https://www.reddit.com/r/ProgrammingLanguages/comments/1ay30y8/comment/krwdde9/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+					       (PointerToChessBoard chessBoard,
+                                               Integer32 n) 
+					       Which Returns Integer32 Does
   // First, do some sanity checks useful for debugging...
   If chessBoard->length > n Then
     printString("Bug: Chessboard length too large!");
@@ -232,7 +235,7 @@ Function recursiveFunction(PointerToChessBoard chessBoard,
     newChessBoard.length += 1;
     newChessBoard.queens[chessBoard->length].column := chessBoard->length;
     newChessBoard.queens[chessBoard->length].row := i;
-    result += recursiveFunction(AddressOf(newChessBoard), n);
+    result += validatePartialSolutionAndTryToExtend(AddressOf(newChessBoard), n);
     i += 1;
   EndWhile
   Return result;
