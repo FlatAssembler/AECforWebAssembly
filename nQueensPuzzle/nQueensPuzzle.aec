@@ -184,8 +184,9 @@ Function printAsASolution(PointerToChessBoard chessBoard)
 EndFunction
 
 // Now, let's implement the brute-force algorithm.
-Function validatePartialSolutionAndTryToExtend // A name suggested by a Reddit user called tobega: https://www.reddit.com/r/ProgrammingLanguages/comments/1ay30y8/comment/krwdde9/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-					       (PointerToChessBoard chessBoard,
+Function validatePartialSolutionAndTryToExtend // A name suggested by a Reddit user called tobega:
+// https://www.reddit.com/r/ProgrammingLanguages/comments/1ay30y8/comment/krwdde9/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+                                               (PointerToChessBoard chessBoard,
                                                Integer32 n) 
 					       Which Returns Integer32 Does
   // First, do some sanity checks useful for debugging...
