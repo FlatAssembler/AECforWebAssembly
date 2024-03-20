@@ -1569,8 +1569,12 @@ PS E:\My programs\AECforWebAssembly> docker run --rm -v "$($PWD):/usr/src/myapp"
         and Python 3.x). It's hard to tell which approach is better, both can
         produce hard-to-find bugs. The Pascal-like approach of using different
         operators for integer division and decimal division probably makes the
-        most sense, but it will also undeniably feel alien to most programmers.
-        I have started a
+        most sense (Pascal uses <span class="inline_code">/</span> for
+        floating-point division and <span class="inline_code">div</span> for
+        integer division. Similarly, Dart uses
+        <span class="inline_code">/</span> for floating-point division and
+        <span class="inline_code">~/</span> for integer division), but it will
+        also undeniably feel alien to most programmers. I have started a
         <a
           href="https://www.reddit.com/r/ProgrammingLanguages/comments/10rw892/is_in_your_programming_language_321_or_3215/?utm_source=share&utm_medium=web2x&context=3"
           >Reddit thread</a
