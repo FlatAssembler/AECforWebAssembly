@@ -2567,6 +2567,9 @@ EndFunction</pre
         problems I faced it when making my Labyrinth game (also mentioned in the
         introduction) in it. I solved it by storing what should be local
         variables on global stacks (which SmallBasic standard library includes).
+        And, as an example of how to use stack instead of recursion when
+        targeting x86 using AEC, compare the WebAssembly and x86 versions of the
+        <a href="nQueensPuzzle.html">N-Queens Puzzle</a>.
         <del
           >AEC doesn't support function hoisting nor circularly dependent
           functions, for the simple reason that there is no obvious way to
