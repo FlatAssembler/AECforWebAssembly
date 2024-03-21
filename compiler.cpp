@@ -1185,8 +1185,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << ", Compiler error: It's not specified what to return from "
                      "a function that's supposed to return \""
                   << currentFunction.returnType
-                  << "\", aborting the compilation (or else the compiler will "
-                     "segfault)!"
+                  << "\", aborting the compilation (or else vector::at will "
+                     "throw an exception)!"
                   << std::endl;
         exit(1);
       }
