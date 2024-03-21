@@ -1190,7 +1190,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   << std::endl;
         exit(1);
       }
-      TreeNode valueToBeReturned = children[0];
+      TreeNode valueToBeReturned = children.at(0);
       if (valueToBeReturned.text == ":=") {
         TreeNode tmp = valueToBeReturned;
         assembly += valueToBeReturned.compile(context) + "\n";
@@ -1214,18 +1214,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         // constructors in Java, C# and JavaScript (there, variables don't hold
         // objects but pointers to objects, and, as confusing as it can be at
         // first, it can't lead to this kind of problems).
-        if (tmp.children[0].getLispExpression() !=
+        if (tmp.children.at(0).getLispExpression() !=
             valueToBeReturned.getLispExpression()) {
           std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                     << ", Internal compiler error: Some part of the compiler "
                        "has changed a part of the AST from "
-                    << tmp.children[0].getLispExpression() << " into "
+                    << tmp.children.at(0).getLispExpression() << " into "
                     << valueToBeReturned.getLispExpression()
                     << ", which shouldn't be possible. The compilation will "
                        "continue, but be warned it might produce wrong code "
                        "because of this."
                     << std::endl;
-          valueToBeReturned = tmp.children[0];
+          valueToBeReturned = tmp.children.at(0);
         }
       }
       assembly +=
