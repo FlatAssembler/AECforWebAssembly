@@ -192,8 +192,9 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
   }
   EndIf;
   /*
-   * Sine and cosine are defined in Mathematics 2 using the system of
-   * equations (Cauchy system):
+   * Sine and cosine are defined in Mathematics 2 (I guess it's called Calculus
+   * 2 in the English-speaking world) using the system of equations (Cauchy
+   * system):
    *
    * sin(0)=0
    * cos(0)=1
