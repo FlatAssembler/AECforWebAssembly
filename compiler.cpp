@@ -1366,6 +1366,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       andNode.children.push_back(children.at(0));
       secondChild.children.push_back(children.at(0).children.at(1));
       secondChild.children.push_back(children.at(1));
+      andNode.children.push_back(secondChild);
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Compiler warning: Chained comparisons are not implemented "
