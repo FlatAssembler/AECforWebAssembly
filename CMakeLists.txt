@@ -1,6 +1,6 @@
 # https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804
 cmake_minimum_required(VERSION 3.10)
-project(AECForWebAssembly VERSION 2.7.0)
+project(AECForWebAssembly VERSION 2.8.0)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -63,4 +63,13 @@ add_test(NAME multiLineStringTestAssembles
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_test(NAME multiLineStringTestRuns
 	      COMMAND node multiLineStringTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+      add_test(NAME chainedComparisonsTestCompiles
+	      COMMAND aec chainedComparisonsTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+      add_test(NAME chainedComparisonsTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm chainedComparisonsTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+      add_test(NAME chainedComparisonsTestRuns
+	      COMMAND node chainedComparisonsTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
