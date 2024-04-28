@@ -1358,8 +1358,28 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
   } else if (text == "<" or text == ">") {
-    std::string firstType = children[0].getType(context);
-    std::string secondType = children[1].getType(context);
+    if (children.at(0).text ==
+        text) // Chained comparisons, such as `a < b < c`.
+    {
+      TreeNode andNode("and", lineNumber, columnNumber),
+          secondChild(text, lineNumber, columnNumber);
+      andNode.children.push_back(children.at(0));
+      secondChild.children.push_back(children.at(0).children.at(1));
+      secondChild.children.push_back(children.at(1));
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler warning: Chained comparisons are not implemented "
+             "correctly in this compiler. The middle term, in this case \""
+          << children.at(0).children.at(1).text
+          << "\" will be evaluated twice, possibly leading to unintended side "
+             "effects. I am sorry about that, but, thus far, there does not "
+             "seem to be a simple solution given the way the compiler is "
+             "structured."
+          << std::endl;
+      return andNode.compile(context);
+    }
+    std::string firstType = children.at(0).getType(context);
+    std::string secondType = children.at(1).getType(context);
     std::string strongerType;
     if (isPointerType(firstType) and isPointerType(secondType))
       strongerType =
