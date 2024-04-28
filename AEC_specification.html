@@ -1916,9 +1916,15 @@ EndFunction</pre
         AEC for x86, they end with a newline character. In AEC for x86, there is
         also the string-assignment operator
         <span class="inline_code">&lt;=</span> (similar to the difference
-        between signal and variable assignments in VHDL). In AEC for
-        WebAssembly, you use <span class="inline_code">:=</span> for string
-        assignments.<br />
+        between signal and variable assignments in VHDL) (<i
+          >UPDATE on 28/04/2024: I've started
+          <a href="https://langdev.stackexchange.com/q/3744/330"
+            >a StackExchange thread about how the VHDL compiler knows when
+            <span class="inline_code">&lt;=</span> is a signal assignment and
+            when it is a less-than-or-equal operator</a
+          >.</i
+        >). In AEC for WebAssembly, you use
+        <span class="inline_code">:=</span> for string assignments.<br />
         <b>TODO</b>:
         <del
           >Implement the assignment operators
