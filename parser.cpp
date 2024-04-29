@@ -279,7 +279,12 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression.erase(parsedExpression.begin() + i + 1);
     }
   std::vector<std::vector<std::string>> leftAssociativeBinaryOperators(
-      {{".", "->"}, {"*", "/"}, {"-", "+"}, {"<", ">", "="}, {"and"}, {"or"}});
+      {{".", "->"},
+       {"*", "/"},
+       {"-", "+"},
+       {"<", ">", "=", "<=", ">="},
+       {"and"},
+       {"or"}});
   for (unsigned int i = 0; i < leftAssociativeBinaryOperators.size(); i++)
     parsedExpression = applyBinaryOperators(parsedExpression,
                                             leftAssociativeBinaryOperators[i],

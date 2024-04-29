@@ -142,7 +142,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
     throw CorruptCompilationContextException(context);
   }
   if (text == "and" or text == "or" or text == "<" or text == ">" or
-      text == "=" or text == "not(" or text == "invertBits(") {
+      text == "=" or text == "<=" or text == ">=" or text == "not(" or
+      text == "invertBits(") {
     if (children.empty()) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: The operator \"" << text
@@ -259,7 +260,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
                            children[0].getType(context),
                            children[1].getType(context));
   }
-  if (text.size() == 2 and text[1] == '=') // Assignment operators
+  if (text.size() == 2 and text[1] == '=' and text[0] != '<' and
+      text[0] != '>') // Assignment operators
   {
     if (children.size() < 2) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber

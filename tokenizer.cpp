@@ -256,7 +256,9 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
          tokenizedExpression[i - 1].text == "+" // The "+=" assignment operator.
          or tokenizedExpression[i - 1].text == "-" or
          tokenizedExpression[i - 1].text == "*" or
-         tokenizedExpression[i - 1].text == "/")) {
+         tokenizedExpression[i - 1].text == "/" or
+         tokenizedExpression[i - 1].text == "<" or
+         tokenizedExpression[i - 1].text == ">")) {
       tokenizedExpression[i - 1].text = tokenizedExpression[i - 1].text + "=";
       tokenizedExpression.erase(tokenizedExpression.begin() + i);
     }

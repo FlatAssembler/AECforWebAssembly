@@ -828,7 +828,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         fakeContext.stackSizeOfThisScope = 0;
         fakeContext.stackSizeOfThisFunction = 0;
         assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
-      } else if ((childNode.text.size() == 2 and childNode.text[1] == '=') or
+      } else if ((childNode.text.size() == 2 and childNode.text[1] == '=' and
+                  childNode.text[0] != '<' and childNode.text[0] != '>') or
                  childNode.getType(context) == "Nothing")
         assembly += std::string(childNode.compile(context)) + "\n";
       else {
@@ -1051,9 +1052,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << ", Compiler warning: You are assigning a pointer to a type \""
           << typeOfTheCurrentNode << "\", this is likely an error!"
           << std::endl;
-  } else if (text.size() == 2 and
-             text[1] ==
-                 '=') // The assignment operators "+=", "-=", "*=" and "/="...
+  } else if (text.size() == 2 and text[1] == '=' and text[0] != '<' and
+             text[0] !=
+                 '>') // The assignment operators "+=", "-=", "*=" and "/="...
   {
     if (children.at(0).text.back() ==
         '[') { // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
@@ -1357,7 +1358,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           "\n" +
           convertTo(children[1], typeOfTheCurrentNode, context).indentBy(1) +
           "\n)";
-  } else if (text == "<" or text == ">") {
+  } else if (text == "<" or text == ">" or text == "<=" or text == ">=") {
     if (children.at(0).text ==
         text) // Chained comparisons, such as `a < b < c`.
     {
@@ -1393,14 +1394,20 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         assemblyType == AssemblyCode::AssemblyType::i64)
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) +
-          (text == "<" ? ".lt_s\n" : ".gt_s\n") +
+          (text == "<"    ? ".lt_s\n"
+           : text == ">"  ? ".gt_s\n"
+           : text == "<=" ? ".le_s\n"
+                          : ".ge_s\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
     else // If we are comparing decimal (floating-point) numbers, rather than
          // integers...
       assembly +=
           "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) +
-          (text == "<" ? ".lt\n" : ".gt\n") +
+          (text == "<"    ? ".lt\n"
+           : text == ">"  ? ".gt\n"
+           : text == "<=" ? ".le\n"
+                          : ".ge\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=" &&
