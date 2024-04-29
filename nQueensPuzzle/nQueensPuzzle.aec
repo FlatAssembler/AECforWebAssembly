@@ -80,7 +80,7 @@ Function strlen(PointerToCharacter str) Which Returns Integer32 Is Declared;
 // Let's write the function that JavaScript is supposed to call...
 Function nQueensPuzzle(Integer32 n) Which Returns Integer32 Does
   clearScreen();
-  If not(0 < n < 12 + 1) Then
+  If not(1 <= n <= 12) Then
     printString("Please enter a number between 1 and 12!");
     Return -1;
   EndIf
