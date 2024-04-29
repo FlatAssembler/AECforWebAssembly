@@ -705,7 +705,12 @@
           <li><a href="#Variables">Variable declarations</a></li>
           <li><a href="#Arrays">Arrays and pointers</a></li>
           <li><a href="#Assignments">Assignments</a></li>
-          <li><a href="#Operators">Operators</a></li>
+          <li>
+            <a href="#Operators">Operators</a>
+            <ol>
+              <li><a href="#chained_comparisons">Chained comparisons</a></li>
+            </ol>
+          </li>
           <li>
             <a href="#Branching">Branching</a>
             <ol>
@@ -2156,8 +2161,8 @@ Function xor_using_assembly(Integer32 first,
 EndFunction
 	</pre
         >
-        <b>UPDATE</b> on 28/04/2024: I've implemented the chained comparisons
-        operators. For instance, this function:
+        <b id="chained_comparisons">UPDATE</b> on 28/04/2024: I've implemented
+        the chained comparisons operators. For instance, this function:
         <pre>
 Function testChainedComparisons() Which Returns Integer32 Does
 	Return (1 &lt; 2 &lt; 3) and not(2 &lt; 3 &lt; 1) and (-3 &lt; -2 &lt; -1);
@@ -2167,6 +2172,17 @@ EndFunction
         It returns 1 if it is compiled using AECforWebAssembly v2.8.0 (not
         released as of writing this), but it returns 0 if it's compiled with
         AECforWebAssembly v2.7.0.<br />
+        Unfortunately, the implementation is incorrect. All it does is to
+        rewrite <span class="inline_code">a &lt; b &lt; c</span> to
+        <span class="inline_code">a &lt; b and b &lt; c</span>, which will, of
+        course, evaluate <span class="inline_code">b</span> twice. That is
+        incorrect whenever <span class="inline_code">b</span> has side-effects.
+        You can see how it's implemented
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/520f8e97f47f2d6c4cd793ab1f222e49ef5e4158/compiler.cpp#L1360"
+          >on GitHub</a
+        >.
+        <br />
         <b>TODO</b>: Implement a less-than-or-equal-to operator
         <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
         operator <span class="inline_code">&gt;=</span>. For that, we will need
