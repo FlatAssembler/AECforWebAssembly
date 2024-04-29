@@ -64,12 +64,12 @@ add_test(NAME multiLineStringTestAssembles
 add_test(NAME multiLineStringTestRuns
 	      COMMAND node multiLineStringTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      add_test(NAME chainedComparisonsTestCompiles
+add_test(NAME chainedComparisonsTestCompiles
 	      COMMAND aec chainedComparisonsTest.aec
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      add_test(NAME chainedComparisonsTestAssembles
+add_test(NAME chainedComparisonsTestAssembles
 	      COMMAND npx -q -p wabt wat2wasm chainedComparisonsTest.wat
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      add_test(NAME chainedComparisonsTestRuns
+add_test(NAME chainedComparisonsTestRuns
 	      COMMAND node chainedComparisonsTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

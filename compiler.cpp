@@ -1363,16 +1363,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     {
       TreeNode andNode("and", lineNumber, columnNumber),
           secondChild(text, lineNumber, columnNumber);
-      andNode.children.push_back(children.at(0));
-      secondChild.children.push_back(children.at(0).children.at(1));
-      secondChild.children.push_back(children.at(1));
-      andNode.children.push_back(secondChild);
+      secondChild.children = {children.at(0).children.at(1), children.at(1)};
+      andNode.children = {children.at(0), secondChild};
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
           << ", Compiler warning: Chained comparisons are not implemented "
              "correctly in this compiler. The middle term, in this case \""
           << children.at(0).children.at(1).text
-          << "\" will be evaluated twice, possibly leading to unintended side "
+          << "\", will be evaluated twice, possibly leading to unintended side "
              "effects. I am sorry about that, but, thus far, there does not "
              "seem to be a simple solution given the way the compiler is "
              "structured."
