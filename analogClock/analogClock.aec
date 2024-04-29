@@ -453,12 +453,10 @@ y:
       = i / windowWidth;
       Integer32 x : = mod(i, windowWidth), isXWithinBounds;
     isXWithinBounds:
-      = (x > lowerBoundX or x = lowerBoundX) and
-        (x < upperBoundX or x = upperBoundX);
+      = lowerBoundX <= x <= upperBoundX;
       Integer32 isYWithinBounds;
     isYWithinBounds:
-      = (y > lowerBoundY or y = lowerBoundY) and
-        (y < upperBoundY or y = upperBoundY);
+      = lowerBoundY <= y <= upperBoundY;
       If isXWithinBounds and isYWithinBounds Then {
         Decimal32 expectedX, expectedY;
       expectedY:
