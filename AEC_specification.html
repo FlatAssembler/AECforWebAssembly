@@ -2194,10 +2194,14 @@ EndFunction
         doesn't seem to be such a simple solution (of using a local temporary
         variable) to the problem with chained comparisons.
         <br />
-        <b>TODO</b>: Implement a less-than-or-equal-to operator
-        <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
-        operator <span class="inline_code">&gt;=</span>. For that, we will need
-        to modify both the tokenizer, the parser and the compiler.<br />
+        <del
+          ><b>TODO</b>: Implement a less-than-or-equal-to operator
+          <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
+          operator <span class="inline_code">&gt;=</span>. For that, we will
+          need to modify both the tokenizer, the parser and the compiler.</del
+        >
+        (UPDATE on 29/04/2024: They have been implemented and they will be
+        available in the release v2.9.0.)<br />
         <br /><b id="Branching">Branching</b><br />
         Branching is supported only via <span class="inline_code">If</span>,
         <span class="inline_code">If</span>-<span class="inline_code">Else</span
