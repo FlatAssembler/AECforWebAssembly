@@ -2186,7 +2186,13 @@ EndFunction
           <a href="https://langdev.stackexchange.com/q/3755/330"
             >a StackExchange question about that</a
           >.</i
-        >)
+        >)<br />
+        That problem might seem similar to the problem which occurs when
+        compiling <span class="inline_code">+=</span> and similar operators,
+        when incrementing an element of an array with the index being a function
+        with side-effects, but that's actually not the same problem. There
+        doesn't seem to be such a simple solution (of using a local temporary
+        variable) to the problem with chained comparisons.
         <br />
         <b>TODO</b>: Implement a less-than-or-equal-to operator
         <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
