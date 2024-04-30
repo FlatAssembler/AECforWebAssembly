@@ -1374,7 +1374,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << "\", will be evaluated twice, possibly leading to unintended side "
              "effects. I am sorry about that, but, thus far, there does not "
              "seem to be a simple solution given the way the compiler is "
-             "structured."
+             "structured. I've started a StackExchange thread about that "
+             "problem: https://langdev.stackexchange.com/q/3755/330"
           << std::endl;
       return andNode.compile(context);
     }
