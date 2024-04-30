@@ -162,6 +162,14 @@ public:
     return LispExpression;
   }
   virtual int interpretAsACompileTimeIntegerConstant() const {
+    if ((text == "<" or text == ">" or text == "<=" or text == ">=") and
+        children.at(0).text == text) { // Chained comparisons (`a < b < c`).
+      TreeNode andNode("and", lineNumber, columnNumber),
+          secondChild(text, lineNumber, columnNumber);
+      secondChild.children = {children.at(0).children.at(1), children.at(1)};
+      andNode.children = {children.at(0), secondChild};
+      return andNode.interpretAsACompileTimeIntegerConstant();
+    }
     if (isInteger(text))
       return std::stoi(text, 0, 0);
     if (text == "+" and children.size() == 2)
@@ -206,6 +214,12 @@ public:
     if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() ==
              children[1].interpretAsACompileTimeIntegerConstant();
+    if (text == "<=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeIntegerConstant() <=
+             children[1].interpretAsACompileTimeIntegerConstant();
+    if (text == ">=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeIntegerConstant() >=
+             children[1].interpretAsACompileTimeIntegerConstant();
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Interpreter error: \"" << text
               << "\" isn't a valid token in a compile-time integer constant."
@@ -213,6 +227,14 @@ public:
     return 0;
   }
   virtual double interpretAsACompileTimeDecimalConstant() const {
+    if ((text == "<" or text == ">" or text == "<=" or text == ">=") and
+        children.at(0).text == text) { // Chained comparisons (`a < b < c`).
+      TreeNode andNode("and", lineNumber, columnNumber),
+          secondChild(text, lineNumber, columnNumber);
+      secondChild.children = {children.at(0).children.at(1), children.at(1)};
+      andNode.children = {children.at(0), secondChild};
+      return andNode.interpretAsACompileTimeDecimalConstant();
+    }
     if (isInteger(text))
       return std::stoi(text, 0, 0);
     if (isDecimalNumber(text))
@@ -304,6 +326,12 @@ public:
              children[1].interpretAsACompileTimeDecimalConstant();
     if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() ==
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "<=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeDecimalConstant() <=
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == ">=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeDecimalConstant() >=
              children[1].interpretAsACompileTimeDecimalConstant();
     std::cerr
         << "Line " << lineNumber << ", Column " << columnNumber
