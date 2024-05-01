@@ -124,9 +124,15 @@ void interpreterTests() {
        {"0xff", "255"},
        {"0x41='A' and 0xff=255", "1"},
        {"0x42='A' or 0x2b=127", "0"},
-       {"5/2","2" /*A simple division in a compile-time integer constant was
-                    crashing the compiler all the way up to version v1.4.3*/},
-       {"3 >= 2 >= 1","1"}
+       {"5/2", "2" /*A simple division in a compile-time integer constant was
+                     crashing the compiler all the way up to version v1.4.3*/},
+       {"3 >= 2 >= 1", "1"},
+       {R"(
+       	       (1 < 2 < 3) and
+	       not(2 < 3 < 1) and
+	       (-3 < -2 < -1) and
+	       (3 > 2 > 1)
+       )", "1"}
       });
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = std::to_string(

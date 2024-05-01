@@ -220,6 +220,8 @@ public:
     if (text == ">=" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() >=
              children[1].interpretAsACompileTimeIntegerConstant();
+    if (text == "not(" and children.size() == 1)
+      return not(children[0].interpretAsACompileTimeIntegerConstant());
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber
               << ", Interpreter error: \"" << text
               << "\" isn't a valid token in a compile-time integer constant."
