@@ -1377,7 +1377,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
              "structured. I've started a StackExchange thread about that "
              "problem: https://langdev.stackexchange.com/q/3755/330"
           << std::endl;
-      return andNode.compile(context);
+      return ";;Chained comparison, converting " + getLispExpression() +
+             " to " + andNode.getLispExpression() + "\n" +
+             andNode.compile(context);
     }
     std::string firstType = children.at(0).getType(context);
     std::string secondType = children.at(1).getType(context);
