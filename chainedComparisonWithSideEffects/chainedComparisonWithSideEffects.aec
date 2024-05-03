@@ -1,0 +1,17 @@
+#target WASI
+
+Integer16 counter := 0;
+
+Function b() Which Returns Integer32 Does
+	counter += 1;
+	Return counter;
+EndFunction
+
+Function test() Which Returns Integer32 Does
+	// By common sense, this should return 1. However, because of the
+	// current AEC semantics, this returns 2.
+	counter := 0;
+	Integer16 a := 0, c := 2;
+	Integer16 resultOfComparison := a <= b() <= c;
+	Return counter;
+EndFunction
