@@ -2194,6 +2194,32 @@ EndFunction
         doesn't seem to be such a simple solution (of using a local temporary
         variable) to the problem with chained comparisons.
         <br />
+        UPDATE on 03/05/2024: Here is
+        <a
+          href="https://github.com/FlatAssembler/AECforWebAssembly/blob/master/chainedComparisonWithSideEffects/chainedComparisonWithSideEffects.aec"
+          >an example program that illustrates the problem with chained
+          comparisons as they are currently implemented in AEC</a
+        >:
+        <pre>
+#target WASI
+
+Integer16 counter := 0;
+
+Function b() Which Returns Integer32 Does
+	counter += 1;
+	Return counter;
+EndFunction
+
+Function test() Which Returns Integer32 Does
+	// By common sense, this should return 1. However, because of the
+	// current AEC semantics, this returns 2.
+	counter := 0;
+	Integer16 a := 0, c := 2;
+	Integer16 resultOfComparison := a &lt;= b() &lt;= c;
+	Return counter;
+EndFunction
+	</pre
+        >
         <del
           ><b>TODO</b>: Implement a less-than-or-equal-to operator
           <span class="inline_code">&lt;=</span> and a greater-than-or-equal-to
