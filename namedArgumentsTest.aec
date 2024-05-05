@@ -60,6 +60,12 @@ Function namedArgumentsTest() Which Returns Integer32 Does
   // Let's test whether structure comparisons work...
   While iterator < 1*2*3 - 1 Loop
     If not(solution[iterator] = solution[iterator + 1]) Then
+      /*
+       * The line above appears to betray a bug in the compiler,
+       * which is exposed only when the compiler itself is compiled
+       * using Microsoft C++ compiler:
+       * https://github.com/FlatAssembler/AECforWebAssembly/issues/20
+       */
       Return iterator + 7;
     EndIf
     iterator += 1;
