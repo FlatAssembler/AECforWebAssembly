@@ -13,7 +13,7 @@
 
 #include "bitManipulations.cpp"
 #include "semanticAnalyzer.cpp"
-#include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <ciso646> // Necessary for Microsoft C++ Compiler (for `and` and `or`).
 
 AssemblyCode convertToInteger32(
     const TreeNode &
@@ -1415,6 +1415,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=" &&
              context.structureSizes.count(children.at(0).getType(context))) {
+    // I am guessing that there is a bug somewhere in the following lines:
+    // https://github.com/FlatAssembler/AECforWebAssembly/issues/20
     if (children[0].getType(context) != children.at(1).getType(context))
       std::cerr
           << "Line " << lineNumber << ", Column " << columnNumber
