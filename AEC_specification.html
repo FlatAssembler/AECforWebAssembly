@@ -2890,6 +2890,14 @@ InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
         <a
           href="https://github.com/FlatAssembler/AECforWebAssembly/commit/8747e0ef33238ab3a598e187da6c0b490bafbc31"
           >relatively simple fix</a
+        >.<br />
+        <b>UPDATE</b> on 05/05/2024: There seems to be a bug in the
+        AEC-to-WebAssembly compiler which is triggered under certain conditions
+        (apparently, only when compiled using Microsoft C++ Compiler) when
+        comparing two structures using the
+        <span class="inline_code">=</span> operator. You can read more about it
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/20"
+          >on GitHub</a
         >.
         <br />
         <br /><b id="Assembly">Inline assembly</b><br />
