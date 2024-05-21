@@ -1400,6 +1400,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           (text == "<"    ? ".lt_s\n"
            : text == ">"  ? ".gt_s\n"
            : text == "<=" ? ".le_s\n"
+                          /*text == ">="*/
                           : ".ge_s\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
@@ -1410,6 +1411,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           (text == "<"    ? ".lt\n"
            : text == ">"  ? ".gt\n"
            : text == "<=" ? ".le\n"
+                          /*text == ">="*/
                           : ".ge\n") +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
