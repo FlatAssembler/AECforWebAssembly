@@ -254,7 +254,7 @@ i:
     strcat(AddressOf(stringToBePrinted[0]), "The character '");
     Integer16 indexOfCharacter : = strlen(AddressOf(stringToBePrinted[0]));
     stringToBePrinted[indexOfCharacter] : = array[i]->character;
-    stringToBePrinted[indexOfCharacter] : = 0;
+    stringToBePrinted[indexOfCharacter + 1] : = 0;
     strcat(AddressOf(stringToBePrinted[0]), "' has the frequency of ");
     convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                strlen(AddressOf(stringToBePrinted[0])),
