@@ -25,6 +25,7 @@ convertIntegerToString(PointerToCharacter string,
                        Integer32 integer) Which Returns Nothing Is Declared;
 Function strcat(PointerToCharacter dest,
                 PointerToCharacter src) Which Returns Nothing Is Declared;
+Function strlen(PointerToCharacter string) Which Returns Integer32 Is Declared;
 
 Function newTreeNode() Which Returns PointerToTreeNode Does {
   Integer16 i : = 0;
@@ -35,11 +36,12 @@ Function newTreeNode() Which Returns PointerToTreeNode Does {
           : = PointerToTreeNode(0);
       treeNodes[i].code[0] : = 0;
       treeNodes[i].frequencyOfCharacter : = 0;
+      isTreeNodeUsed[i] := 1;
       If NDEBUG = 0 Then {
         Character stringToBePrinted[64] : = {0};
         strcat(AddressOf(stringToBePrinted[0]),
                "NDEBUG: Allocating the TreeNode #");
-        convertIntegerToString(AddressOf(stringToBePrinted[0]), i);
+        convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), i);
         strcat(AddressOf(stringToBePrinted[0]), "\n");
         printString(AddressOf(stringToBePrinted[0]));
       }
@@ -63,7 +65,7 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
   If NDEBUG = 0 Then {
     Character stringToBePrinted[64] : = {0};
     strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Freeing the TreeNode #");
-    convertIntegerToString(AddressOf(stringToBePrinted[0]),
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])),
                            treeNode - AddressOf(treeNodes[0]));
     strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
@@ -73,11 +75,11 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
 }
 EndFunction;
 
+
 Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
   Integer32 length : = 0;
   While ValueAt(str + length) Loop {
-  length:
-    = length + 1;
+  length += 1;
   }
   EndWhile;
   Return length;
@@ -199,12 +201,13 @@ Function main() Which Returns Nothing Does {
   clearScreen();
   Integer16 lengthOfInput : = getLengthOfTheInput(), i : = 0;
   If NDEBUG = 0 Then {
-    Character stringToBePrinted[32] : = {0};
+    Character stringToBePrinted[64] : = {0};
     strcat(AddressOf(stringToBePrinted[0]),
            "NDEBUG: The length of the input is: ");
     convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                strlen(AddressOf(stringToBePrinted[0])),
                            lengthOfInput);
+strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
   }
   EndIf;
