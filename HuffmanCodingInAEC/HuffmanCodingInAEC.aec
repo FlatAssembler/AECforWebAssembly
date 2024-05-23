@@ -48,11 +48,10 @@ Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
   EndWhile;
   Return length;
 }
-EndFunction
+EndFunction;
 
-    Function
-    strcpy(PointerToCharacter dest,
-           PointerToCharacter src) Which Returns Nothing Does {
+Function strcpy(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does {
   While ValueAt(src) Loop {
     ValueAt(dest) : = ValueAt(src);
     dest += 1;
@@ -82,11 +81,10 @@ Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
   }
   EndWhile
 }
-EndFunction
+EndFunction;
 
-    Function
-    convertIntegerToString(PointerToCharacter string,
-                           Integer32 number) Which Returns Nothing Does {
+Function convertIntegerToString(PointerToCharacter string,
+                                Integer32 number) Which Returns Nothing Does {
   Integer32 isNumberNegative : = 0;
   If number < 0 Then {
   number:
@@ -110,9 +108,9 @@ EndFunction
   EndIf ValueAt(string + i) : = 0;
   reverseString(string);
 }
-EndFunction
+EndFunction;
 
-    PointerToCharacter mapOfCodes[256];
+PointerToCharacter mapOfCodes[256];
 
 Function assignCode(PointerToCharacter currentCode,
                     PointerToTreeNode treeNode) Which Returns Nothing Does {
@@ -166,6 +164,8 @@ Function getAddressOfInput() Which Returns PointerToCharacter Does {
 }
 EndFunction;
 
+Character output[128];
+
 Function main() Which Returns Nothing Does {
   If strlen(AddressOf(input[0])) = 0 Then {
     printString("The input is empty!\n");
@@ -215,6 +215,61 @@ i:
     printString(AddressOf(stringToBePrinted[0]));
   }
   EndWhile;
+
+  While lengthOfTheArray > 1 Loop {
+    Integer16 maximum : = 0, secondMaximum : = 0;
+
+    Integer16 i : = 0;
+    While i < lengthOfTheArray Loop {
+      If array[i]->frequencyOfCharacter >
+          array[maximum]->frequencyOfCharacter Then maximum : = i;
+      EndIf i += 1;
+    }
+    EndWhile;
+
+  i:
+    = maximum = 0 ? 1 : 0;
+    While i < lengthOfTheArray Loop {
+      If array[i]->frequencyOfCharacter >
+              array[secondMaximum]->frequencyOfCharacter and
+          not(i = maximum) Then secondMaximum : = i;
+      EndIf i += 1;
+    }
+    EndWhile;
+
+    PointerToTreeNode sumOfTheTwoMostFrequent : = newTreeNode();
+    sumOfTheTwoMostFrequent->frequencyOfCharacter
+        : = array[maximum]->frequencyOfCharacter +
+            array[secondMaximum]->frequencyOfCharacter;
+    sumOfTheTwoMostFrequent->leftChild : = array[maximum];
+    sumOfTheTwoMostFrequent->rightChild : = array[secondMaximum];
+
+    array[maximum] : = sumOfTheTwoMostFrequent;
+
+  i:
+    = secondMaximum;
+    While i < lengthOfTheArray - 1 Loop {
+      array[i] : = array[i + 1];
+      i += 1;
+    }
+    EndWhile;
+
+    lengthOfTheArray -= 1;
+  }
+  EndWhile;
+
+  assignCode("", AddressOf(array[0]));
+
+  output[0] : = 0;
+i:
+  = 0;
+  While i < lengthOfInput Loop {
+    strcat(AddressOf(output[0]), mapOfCodes[input[i]]);
+    i += 1;
+  }
+  EndWhile;
+  strcat(AddressOf(output[0]), "\n");
+  printString(AddressOf(output[0]));
 
   freeUpTheTree(array[0]);
 }
