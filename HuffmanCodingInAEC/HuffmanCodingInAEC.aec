@@ -2,6 +2,12 @@ Function noMoreFreeMemory() Which Returns Nothing Is External;
 Function segmentationFault() Which Returns Nothing Is External;
 Function
 printString(PointerToCharacter string) Which Returns Nothing Is External;
+Function clearScreen() Which Returns Nothing Is External;
+Function getLengthOfTheInput() Which Returns Integer16 Is External;
+Function
+getCharacterOfTheInput(Integer16 index) Which Returns Character Is External;
+
+Integer32 NDEBUG : = 0;
 
 Structure TreeNode Consists Of {
   Character character;
@@ -14,18 +20,37 @@ EndStructure;
 InstantiateStructure TreeNode treeNodes[32];
 Integer16 isTreeNodeUsed[32];
 
+Function
+convertIntegerToString(PointerToCharacter string,
+                       Integer32 integer) Which Returns Nothing Is Declared;
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Is Declared;
+
 Function newTreeNode() Which Returns PointerToTreeNode Does {
   Integer16 i : = 0;
-  While i < 32 Loop If not(isTreeNodeUsed[i]) Then {
-    treeNodes[i].character : = 0;
-    treeNodes[i].leftChild : = treeNodes[i].rightChild : = PointerToTreeNode(0);
-    treeNodes[i].code[0] : = 0;
-    treeNodes[i].frequencyOfCharacter : = 0;
-    Return AddressOf(treeNodes[i]);
+  While i < 32 Loop {
+    If not(isTreeNodeUsed[i]) Then {
+      treeNodes[i].character : = 0;
+      treeNodes[i].leftChild : = treeNodes[i].rightChild
+          : = PointerToTreeNode(0);
+      treeNodes[i].code[0] : = 0;
+      treeNodes[i].frequencyOfCharacter : = 0;
+      If NDEBUG = 0 Then {
+        Character stringToBePrinted[64] : = {0};
+        strcat(AddressOf(stringToBePrinted[0]),
+               "NDEBUG: Allocating the TreeNode #");
+        convertIntegerToString(AddressOf(stringToBePrinted[0]), i);
+        strcat(AddressOf(stringToBePrinted[0]), "\n");
+        printString(AddressOf(stringToBePrinted[0]));
+      }
+      EndIf;
+      Return AddressOf(treeNodes[i]);
+    }
+    EndIf;
+    i += 1;
   }
-  EndIf;
-  i += 1;
-  EndWhile noMoreFreeMemory();
+  EndWhile;
+  noMoreFreeMemory();
 }
 EndFunction;
 
@@ -33,6 +58,15 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
   If not(AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[32 - 1]))
       Then {
     segmentationFault();
+  }
+  EndIf;
+  If NDEBUG = 0 Then {
+    Character stringToBePrinted[64] : = {0};
+    strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Freeing the TreeNode #");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]),
+                           treeNode - AddressOf(treeNodes[0]));
+    strcat(AddressOf(stringToBePrinted[0]), "\n");
+    printString(AddressOf(stringToBePrinted[0]));
   }
   EndIf;
   isTreeNodeUsed[treeNode - AddressOf(treeNodes[0])] : = 0;
@@ -159,14 +193,28 @@ Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
 EndFunction;
 
 Character input[32];
-Function getAddressOfInput() Which Returns PointerToCharacter Does {
-  Return AddressOf(input[0]);
-}
-EndFunction;
-
 Character output[128];
 
 Function main() Which Returns Nothing Does {
+  clearScreen();
+  Integer16 lengthOfInput : = getLengthOfTheInput(), i : = 0;
+  If NDEBUG = 0 Then {
+    Character stringToBePrinted[32] : = {0};
+    strcat(AddressOf(stringToBePrinted[0]),
+           "NDEBUG: The length of the input is: ");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                               strlen(AddressOf(stringToBePrinted[0])),
+                           lengthOfInput);
+    printString(AddressOf(stringToBePrinted[0]));
+  }
+  EndIf;
+  While i < lengthOfInput Loop {
+    input[i] : = getCharacterOfTheInput(i);
+    i += 1;
+  }
+  EndWhile;
+  input[lengthOfInput] : = 0;
+
   If strlen(AddressOf(input[0])) = 0 Then {
     printString("The input is empty!\n");
     Return;
@@ -174,8 +222,8 @@ Function main() Which Returns Nothing Does {
   EndIf;
   PointerToTreeNode array[32];
   Integer16 lengthOfTheArray : = 0;
-  Integer16 i : = 0;
-  Integer16 lengthOfInput : = strlen(getAddressOfInput());
+i:
+  = 0;
   While i < lengthOfInput Loop {
     Integer16 j : = 0, haveWeFoundTheCharacterInTheArray : = 0;
     While j < lengthOfTheArray Loop {
@@ -213,6 +261,7 @@ i:
                            array[i]->frequencyOfCharacter);
     strcat(AddressOf(stringToBePrinted[0]), ".\n");
     printString(AddressOf(stringToBePrinted[0]));
+    i += 1;
   }
   EndWhile;
 

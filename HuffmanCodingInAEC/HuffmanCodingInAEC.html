@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html lang="en">
+  <head>
+    <title>AEC-to-WebAssembly compiler - Huffman Coding</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+        white-space: pre;
+        width: 100%;
+        background: #eeeeee;
+        height: 75vh;
+        display: block;
+        overflow: scroll;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Huffman Encoding</h1>
+    This is my attempt to implement the Huffman's data compression algorithm in
+    my programming language, AEC. A few years ago, I implemented it in
+    JavaScript, you can see it <a href="huffman.html">here</a>.
+    <br />
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer (those with support <code>WebAssembly.Global</code>).
+    After a few years (if not months), all JavaScript environments will become
+    as capable as they are, rather than like Internet Explorer.<br /><br />
+    <form>
+      <label for="enterTheText">Enter the text you want to compress:</label
+      ><br />
+      <input type="text" id="enterTheText" name="enterTheText" />
+    </form>
+    <button onclick="invokeAECfunctions()">Invoke AEC program!</button
+    ><br /><br />
+    AEC program output:<br />
+    <span id="format_as_code"></span>
+    <br />
+    You can see the source code of the AEC program
+    <a href="HuffmanCodingInAEC.aec.html">here</a>.
+    <script type="text/javascript">
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0,
+      );
+      let text = "";
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      function printString(ptr) {
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
+        while (buffer[ptr]) {
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
+        }
+        document.getElementById("format_as_code").innerHTML += str;
+      }
+      function clearScreen() {
+        document.getElementById("format_as_code").innerHTML = "";
+      }
+      function noMoreFreeMemory() {
+        alert("The AEC program reports to have run out of memory!");
+      }
+      function segmentationFault() {
+        alert(
+          "The AEC program reported to have experienced a segmentation fault!",
+        );
+      }
+      function getLengthOfTheInput() {
+        return text.length;
+      }
+      function getCharacterOfTheInput(i) {
+        return text.charCodeAt(i);
+      }
+      let importObject = {
+        JavaScript: {
+          stack_pointer: stack_pointer,
+          memory: memory,
+          printString: printString,
+          clearScreen: clearScreen,
+          noMoreFreeMemory: noMoreFreeMemory,
+          segmentationFault: segmentationFault,
+          getLengthOfTheInput: getLengthOfTheInput,
+          getCharacterOfTheInput: getCharacterOfTheInput,
+        },
+      };
+      let nQueensPuzzle;
+      fetch("HuffmanCodingInAEC.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          const exports = results.instance.exports;
+          main = exports.main;
+        });
+      function invokeAECfunctions() {
+        text = document.getElementById("enterTheText").value;
+        main();
+      }
+    </script>
+  </body>
+</html>
