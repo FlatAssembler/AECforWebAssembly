@@ -1400,8 +1400,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           (text == "<"    ? ".lt_s\n"
            : text == ">"  ? ".gt_s\n"
            : text == "<=" ? ".le_s\n"
-                          /*text == ">="*/
-                          : ".ge_s\n") +
+           : text == ">=" ? ".ge_s\n"
+                          : ".drop\n" /*Shouldn't happen.*/) +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
     else // If we are comparing decimal (floating-point) numbers, rather than
@@ -1411,8 +1411,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           (text == "<"    ? ".lt\n"
            : text == ">"  ? ".gt\n"
            : text == "<=" ? ".le\n"
-                          /*text == ">="*/
-                          : ".ge\n") +
+           : text == ">=" ? ".ge\n"
+                          : ".drop\n" /*Shouldn't happen.*/) +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=" &&
