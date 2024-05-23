@@ -1,0 +1,221 @@
+Function noMoreFreeMemory() Which Returns Nothing Is External;
+Function segmentationFault() Which Returns Nothing Is External;
+Function
+printString(PointerToCharacter string) Which Returns Nothing Is External;
+
+Structure TreeNode Consists Of {
+  Character character;
+  Integer16 frequencyOfCharacter;
+  PointerToTreeNode leftChild, rightChild;
+  Character code[16];
+}
+EndStructure;
+
+InstantiateStructure TreeNode treeNodes[32];
+Integer16 isTreeNodeUsed[32];
+
+Function newTreeNode() Which Returns PointerToTreeNode Does {
+  Integer16 i : = 0;
+  While i < 32 Loop If not(isTreeNodeUsed[i]) Then {
+    treeNodes[i].character : = 0;
+    treeNodes[i].leftChild : = treeNodes[i].rightChild : = PointerToTreeNode(0);
+    treeNodes[i].code[0] : = 0;
+    treeNodes[i].frequencyOfCharacter : = 0;
+    Return AddressOf(treeNodes[i]);
+  }
+  EndIf;
+  i += 1;
+  EndWhile noMoreFreeMemory();
+}
+EndFunction;
+
+Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
+  If not(AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[32 - 1]))
+      Then {
+    segmentationFault();
+  }
+  EndIf;
+  isTreeNodeUsed[treeNode - AddressOf(treeNodes[0])] : = 0;
+}
+EndFunction;
+
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
+  Integer32 length : = 0;
+  While ValueAt(str + length) Loop {
+  length:
+    = length + 1;
+  }
+  EndWhile;
+  Return length;
+}
+EndFunction
+
+    Function
+    strcpy(PointerToCharacter dest,
+           PointerToCharacter src) Which Returns Nothing Does {
+  While ValueAt(src) Loop {
+    ValueAt(dest) : = ValueAt(src);
+    dest += 1;
+    src += 1;
+  }
+  EndWhile;
+  ValueAt(dest) : = 0;
+}
+EndFunction;
+
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does {
+  strcpy(dest + strlen(dest), src);
+}
+EndFunction;
+
+Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
+  PointerToCharacter pointerToLastCharacter : = string + strlen(string) - 1;
+  While pointerToLastCharacter - string > 0 Loop {
+    Character tmp : = ValueAt(string);
+    ValueAt(string) : = ValueAt(pointerToLastCharacter);
+    ValueAt(pointerToLastCharacter) : = tmp;
+  string:
+    = string + 1;
+  pointerToLastCharacter:
+    = pointerToLastCharacter - 1;
+  }
+  EndWhile
+}
+EndFunction
+
+    Function
+    convertIntegerToString(PointerToCharacter string,
+                           Integer32 number) Which Returns Nothing Does {
+  Integer32 isNumberNegative : = 0;
+  If number < 0 Then {
+  number:
+    = -number;
+  isNumberNegative:
+    = 1;
+  }
+  EndIf Integer32 i : = 0;
+  While number >= 10 Loop {
+    ValueAt(string + i) : = '0' + mod(number, 10);
+    number /= 10;
+    i += 1;
+  }
+  EndWhile;
+  ValueAt(string + i) : = '0' + number;
+  i += 1;
+  If isNumberNegative Then {
+    ValueAt(string + i) : = '-';
+    i += 1;
+  }
+  EndIf ValueAt(string + i) : = 0;
+  reverseString(string);
+}
+EndFunction
+
+    PointerToCharacter mapOfCodes[256];
+
+Function assignCode(PointerToCharacter currentCode,
+                    PointerToTreeNode treeNode) Which Returns Nothing Does {
+  strcpy(AddressOf(treeNode->code[0]), currentCode);
+
+  Character leftCode[16] : = {0}, rightCode[16] : = {0};
+
+  strcpy(AddressOf(leftCode[0]), currentCode);
+  strcat(AddressOf(leftCode[0]), "0");
+  strcpy(AddressOf(rightCode[0]), currentCode);
+  strcat(AddressOf(rightCode[0]), "1");
+
+  If treeNode->leftChild Then {
+    assignCode(AddressOf(leftCode[0]), treeNode->leftChild);
+  }
+  EndIf;
+  If treeNode->rightChild Then {
+    assignCode(AddressOf(rightCode[0]), treeNode->rightChild);
+  }
+  EndIf;
+
+  If treeNode->character Then {
+    mapOfCodes[treeNode->character] : = AddressOf(treeNode->code[0]);
+    Character codeToPrint[32] : = {0};
+    codeToPrint[0] : = '\'';
+    codeToPrint[1] : = treeNode->character;
+    codeToPrint[2] : = '\'';
+    codeToPrint[3] : = '=';
+    codeToPrint[4] : = '>';
+    codeToPrint[5] : = 0;
+    strcat(AddressOf(codeToPrint[0]), AddressOf(treeNode->code[0]));
+    strcat(AddressOf(codeToPrint[0]), "\n");
+    printString(AddressOf(codeToPrint[0]));
+  }
+  EndIf;
+}
+EndFunction;
+
+Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
+  If tree->leftChild Then { freeTreeNode(tree->leftChild); }
+  EndIf;
+  If tree->rightChild Then { freeTreeNode(tree->rightChild); }
+  EndIf;
+  freeTreeNode(tree);
+}
+EndFunction;
+
+Character input[32];
+Function getAddressOfInput() Which Returns PointerToCharacter Does {
+  Return AddressOf(input[0]);
+}
+EndFunction;
+
+Function main() Which Returns Nothing Does {
+  If strlen(AddressOf(input[0])) = 0 Then {
+    printString("The input is empty!\n");
+    Return;
+  }
+  EndIf;
+  PointerToTreeNode array[32];
+  Integer16 lengthOfTheArray : = 0;
+  Integer16 i : = 0;
+  Integer16 lengthOfInput : = strlen(getAddressOfInput());
+  While i < lengthOfInput Loop {
+    Integer16 j : = 0, haveWeFoundTheCharacterInTheArray : = 0;
+    While j < lengthOfTheArray Loop {
+      If array[j]->character = input[i] Then {
+      haveWeFoundTheCharacterInTheArray:
+        = 1;
+        array[j]->frequencyOfCharacter += 1;
+      }
+      EndIf;
+      j += 1;
+    }
+    EndWhile;
+    If not(haveWeFoundTheCharacterInTheArray) Then {
+      array[lengthOfTheArray] : = newTreeNode();
+      array[lengthOfTheArray]->character : = input[i];
+      array[lengthOfTheArray]->frequencyOfCharacter : = 1;
+      lengthOfTheArray += 1;
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+
+i:
+  = 0;
+  While i < lengthOfTheArray Loop {
+    Character stringToBePrinted[64] : = {0};
+    strcat(AddressOf(stringToBePrinted[0]), "The character '");
+    Integer16 indexOfCharacter : = strlen(AddressOf(stringToBePrinted[0]));
+    stringToBePrinted[indexOfCharacter] : = array[i]->character;
+    stringToBePrinted[indexOfCharacter] : = 0;
+    strcat(AddressOf(stringToBePrinted[0]), "' has the frequency of ");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                               strlen(AddressOf(stringToBePrinted[0])),
+                           array[i]->frequencyOfCharacter);
+    strcat(AddressOf(stringToBePrinted[0]), ".\n");
+    printString(AddressOf(stringToBePrinted[0]));
+  }
+  EndWhile;
+
+  freeUpTheTree(array[0]);
+}
+EndFunction;

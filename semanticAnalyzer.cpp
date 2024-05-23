@@ -353,12 +353,13 @@ std::string TreeNode::getType(const CompilationContext &context) const {
         std::find_if(context.structures.begin(), context.structures.end(),
                      [=](structure str) { return str.name == structureName; });
     if (iteratorPointingToTheStructure == context.structures.end()) {
-      std::cerr
-          << "Line " << children[0].lineNumber << ", Column "
-          << children[0].columnNumber << ", Compiler error: The instance \""
-          << children[0].text << "\" has the type \"" << structureName
-          << "\", which doesn't appear to be a structure name. Quitting now!"
-          << std::endl;
+      std::cerr << "Line " << children[0].lineNumber << ", Column "
+                << children[0].columnNumber
+                << ", Compiler error: The instance \"" << children[0].text
+                << "\" has the type \"" << structureName
+                << "\", which doesn't appear to be a structure name. Did you "
+                   "perhaps use `.` instead of `->`? Quitting now!"
+                << std::endl;
       exit(1);
     }
     std::string memberName = children[1].text;
