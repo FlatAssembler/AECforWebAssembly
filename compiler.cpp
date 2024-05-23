@@ -1757,6 +1757,7 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                 << std::endl;
       exit(1);
     }
+    /*
     if (not(isPointerType(getType(context))) and
         not(basicDataTypeSizes.count(getType(context)) and
             not(context.structureSizes.count(getType(context))))) {
@@ -1765,7 +1766,7 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                    "lost the track of the size of the structure named `"
                 << getType(context) << "`!" << std::endl;
       throw CorruptCompilationContextException(context);
-    }
+    }*/
     return AssemblyCode(
         "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
