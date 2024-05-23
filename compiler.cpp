@@ -15,6 +15,11 @@
 #include "semanticAnalyzer.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler (for `and` and `or`).
 
+const char *throwNotImplementedException(std::string message) {
+  throw new NotImplementedException(message);
+  return NULL;
+}
+
 AssemblyCode convertToInteger32(
     const TreeNode &
         node, // HappySkeptic suggested me to use constant references to avoid
@@ -1401,7 +1406,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
            : text == ">"  ? ".gt_s\n"
            : text == "<=" ? ".le_s\n"
            : text == ">=" ? ".ge_s\n"
-                          : ".drop\n" /*Shouldn't happen.*/) +
+                          : throwNotImplementedException(
+                                "The comparison operator `" + text +
+                                "` is not implemeneted!")) +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
     else // If we are comparing decimal (floating-point) numbers, rather than
@@ -1412,7 +1419,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
            : text == ">"  ? ".gt\n"
            : text == "<=" ? ".le\n"
            : text == ">=" ? ".ge\n"
-                          : ".drop\n" /*Shouldn't happen.*/) +
+                          : throwNotImplementedException(
+                                "The comparison operator `" + text +
+                                "` is not implemeneted!")) +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
   } else if (text == "=" &&
