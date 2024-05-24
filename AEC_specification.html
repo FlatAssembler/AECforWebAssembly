@@ -3507,7 +3507,92 @@ EndFunction</pre
           <span class="inline_code">EndWhile</span>,
           <span class="inline_code">EndFunction</span> and
           <span class="inline_code">EndStructure</span></a
-        >, and that question got many upvotes.
+        >, and that question got many upvotes.<br /><br />
+        <b>UPDATE</b> on 24/05/2024: A question I often ask myself is what is
+        the proper way of dealing with algorithms that involve tree manipulation
+        in languages such as AEC. Well, here is how I solved that problem in
+        <a href="HuffmanCodingInAEC.html">Huffman Coding</a>:
+        <pre>
+Structure TreeNode Consists Of {
+  Character character;
+  Integer16 frequencyOfCharacter;
+  PointerToTreeNode leftChild, rightChild;
+  Character code[16];
+}
+EndStructure;
+
+InstantiateStructure TreeNode treeNodes[32];
+Integer16 isTreeNodeUsed[32];
+
+Function newTreeNode() Which Returns PointerToTreeNode Does {
+  Integer16 i : = 0;
+  While i &lt; 32 Loop {
+    If not(isTreeNodeUsed[i]) Then {
+      treeNodes[i].character : = 0;
+      treeNodes[i].leftChild : = treeNodes[i].rightChild
+          : = PointerToTreeNode(0);
+      treeNodes[i].code[0] : = 0;
+      treeNodes[i].frequencyOfCharacter : = 0;
+      isTreeNodeUsed[i] : = 1;
+      If NDEBUG = 0 Then {
+        Character stringToBePrinted[64] : = {0};
+        strcat(AddressOf(stringToBePrinted[0]),
+               "NDEBUG: Allocating the TreeNode #");
+        convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                   strlen(AddressOf(stringToBePrinted[0])),
+                               i);
+        strcat(AddressOf(stringToBePrinted[0]), "\n");
+        printString(AddressOf(stringToBePrinted[0]));
+      }
+      EndIf;
+      Return AddressOf(treeNodes[i]);
+    }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+  noMoreFreeMemory();
+}
+EndFunction;
+
+Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
+  If not(AddressOf(treeNodes[0]) &lt;= treeNode &lt;= AddressOf(treeNodes[32 - 1]))
+      Then {
+    segmentationFault();
+  }
+  EndIf;
+  If NDEBUG = 0 Then {
+    Character stringToBePrinted[64] : = {0};
+    strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Freeing the TreeNode #");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                               strlen(AddressOf(stringToBePrinted[0])),
+                           (treeNode - AddressOf(treeNodes[0])) /
+                               SizeOf(TreeNode));
+    strcat(AddressOf(stringToBePrinted[0]), "\n");
+    printString(AddressOf(stringToBePrinted[0]));
+  }
+  EndIf;
+  isTreeNodeUsed[(treeNode - AddressOf(treeNodes[0])) / SizeOf(TreeNode)] : = 0;
+}
+EndFunction;
+
+Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
+  If tree-&gt;leftChild Then {
+    freeUpTheTree(tree-&gt;leftChild); // Calling `freeTreeNode` here instead of
+                                    // `freeUpTheTree` causes a memory leak.
+  }
+  EndIf;
+  If tree-&gt;rightChild Then { freeUpTheTree(tree-&gt;rightChild); }
+  EndIf;
+  freeTreeNode(tree);
+}
+EndFunction;
+  </pre
+        >
+        So, in other words, I think you should make a global array of TreeNode
+        structures, and make another array to track which elements of that array
+        are actually being used and which ones aren't. And write functions which
+        allow you to allocate a TreeNode and deallocate a TreeNode.
       </div>
       <script type="text/javascript">
         function highlightedToken(token) {
