@@ -7,7 +7,7 @@ Function getLengthOfTheInput() Which Returns Integer16 Is External;
 Function
 getCharacterOfTheInput(Integer16 index) Which Returns Character Is External;
 
-Integer32 NDEBUG : = 0;
+Integer32 NDEBUG : = 1;
 
 Structure TreeNode Consists Of {
   Character character;
@@ -362,7 +362,7 @@ i:
   i:
     = 0;
     While i < lengthOfTheArray Loop {
-      If array[i]->frequencyOfCharacter >
+      If array[i]->frequencyOfCharacter <
           array[maximum]->frequencyOfCharacter Then {
       maximum:
         = i;
@@ -374,8 +374,10 @@ i:
 
   i:
     = maximum = 0 ? 1 : 0;
+  secondMaximum:
+    = i;
     While i < lengthOfTheArray Loop {
-      If array[i]->frequencyOfCharacter >
+      If array[i]->frequencyOfCharacter <
               array[secondMaximum]->frequencyOfCharacter and
           not(i = maximum) Then {
       secondMaximum:
@@ -385,6 +387,22 @@ i:
       i += 1;
     }
     EndWhile;
+
+    If NDEBUG = 0 Then {
+      Character stringToBePrinted[64] : = {0};
+      strcat(AddressOf(stringToBePrinted[0]),
+             "NDEBUG: The maximum and the second maximum are ");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             maximum);
+      strcat(AddressOf(stringToBePrinted[0]), " and ");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             secondMaximum);
+      strcat(AddressOf(stringToBePrinted[0]), ".\n");
+      printString(AddressOf(stringToBePrinted[0]));
+    }
+    EndIf;
 
     If NDEBUG = 0 Then {
       Character stringToBePrinted[64] : = {0};
@@ -437,7 +455,7 @@ i:
   EndWhile;
 
   If NDEBUG = 0 Then {
-    Character stringToBePrinted[64] : = {0};
+    Character stringToBePrinted[128] : = {0};
     strcat(AddressOf(stringToBePrinted[0]),
            "NDEBUG: The frequency of the root node is ");
     convertIntegerToString(AddressOf(stringToBePrinted[0]) +
