@@ -36,12 +36,14 @@ Function newTreeNode() Which Returns PointerToTreeNode Does {
           : = PointerToTreeNode(0);
       treeNodes[i].code[0] : = 0;
       treeNodes[i].frequencyOfCharacter : = 0;
-      isTreeNodeUsed[i] := 1;
+      isTreeNodeUsed[i] : = 1;
       If NDEBUG = 0 Then {
         Character stringToBePrinted[64] : = {0};
         strcat(AddressOf(stringToBePrinted[0]),
                "NDEBUG: Allocating the TreeNode #");
-        convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), i);
+        convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                   strlen(AddressOf(stringToBePrinted[0])),
+                               i);
         strcat(AddressOf(stringToBePrinted[0]), "\n");
         printString(AddressOf(stringToBePrinted[0]));
       }
@@ -65,7 +67,8 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
   If NDEBUG = 0 Then {
     Character stringToBePrinted[64] : = {0};
     strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Freeing the TreeNode #");
-    convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])),
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                               strlen(AddressOf(stringToBePrinted[0])),
                            treeNode - AddressOf(treeNodes[0]));
     strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
@@ -75,12 +78,9 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
 }
 EndFunction;
 
-
 Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
   Integer32 length : = 0;
-  While ValueAt(str + length) Loop {
-  length += 1;
-  }
+  While ValueAt(str + length) Loop { length += 1; }
   EndWhile;
   Return length;
 }
@@ -150,6 +150,51 @@ PointerToCharacter mapOfCodes[256];
 
 Function assignCode(PointerToCharacter currentCode,
                     PointerToTreeNode treeNode) Which Returns Nothing Does {
+  If NDEBUG = 0 Then {
+    Character stringToBePrinted[64] : = {0};
+    strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Assigning the code \"");
+    strcat(AddressOf(stringToBePrinted[0]), currentCode);
+    strcat(AddressOf(stringToBePrinted[0]), "\" to the TreeNode #");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                               strlen(AddressOf(stringToBePrinted[0])),
+                           treeNode - AddressOf(treeNodes[0]));
+    strcat(AddressOf(stringToBePrinted[0]), ".\n");
+    printString(AddressOf(stringToBePrinted[0]));
+
+    stringToBePrinted[0] : = 0;
+    strcat(AddressOf(stringToBePrinted[0]),
+           "NDEBUG: Its left child is the TreeNode #");
+    If treeNode->leftChild Then {
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             treeNode->leftChild - AddressOf(treeNodes[0]));
+    }
+    Else { strcat(AddressOf(stringToBePrinted[0]), "null"); }
+    EndIf;
+    strcat(AddressOf(stringToBePrinted[0]), ".\n");
+    printString(AddressOf(stringToBePrinted[0]));
+
+    stringToBePrinted[0] : = 0;
+    strcat(AddressOf(stringToBePrinted[0]),
+           "NDEBUG: Its right child is the TreeNode #");
+    If treeNode->leftChild Then {
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             treeNode->rightChild - AddressOf(treeNodes[0]));
+    }
+    Else { strcat(AddressOf(stringToBePrinted[0]), "null"); }
+    EndIf;
+    strcat(AddressOf(stringToBePrinted[0]), ".\n");
+    printString(AddressOf(stringToBePrinted[0]));
+  }
+  EndIf;
+
+  If not(AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[32 - 1]))
+      Then {
+    segmentationFault();
+  }
+  EndIf;
+
   strcpy(AddressOf(treeNode->code[0]), currentCode);
 
   Character leftCode[16] : = {0}, rightCode[16] : = {0};
@@ -207,7 +252,7 @@ Function main() Which Returns Nothing Does {
     convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                strlen(AddressOf(stringToBePrinted[0])),
                            lengthOfInput);
-strcat(AddressOf(stringToBePrinted[0]), "\n");
+    strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
   }
   EndIf;
@@ -274,8 +319,12 @@ i:
     Integer16 i : = 0;
     While i < lengthOfTheArray Loop {
       If array[i]->frequencyOfCharacter >
-          array[maximum]->frequencyOfCharacter Then maximum : = i;
-      EndIf i += 1;
+          array[maximum]->frequencyOfCharacter Then {
+      maximum:
+        = i;
+      }
+      EndIf;
+      i += 1;
     }
     EndWhile;
 
@@ -284,10 +333,29 @@ i:
     While i < lengthOfTheArray Loop {
       If array[i]->frequencyOfCharacter >
               array[secondMaximum]->frequencyOfCharacter and
-          not(i = maximum) Then secondMaximum : = i;
-      EndIf i += 1;
+          not(i = maximum) Then {
+      secondMaximum:
+        = i;
+      }
+      EndIf;
+      i += 1;
     }
     EndWhile;
+
+    If NDEBUG = 0 Then {
+      Character stringToBePrinted[64] : = {0};
+      strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Joining the TreeNode #");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             array[maximum] - AddressOf(treeNodes[0]));
+      strcat(AddressOf(stringToBePrinted[0]), " with the TreeNode #");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) +
+                                 strlen(AddressOf(stringToBePrinted[0])),
+                             array[secondMaximum] - AddressOf(treeNodes[0]));
+      strcat(AddressOf(stringToBePrinted[0]), ".\n");
+      printString(AddressOf(stringToBePrinted[0]));
+    }
+    EndIf;
 
     PointerToTreeNode sumOfTheTwoMostFrequent : = newTreeNode();
     sumOfTheTwoMostFrequent->frequencyOfCharacter
