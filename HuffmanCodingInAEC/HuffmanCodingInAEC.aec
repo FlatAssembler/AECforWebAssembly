@@ -235,9 +235,12 @@ Function assignCode(PointerToCharacter currentCode,
 EndFunction;
 
 Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
-  If tree->leftChild Then { freeTreeNode(tree->leftChild); }
+  If tree->leftChild Then {
+    freeUpTheTree(tree->leftChild); // Calling `freeTreeNode` here instead of
+                                    // `freeUpTheTree` causes a memory leak.
+  }
   EndIf;
-  If tree->rightChild Then { freeTreeNode(tree->rightChild); }
+  If tree->rightChild Then { freeUpTheTree(tree->rightChild); }
   EndIf;
   freeTreeNode(tree);
 }
