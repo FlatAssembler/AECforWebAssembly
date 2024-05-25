@@ -1757,7 +1757,9 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                 << std::endl;
       exit(1);
     }
-    /*
+    /* // If you uncomment this, the Structure Declarations Test fails.
+       // I don't know why. I opened a GitHub issue about that:
+       // https://github.com/FlatAssembler/AECforWebAssembly/issues/21
     if (not(isPointerType(getType(context))) and
         not(basicDataTypeSizes.count(getType(context)) and
             not(context.structureSizes.count(getType(context))))) {
