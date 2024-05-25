@@ -111,10 +111,8 @@ Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
     Character tmp : = ValueAt(string);
     ValueAt(string) : = ValueAt(pointerToLastCharacter);
     ValueAt(pointerToLastCharacter) : = tmp;
-  string:
-    = string + 1;
-  pointerToLastCharacter:
-    = pointerToLastCharacter - 1;
+    string += 1;
+    pointerToLastCharacter -= 1;
   }
   EndWhile
 }
@@ -129,7 +127,8 @@ Function convertIntegerToString(PointerToCharacter string,
   isNumberNegative:
     = 1;
   }
-  EndIf Integer32 i : = 0;
+  EndIf;
+  Integer32 i : = 0;
   While number >= 10 Loop {
     ValueAt(string + i) : = '0' + mod(number, 10);
     number /= 10;
@@ -142,7 +141,8 @@ Function convertIntegerToString(PointerToCharacter string,
     ValueAt(string + i) : = '-';
     i += 1;
   }
-  EndIf ValueAt(string + i) : = 0;
+  EndIf;
+  ValueAt(string + i) : = 0;
   reverseString(string);
 }
 EndFunction;
