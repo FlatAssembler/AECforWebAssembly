@@ -17,8 +17,15 @@ Structure TreeNode Consists Of {
 }
 EndStructure;
 
-InstantiateStructure TreeNode treeNodes[32];
-Integer16 isTreeNodeUsed[32];
+InstantiateStructure TreeNode treeNodes[64];
+Integer16 isTreeNodeUsed[64];
+
+Function isTreeNodeWithinBounds(
+    PointerToTreeNode treeNode) Which Returns Integer32 Does {
+  Return AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[64 - 1]) and
+      mod(treeNode - AddressOf(treeNodes[0]), SizeOf(TreeNode)) = 0;
+}
+EndFunction;
 
 Function
 convertIntegerToString(PointerToCharacter string,
@@ -29,7 +36,7 @@ Function strlen(PointerToCharacter string) Which Returns Integer32 Is Declared;
 
 Function newTreeNode() Which Returns PointerToTreeNode Does {
   Integer16 i : = 0;
-  While i < 32 Loop {
+  While i < 64 Loop {
     If not(isTreeNodeUsed[i]) Then {
       treeNodes[i].character : = 0;
       treeNodes[i].leftChild : = treeNodes[i].rightChild
@@ -59,10 +66,7 @@ Function newTreeNode() Which Returns PointerToTreeNode Does {
 EndFunction;
 
 Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
-  If not(AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[32 - 1]))
-      Then {
-    segmentationFault();
-  }
+  If not(isTreeNodeWithinBounds(treeNode)) Then { segmentationFault(); }
   EndIf;
   If NDEBUG = 0 Then {
     Character stringToBePrinted[64] : = {0};
@@ -193,10 +197,7 @@ Function assignCode(PointerToCharacter currentCode,
   }
   EndIf;
 
-  If not(AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[32 - 1]))
-      Then {
-    segmentationFault();
-  }
+  If not(isTreeNodeWithinBounds(treeNode)) Then { segmentationFault(); }
   EndIf;
 
   strcpy(AddressOf(treeNode->code[0]), currentCode);
@@ -247,7 +248,7 @@ Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
 EndFunction;
 
 Character input[32];
-Character output[128];
+Character output[256];
 
 Function main() Which Returns Nothing Does {
   clearScreen();
@@ -352,8 +353,7 @@ i:
         printString(AddressOf(stringToBePrinted[0]));
       }
       EndIf;
-      If not(AddressOf(treeNodes[0]) <= array[i] <=
-             AddressOf(treeNodes[32 - 1])) Then {
+      If not(isTreeNodeWithinBounds(array[i])) Then {
         segmentationFault();
         Return;
       }
