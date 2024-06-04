@@ -1757,27 +1757,26 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                 << std::endl;
       exit(1);
     }
-    /* // If you uncomment this, the Structure Declarations Test fails.
-       // I don't know why. I opened a GitHub issue about that:
-       // https://github.com/FlatAssembler/AECforWebAssembly/issues/21
-    if (not(isPointerType(getType(context))) and
-        not(basicDataTypeSizes.count(getType(context)) and
-            not(context.structureSizes.count(getType(context))))) {
+    std::string typeOfTheCurrentNode = getType(context);
+    if (not(isPointerType(typeOfTheCurrentNode)) and
+        not(basicDataTypeSizes.count(typeOfTheCurrentNode)) and
+        not(context.structureSizes.count(typeOfTheCurrentNode))) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Internal compiler error: The compiler has apparently "
                    "lost the track of the size of the structure named `"
-                << getType(context) << "`!" << std::endl;
+                << typeOfTheCurrentNode << "`!" << std::endl;
       throw CorruptCompilationContextException(context);
-    }*/
+    }
     return AssemblyCode(
         "(i32.add\n\t(i32.sub\n\t\t(global.get "
         "$stack_pointer)\n\t\t(i32.const " +
             std::to_string(context.localVariables.at(text)) + ") ;;" + text +
             "\n\t)\n\t(i32.mul\n\t\t(i32.const " +
-            std::to_string(isPointerType(getType(context)) ? 4
-                           : basicDataTypeSizes.count(getType(context))
-                               ? basicDataTypeSizes.at(getType(context))
-                               : context.structureSizes.at(getType(context))) +
+            std::to_string(
+                isPointerType(typeOfTheCurrentNode) ? 4
+                : basicDataTypeSizes.count(typeOfTheCurrentNode)
+                    ? basicDataTypeSizes.at(typeOfTheCurrentNode)
+                    : context.structureSizes.at(typeOfTheCurrentNode)) +
             ")\n" +
             std::string(convertToInteger32(children[0], context).indentBy(2)) +
             "\n\t)\n)",
