@@ -228,7 +228,7 @@ AssemblyCode convertTo(const TreeNode &node, const std::string &type,
 }
 
 AssemblyCode TreeNode::compile(CompilationContext context) const {
-  std::string typeOfTheCurrentNode = getType(context);
+  const std::string typeOfTheCurrentNode = getType(context);
   AssemblyCode::AssemblyType returnType;
   if (isPointerType(typeOfTheCurrentNode))
     returnType = AssemblyCode::AssemblyType::i32;
@@ -757,7 +757,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       } else if (childNode.text == ":=" &&
                  context.structureSizes.count(
                      childNode.getType(context))) { // Structure assignments.
-        std::string structureName = childNode.getType(context);
+        const std::string structureName = childNode.getType(context);
         TreeNode fakeInnerFunctionNode(
             "Does", childNode.lineNumber,
             childNode
@@ -1757,7 +1757,7 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                 << std::endl;
       exit(1);
     }
-    std::string typeOfTheCurrentNode = getType(context);
+    const std::string typeOfTheCurrentNode = getType(context);
     if (not(isPointerType(typeOfTheCurrentNode)) and
         not(basicDataTypeSizes.count(typeOfTheCurrentNode)) and
         not(context.structureSizes.count(typeOfTheCurrentNode))) {
