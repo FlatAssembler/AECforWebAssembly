@@ -1978,10 +1978,20 @@ EndFunction</pre
         converting to the boolean type in the if-conditions, which is an
         interesting solution, but it often makes the code longer, as well as not
         addressing the fact that the same problem can happen with boolean
-        variables. So, I think that making
-        <span class="inline_code">:=</span> the assignment operator and
-        <span class="inline_code">=</span> the equality-testing operator is a
-        good choice. The AEC-to-WebAssembly compiler allows whitespace between
+        variables (<i
+          >UPDATE on 05/06/2024:
+          <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/21"
+            >One hard-to-trace bug in my AEC-to-WebAssembly compiler</a
+          >, causing my compiler to lose track of the sizes of the structures
+          and cause an internal compiler error, was caused by mismatched
+          parentheses, which C++ compiler didn't complain about, but instead it
+          implicitly casted an integer into boolean. Had I written my compiler
+          in Java or C#, rather than in C++, something like that couldn't have
+          happened to me.</i
+        >). So, I think that making <span class="inline_code">:=</span> the
+        assignment operator and <span class="inline_code">=</span> the
+        equality-testing operator is a good choice. The AEC-to-WebAssembly
+        compiler allows whitespace between
         <span class="inline_code">:</span> and
         <span class="inline_code">=</span> in the assignment operator
         <span class="inline_code">:=</span>, so that, when
