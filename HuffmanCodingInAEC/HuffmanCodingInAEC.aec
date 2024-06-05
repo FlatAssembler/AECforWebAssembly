@@ -118,7 +118,7 @@ Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
     string += 1;
     pointerToLastCharacter -= 1;
   }
-  EndWhile
+  EndWhile;
 }
 EndFunction;
 
