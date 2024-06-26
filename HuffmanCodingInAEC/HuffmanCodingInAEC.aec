@@ -476,6 +476,21 @@ i:
 
   assignCode("", array[0]);
 
+  Integer16 lengthOfTheOutput : = 0;
+i:
+  = 0;
+  While i < lengthOfInput Loop {
+    lengthOfTheOutput += strlen(mapOfCodes[input[i]]);
+    i += 1;
+  }
+  EndWhile;
+  output[0] : = 0;
+  strcat(AddressOf(output[0]), "The length of the encoded string is: ");
+  convertIntegerToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                         lengthOfTheOutput);
+  strcat(AddressOf(output[0]), " bits.\n");
+  printString(AddressOf(output[0]));
+
   output[0] : = 0;
 i:
   = 0;
