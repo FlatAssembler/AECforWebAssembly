@@ -151,6 +151,29 @@ Function convertIntegerToString(PointerToCharacter string,
 }
 EndFunction;
 
+Function convertDecimalToString(PointerToCharacter string,
+                                Decimal32 number) Which Returns Nothing Does {
+  convertIntegerToString(string, number);
+  number -= Integer32(number);
+  If number < 0 Then { number *= -1; }
+  EndIf;
+  If number = 0 Then { Return; }
+  EndIf;
+  strcat(string, ".");
+  Integer16 numberOfDecimals : = 0;
+  While numberOfDecimals<3 and number> 0 Loop {
+    numberOfDecimals += 1;
+    number *= 10;
+    Character stringWithTheNewDigit[2];
+    stringWithTheNewDigit[0] : = stringWithTheNewDigit[1] : = 0;
+    stringWithTheNewDigit[0] : = '0' + number;
+    strcat(string, AddressOf(stringWithTheNewDigit[0]));
+    number -= Integer32(number);
+  }
+  EndWhile;
+}
+EndFunction;
+
 PointerToCharacter mapOfCodes[256];
 
 Function assignCode(PointerToCharacter currentCode,
@@ -247,6 +270,24 @@ Function freeUpTheTree(PointerToTreeNode tree) Which Returns Nothing Does {
 }
 EndFunction;
 
+Decimal32 PRECISION : = 500;
+Function ln(Decimal32 x) Which Returns Decimal32 Does {
+  // Natural logarithm is the integral of 1/x from 1 to x, highschool math.
+  Decimal32 sum : = 0, epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
+  While(epsilon > 0 and i < x) or (epsilon < 0 and i > x) Loop {
+    sum += epsilon / i;
+    i += epsilon;
+  }
+  EndWhile;
+  Return sum;
+}
+EndFunction;
+
+Function log2(Decimal32 x) Which Returns Decimal32 Does {
+  Return ln(x) / ln(2);
+}
+EndFunction;
+
 Character input[32];
 Character output[256];
 
@@ -320,6 +361,23 @@ i:
     i += 1;
   }
   EndWhile;
+
+  Decimal32 ShannonEntropy : = 0;
+i:
+  = 0;
+  While i < lengthOfTheArray Loop {
+    ShannonEntropy -=
+        (array[i]->frequencyOfCharacter / Decimal32(lengthOfInput)) *
+        log2(array[i]->frequencyOfCharacter / Decimal32(lengthOfInput));
+    i += 1;
+  }
+  EndWhile;
+  output[0] : = 0;
+  strcat(AddressOf(output[0]), "The Shannon Entropy of the input string is: ");
+  convertDecimalToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                         ShannonEntropy);
+  strcat(AddressOf(output[0]), " bits/symbol.\n");
+  printString(AddressOf(output[0]));
 
   While lengthOfTheArray > 1 Loop {
     Integer16 maximum : = 0, secondMaximum : = 0;
@@ -489,6 +547,14 @@ i:
   convertIntegerToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
                          lengthOfTheOutput);
   strcat(AddressOf(output[0]), " bits.\n");
+  printString(AddressOf(output[0]));
+
+  output[0] : = 0;
+  strcat(AddressOf(output[0]),
+         "The average length of the symbol in the Huffman code is: ");
+  convertDecimalToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                         Decimal32(lengthOfTheOutput) / lengthOfInput);
+  strcat(AddressOf(output[0]), " bits/symbol.\n");
   printString(AddressOf(output[0]));
 
   output[0] : = 0;
