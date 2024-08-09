@@ -900,12 +900,32 @@
           something like that simply could not have happened to me. And when
           writing my AEC-to-WebAssembly compiler in C++, C++ has surprised me
           quite a few times, and once made a very hard-to-trace bug (you can
-          read about it in the <a href="#Structures">Structures section</a>).
-          When programming in a programming language you have made, you
-          understand how the tools you are using work, and you have an at least
-          basic understanding how the environment you are targetting works (to
-          make a compiler targetting WebAssembly, you need to have at least
-          basic understanding how modern browsers work), so you are not doing
+          read about it in the <a href="#Structures">Structures section</a>). So
+          has JavaScript surprised me a few times when I was writing my
+          PicoBlaze assembler and emulator in JavaScript. For example, what do
+          you think happens if you pass a string with an invalid number (for
+          example, with a letter inside a decimal number, or a digit bigger than
+          1 in a binary number) to the JavaScript function
+          <span class="inline_code">parseInt</span>? If you have answered that
+          it throws an exception, you are wrong. In fact, it returns
+          <a href="https://en.wikipedia.org/wiki/NaN">a not-a-number</a>. I
+          guess it is because the first versions of JavaScript didn't have
+          exceptions, but I suppose they did have
+          <span class="inline_code">parseInt</span>, which had to signal error
+          somehow differently, so that weird way of signalling an error was kept
+          because of compatibility. Wrongly thinking it throws an exception
+          <a
+            href="https://github.com/FlatAssembler/PicoBlaze_Simulator_in_JS/issues/27"
+            >caused my assembler to fail silently in case somebody writes an
+            invalid decimal or binary number</a
+          >. Had I written the assembler in my programming language, such a bug
+          would be impossible, because I would know how the equivalent of
+          <span class="inline_code">parseInt</span> signals an error. When
+          programming in a programming language you have made, you understand
+          how the tools you are using work, and you have an at least basic
+          understanding how the environment you are targetting works (to make a
+          compiler targetting WebAssembly, you need to have at least basic
+          understanding how modern browsers work), so you are not doing
           bloodletting. WebAssembly is designed to be an exceptionally easy
           target for compilers, so now you can easily program in a programming
           language you have made and make the programs you have written in it
