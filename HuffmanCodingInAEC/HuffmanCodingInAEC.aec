@@ -380,7 +380,7 @@ i:
   printString(AddressOf(output[0]));
 
   While lengthOfTheArray > 1 Loop {
-    Integer16 maximum : = 0, secondMaximum : = 0;
+    Integer16 minimum : = 0, secondMinimum : = 0;
 
     Integer16 i : = 0;
     If NDEBUG = 0 Then {
@@ -424,8 +424,8 @@ i:
     = 0;
     While i < lengthOfTheArray Loop {
       If array[i]->frequencyOfCharacter <
-          array[maximum]->frequencyOfCharacter Then {
-      maximum:
+          array[minimum]->frequencyOfCharacter Then {
+      minimum:
         = i;
       }
       EndIf;
@@ -434,14 +434,14 @@ i:
     EndWhile;
 
   i:
-    = maximum = 0 ? 1 : 0;
-  secondMaximum:
+    = minimum = 0 ? 1 : 0;
+  secondMinimum:
     = i;
     While i < lengthOfTheArray Loop {
       If array[i]->frequencyOfCharacter <
-              array[secondMaximum]->frequencyOfCharacter and
-          not(i = maximum) Then {
-      secondMaximum:
+              array[secondMinimum]->frequencyOfCharacter and
+          not(i = minimum) Then {
+      secondMinimum:
         = i;
       }
       EndIf;
@@ -452,14 +452,14 @@ i:
     If NDEBUG = 0 Then {
       Character stringToBePrinted[64] : = {0};
       strcat(AddressOf(stringToBePrinted[0]),
-             "NDEBUG: The maximum and the second maximum are ");
+             "NDEBUG: The minimum and the second minimum are ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                  strlen(AddressOf(stringToBePrinted[0])),
-                             maximum);
+                             minimum);
       strcat(AddressOf(stringToBePrinted[0]), " and ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                  strlen(AddressOf(stringToBePrinted[0])),
-                             secondMaximum);
+                             secondMinimum);
       strcat(AddressOf(stringToBePrinted[0]), ".\n");
       printString(AddressOf(stringToBePrinted[0]));
     }
@@ -470,12 +470,12 @@ i:
       strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Joining the TreeNode #");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                  strlen(AddressOf(stringToBePrinted[0])),
-                             (array[maximum] - AddressOf(treeNodes[0])) /
+                             (array[minimum] - AddressOf(treeNodes[0])) /
                                  SizeOf(TreeNode));
       strcat(AddressOf(stringToBePrinted[0]), " with the TreeNode #");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) +
                                  strlen(AddressOf(stringToBePrinted[0])),
-                             (array[secondMaximum] - AddressOf(treeNodes[0])) /
+                             (array[secondMinimum] - AddressOf(treeNodes[0])) /
                                  SizeOf(TreeNode));
       strcat(AddressOf(stringToBePrinted[0]), ".\n");
       printString(AddressOf(stringToBePrinted[0]));
@@ -484,10 +484,10 @@ i:
 
     PointerToTreeNode sumOfTheTwoMostFrequent : = newTreeNode();
     sumOfTheTwoMostFrequent->frequencyOfCharacter
-        : = array[maximum]->frequencyOfCharacter +
-            array[secondMaximum]->frequencyOfCharacter;
-    sumOfTheTwoMostFrequent->leftChild : = array[maximum];
-    sumOfTheTwoMostFrequent->rightChild : = array[secondMaximum];
+        : = array[minimum]->frequencyOfCharacter +
+            array[secondMinimum]->frequencyOfCharacter;
+    sumOfTheTwoMostFrequent->leftChild : = array[minimum];
+    sumOfTheTwoMostFrequent->rightChild : = array[secondMinimum];
 
     If NDEBUG = 0 Then {
       Character stringToBePrinted[64] : = {0};
@@ -501,10 +501,10 @@ i:
     }
     EndIf;
 
-    array[maximum] : = sumOfTheTwoMostFrequent;
+    array[minimum] : = sumOfTheTwoMostFrequent;
 
   i:
-    = secondMaximum;
+    = secondMinimum;
     While i < lengthOfTheArray - 1 Loop {
       array[i] : = array[i + 1];
       i += 1;
