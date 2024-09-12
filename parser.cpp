@@ -662,7 +662,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         std::cerr << "Line " << condition[1].lineNumber << ", Column "
                   << condition[1].columnNumber
                   << ", Parser error: Unexpected token \"" << condition[1].text
-                  << "\"" << std::endl;
+                  << "\"!" << std::endl;
       input[i].children.push_back(condition[0]);
       if (iteratorPointingToTheLoopToken ==
           input.end()) // If there is no "Loop" token...
@@ -719,7 +719,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         std::cerr << "Line " << expression[1].lineNumber << ", Column "
                   << expression[1].columnNumber
                   << ", Parser error: Unexpected token \"" << expression[1].text
-                  << "\"" << std::endl;
+                  << "\"!" << std::endl;
       if (expression.size())
         input[i].children.push_back(
             expression.at(0)); // The function can return nothing at all, the
