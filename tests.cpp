@@ -132,7 +132,8 @@ void interpreterTests() {
 	       not(2 < 3 < 1) and
 	       (-3 < -2 < -1) and
 	       (3 > 2 > 1)
-       )", "1"}
+       )", "1"},
+       {"5 + + 1", "6"}
       });
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = std::to_string(

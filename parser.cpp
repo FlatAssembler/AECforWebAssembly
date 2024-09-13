@@ -265,8 +265,8 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression[openCurlyBrace].text = "{}";
     }
   for (int i = parsedExpression.size() - 1; i >= 0;
-       i--) // The unary "-" operator.
-    if (parsedExpression[i].text == "-" and
+       i--) // The unary "+" and "-" operators.
+    if ((parsedExpression[i].text == "-" or parsedExpression[i].text == "+") and
         i != int(parsedExpression.size()) - 1 and
         parsedExpression[i].children.size() == 0 and
         (!i or (!isComposedOfAlnumsAndOneDot(parsedExpression[i - 1].text) and
