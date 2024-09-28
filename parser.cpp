@@ -72,7 +72,13 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
     for (int i = 0; i < int(input.size()); i++)
       loop_body(i);
   else if (associativity == Associativity::right)
-    for (int i = input.size() - 1; i >= 0; i--)
+    for (int i = input.size() - 1; i >= 0;
+         i--) // I received some comments on Internet forums that the "scan
+              // backwards" method of parsing right-associative operators (as I
+              // am doing here, as well as down below when parsing `?:`) is
+              // considered to be an anti-pattern. So, I have opened a
+              // StackExchange question about that:
+              // https://langdev.stackexchange.com/q/4071/330
       loop_body(i);
   else {
     std::cerr << "Line " << input.at(0).lineNumber << ", Column "
