@@ -30,7 +30,10 @@ class TreeNode {
                        Associativity associativity);
 
 protected:
-  std::set<std::string> getStringsInSubnodes() const {
+  std::set<std::string> getStringsInSubnodes()
+      const { // This will need to be significantly modified if we want to
+              // implement the `typeid` operator. You can read more about that
+              // here: https://langdev.stackexchange.com/q/4189/330
     auto setToBeReturned = std::set<std::string>();
     if (text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
         text == "asm_f32(" or
