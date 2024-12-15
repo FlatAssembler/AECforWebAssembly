@@ -2969,7 +2969,12 @@ EndFunction
 	</pre
         >
         Maybe it comes useful to somebody when debugging programs, or to me when
-        debugging the compiler.
+        debugging the compiler. However, as of the version
+        <span class="inline_code">v3.1.0</span>, there is
+        <a href="https://github.com/FlatAssembler/AECforWebAssembly/issues/22"
+          >a bug which crashes the compiler in some cases when using AddressOf
+          with the pointers to functions</a
+        >, and there doesn't appear to be a simple solution.
         <br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
