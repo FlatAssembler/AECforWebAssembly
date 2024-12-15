@@ -158,12 +158,7 @@ public:
                 << std::endl;
       throw std::runtime_error("Invalid compilation target!");
     }
-    auto allTheStrings =
-        getStringsInSubnodes(); // TODO: To implement the `typeid` operator,
-                                // we'd probably need to pass the compilation
-                                // context to the `getStringsInSubnodes` method.
-                                // You can read more about that problem here:
-                                // https://langdev.stackexchange.com/q/4189/330
+    auto allTheStrings = getStringsInSubnodes();
     for (auto string : allTheStrings) {
       context.globalVariables[string] = context.globalVariablePointer;
       context.variableTypes[string] = "CharacterPointer";
