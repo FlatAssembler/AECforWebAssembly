@@ -2940,6 +2940,37 @@ InstantiateStructure QuadraticEquationSolution solution[1 * 2 * 3];
           >on GitHub</a
         >.
         <br />
+        <b>UPDATE</b> on 15/12/2024: I've added the support for the
+        <span class="inline_code">TypeOf</span> operator, similar to the one
+        that exists in JavaScript. It returns the type of an expression as a
+        string. Here is an example of how to use it:
+        <pre>
+#target WASI
+
+Function areStringsEqual(PointerToCharacter first, PointerToCharacter second) Which Returns Integer32 Does
+	While not(ValueAt(first)=0 and ValueAt(second)=0) Loop
+		If (not(ValueAt(first)=ValueAt(second))) Then
+			Return 0;
+		EndIf
+		first += 1;
+		second += 1;
+	EndWhile
+	Return 1;
+EndFunction
+
+Structure Point Consists Of
+	Decimal32 x, y, z;
+EndStructure
+
+Function test() Which Returns Integer32 Does
+	InstantiateStructure Point myPoint;
+	Return areStringsEqual(TypeOf(myPoint),"Point") and areStringsEqual(TypeOf("Hello world!"),"CharacterPointer");
+EndFunction
+	</pre
+        >
+        Maybe it comes useful to somebody when debugging programs, or to me when
+        debugging the compiler.
+        <br />
         <br /><b id="Assembly">Inline assembly</b><br />
         AEC for x86 passes everything between the
         <span class="inline_code">AsmStart</span> and
