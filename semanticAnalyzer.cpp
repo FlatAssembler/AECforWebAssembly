@@ -84,6 +84,8 @@ std::string TreeNode::getType(const CompilationContext &context) const {
     return "Integer64";
   if (isDecimalNumber(text))
     return "Decimal64";
+  if (text == "TypeOf(")
+    return "CharacterPointer";
   if (text == "AddressOf(") {
     if (children.empty()) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber

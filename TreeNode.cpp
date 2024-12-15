@@ -30,10 +30,7 @@ class TreeNode {
                        Associativity associativity);
 
 protected:
-  std::set<std::string> getStringsInSubnodes()
-      const { // This will need to be significantly modified if we want to
-              // implement the `typeid` operator. You can read more about that
-              // here: https://langdev.stackexchange.com/q/4189/330
+  std::set<std::string> getStringsInSubnodes() const {
     auto setToBeReturned = std::set<std::string>();
     if (text == "asm(" or text == "asm_i32(" or text == "asm_i64(" or
         text == "asm_f32(" or
@@ -51,6 +48,14 @@ protected:
       auto stringsInChild = child.getStringsInSubnodes();
       setToBeReturned.insert(stringsInChild.begin(), stringsInChild.end());
     }
+    // Now follows the code for the `TypeOf` operator. You can read more about
+    // it here: https://langdev.stackexchange.com/q/4189/330
+    for (auto basicDataType : basicDataTypeSizes)
+      setToBeReturned.insert("\"" + basicDataType.first + "\"");
+    if (isPointerType(text))
+      setToBeReturned.insert("\"" + demanglePointerType(text) + "\"");
+    if (text == "Structure")
+      setToBeReturned.insert("\"" + children.at(0).text + "\"");
     return setToBeReturned;
   }
 

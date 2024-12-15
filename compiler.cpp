@@ -244,6 +244,19 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     }
     returnType = mappingOfAECTypesToWebAssemblyTypes.at(typeOfTheCurrentNode);
   }
+  if (text == "TypeOf(") {
+    if (children.size() != 1) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The TypeOf operator has either no "
+                   "children or has more than 1 child!"
+                << std::endl;
+      std::exit(1);
+    }
+    TreeNode newTreeNode =
+        TreeNode("\"" + children.at(0).getType(context) + "\"", lineNumber,
+                 columnNumber);
+    return newTreeNode.compile(context);
+  }
   auto iteratorPointingToFunctionBeingCompiled =
       std::find_if(context.functions.begin(), context.functions.end(),
                    [=](function someFunction) {
