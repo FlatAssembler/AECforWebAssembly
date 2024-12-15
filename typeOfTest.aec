@@ -1,0 +1,21 @@
+#target WASI
+
+Function areStringsEqual(PointerToCharacter first, PointerToCharacter second) Which Returns Integer32 Does
+	While not(ValueAt(first)=0 and ValueAt(second)=0) Loop
+		If (not(ValueAt(first)=ValueAt(second))) Then
+			Return 0;
+		EndIf
+		first += 1;
+		second += 1;
+	EndWhile
+	Return 1;
+EndFunction
+
+Structure Point Consists Of
+	Decimal32 x, y, z;
+EndStructure
+
+Function test() Which Returns Integer32 Does
+	InstantiateStructure Point myPoint;
+	Return areStringsEqual(TypeOf(myPoint),"Point") and areStringsEqual(TypeOf("Hello world!"),"CharacterPointer");
+EndFunction
