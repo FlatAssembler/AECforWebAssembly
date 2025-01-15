@@ -283,7 +283,7 @@ Function updateClockToTime(Integer32 hour, Integer32 minute,
     logInteger(atan2(sin(185), cos(185)));
     logString("\natan2(sin(275),cos(275))=");
     logInteger(atan2(sin(275), cos(275)));
-    logString("\n\n\n");
+    logString("\n\n");
   }
   EndIf;
   Integer32 windowWidth : = 80, windowHeight : = 23, i : = 0;
