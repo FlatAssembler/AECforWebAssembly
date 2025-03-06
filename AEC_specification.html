@@ -1769,7 +1769,19 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
         make sure the variables are aligned, which I am not sure is the best
         approach. Also, while JavaScript Virtual Machine does allow unaligned
         memory access, it's not guaranteed to be nearly as fast as aligned
-        access (on x86, it usually is, on ARM, it's many times slower).<br />
+        access (on x86, it usually is, on ARM, it's many times slower). (<i
+          >UPDATE on 06/03/2025: I've opened
+          <a href="https://qr.ae/pYzF4R"
+            >a Quora question asking why JavaScript throws an exception in case
+            of an unaligned access, given that WebAssembly supports unaligned
+            access</a
+          >. I've also asked
+          <a href="https://langdev.stackexchange.com/q/4341/330"
+            >a StackExchange question about how the
+            <span class="inline_code">wasm2c</span> tool from the WebAssembly
+            Binary Toolkit deals with unaligned access</a
+          >.</i
+        >)<br />
         <br /><b id="Arrays">Arrays and Pointers</b><br />
         In the x86 dialect of AEC, you don't declare arrays in AEC, the compiler
         assumes any arrays you mention in AEC are declared in inline assembly
