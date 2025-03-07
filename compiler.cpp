@@ -395,7 +395,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                         variableName.text + "\".\n)\n";
             if (variableName.children.size() == 2 and
                 variableName.children[1].text == ":=" and
-                variableName.children[1].children[0].text ==
+                variableName.children[1].children.at(0).text ==
                     "{}") // Initial assignments of local arrays.
             {
               TreeNode initialisationList =
