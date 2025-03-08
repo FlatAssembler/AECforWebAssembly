@@ -323,7 +323,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                       << std::endl;
           if (variableName.text.back() != '[') { // If it's not an array.
             context.localVariables[variableName.text] = 0;
-            for (auto &pair : context.localVariables)
+            for (auto bitand pair : context.localVariables)
               pair.second += isPointerType(childNode.text)
                                  ? 4
                                  : basicDataTypeSizes.at(childNode.text);
@@ -381,7 +381,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 variableName.children[0]
                     .interpretAsACompileTimeIntegerConstant();
             context.localVariables[variableName.text] = 0;
-            for (auto &pair : context.localVariables)
+            for (auto bitand pair : context.localVariables)
               pair.second += arraySizeInBytes;
             context.variableTypes[variableName.text] = childNode.text;
             context.placesOfVariableDeclarations[variableName.text] =
