@@ -206,7 +206,7 @@ node analogClock
         let addressOfOutput = getAddressOfOutput();
         let addressOfColors = getAddressOfColors();
         let bytes = new Uint8Array(memory.buffer, addressOfOutput, 80 * 23);
-        let colors = new Uint32Array(memory.buffer, addressOfColors, 80 * 23);
+        let dataView = new DataView(memory.buffer);
         let str = "";
         for (let i = 0; i < 80 * 23; i++)
           str +=
@@ -215,7 +215,9 @@ node analogClock
             " y=" +
             Math.floor(i / 80) * 14.5 +
             ' fill="' +
-            getStringAtAddress(colors[i]) +
+            getStringAtAddress(
+              dataView.getUint32(addressOfColors + 4 * i, true),
+            ) +
             '">' +
             String.fromCharCode(bytes[i]) +
             "<\/text>";

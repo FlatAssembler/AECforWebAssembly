@@ -1753,7 +1753,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
 AssemblyCode
 TreeNode::compileAPointer(const CompilationContext &context) const {
   if (text == "ValueAt(")
-    return children[0].compile(context);
+    return children.at(0).compile(context);
   if (context.localVariables.count(text) and text.back() != '[')
     return AssemblyCode(
         "(i32.sub\n\t(global.get $stack_pointer)\n\t(i32.const " +
@@ -1791,7 +1791,8 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                     ? basicDataTypeSizes.at(typeOfTheCurrentNode)
                     : context.structureSizes.at(typeOfTheCurrentNode)) +
             ")\n" +
-            std::string(convertToInteger32(children[0], context).indentBy(2)) +
+            std::string(
+                convertToInteger32(children.at(0), context).indentBy(2)) +
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
@@ -1818,7 +1819,8 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                                ? basicDataTypeSizes.at(getType(context))
                                : context.structureSizes.at(getType(context))) +
             ")\n" +
-            std::string(convertToInteger32(children[0], context).indentBy(3)) +
+            std::string(
+                convertToInteger32(children.at(0), context).indentBy(3)) +
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
@@ -1828,46 +1830,48 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
         std::find_if(context.structures.begin(), context.structures.end(),
                      [=](structure str) { return str.name == structureName; });
     unsigned offset = iteratorPointingToTheStructure->memberOffsetInBytes.at(
-        children[1].text);
-    if (children[1].text.back() == '[') // If it's an array inside of a
-                                        // structure
+        children.at(1).text);
+    if (children.at(1).text.back() == '[') // If it's an array inside of a
+                                           // structure
       return AssemblyCode(
-          "(i32.add\n" + children[0].compileAPointer(context).indentBy(1) +
+          "(i32.add\n" + children.at(0).compileAPointer(context).indentBy(1) +
               "\n\t(i32.add\n\t\t(i32.const " + std::to_string(offset) +
               ") ;;The offset of the structure member " + structureName + "." +
-              children[1].text + "\n\t\t(i32.mul\n\t\t\t(i32.const " +
+              children.at(1).text + "\n\t\t(i32.mul\n\t\t\t(i32.const " +
               std::to_string(
                   isPointerType(iteratorPointingToTheStructure->memberTypes.at(
-                      children[1].text))
+                      children.at(1).text))
                       ? 4
                   : context.structureSizes.count(
                         iteratorPointingToTheStructure->memberTypes.at(
-                            children[1].text))
+                            children.at(1).text))
                       ? context.structureSizes.at(
                             iteratorPointingToTheStructure->memberTypes.at(
-                                children[1].text))
+                                children.at(1).text))
                       : basicDataTypeSizes.at(
                             iteratorPointingToTheStructure->memberTypes.at(
-                                children[1].text))) +
+                                children.at(1).text))) +
               ") ;;Size of the type \"" +
-              iteratorPointingToTheStructure->memberTypes.at(children[1].text) +
+              iteratorPointingToTheStructure->memberTypes.at(
+                  children.at(1).text) +
               "\"\n" +
-              convertToInteger32(children[1].children[0], context).indentBy(3) +
+              convertToInteger32(children.at(1).children.at(0), context)
+                  .indentBy(3) +
               "\n\t\t)\n\t)\n)",
           AssemblyCode::AssemblyType::i32);
     else
-      return AssemblyCode("(i32.add\n" +
-                              children[0].compileAPointer(context).indentBy(1) +
-                              "\n\t(i32.const " + std::to_string(offset) +
-                              ") ;;The offset of the structure member " +
-                              structureName + "." + children[1].text + "\n)",
-                          AssemblyCode::AssemblyType::i32);
+      return AssemblyCode(
+          "(i32.add\n" + children.at(0).compileAPointer(context).indentBy(1) +
+              "\n\t(i32.const " + std::to_string(offset) +
+              ") ;;The offset of the structure member " + structureName + "." +
+              children.at(1).text + "\n)",
+          AssemblyCode::AssemblyType::i32);
   }
   if (text == "->") {
     TreeNode dotOperator(".", lineNumber, columnNumber);
     TreeNode valueAtOperator("ValueAt(", lineNumber, columnNumber);
-    valueAtOperator.children.push_back(children[0]);
-    dotOperator.children = <% valueAtOperator, children[1] %>;
+    valueAtOperator.children.push_back(children.at(0));
+    dotOperator.children = <% valueAtOperator, children.at(1) %>;
     return dotOperator.compileAPointer(context);
   }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber
