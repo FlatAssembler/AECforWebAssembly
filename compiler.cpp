@@ -15,7 +15,10 @@
 #include "semanticAnalyzer.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler (for `and` and `or`).
 
-const char *throwNotImplementedException(std::string message) {
+const char *throwNotImplementedException(
+    std::string
+        message) { // So that the ternary conditional operator in compiling
+                   // comparison operators can be more nicely written.
   throw new NotImplementedException(message);
   return NULL;
 }
@@ -300,7 +303,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     for (auto childNode : children) {
       if (childNode.text == "Nothing")
         continue;
-      else if (basicDataTypeSizes.count(childNode.text) ||
+      else if (basicDataTypeSizes.count(childNode.text) or
                isPointerType(childNode.text)) {
         // Local variables declaration.
         for (TreeNode variableName : childNode.children) {
@@ -364,8 +367,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                         << "\" has no child node indicating size." << std::endl;
               exit(1);
             }
-            if (!basicDataTypeSizes.count(childNode.text) &&
-                !isPointerType(childNode.text)) {
+            if (not(basicDataTypeSizes.count(childNode.text) or
+                    isPointerType(childNode.text))) {
               std::cerr << "Line " << variableName.lineNumber << ", Column "
                         << variableName.columnNumber
                         << ", Compiler error: Corrupt AST, the variable is "
@@ -454,8 +457,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           exit(1);
         }
         TreeNode nodeWithStructureName = childNode.children[0];
-        if (!isValidVariableName(nodeWithStructureName.text) ||
-            AECkeywords.count(nodeWithStructureName.text) ||
+        if (!isValidVariableName(nodeWithStructureName.text) or
+            AECkeywords.count(nodeWithStructureName.text) or
             nodeWithStructureName.text.back() == '[') {
           std::cerr << "Line " << nodeWithStructureName.lineNumber
                     << ", Column " << nodeWithStructureName.columnNumber
@@ -471,7 +474,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                          [=](structure str) {
                            return str.name == nodeWithStructureName.text;
                          });
-        if (iteratorPointingToTheStructure == context.structures.end() &&
+        if (iteratorPointingToTheStructure == context.structures.end() and
             !context.structureSizes.count(nodeWithStructureName.text)) {
           std::cerr << "Line " << nodeWithStructureName.lineNumber
                     << ", Column " << nodeWithStructureName.columnNumber
@@ -500,7 +503,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                         nodeWithStructureName.text);
 #endif
               });
-          if (most_similar_structure_iterator != context.structures.end() &&
+          if (most_similar_structure_iterator != context.structures.end() and
               longest_common_subsequence_length(
                   most_similar_structure_iterator->name,
                   nodeWithStructureName.text)) {
@@ -540,7 +543,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           exit(1);
         }
         for (TreeNode instanceName : nodeWithStructureName.children) {
-          if (!isValidVariableName(instanceName.text) ||
+          if (!isValidVariableName(instanceName.text) or
               AECkeywords.count(instanceName.text)) {
             std::cerr << "Line " << instanceName.lineNumber << ", Column "
                       << instanceName.columnNumber
@@ -555,7 +558,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               instanceName.lineNumber;
           context.localVariables[instanceName.text] = 0;
           int arraySizeInBytes = 0, arraySizeInStructures = 0;
-          if (instanceName.text.back() == '[' &&
+          if (instanceName.text.back() == '[' and
               instanceName.children.size() == 1) {
             arraySizeInStructures =
                 instanceName.children[0]
@@ -579,7 +582,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               arraySizeInStructures = 1;
             }
           }
-          if (arraySizeInBytes < 1 || arraySizeInStructures < 1) {
+          if (arraySizeInBytes < 1 or arraySizeInStructures < 1) {
             std::cerr << "Line " << instanceName.lineNumber << ", Column "
                       << instanceName.columnNumber
                       << ", Internal compiler error: Some part of the "
@@ -732,7 +735,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               }
             }
           }
-          if (instanceName.children.size() &&
+          if (instanceName.children.size() and
               instanceName.children[0].text ==
                   ":=") // Initial assignment of local structures
           {
@@ -767,7 +770,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                     "current compilation context is:\n" +
                     commentedJSON + "\n";
 #endif
-      } else if (childNode.text == ":=" &&
+      } else if (childNode.text == ":=" and
                  context.structureSizes.count(
                      childNode.getType(context))) { // Structure assignments.
         const std::string structureName = childNode.getType(context);
@@ -963,7 +966,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   } else if (text == "nan")
     assembly += "(f32.reinterpret_i32\n\t(i32.const -1) ;;IEE754 for "
                 "not-a-number is 0xffffffff=-1.\n)";
-  else if (context.variableTypes.count(text) or text == "." || text == "->") {
+  else if (context.variableTypes.count(text) or text == "." or text == "->") {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
           "(i32.load8_s\n" + compileAPointer(context).indentBy(1) + "\n)";
@@ -986,7 +989,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << text << "\", aborting the compilation!" << std::endl;
       throw InvalidTypenameException();
     }
-  } else if (text == ":=" &&
+  } else if (text == ":=" and
              children[0].text ==
                  "?:") { // Left-hand-side conditional operators will be
                          // converted to if-else statements on the AST level...
@@ -1282,7 +1285,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     {
       std::string typeName =
           firstType.substr(0, firstType.size() - std::string("Pointer").size());
-      if (!basicDataTypeSizes.count(typeName) && !isPointerType(typeName) &&
+      if (!basicDataTypeSizes.count(typeName) and !isPointerType(typeName) and
           !context.structureSizes.count(typeName)) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Internal compiler error: The size of the type \""
@@ -1325,7 +1328,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     else if (isPointerType(firstType) and !isPointerType(secondType)) {
       std::string typeName =
           firstType.substr(0, firstType.size() - std::string("Pointer").size());
-      if (!basicDataTypeSizes.count(typeName) && !isPointerType(typeName) &&
+      if (!basicDataTypeSizes.count(typeName) and !isPointerType(typeName) and
           !context.structureSizes.count(typeName)) {
         std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                   << ", Internal compiler error: The size of the type \""
@@ -1437,7 +1440,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                 "` is not implemeneted!")) +
           convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
           convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
-  } else if (text == "=" &&
+  } else if (text == "=" and
              context.structureSizes.count(children.at(0).getType(context))) {
     // I am guessing that there is a bug somewhere in the following lines:
     // https://github.com/FlatAssembler/AECforWebAssembly/issues/20
@@ -1697,7 +1700,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   } else if (text == "ValueAt(") {
     if (typeOfTheCurrentNode == "Character")
       assembly +=
-          "(i32.load8_s\n" + children[0].compile(context).indentBy(1) + "\n)";
+          "(i32.load8_s\n" + children[0].compile(context).indentBy(1) +
+          "\n)"; // Why does the `data` directive require an additional argument
+                 // `0` after it (supposedly so that, in the future, it can be
+                 // used for multi-memory support) while the `load` and `store`
+                 // directives don't? I've opened a StackExchange thread about
+                 // that: https://langdev.stackexchange.com/q/4345/330
     else if (typeOfTheCurrentNode == "Integer16")
       assembly +=
           "(i32.load16_s\n" + children[0].compile(context).indentBy(1) + "\n)";

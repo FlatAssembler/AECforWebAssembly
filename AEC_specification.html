@@ -3690,7 +3690,18 @@ EndFunction;
         So, in other words, I think you should make a global array of TreeNode
         structures, and make another array to track which elements of that array
         are actually being used and which ones aren't. And write functions which
-        allow you to allocate a TreeNode and deallocate a TreeNode.
+        allow you to allocate a TreeNode and deallocate a TreeNode.<br /><br />
+        UPDATE on 11/03/2025: One of the things that I was wondering about while
+        learning WebAssembly is why is WebAssembly designed to be so
+        future-proof in some ways (such as requiring an additional dummy
+        argument on the <span class="inline_code">data</span> mnemonic to be
+        used in the future when WebAssembly starts supporting multiple linear
+        memories), but appears to be so short-sighted in others (not requiring
+        that dummy argument on <span class="inline_code">load</span> and
+        <span class="inline_code">store</span>). I've opened
+        <a href="https://langdev.stackexchange.com/q/4345/330"
+          >a StackExchange question about that</a
+        >.
       </div>
       <script type="text/javascript">
         function highlightedToken(token) {
