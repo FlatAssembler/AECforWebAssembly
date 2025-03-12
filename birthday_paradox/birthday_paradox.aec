@@ -59,10 +59,7 @@ Function numericki_izracun_rodendanskog_paradoksa(
 			If
 				koliko_ljudi_ima_rodendan_na_taj_dan[
 					unutarnji_brojac
-				] > iznad_koliko_kolizija_brojimo or
-				koliko_ljudi_ima_rodendan_na_taj_dan[
-					unutarnji_brojac
-				] = iznad_koliko_kolizija_brojimo
+				] >= iznad_koliko_kolizija_brojimo
 			Then
 				jesmo_li_nasli_potreban_broj_kolizija := 1;	
 			EndIf
