@@ -23,7 +23,9 @@ Integer16 isTreeNodeUsed[64];
 Function isTreeNodeWithinBounds(
     PointerToTreeNode treeNode) Which Returns Integer32 Does {
   Return AddressOf(treeNodes[0]) <= treeNode <= AddressOf(treeNodes[64 - 1]) and
-      mod(treeNode - AddressOf(treeNodes[0]), SizeOf(TreeNode)) = 0;
+      mod(treeNode - AddressOf(treeNodes[0]), SizeOf(TreeNode)) =
+      0; // In C, testing whether the mod is equal to 0 would not be necessary,
+         // but, since AEC supports unaligned access, it is necessary here.
 }
 EndFunction;
 
@@ -84,10 +86,29 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
 EndFunction;
 
 Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
+  If str = 0 Then { Return 0; }
+  EndIf;
   Integer32 length : = 0;
   While ValueAt(str + length) Loop { length += 1; }
   EndWhile;
   Return length;
+}
+EndFunction;
+
+Function strncmp(PointerToCharacter first, PointerToCharacter second,
+                 Integer32 n) Which Returns Integer32 Does {
+  If first = 0 or second = 0 Then { Return 1; }
+  EndIf;
+  Integer32 iterator : = 0;
+  While iterator < n Loop {
+    If ValueAt(first + iterator) = ValueAt(second + iterator) Then {
+      iterator += 1;
+    }
+    Else { Return ValueAt(first + iterator) - ValueAt(second + iterator); }
+    EndIf;
+  }
+  EndWhile;
+  Return 0;
 }
 EndFunction;
 
@@ -317,6 +338,15 @@ Function main() Which Returns Nothing Does {
     Return;
   }
   EndIf;
+
+i:
+  = 0;
+  While i < 256 Loop {
+    mapOfCodes[i] : = PointerToCharacter(0);
+    i += 1;
+  }
+  EndWhile;
+
   PointerToTreeNode array[32];
   Integer16 lengthOfTheArray : = 0;
 i:
@@ -503,6 +533,7 @@ i:
 
     array[minimum] : = sumOfTheTwoMostFrequent;
 
+  // Delete the second minimum from the array...
   i:
     = secondMinimum;
     While i < lengthOfTheArray - 1 Loop {
@@ -532,6 +563,8 @@ i:
   }
   EndIf;
 
+  printString("The tree has been constructed, let us assign Huffman codes to "
+              "characters:\n");
   assignCode("", array[0]);
 
   Integer16 lengthOfTheOutput : = 0;
@@ -566,8 +599,60 @@ i:
   }
   EndWhile;
   strcat(AddressOf(output[0]), "\n");
+  printString("The Huffman code of the input is:\n");
   printString(AddressOf(output[0]));
 
   freeUpTheTree(array[0]);
+
+  Character stringToBePrinted[64] : = {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Decoding the output...\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
+  Integer16 j : = 0;
+  While j < strlen(AddressOf(output[0])) - 1 Loop {
+  i:
+    = 0;
+    If NDEBUG = 0 Then {
+      printString(
+          "NDEBUG: We are entering the loop for decoding the output!\n");
+    }
+    EndIf;
+    While(mapOfCodes[i] = 0 or strncmp(AddressOf(output[j]), mapOfCodes[i],
+                                       strlen(mapOfCodes[i]))) and
+        i < 256 Loop {
+      If NDEBUG = 0 Then {
+        If mapOfCodes[i] = 0 Then {
+          printString("NDEBUG: Skipping the character because it's NULL.\n");
+        }
+        Else {
+          printString(
+              "NDEBUG: Skipping the character because it doesn't match!\n");
+        }
+        EndIf;
+      }
+      EndIf;
+      i += 1;
+    }
+    EndWhile;
+    If i = 256 Then {
+      printString("ERROR: Cannot find the beginning of the current string in "
+                  "the map of codes!\n");
+      Return;
+    }
+    EndIf;
+    stringToBePrinted[0] : = 0;
+    strcat(AddressOf(stringToBePrinted[0]), mapOfCodes[i]);
+    strcat(AddressOf(stringToBePrinted[0]), "=>");
+    Character stringToBeAdded[5];
+    stringToBeAdded[0] : = '\'';
+    stringToBeAdded[1] : = i;
+    stringToBeAdded[2] : = '\'';
+    stringToBeAdded[3] : = '\n';
+    stringToBeAdded[4] : = 0;
+    strcat(AddressOf(stringToBePrinted[0]), AddressOf(stringToBeAdded[0]));
+    printString(AddressOf(stringToBePrinted[0]));
+    j += strlen(mapOfCodes[i]);
+  }
+  EndWhile;
 }
 EndFunction;
