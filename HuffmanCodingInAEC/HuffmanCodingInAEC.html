@@ -16,6 +16,10 @@
         display: block;
         overflow: scroll;
       }
+      pre {
+        width: 100%;
+        overflow: scroll;
+      }
       h1 {
         text-align: center;
       }
@@ -31,9 +35,10 @@
     <br />
     <b>This only works in very modern browsers.</b> I'm not too interested in
     targeting archaic browsers here. This only works in Firefox 62 and newer or
-    Chrome 69 and newer (those with support <code>WebAssembly.Global</code>).
-    After a few years (if not months), all JavaScript environments will become
-    as capable as they are, rather than like Internet Explorer.<br /><br />
+    Chrome 69 and newer (those with support for
+    <code>WebAssembly.Global</code>). After a few years (if not months), all
+    JavaScript environments will become as capable as they are, rather than like
+    Internet Explorer.<br /><br />
     <form>
       <label for="enterTheText">Enter the text you want to compress:</label
       ><br />
@@ -50,7 +55,20 @@
     <span id="format_as_code"></span>
     <br />
     You can see the source code of the AEC program
-    <a href="HuffmanCodingInAEC.aec.html">here</a>.
+    <a href="HuffmanCodingInAEC.aec.html">here</a>.<br /><br />
+    UPDATE on 13/03/2025: For a reason that escapes me, the Huffman Coding in
+    AEC and the Huffman Coding in JavaScript don't always output the same
+    result. For the input <code>TEO SAMARZIJA</code>, they do, but, for example,
+    for the input <code>HENDRIK WADE BODE</code>, they don't. The Huffman Coding
+    in AEC outputs:
+    <pre>00101100011111010001010110100011110101111101001011000111110</pre>
+    While the Huffman Coding in JavaScript outputs:
+    <pre>01001100101111011001111000001100110101111100011011000111110</pre>
+    I have warned about that problem
+    <a
+      href="https://discord.com/channels/530598289813536771/847014270922391563/1349784348827586661"
+      >on Discord</a
+    >.
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
