@@ -68,7 +68,14 @@
     <a
       href="https://discord.com/channels/530598289813536771/847014270922391563/1349784348827586661"
       >on Discord</a
-    >.
+    >. The only potentially relevant difference between the way I implemented
+    the Huffman's Algorithm in AEC and the way I implemented it in JavaScript is
+    this: In AEC, I was trying to save a bit of memory by deleting the tree
+    nodes that have already been used (that is, the two tree nodes with the
+    lowest frequency in the array) from the array, whereas, in JavaScript, I put
+    a boolean in the tree node structure indicating whether the node has already
+    been used in the tree construction. But that shouldn't affect the final
+    results, should it?
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
