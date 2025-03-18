@@ -7,7 +7,12 @@ Function getLengthOfTheInput() Which Returns Integer16 Is External;
 Function
 getCharacterOfTheInput(Integer16 index) Which Returns Character Is External;
 
-Integer32 NDEBUG : = 1;
+Integer32 NDEBUG : = 1,
+                 MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION : = 0;
+// The JavaScript implementation is available here:
+// https://flatassembler.github.io/huffman.html
+// Maintaining the compatibility with the JavaScript implementation does not
+// work for now, so it is disabled.
 
 Structure TreeNode Consists Of {
   Character character;
@@ -531,7 +536,10 @@ i:
     }
     EndIf;
 
-    array[minimum] : = sumOfTheTwoMostFrequent;
+    If not(MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION) Then {
+      array[minimum] : = sumOfTheTwoMostFrequent;
+    }
+    EndIf;
 
   // Delete the second minimum from the array...
   i:
@@ -541,8 +549,26 @@ i:
       i += 1;
     }
     EndWhile;
-
     lengthOfTheArray -= 1;
+
+    If MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION Then {
+      // Delete the first minimum from the array...
+      If minimum >
+          secondMinimum Then { // If the first minimum moved while we were
+                               // deleting the second minimum from the array.
+        minimum -= 1;
+      }
+      EndIf;
+    i:
+      = minimum;
+      While i < lengthOfTheArray - 1 Loop {
+        array[i] : = array[i + 1];
+        i += 1;
+      }
+      EndWhile;
+      array[lengthOfTheArray - 1] : = sumOfTheTwoMostFrequent;
+    }
+    EndIf;
   }
   EndWhile;
 

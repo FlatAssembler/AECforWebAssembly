@@ -2,6 +2,7 @@
 <!-- See Arithmetic Operators Test for explanations.-->
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
     <title>AEC-to-WebAssembly compiler - Huffman Coding</title>
     <style type="text/css">
       body {
@@ -22,6 +23,11 @@
       }
       h1 {
         text-align: center;
+      }
+      blockquote {
+        background: #ffe;
+        font-family: Times;
+        padding: 3px;
       }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -75,7 +81,45 @@
     lowest frequency in the array) from the array, whereas, in JavaScript, I put
     a boolean in the tree node structure indicating whether the node has already
     been used in the tree construction. But that shouldn't affect the final
-    results, should it?
+    results, should it?<br /><br />
+    UPDATE on 18/03/2025: Here is what my Algorithms and Data Structures
+    professor Alfonso Baumgartner has to say about this problem:
+    <blockquote>
+      Poštovani,<br />
+      najčešći problemi kod Huffmanovog algoritma su u određivanju najmanjeg
+      čvora u nizu. Naime, može se desiti situacija da više podataka moze imati
+      vrijednost najmanjeg, pa je pitanje kojeg odabrati. Optimalan algoritam
+      traženja najmanjeg će uvijek odabrati prvu pojavu najmanjeg čvora. Znači
+      ja bih najprije pogleda da li se u oba slučaja radi na isti način. Primjer
+      za niz 5,1,3,7,2,1,4, bila bi odabrana jedinica na 2. mjestu, a ne ona
+      jedinica koja je na predzadnjem mjestu!
+      <br /><br />
+      Druga stvar koja moze dovesti do više verzija stabla je kada dva najmanja
+      odabrana čvora imaju jednaku vrijednost. Kako mi imamo pravilo da zbog
+      jednoznačnosti stavljamo da je lijevi manji od desnog, u ovom slučaju to
+      pravilo nije potpuno jasno, jer su čvorovi jednake vrijednosti. Može se
+      desiti da Vaši algoritmi u takvom slučaju 'obrnuto' uzmu i naravno da su
+      onda konačni kodovi za svaki znak različiti. Ako je u ovome Vaš problem,
+      ja bih se držao sličnog prinicpa kao u gornjoj situaciji: uzeti za
+      lijevog, onog podatka kojeg sam prvo susreo u nizu. Opet primjer, ako su
+      težine 5,1,3,7,2,1,4 i naravno dva najmanja su dvije jedinice, ja bih uzeo
+      za lijevog nasljednika jedinicu koja se prvo pojavila (na 2. mjestu), a
+      kao desnog ovu drugu jedinicu koja se pojavila na predzadnjem mjestu.
+      <br /><br />
+      Nadam se da Vam je ovo može pomoći, ako ni u tome nije problem, javite mi
+      pa bih mogao mozda malo detaljnije pogledati i Vaše programske kodove.
+      <br /><br />
+      Alfonzo.
+    </blockquote>
+    Overall, I've diagnozed that problem more precisely by now: I think the
+    problem is that, in JavaScript, I &quot;<i>excise</i>&quot; both the minimum
+    and the second minimum from the array the Huffman Algorithm looks through
+    and push their sum onto the end of the array, whereas, in AEC, I replace the
+    first minimum with the sum of the two minimums. However, I've tried telling
+    the AEC program to excise the first minimum from the array and push the sum
+    of the two minimums at the end of the array, but that didn't work. I've left
+    the code to do that as dead code in the AEC program, maybe I will figure it
+    out later.
     <script type="text/javascript">
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
