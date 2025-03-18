@@ -8,11 +8,9 @@ Function
 getCharacterOfTheInput(Integer16 index) Which Returns Character Is External;
 
 Integer32 NDEBUG : = 1,
-                 MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION : = 0;
+                 MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION : = 1;
 // The JavaScript implementation is available here:
 // https://flatassembler.github.io/huffman.html
-// Maintaining the compatibility with the JavaScript implementation does not
-// work for now, so it is disabled.
 
 Structure TreeNode Consists Of {
   Character character;
