@@ -315,6 +315,11 @@ EndFunction;
 Character input[32];
 Character output[256];
 
+Function getAddressOfTheOutput() Which Returns PointerToCharacter Does {
+  Return AddressOf(output[0]);
+}
+EndFunction;
+
 Function main() Which Returns Nothing Does {
   clearScreen();
   Integer16 lengthOfInput : = getLengthOfTheInput(), i : = 0;
