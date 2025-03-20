@@ -21,4 +21,4 @@ test:
     - apt update && apt -y install cmake make nodejs npm # Apparently, those are not saved from the build phase on GitLab.
   script:
     - cmake .
-    - ctest
+    - ctest --rerun-failed --output-on-failure
