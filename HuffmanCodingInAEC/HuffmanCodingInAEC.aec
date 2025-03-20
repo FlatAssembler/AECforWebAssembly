@@ -315,7 +315,11 @@ EndFunction;
 Character input[32];
 Character output[256];
 
-Function getAddressOfTheOutput() Which Returns PointerToCharacter Does {
+Function getAddressOfTheOutput() Which Returns PointerToCharacter
+    Does { // To be invoked by the `automaticTestOfHuffmanCoding.js` file (run
+           // in NodeJS) when the `main` function finishes executing, to compare
+           // the Huffman coding stored in `output` with the known good
+           // encodings for test strings.
   Return AddressOf(output[0]);
 }
 EndFunction;

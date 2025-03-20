@@ -1,3 +1,6 @@
+// It has happened to me that I screw something up while manually testing the
+// Huffman Coding in AEC, so I have decided I will write a script that will do
+// that for me.
 const fs = require("fs");
 const buffer = fs.readFileSync("HuffmanCodingInAEC/HuffmanCodingInAEC.wasm");
 const stack_pointer = new WebAssembly.Global(
