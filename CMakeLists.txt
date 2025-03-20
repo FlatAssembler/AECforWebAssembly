@@ -86,7 +86,7 @@ add_test(NAME HuffmanCodingCompiles
 	      COMMAND aec HuffmanCodingInAEC/HuffmanCodingInAEC.aec
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_test(NAME HuffmanCodingAssembles
-	      COMMAND npx -q -p wabt wat2wasm HuffmanCodingInAEC/HuffmanCodingInAEC.wat
+	      COMMAND npx -q -p wabt wat2wasm --output HuffmanCodingInAEC/HuffmanCodingInAEC.wasm HuffmanCodingInAEC/HuffmanCodingInAEC.wat
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_test(NAME HuffmanCodingRuns
 	      COMMAND node automaticTestOfHuffmanCoding.js
