@@ -2,7 +2,7 @@
 // Huffman Coding in AEC, so I have decided I will write a script that will do
 // that for me.
 const fs = require("fs");
-const buffer = fs.readFileSync("HuffmanCodingInAEC/HuffmanCodingInAEC.wasm");
+const buffer = fs.readFileSync("HuffmanCodingInAEC.wasm");
 const stack_pointer = new WebAssembly.Global(
     {value : "i32", mutable : true},
     0,
