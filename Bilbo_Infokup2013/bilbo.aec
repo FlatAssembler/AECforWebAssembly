@@ -1,6 +1,10 @@
 // This is my solution to the task Bilbo from Infokup 2013, the school-level
 // competition in informatics for grade 8.
 // https://informatika.azoo.hr/natjecanje/dobavi-dokument/458
+// Basically, you receive 6 digits as an input, and you have to arrange those
+// 6 digits into 2 3-digit numbers so that the sum of the two three-digit
+// numbers is as big as possible without exceeding 1000 and output that sum. If
+// that is not possible, you have to output the string "Bilbo".
 
 // First, a lot of boilerplate to target WASI...
 #target WASI
