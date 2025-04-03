@@ -1,0 +1,255 @@
+// This is my solution to the task Bilbo from Infokup 2013, the school-level
+// competition in informatics for grade 8.
+// https://informatika.azoo.hr/natjecanje/dobavi-dokument/458
+
+// First, a lot of boilerplate to target WASI...
+#target WASI
+
+Structure IOV Consists Of {
+  PointerToCharacter iov_base;
+  Integer32 iov_len;
+}
+EndStructure;
+
+Function
+fd_write(Integer32 file_descriptor, IOVPointer iovs, Integer32 iovs_len,
+         PointerToInteger32 nwritten) Which Returns Integer32 Is External;
+
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
+  Integer32 size : = 0;
+  While ValueAt(str + size) Loop { size += 1; }
+  EndWhile;
+  Return size;
+}
+EndFunction;
+
+Integer32 stdout : = 1;
+InstantiateStructure IOV iov;
+Integer32 dummy_integer : = 0;
+
+Function printString(PointerToCharacter string) Which Returns Nothing Does {
+  iov.iov_base : = string;
+  iov.iov_len : = strlen(string);
+dummy_integer:
+  = fd_write(stdout, AddressOf(iov),
+             1 /*Because we are printing only 1 string.*/,
+             AddressOf(dummy_integer));
+}
+EndFunction;
+
+// Let's finally start solving the task...
+Structure ArrayOfDigits Consists Of {
+  Integer16 length;
+  Integer16 digits[6];
+}
+EndStructure;
+
+InstantiateStructure ArrayOfDigits digitsInTask;
+
+Function count(PointerToArrayOfDigits array,
+               Integer16 digit) Which Returns Integer16 Does {
+  Integer16 result : = 0, i : = 0;
+  While i < array->length Loop {
+    If array->digits[i] = digit Then { result += 1; }
+    EndIf;
+    i += 1;
+  }
+  EndWhile;
+  Return result;
+}
+EndFunction;
+
+Function strcpy(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does {
+  While ValueAt(src) Loop {
+    ValueAt(dest) : = ValueAt(src);
+    dest += 1;
+    src += 1;
+  }
+  EndWhile;
+  ValueAt(dest) : = 0;
+}
+EndFunction;
+
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does {
+  strcpy(dest + strlen(dest), src);
+}
+EndFunction;
+
+Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
+  PointerToCharacter pointerToLastCharacter : = string + strlen(string) - 1;
+  While pointerToLastCharacter - string > 0 Loop {
+    Character tmp : = ValueAt(string);
+    ValueAt(string) : = ValueAt(pointerToLastCharacter);
+    ValueAt(pointerToLastCharacter) : = tmp;
+    string += 1;
+    pointerToLastCharacter -= 1;
+  }
+  EndWhile;
+}
+EndFunction;
+
+Function convertIntegerToString(PointerToCharacter string,
+                                Integer32 number) Which Returns Nothing Does {
+  Integer32 isNumberNegative : = 0;
+  If number < 0 Then {
+  number:
+    = -number;
+  isNumberNegative:
+    = 1;
+  }
+  EndIf;
+  Integer32 i : = 0;
+  While number >= 10 Loop {
+    ValueAt(string + i) : = '0' + mod(number, 10);
+    number /= 10;
+    i += 1;
+  }
+  EndWhile;
+  ValueAt(string + i) : = '0' + number;
+  i += 1;
+  If isNumberNegative Then {
+    ValueAt(string + i) : = '-';
+    i += 1;
+  }
+  EndIf;
+  ValueAt(string + i) : = 0;
+  reverseString(string);
+}
+EndFunction;
+
+InstantiateStructure ArrayOfDigits stackOfAttempts[128];
+Integer32 topOfTheStack : = -1;
+
+Function max(Integer32 a, Integer32 b) Which Returns Integer32 Does {
+  Return a > b ? a : b;
+}
+EndFunction;
+
+Character output[16];
+
+Integer32 NDEBUG : = 1;
+
+Function solveFor(Integer16 a, Integer16 b, Integer16 c, Integer16 d,
+                  Integer16 e,
+                  Integer16 f) Which Returns PointerToCharacter Does {
+  Integer16 initialArray[6] : = {a, b, c, d, e, f}, i : = 0;
+  digitsInTask.length : = 6;
+  While i < 6 Loop {
+    digitsInTask.digits[i] : = initialArray[i];
+    i += 1;
+  }
+  EndWhile;
+  Integer32 result : = -1;
+topOfTheStack:
+  = 0;
+  stackOfAttempts[topOfTheStack].length : = 0;
+  While topOfTheStack >= 0 Loop {
+    InstantiateStructure ArrayOfDigits currentAttempt
+        : = stackOfAttempts[topOfTheStack];
+    If NDEBUG = 0 Then {
+      Character debugOutput[64] : = {0};
+      strcat(AddressOf(debugOutput[0]), "DEBUG: Trying the attempt: ");
+      Character printingCurrentAttempt[7] : = {0, 0, 0, 0, 0, 0, 0};
+      Integer16 counter : = 0;
+      While counter < currentAttempt.length Loop {
+        printingCurrentAttempt[counter]
+            : = currentAttempt.digits[counter] + '0';
+        counter += 1;
+      }
+      EndWhile;
+      strcat(AddressOf(debugOutput[0]), AddressOf(printingCurrentAttempt[0]));
+      strcat(AddressOf(debugOutput[0]), "    \n");
+      printString(AddressOf(debugOutput[0]));
+    }
+    EndIf;
+    topOfTheStack -= 1;
+    If currentAttempt.length = 6 Then {
+      Integer32 sum
+          : = currentAttempt.digits[0] * 100 + currentAttempt.digits[1] * 10 +
+              currentAttempt.digits[2] + currentAttempt.digits[3] * 100 +
+              currentAttempt.digits[4] * 10 + currentAttempt.digits[5];
+      If NDEBUG = 0 Then {
+        Character debugOutput[64] : = {0};
+        strcat(AddressOf(debugOutput[0]),
+               "DEBUG: Found a potential solution with the sum: ");
+        convertIntegerToString(
+            AddressOf(debugOutput[0]) + strlen(AddressOf(debugOutput[0])), sum);
+        strcat(AddressOf(debugOutput[0]), "\n");
+        printString(AddressOf(debugOutput[0]));
+      }
+      EndIf;
+      If sum < 1000 Then result : = max(result, sum);
+      EndIf
+    }
+    Else {
+      Integer16 newDigit : = 0;
+      While newDigit <= 9 Loop {
+        If NDEBUG = 0 Then {
+          Character debugOutput[64] : = {0};
+          strcat(AddressOf(debugOutput[0]),
+                 "DEBUG: Let's check whether we can add the digit: ");
+          convertIntegerToString(AddressOf(debugOutput[0]) +
+                                     strlen(AddressOf(debugOutput[0])),
+                                 newDigit);
+          strcat(AddressOf(debugOutput[0]), "\n");
+          printString(AddressOf(debugOutput[0]));
+        }
+        EndIf;
+        Integer32 howManyInCurrentAttempt
+            : = count(AddressOf(currentAttempt), newDigit);
+        Integer32 howManyInTheTask : = count(AddressOf(digitsInTask), newDigit);
+        If NDEBUG = 0 Then {
+          Character debugOutput[128] : = {0};
+          PointerToCharacter debugOutput : = AddressOf(debugOutput[0]);
+          strcat(debugOutput, "DEBUG: There are ");
+          convertIntegerToString(debugOutput + strlen(debugOutput),
+                                 howManyInCurrentAttempt);
+          strcat(debugOutput, " in the current attempt, and there are ");
+          convertIntegerToString(debugOutput + strlen(debugOutput),
+                                 howManyInTheTask);
+          strcat(debugOutput, " in the task.\n");
+          printString(debugOutput);
+        }
+        EndIf;
+        If howManyInCurrentAttempt < howManyInTheTask Then {
+          If NDEBUG = 0 Then {
+            printString("DEBUG: It loooks as though we can.\n");
+          }
+          EndIf;
+          topOfTheStack += 1;
+          stackOfAttempts[topOfTheStack] : = currentAttempt;
+          stackOfAttempts[topOfTheStack].length += 1;
+          stackOfAttempts[topOfTheStack].digits[currentAttempt.length]
+              : = newDigit;
+        }
+        EndIf;
+        newDigit += 1;
+      }
+      EndWhile;
+    }
+    EndIf;
+  }
+  EndWhile;
+  If result = -1 Then { strcpy(AddressOf(output[0]), "Bilbo"); }
+  Else { convertIntegerToString(AddressOf(output[0]), result); }
+  EndIf;
+  Return AddressOf(output[0]);
+}
+EndFunction;
+
+Function main() Which Returns Nothing Does {
+  printString("The result for the first test sample: ");
+  printString(solveFor(5, 3, 6, 2, 6, 8));
+  printString("\n");
+  printString("The result for the second test sample: ");
+  printString(solveFor(4, 2, 0, 2, 0, 1));
+  printString("\n");
+  printString("The result for the third test sample: ");
+  printString(solveFor(9, 8, 7, 7, 6, 8));
+  printString("\n");
+}
+EndFunction;
+
+asm("(export \"_start\" (func $main))");
