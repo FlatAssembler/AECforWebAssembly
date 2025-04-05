@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zadatak Bilbo s natjecanja Infokup 2013 u AEC-u</title>
+  </head>
+  <body>
+    <h1>Bilbo u AEC-u</h1>
+    <p>
+      Ponukan
+      <a href="https://stackoverflow.com/q/79546110/8902065">svojim otkrićem</a>
+      da mnoge starije implementacije WebAssembly-ja (NodeJS 10, Eclipse Lun3r
+      33), koje nazivno ne podržavaju WebAssembly globalne varijable, zapravo
+      podržavaju WebAssembly globalne varijable dokle god im ne pokušaš
+      pristupiti iz JavaScripta (dakle, možeš ih slobodno koristiti u
+      WebAssembly-ju), pokušat ću napraviti program koji to koristi. Naime, koji
+      cilja starije WebAssembly implementacije tako da čini da AEC compiler
+      misli da cilja WASI, a ne internetski preglednik.
+    </p>
+    <p>
+      Naime, kada cilja WASI (a ne internetski preglednik), AEC compiler
+      podržava WebAssembly globalne varijable, ali ih ne možeš koristiti iz
+      JavaScripta. Međutim, ako ciljaš WASI, onda možda (sad ću to isprobati)
+      možeš pristupiti memoriji WebAssembly virtualne mašine iz JavaScripta.
+    </p>
+    <p>
+      <a href="https://informatika.azoo.hr/natjecanje/dobavi-dokument/458"
+        >Zadatak Bilbo s Infokupa 2013</a
+      >
+      ide ovako: U program koji ti trebaš napraviti unosi se 6 jednoznamenkastih
+      brojeva, i taj tvoj program od tih 6 znamenki treba sastaviti 2
+      troznamenkasta broja tako da im zbroj bude najveći mogući, a da ne prelazi
+      1000. Ukoliko to nije moguće napraviti, program treba samo ispisati string
+      "Bilbo".
+    </p>
+    <label for="brojevi">Unesi 6 jednoznamenkastih brojeva:</label><br />
+    <input type="text" id="brojevi" name="brojevi" value="5 3 6 2 6 8" /><br />
+    <button id="izracunaj">Izračunaj</button><br />
+    <pre id="rezultat"></pre>
+    <p>Izvorni kod u AEC-u imate <a href="bilbo.aec.html">ovdje</a>.</p>
+    <script>
+      let memory, solveFor;
+      fetch("bilbo.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) =>
+          WebAssembly.instantiate(bytes, {
+            wasi_unstable: { fd_write: () => {} },
+          }),
+        )
+        .then((results) => {
+          const instance = results.instance;
+          memory = instance.exports.memory;
+          solveFor = instance.exports.solveFor;
+        })
+        .catch(console.error);
+      document.getElementById("izracunaj").onclick = function () {
+        const input = document
+          .getElementById("brojevi")
+          .value.split(" ")
+          .map(Number);
+        if (input.length !== 6 || input.some((num) => num < 0 || num > 9)) {
+          alert("Unesite točno 6 jednoznamenkastih brojeva.");
+          return;
+        }
+        const ptr = solveFor(
+          input[0],
+          input[1],
+          input[2],
+          input[3],
+          input[4],
+          input[5],
+        );
+        const output = new Uint8Array(memory.buffer, ptr, 16);
+        let result = "";
+        for (let i = 0; i < output.length; i++) {
+          if (output[i] === 0) break;
+          result += String.fromCharCode(output[i]);
+        }
+        const outputElement = document.getElementById("rezultat");
+        outputElement.textContent = result;
+      };
+    </script>
+  </body>
+</html>
