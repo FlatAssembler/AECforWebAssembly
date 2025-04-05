@@ -131,6 +131,11 @@ Function max(Integer32 a, Integer32 b) Which Returns Integer32 Does {
 }
 EndFunction;
 
+Function min(Integer32 a, Integer32 b) Which Returns Integer32 Does {
+  Return a < b ? a : b;
+}
+EndFunction;
+
 Character output[16];
 
 Integer32 NDEBUG : = 1;
@@ -145,7 +150,7 @@ Function solveFor(Integer16 a, Integer16 b, Integer16 c, Integer16 d,
     i += 1;
   }
   EndWhile;
-  Integer32 result : = -1;
+  Integer32 result : = -1, firstNumber, secondNumber;
 topOfTheStack:
   = 0;
   stackOfAttempts[topOfTheStack].length : = 0;
@@ -184,7 +189,20 @@ topOfTheStack:
         printString(AddressOf(debugOutput[0]));
       }
       EndIf;
-      If sum < 1000 Then result : = max(result, sum);
+      If sum<1000 and sum> result Then {
+      result:
+        = sum;
+      firstNumber:
+        = max(currentAttempt.digits[0] * 100 + currentAttempt.digits[1] * 10 +
+                  currentAttempt.digits[2],
+              currentAttempt.digits[3] * 100 + currentAttempt.digits[4] * 10 +
+                  currentAttempt.digits[5]);
+      secondNumber:
+        = min(currentAttempt.digits[0] * 100 + currentAttempt.digits[1] * 10 +
+                  currentAttempt.digits[2],
+              currentAttempt.digits[3] * 100 + currentAttempt.digits[4] * 10 +
+                  currentAttempt.digits[5]);
+      }
       EndIf
     }
     Else {
@@ -237,7 +255,15 @@ topOfTheStack:
   }
   EndWhile;
   If result = -1 Then { strcpy(AddressOf(output[0]), "Bilbo"); }
-  Else { convertIntegerToString(AddressOf(output[0]), result); }
+  Else {
+    convertIntegerToString(AddressOf(output[0]), result);
+    strcat(AddressOf(output[0]), "=");
+    convertIntegerToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                           firstNumber);
+    strcat(AddressOf(output[0]), "+");
+    convertIntegerToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                           secondNumber);
+  }
   EndIf;
   Return AddressOf(output[0]);
 }
