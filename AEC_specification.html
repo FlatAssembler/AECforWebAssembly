@@ -1360,9 +1360,26 @@ node analogClock
         <a href="https://webassembly.org/docs/faq/">FAQ of WebAssembly</a> says
         is, in principle, possible. But I am quite sure you would need to
         polyfill the entire WebAssembly, and not just
-        <span class="inline_code">WebAssembly.Global</span>.) Of course, in
-        order for <span class="inline_code">npx -p wabt wat2wasm</span> to work,
-        you either need to have
+        <span class="inline_code">WebAssembly.Global</span>.)
+        <i
+          >(UPDATE on 05/04/2025: You can also use the fact that some
+          WebAssembly environments which nominally don't support WebAssembly
+          globals, such as NodeJS 10 or Eclipse Lun3r 33, actually do support
+          them, they just don't let you access them from JavaScript. That's why
+          <a href="hurwitz.html"
+            >my implementation of the Hurwitz'es algorithm</a
+          >
+          and
+          <a href="bilbo.html"
+            >my solution to the task Bilbo from the competition Infokup 2013</a
+          >
+          work in those WebAssembly environments. The trick is to make the
+          AEC-to-WebAssembly compiler think we are targetting WebAssembly System
+          Interface, rather than a browser.)</i
+        >
+        Of course, in order for
+        <span class="inline_code">npx -p wabt wat2wasm</span> to work, you
+        either need to have
         <a href="https://www.npmjs.com/package/wabt">WABT</a> already installed,
         or you need to be connected to the Internet so that
         <span class="inline_code">npx</span> can download it (which you probably
