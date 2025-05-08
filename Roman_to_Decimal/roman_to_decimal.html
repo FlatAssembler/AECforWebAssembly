@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!-- See Arithmetic Operators Test for explanations.-->
+<html lang="en">
+  <head>
+    <title>AEC-to-WebAssembly compiler - Roman Numerals to Decimal</title>
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>Converting Roman Numerals to Decimal</h1>
+    This is an AEC program that converts Roman numbers to decimal,
+    compiled using my
+    <a href="https://github.com/FlatAssembler/AECforWebAssembly"
+      >AEC-to-WebAssembly compiler</a
+    >. This is my solution to <a href="https://leetcode.com/problems/roman-to-integer/description/">the LeetCode problem #13</a>.
+    <br />
+    <b>This only works in very modern browsers.</b> I'm not too interested in
+    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    Chrome 69 and newer (those that support <code>WebAssembly.Global</code>).
+    After a few years (if not months), all JavaScript environments will become
+    as capable as they are, rather than like Internet Explorer.<br /><br />
+    <form>
+      <label for="RomanNumber">Roman number:</label><br />
+      <input type="text" id="RomanNumber" name="RomanNumber" value="MmXxIv" /><br />
+    </form>
+    <button onclick="invokeAECfunctions()">Convert to decimal!</button
+    ><br />
+    <span id="format_as_code">
+    </span
+    ><br />
+    You can see the source code of the AEC program
+    <a href="roman_to_decimal.aec.html">here</a>.
+    <script type="text/javascript">
+      const inputWithRomanNumber = document.getElementById("RomanNumber");
+      function getLengthOfTheInput() {
+      	const length = inputWithRomanNumber.value.length;
+	return length;
+      }
+      function getCharacterAtIndex(i) {
+      	const charCode = inputWithRomanNumber.value.charCodeAt(i);
+	return charCode;
+      }
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+      function printString(str) {
+      	let array = new Uint8Array(memory.buffer);
+	let string = "";
+	while (array[str]) {
+		string += String.fromCharCode(array[str]);
+		str++;
+	}
+	console.log(string);
+      }
+      let importObject = {
+        JavaScript: { stack_pointer: stack_pointer,
+		      memory: memory,
+		      getLengthOfTheInput: getLengthOfTheInput,
+		      getCharacterAtIndex: getCharacterAtIndex,
+	              printString: printString }
+      };
+      let solve;
+      fetch("roman_to_decimal.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          const exports = results.instance.exports;
+          solve = exports.solve;
+        });
+      function invokeAECfunctions() {
+        const decimalNumber = solve();
+	if (decimalNumber == 4_000)
+		alert("You seem to have entered an invalid Roman number.");
+        document.getElementById("format_as_code").innerText = decimalNumber;
+      }
+    </script>
+  </body>
+</html>

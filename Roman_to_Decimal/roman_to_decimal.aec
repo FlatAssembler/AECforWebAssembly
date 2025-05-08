@@ -1,0 +1,114 @@
+Function getLengthOfTheInput() Which Returns Integer32 Is External;
+Function getCharacterAtIndex(Integer32 index)
+         Which Returns Character Is External;
+Function printString(PointerToCharacter string) Which Returns Nothing
+         Is External;
+
+PointerToCharacter elements[13]  :=   {"I",  "IV", "V",
+                                       "IX", "X",  "XL",
+                                       "L",  "XC", "C",
+                                       "CD", "D",  "CM",
+                                       "M"};
+Integer16 meaningsOfElements[13] :=   { 1,    4,    5,
+                                        9     10,   40,
+                                        50,   90,  100,
+                                        400,  500, 900,
+                                        1000};
+Character result[64], input[64], debugPrint[128];
+
+Function strcat(PointerToCharacter dest, PointerToCharacter src)
+         Which Returns Nothing Is Declared;
+
+Function convertToRomanNumerals(Integer16 number) Which Returns Nothing Does
+    result[0] := 0;
+    PointerToCharacter result := AddressOf(result[0]);
+    If number = 0 Then
+        strcat(result,"N");
+        Return;
+    ElseIf number < 0 or number >= 4000 Then
+        strcat(result,"\"Please enter a number between 0 and 4000.\"");
+        Return;
+    EndIf
+    Integer32 pointerToElement := 12; // To "M" (1000).
+    While number Loop
+        If number > meaningsOfElements[pointerToElement] - 1 Then
+            strcat(result, elements[pointerToElement]);
+            number -= meaningsOfElements[pointerToElement];
+        Else
+           pointerToElement -= 1;
+        EndIf
+    EndWhile
+EndFunction
+
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does
+    Integer32 length : = 0;
+    While ValueAt(str + length) Loop
+        length += 1;
+    EndWhile
+    Return length;
+EndFunction
+
+Function strcpy(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
+    While ValueAt(src) Loop
+        ValueAt(dest) := ValueAt(src);
+        dest          += 1;
+        src           += 1;
+    EndWhile
+    ValueAt(dest) : = 0;
+EndFunction
+
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
+    strcpy(dest + strlen(dest), src);
+EndFunction
+
+Function strcmp(PointerToCharacter first, PointerToCharacter second)
+         Which Returns Integer32 Does
+   If strlen(first) - strlen(second) Then
+     Return 1; // If their lengths aren't equal, they cannot be equal.
+   EndIf
+   Integer32 i := 0;
+   While i < strlen(first) Loop
+     If ValueAt(first + i) - ValueAt(second + i) Then
+       Return 1;
+     EndIf
+     i += 1;
+   EndWhile
+   Return 0;
+EndFunction
+
+Function toUpperCase(Character chr) Which Returns Character Does
+    If 'a' <= chr <= 'z' Then
+      Return chr - ('a' - 'A');
+    EndIf
+    Return chr;
+EndFunction
+
+Function solve() Which Returns Integer32 Does
+    debugPrint[0] := 0;
+    strcat(AddressOf(debugPrint[0]), "strcmp(\"MMXXIV\",\"MMX\")+5 is equal to: ");
+    Character testArray[2] := {strcmp("MMXXIV","MMX")+'5', 0};
+    strcat(AddressOf(debugPrint[0]), AddressOf(testArray[0]));
+    printString(AddressOf(debugPrint[0]));
+    Integer32 i := 0;
+    While i < getLengthOfTheInput() Loop
+        input[i] := toUpperCase(getCharacterAtIndex(i));
+        i += 1;
+    EndWhile
+    input[i] := 0;
+    debugPrint[0] := 0;
+    strcat(AddressOf(debugPrint[0]),"The input is: ");
+    strcat(AddressOf(debugPrint[0]),AddressOf(input[0]));
+    printString(AddressOf(debugPrint[0]));
+    i := 0;
+    result[0] := 0;
+    While strcmp(AddressOf(result[0]), AddressOf(input[0])) and i < 4_000 Loop
+        i += 1;
+	convertToRomanNumerals(i);
+	printString(AddressOf(input[0]));
+	printString(AddressOf(result[0]));
+    EndWhile
+    Return i;
+EndFunction
+
