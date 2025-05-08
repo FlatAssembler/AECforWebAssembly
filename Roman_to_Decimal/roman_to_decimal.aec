@@ -105,9 +105,9 @@ Function solve() Which Returns Integer32 Does
     result[0] := 0;
     While strcmp(AddressOf(result[0]), AddressOf(input[0])) and i < 4_000 Loop
         i += 1;
-	convertToRomanNumerals(i);
-	printString(AddressOf(input[0]));
-	printString(AddressOf(result[0]));
+        convertToRomanNumerals(i);
+        printString(AddressOf(input[0]));
+        printString(AddressOf(result[0]));
     EndWhile
     Return i;
 EndFunction
