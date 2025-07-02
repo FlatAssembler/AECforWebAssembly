@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Multiplying Strings - solution to Leetcode 43 in AEC</title>
+  </head>
+  <body>
+    <h1>
+      Multiplying Strings - solution to Leetcode #43 in AEC compiled to
+      WebAssembly
+    </h1>
+    I've recently solved
+    <a href="multiplying-strings.html">the LeetCode 43 problem in JavaScript</a
+    >, so I thought I may as well try solving it in AEC and compile it to
+    WebAssembly using
+    <a href="https://github.com/FlatAssembler/AECforWebAssembly"
+      >AECforWebAssembly</a
+    >. This illustrates how one might deal with big integers in AEC.<br />
+    <label for="input_with_the_first_number">Enter the first number: </label
+    ><input id="input_with_the_first_number" type="text" value="123" /><br />
+    <label for="input_with_the_second_number">Enter the second number: </label
+    ><input id="input_with_the_second_number" type="text" value="456" /><br />
+    <button onclick="main()">Run the AEC program!</button><br />
+    You can see
+    <a href="multiplying-strings-aec.aec.html"
+      >the source code of the AEC program</a
+    >.
+    <pre id="output"></pre>
+    <script>
+      let multiply, first_number, second_number, exports;
+      function get_length_of_the_first_number() {
+        return first_number.length;
+      }
+      function get_length_of_the_second_number() {
+        return second_number.length;
+      }
+      function get_digit_of_the_first_number_at(i) {
+        return first_number.charCodeAt(i);
+      }
+      function get_digit_of_the_second_number_at(i) {
+        return second_number.charCodeAt(i);
+      }
+      function putc(char) {
+        output.innerHTML += String.fromCharCode(char);
+      }
+
+      const stack_pointer = new WebAssembly.Global(
+        { value: "i32", mutable: true },
+        0,
+      );
+      let memory = new WebAssembly.Memory({ initial: 1 });
+
+      let importObject = {
+        JavaScript: {
+          stack_pointer,
+          memory,
+          get_length_of_the_first_number,
+          get_length_of_the_second_number,
+          get_digit_of_the_first_number_at,
+          get_digit_of_the_second_number_at,
+          putc,
+        },
+      };
+
+      fetch("multiplying-strings-aec.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) => WebAssembly.instantiate(bytes, importObject))
+        .then((results) => {
+          exports = results.instance.exports;
+          multiply = exports.multiply;
+        });
+
+      function main() {
+        first_number = document.getElementById(
+          "input_with_the_first_number",
+        ).value;
+        second_number = document.getElementById(
+          "input_with_the_second_number",
+        ).value;
+        document.getElementById("output").innerHTML = "";
+        multiply();
+      }
+    </script>
+  </body>
+</html>
