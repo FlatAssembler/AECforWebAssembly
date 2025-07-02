@@ -1,0 +1,148 @@
+Function get_length_of_the_first_number() Which Returns Integer32 Is External;
+Function get_digit_of_the_first_number_at(Integer32 index) Which Returns Character Is External;
+Function get_length_of_the_second_number() Which Returns Integer32 Is External;
+Function get_digit_of_the_second_number_at(Integer32 index) Which Returns Character Is External;
+Function putc(Character char) Which Returns Nothing Is External;
+
+Character matrix[100*100];
+Function f(Integer16 i, Integer16 j) Which Returns Integer32 Does
+	Return i * 100 + j;
+EndFunction
+
+Character result[100];
+
+Function get_length_of_the_result() Which Returns Integer16 Does
+	Integer16 i := 0;
+	While i < 100 Loop
+		If result[i]=0 Then
+			Return i;
+		EndIf
+		i += 1;
+	EndWhile
+	Return i;
+EndFunction
+
+Function prepend_a_character_to_the_result(Character char) Which Returns Nothing Does
+	Integer16 i := get_length_of_the_result() + 1;
+	While i > 0 Loop
+		result[i]:=result[i - 1];
+		i -= 1;
+	EndWhile
+	result[0] := char;
+EndFunction
+
+Function multiply() Which Returns Nothing Does
+	// Initializing the matrix...
+	Integer32 i := 0, j := 0;
+	While i < get_length_of_the_second_number() Loop
+		j := 0;
+		While j < get_length_of_the_first_number() + get_length_of_the_second_number() + 1 Loop
+			matrix[f(i,j)] := ' ';
+		EndWhile
+		i += 1;
+	EndWhile
+
+	//Filling up the matrix...
+	Integer32 pointer_to_the_digit_in_the_second_number := 0;
+	While pointer_to_the_digit_in_the_second_number < get_length_of_the_second_number() Loop
+		Integer16 carry := 0,
+			pointer_to_the_matrix_column := get_length_of_the_first_number() +
+				pointer_to_the_digit_in_the_second_number + 1;
+		Integer16 pointer_to_the_digit_in_the_first_number := get_length_of_the_first_number() - 1;
+		While pointer_to_the_digit_in_the_first_number >= 0 Loop
+			Integer16 product := (get_digit_of_the_first_number_at(pointer_to_the_digit_in_the_first_number)-'0')*(get_digit_of_the_second_number_at(pointer_to_the_digit_in_the_second_number)-'0') + carry;
+			matrix[f(pointer_to_the_digit_in_the_second_number, pointer_to_the_matrix_column)]
+				:= mod(product, 10);
+			If product >= 10 Then
+				carry := product / 10;
+			Else
+				carry := 0;
+			EndIf
+			pointer_to_the_matrix_column -= 1;
+			pointer_to_the_digit_in_the_first_number -= 1;
+		EndWhile
+		If carry Then
+			matrix[f(pointer_to_the_digit_in_the_second_number,pointer_to_the_matrix_column)] := mod(carry, 10);
+		EndIf
+		If carry >= 10 Then
+			pointer_to_the_matrix_column -= 1;
+			matrix[f(pointer_to_the_digit_in_the_second_number, pointer_to_the_matrix_column)] := carry / 10;
+		EndIf
+		pointer_to_the_digit_in_the_second_number += 1;
+	EndWhile
+	
+	//Summing up the matrix...
+	result[0]:=0;
+	Integer16 carry := 0;
+	i := get_length_of_the_first_number() + get_length_of_the_second_number();
+	While i >= 0 Loop
+		Integer32 sum := carry;
+		j := 0;
+		While j < get_length_of_the_second_number() Loop
+			If not(matrix[f(j, i)] = ' ') Then
+				sum += matrix[f(j, i)] - '0';
+			EndIf
+			j += 1;
+		EndWhile
+		prepend_a_character_to_the_result(mod(sum, 10) + '0');
+		carry := sum / 10;
+		i -= 1;
+	EndWhile
+	If carry Then
+		prepend_a_character_to_the_result(carry + '0');
+	EndIf
+
+	//Replace the trailing zeros with spaces. Now that's a lot easier to do in AEC than in JavaScript...
+	i := 0;
+	While result[i] = '0' Loop
+		result[i] := ' ';
+		i += 1;
+	EndWhile
+
+	//Print the result...
+	putc(' ');
+	putc(' ');
+	i := 0;
+	While i < get_length_of_the_first_number() Loop
+		putc(get_digit_of_the_first_number_at(i));
+		i += 1;
+	EndWhile
+	putc('*');
+	i := 0;
+	While i < get_length_of_the_second_number() Loop
+		putc(get_digit_of_the_second_number_at(i));
+		i += 1;
+	EndWhile
+	putc('\n');
+	
+	i := 0;
+	While i < get_length_of_the_first_number() + get_length_of_the_second_number() + 1 + 2 Loop
+		putc('-');
+		i += 1;
+	EndWhile
+
+	i := 0;
+	While i < get_length_of_the_second_number() Loop
+		j := 0;
+		While j < get_length_of_the_first_number() + get_length_of_the_second_number() + 1 Loop
+			putc(matrix[f(i,j)]);
+			j += 1;
+		EndWhile
+		putc('\n');
+		i += 1;
+	EndWhile
+	
+	i := 0;
+	While i < get_length_of_the_first_number() + get_length_of_the_second_number() + 1 Loop
+		putc('-');
+		i += 1;
+	EndWhile
+	putc('\n');
+
+	i := 0;
+	While result[i] Loop
+		putc(result[i]);
+		i += 1;
+	EndWhile
+	putc('\n');
+EndFunction
