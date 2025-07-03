@@ -3,6 +3,7 @@ Function get_digit_of_the_first_number_at(Integer32 index) Which Returns Charact
 Function get_length_of_the_second_number() Which Returns Integer32 Is External;
 Function get_digit_of_the_second_number_at(Integer32 index) Which Returns Character Is External;
 Function putc(Character char) Which Returns Nothing Is External;
+Function logString(PointerToCharacter string) Which Returns Nothing Is External;
 
 Character matrix[100*100];
 Function f(Integer16 i, Integer16 j) Which Returns Integer32 Does
@@ -42,6 +43,7 @@ Function multiply() Which Returns Nothing Does
 		EndWhile
 		i += 1;
 	EndWhile
+	logString("The matrix is successfully filled with spaces.");
 
 	//Filling up the matrix...
 	Integer32 pointer_to_the_digit_in_the_second_number := 0;
@@ -71,10 +73,12 @@ Function multiply() Which Returns Nothing Does
 		EndIf
 		If carry >= 10 Then
 			pointer_to_the_matrix_column -= 1;
-			matrix[f(pointer_to_the_digit_in_the_second_number, pointer_to_the_matrix_column)] := carry / 10 + '0';
+			matrix[f(pointer_to_the_digit_in_the_second_number, pointer_to_the_matrix_column)] := 
+				carry / 10 + '0';
 		EndIf
 		pointer_to_the_digit_in_the_second_number += 1;
 	EndWhile
+	logString("The matrix is now filled with the products of the first number and the digits of the second.");
 	
 	//Summing up the matrix...
 	result[0]:=0;
@@ -96,6 +100,7 @@ Function multiply() Which Returns Nothing Does
 	If carry Then
 		prepend_a_character_to_the_result(carry + '0');
 	EndIf
+	logString("The matrix is now summed up and the product of the two numbers is calculated.");
 
 	//Replace the trailing zeros with spaces. Now that's a lot easier to do in AEC than in JavaScript...
 	i := 0;
@@ -103,6 +108,7 @@ Function multiply() Which Returns Nothing Does
 		result[i] := ' ';
 		i += 1;
 	EndWhile
+	logString("The trailing zeros in the result are now replaced by spaces.");
 
 	//Print the result...
 	putc(' ');
@@ -151,4 +157,6 @@ Function multiply() Which Returns Nothing Does
 		i += 1;
 	EndWhile
 	putc('\n');
+
+	logString("The result should be visible on the screen now!");
 EndFunction
