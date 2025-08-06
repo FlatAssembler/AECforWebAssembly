@@ -1828,8 +1828,11 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                                : context.structureSizes.at(getType(context))) +
             ")\n" +
             std::string(
-                convertToInteger32(children.at(0), context).indentBy(3)) +
-            "\n\t)\n)",
+                convertToInteger32(children.at(0), context)
+                    .indentBy(
+                        2)) // Indenting by 2 instead of by 3 because of this:
+                            // https://github.com/FlatAssembler/AECforWebAssembly/issues/24
+            + "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
   if (text == ".") { // The dot-operator for accessing structure members.
