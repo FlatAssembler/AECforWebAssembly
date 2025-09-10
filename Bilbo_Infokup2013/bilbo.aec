@@ -282,4 +282,9 @@ Function main() Which Returns Nothing Does {
 }
 EndFunction;
 
-asm("(export \"_start\" (func $main))");
+asm(R"WebAssembly(
+	(export
+		"_start"
+		(func $main)
+	)
+)WebAssembly");
