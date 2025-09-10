@@ -199,6 +199,19 @@ public:
                                     "."
                               : "")
                       << std::endl;
+          if (compilation_target ==
+              "WASI") { // WASI requires global variables to be aligned.
+            auto size_of_the_global_variable =
+                isPointerType(childNode.text)
+                    ? 4
+                    : basicDataTypeSizes.at(childNode.text);
+            while (context.globalVariablePointer %
+                   size_of_the_global_variable) {
+              globalDeclarations += ";;An empty byte left here to keep global "
+                                    "variables aligned.\n";
+              context.globalVariablePointer++;
+            }
+          }
           context.globalVariables[variableName.text] =
               context.globalVariablePointer;
           context.variableTypes[variableName.text] = childNode.text;

@@ -169,9 +169,7 @@ topOfTheStack:
       }
       EndWhile;
       strcat(AddressOf(debugOutput[0]), AddressOf(printingCurrentAttempt[0]));
-      strcat(AddressOf(debugOutput[0]),
-             "    \n"); // Adding random whitespace to strings to make sure
-                        // `dummy_integer` is aligned to 4 bytes.
+      strcat(AddressOf(debugOutput[0]), "\n");
       printString(AddressOf(debugOutput[0]));
     }
     EndIf;
