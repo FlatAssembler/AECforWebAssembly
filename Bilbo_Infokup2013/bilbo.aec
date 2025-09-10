@@ -16,7 +16,7 @@ Structure IOV Consists Of {
 EndStructure;
 
 Function
-fd_write(Integer32 file_descriptor, IOVPointer iovs, Integer32 iovs_len,
+fd_write(Integer32 file_descriptor, PointerToIOV iovs, Integer32 iovs_len,
          PointerToInteger32 nwritten) Which Returns Integer32 Is External;
 
 Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
@@ -169,7 +169,9 @@ topOfTheStack:
       }
       EndWhile;
       strcat(AddressOf(debugOutput[0]), AddressOf(printingCurrentAttempt[0]));
-      strcat(AddressOf(debugOutput[0]), "    \n");
+      strcat(AddressOf(debugOutput[0]),
+             "    \n"); // Adding random whitespace to strings to make sure
+                        // `dummy_integer` is aligned to 4 bytes.
       printString(AddressOf(debugOutput[0]));
     }
     EndIf;
