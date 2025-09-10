@@ -207,8 +207,9 @@ public:
                     : basicDataTypeSizes.at(childNode.text);
             while (context.globalVariablePointer %
                    size_of_the_global_variable) {
-              globalDeclarations += ";;An empty byte left here to keep global "
-                                    "variables aligned.\n";
+              globalDeclarations +=
+                  "\t;;An empty byte left here to keep global "
+                  "variables aligned.\n";
               context.globalVariablePointer++;
             }
           }
