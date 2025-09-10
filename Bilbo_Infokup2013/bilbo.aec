@@ -189,7 +189,7 @@ topOfTheStack:
         printString(AddressOf(debugOutput[0]));
       }
       EndIf;
-      If sum<1000 and sum> result Then {
+      If result < sum < 1000 Then {
       result:
         = sum;
       firstNumber:
