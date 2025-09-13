@@ -1189,13 +1189,23 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    assembly += "(block\n\t(loop\n\t\t(br_if 1\n\t\t\t(i32.eqz\n"
-                "\t\t\t;; Compiling the condition of the while-loop: " +
-                children[0].getLispExpression() + "\n" +
-                convertToInteger32(children[0], context).indentBy(4) +
-                "\n\t\t\t)\n\t\t)\n" +
-                children[1].compile(context).indentBy(2) +
-                "\n\t\t(br 0)\n\t)\n)";
+    assembly +=
+        "(block\n\t(loop ;;Now, in x86 assembly, the \"loop\" directive loops "
+        "by itself, decrementing ecx by one and jumping to some label if it is "
+        "not zero. In WebAssembly, the \"loop\" directive means something else "
+        "entirely. It does not loop by itself, it needs to be branched to in "
+        "order to do looping.\n\t\t(br_if 1 ;;So, we are breaking to a "
+        "\"block\", and breaking to a \"block\" makes the instruction pointer "
+        "(or the program counter) jump to the end of that \"block\", "
+        "effectively like \"break\" in JavaScript and C++.\n\t\t\t(i32.eqz\n"
+        "\t\t\t;; Compiling the condition of the while-loop: " +
+        children[0].getLispExpression() + "\n" +
+        convertToInteger32(children[0], context).indentBy(4) +
+        "\n\t\t\t)\n\t\t)\n" + children[1].compile(context).indentBy(2) +
+        "\n\t\t(br 0) ;;So, we are breaking to a \"loop\", and breaking to a "
+        "\"loop\" makes the instruction pointer (or the program counter) jump "
+        "the the beginning of that \"block\", effectively like \"continue\" in "
+        "JavaScript and C++.\n\t)\n)";
   } else if (isInteger(text))
     assembly += "(i64.const " + text + ")";
   else if (isDecimalNumber(text))
