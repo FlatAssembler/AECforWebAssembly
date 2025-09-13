@@ -273,7 +273,13 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   for (int i = parsedExpression.size() - 1; i >= 0;
        i--) // The unary "+" and "-" operators.
     if ((parsedExpression[i].text == "-" or parsedExpression[i].text == "+") and
-        i != int(parsedExpression.size()) - 1 and
+        i !=
+            int(parsedExpression.size()) -
+                1 and // Not doing this check (not checking whether the current
+                      // token is the very last token in the array given to the
+                      // parser by the tokenizer when dealing with unary
+                      // operators) in the PicoBlaze assembler caused this bug:
+                      // https://github.com/FlatAssembler/PicoBlaze_Simulator_in_JS/issues/42
         parsedExpression[i].children.size() == 0 and
         (!i or (!isComposedOfAlnumsAndOneDot(parsedExpression[i - 1].text) and
                 parsedExpression[i - 1].text.back() != '(' and
