@@ -218,6 +218,11 @@
         font-weight: bold;
         color: #ffa0a0;
       }
+      .Special {
+        font-weight: bold;
+        font-style: italic;
+        color: #ffa0a0;
+      }
       .Statement {
         color: #f0e68c;
         font-weight: bold;
@@ -1799,6 +1804,10 @@ Integer32 directionX[4]    := { 0, 1, 0, -1},
             Binary Toolkit deals with unaligned access</a
           >.</i
         >)<br />
+        <b>UPDATE</b> on 13/09/2025: In AEC-to-WebAssembly compiler version
+        v3.2.0, the global variables are aligned if the compilation target is
+        set to WASI.
+        <br />
         <br /><b id="Arrays">Arrays and Pointers</b><br />
         In the x86 dialect of AEC, you don't declare arrays in AEC, the compiler
         assumes any arrays you mention in AEC are declared in inline assembly
@@ -2652,6 +2661,57 @@ EndFunction</pre
         <span class="inline_code">continue</span>. Most of the time, they are a
         sign of bad code design, but sometimes they aren't, and it's not
         acceptable for a language to discourage them.<br />
+        <b>UPDATE</b> on 13/09/2025: I remember it took me quite a while to
+        realize how to implement a while-loop in WebAssembly. You need to use a
+        <span class="inline_code">loop</span> so that you can, well, loop, and
+        you cannot use <span class="inline_code">block</span> to loop. But if
+        you simply put a <span class="inline_code">br_if</span> statement at the
+        end of it, it will be a do-while loop, rather than a while loop. You
+        need to be able to jump out of a while-loop right after evaluating the
+        condition. Clearly you need both a
+        <span class="inline_code">block</span> and a
+        <span class="inline_code">loop</span>. So, how can you do that? Without
+        further ado, here is how I implemented that into my compiler do that:
+        <pre class="LinuxShell">
+  } <span class="Statement">else</span> <span class="Statement">if</span> (text == <span class="Constant">&quot;While&quot;</span>) {
+    <span class="Statement">if</span> (children.size() &lt; <span class="Constant">2</span> <span class="Statement">or</span> children[<span class="Constant">1</span>].text != <span class="Constant">&quot;Loop&quot;</span>) {
+      std::cerr &lt;&lt; <span class="Constant">&quot;Line &quot;</span> &lt;&lt; lineNumber &lt;&lt; <span class="Constant">&quot;, Column &quot;</span> &lt;&lt; columnNumber
+                &lt;&lt; <span class="Constant">&quot;, Compiler error: Corrupt AST, aborting (or else we will &quot;</span>
+                   <span class="Constant">&quot;segfault)!&quot;</span>
+                &lt;&lt; std::endl;
+      exit(<span class="Constant">1</span>);
+    }
+    assembly +=
+        <span class="Constant">&quot;(block</span><span class="Special">\n\t</span><span class="Constant">(loop ;;Now, in x86 assembly, the </span><span class="Special">\&quot;</span><span class="Constant">loop</span><span class="Special">\&quot;</span><span class="Constant"> directive loops &quot;</span>
+        <span class="Constant">&quot;by itself, decrementing ecx by one and jumping to some label if it is &quot;</span>
+        <span class="Constant">&quot;not zero. In WebAssembly, the </span><span class="Special">\&quot;</span><span class="Constant">loop</span><span class="Special">\&quot;</span><span class="Constant"> directive means something else &quot;</span>
+        <span class="Constant">&quot;entirely. It does not loop by itself, it needs to be branched to in &quot;</span>
+        <span class="Constant">&quot;order to do looping.</span><span class="Special">\n\t\t</span><span class="Constant">(br_if 1 ;;So, we are breaking to a &quot;</span>
+        <span class="Constant">&quot;</span><span class="Special">\&quot;</span><span class="Constant">block</span><span class="Special">\&quot;</span><span class="Constant">, and breaking to a </span><span class="Special">\&quot;</span><span class="Constant">block</span><span class="Special">\&quot;</span><span class="Constant"> makes the instruction pointer &quot;</span>
+        <span class="Constant">&quot;(or the program counter) jump to the end of that </span><span class="Special">\&quot;</span><span class="Constant">block</span><span class="Special">\&quot;</span><span class="Constant">, &quot;</span>
+        <span class="Constant">&quot;effectively like </span><span class="Special">\&quot;</span><span class="Constant">break</span><span class="Special">\&quot;</span><span class="Constant"> in JavaScript and C++.</span><span class="Special">\n\t\t\t</span><span class="Constant">(i32.eqz</span><span class="Special">\n</span><span class="Constant">&quot;</span>
+        <span class="Constant">&quot;</span><span class="Special">\t\t\t</span><span class="Constant">;; Compiling the condition of the while-loop: &quot;</span> +
+        children[<span class="Constant">0</span>].getLispExpression() + <span class="Constant">&quot;</span><span class="Special">\n</span><span class="Constant">&quot;</span> +
+        convertToInteger32(children[<span class="Constant">0</span>], context).indentBy(<span class="Constant">4</span>) +
+        <span class="Constant">&quot;</span><span class="Special">\n\t\t\t</span><span class="Constant">)</span><span class="Special">\n\t\t</span><span class="Constant">)</span><span class="Special">\n</span><span class="Constant">&quot;</span> + children[<span class="Constant">1</span>].compile(context).indentBy(<span class="Constant">2</span>) +
+        <span class="Constant">&quot;</span><span class="Special">\n\t\t</span><span class="Constant">(br 0) ;;So, we are breaking to a </span><span class="Special">\&quot;</span><span class="Constant">loop</span><span class="Special">\&quot;</span><span class="Constant">, and breaking to a &quot;</span>
+        <span class="Constant">&quot;</span><span class="Special">\&quot;</span><span class="Constant">loop</span><span class="Special">\&quot;</span><span class="Constant"> makes the instruction pointer (or the program counter) jump &quot;</span>
+        <span class="Constant">&quot;the the beginning of that </span><span class="Special">\&quot;</span><span class="Constant">block</span><span class="Special">\&quot;</span><span class="Constant">, effectively like </span><span class="Special">\&quot;</span><span class="Constant">continue</span><span class="Special">\&quot;</span><span class="Constant"> in &quot;</span>
+        <span class="Constant">&quot;JavaScript and C++.</span><span class="Special">\n\t</span><span class="Constant">)</span><span class="Special">\n</span><span class="Constant">)&quot;</span>;
+  } 
+	</pre>
+        But notice we cannot simply translate
+        <span class="inline_code">break</span> and
+        <span class="inline_code">continue</span> to
+        <span class="inline_code">(br 0)</span> and
+        <span class="inline_code">(br 1)</span> because... What if they are put
+        in an if-statement? <span class="inline_code">if</span> in WebAssembly
+        behaves like <span class="inline_code">block</span> when it comes to
+        breaking.<br />
+        I think I've made the world a better place by making this piece of
+        information easily available, so that one does not need to look through
+        the source code of an entire compiler to see how a while-loop might be
+        implemented.<br />
         <br /><b id="Functions">Functions</b><br />
         AEC for x86 supports no user-added functions. Furthermore, the parser
         implemented there doesn't support functions with more than 2 arguments.
