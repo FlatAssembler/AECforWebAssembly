@@ -2707,11 +2707,22 @@ EndFunction</pre
         <span class="inline_code">(br 1)</span> because... What if they are put
         in an if-statement? <span class="inline_code">if</span> in WebAssembly
         behaves like <span class="inline_code">block</span> when it comes to
-        breaking.<br />
+        breaking. I've asked
+        <a href="https://langdev.stackexchange.com/q/4616"
+          >a StackExchange question about that</a
+        >.<br />
         I think I've made the world a better place by making this piece of
         information easily available, so that one does not need to look through
         the source code of an entire compiler to see how a while-loop might be
         implemented.<br />
+        UPDATE on 15/09/2025: What do you think, why does the do-while loop in
+        C-like languages have such a seemingly-weird syntax? Why require the
+        curly braces around the body of the loop if the body is already
+        delimited by <span class="inline_code">do</span> and
+        <span class="inline_code">while</span>? I've asked
+        <a href="https://langdev.stackexchange.com/q/4611"
+          >a StackExchange question about that</a
+        >.<br />
         <br /><b id="Functions">Functions</b><br />
         AEC for x86 supports no user-added functions. Furthermore, the parser
         implemented there doesn't support functions with more than 2 arguments.
