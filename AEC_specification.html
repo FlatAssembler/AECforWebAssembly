@@ -2653,14 +2653,21 @@ EndFunction</pre
         range of <span class="inline_code">Integer32</span>. So, that's how you
         do casting in AEC, with the built-in functions named
         <span class="inline_code">DataType(</span>.<br />
-        <b>TODO:</b> Think of some nice syntax for the
-        <span class="inline_code">for</span>-loop, every remotely modern
-        language has a <span class="inline_code">for</span>-loop. Also,
-        implement something like C, C++ and JavaScript
-        <span class="inline_code">break</span> and
-        <span class="inline_code">continue</span>. Most of the time, they are a
-        sign of bad code design, but sometimes they aren't, and it's not
-        acceptable for a language to discourage them.<br />
+        <del
+          ><b>TODO:</b> Think of some nice syntax for the
+          <span class="inline_code">for</span>-loop, every remotely modern
+          language has a <span class="inline_code">for</span>-loop. Also,
+          implement something like C, C++ and JavaScript
+          <span class="inline_code">break</span> and
+          <span class="inline_code">continue</span>. Most of the time, they are
+          a sign of bad code design, but sometimes they aren't, and it's not
+          acceptable for a language to discourage them.</del
+        >
+        (<i
+          >UPDATE on 17/09/2025: The <span class="inline_code">break</span> and
+          <span class="inline_code">continue</span> have been implemented in
+          v3.3.0</i
+        >)<br />
         <b>UPDATE</b> on 13/09/2025: I remember it took me quite a while to
         realize how to implement a while-loop in WebAssembly. You need to use a
         <span class="inline_code">loop</span> so that you can, well, loop, and
@@ -2715,14 +2722,40 @@ EndFunction</pre
         information easily available, so that one does not need to look through
         the source code of an entire compiler to see how a while-loop might be
         implemented.<br />
-        UPDATE on 15/09/2025: What do you think, why does the do-while loop in
-        C-like languages have such a seemingly-weird syntax? Why require the
-        curly braces around the body of the loop if the body is already
+        <b>UPDATE</b> on 15/09/2025: What do you think, why does the do-while
+        loop in C-like languages have such a seemingly-weird syntax? Why require
+        the curly braces around the body of the loop if the body is already
         delimited by <span class="inline_code">do</span> and
         <span class="inline_code">while</span>? I've asked
         <a href="https://langdev.stackexchange.com/q/4611"
           >a StackExchange question about that</a
         >.<br />
+        <b>UPDATE</b> on 17/09/2025: The
+        <span class="inline_code">break</span> and
+        <span class="inline_code">break</span> have been implemented, with the
+        following syntax:
+        <pre>
+#target WASI
+Function test() Which Returns Integer32 Does //Should return 124
+	Integer32 ret := 0, i := 0;
+	While i &lt; 7 Loop
+		i += 1;
+		If i = 3 Then
+			Continue;
+		EndIf
+		If i = 5 Then
+			Break;
+		EndIf
+		ret := ret * 10 + i;
+	EndWhile
+	Return ret;
+EndFunction
+  </pre
+        >
+        Internally, the compiler counts how many if-s there are to the nearest
+        loop and it outputs that number in a break command in case of a
+        continue, and it outputs that number plus one in case of a break.
+        <br />
         <br /><b id="Functions">Functions</b><br />
         AEC for x86 supports no user-added functions. Furthermore, the parser
         implemented there doesn't support functions with more than 2 arguments.
@@ -3874,8 +3907,8 @@ EndFunction;
             token == "asm_i64" ||
             token == "asm_f32" ||
             token == "asm_f64" ||
-	    token == "Break" ||
-	    token == "Continue"
+            token == "Break" ||
+            token == "Continue"
           )
             return '<span class="Keyword">' + token + "</span>";
           if (
