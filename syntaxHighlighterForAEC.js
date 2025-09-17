@@ -44,7 +44,8 @@ function highlightedToken(token) {
       token == "EndWhile" || token == "Loop" || token == ";" ||
       token == "Structure" || token == "Consists" || token == "Of" ||
       token == "EndStructure" || token == "asm" || token == "asm_i32" ||
-      token == "asm_i64" || token == "asm_f32" || token == "asm_f64")
+      token == "asm_i64" || token == "asm_f32" || token == "asm_f64" ||
+      token == "Break" || token == "Continue")
     return '<span class="Keyword">' + token + "</span>";
   if (token == "and" || token == "or" || token == "mod" ||
       token == "AddressOf" || token == "ValueAt" || token == "," ||
