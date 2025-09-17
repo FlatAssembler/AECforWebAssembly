@@ -91,3 +91,12 @@ add_test(NAME HuffmanCodingAssembles
 add_test(NAME HuffmanCodingRuns
 	      COMMAND node automaticTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/HuffmanCodingInAEC)
+      add_test(NAME breakAndContinueTestCompiles
+	      COMMAND aec break_and_continue_test.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+      add_test(NAME breakAndContinueTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm break_and_continue_test.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+      add_test(NAME breakAndContinueTestRuns
+	      COMMAND node break_and_continue_test.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
