@@ -1,0 +1,15 @@
+#target WASI
+Function test() Which Returns Integer32 Does //Should return 124
+	Integer32 ret := 0;
+	While i < 7 Loop
+		i += 1;
+		If i = 3 Then
+			Continue;
+		EndIf
+		If i = 5 Then
+			Break;
+		EndIf
+		ret := ret * 10 + i;
+	EndWhile
+	Return ret;
+EndFunction
