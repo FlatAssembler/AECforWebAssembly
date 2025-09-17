@@ -74,6 +74,11 @@ struct CompilationContext {
   std::vector<function> functions;
   int stackSizeOfThisFunction = 0;
   int stackSizeOfThisScope = 0; // Variables declared inside while-loops...
+  bool areWeInsideOfALoop =
+      false; // To provide a useful error message in case somebody tries to use
+             // "Break" or "Continue" outside of a loop, rather than outputting
+             // invalid assembly code.
+  int distanceInBlocksToTheNearestLoop = 0; // For "Break" and "Continue"...
   std::string currentFunctionName;
   std::vector<structure> structures;
   std::map<std::string, unsigned>
@@ -100,6 +105,9 @@ struct CompilationContext {
         std::to_string(stackSizeOfThisFunction) +
         ",\n\"stackSizeOfThisScope\":" + std::to_string(stackSizeOfThisScope) +
         ",\n\"currentFunctionName\":" + JSONifyString(currentFunctionName) +
+        ",\n\"areWeInsideOfALoop\":" + std::to_string(areWeInsideOfALoop) +
+        ",\n\"distanceInBlocksToTheNearestLoop\":" +
+        std::to_string(distanceInBlocksToTheNearestLoop) +
         ",\n\"structures\":[\n";
     for (size_t i = 0; i < structures.size(); i++)
       if (i == structures.size() - 1)

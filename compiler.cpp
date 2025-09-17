@@ -1171,16 +1171,18 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
-    assembly += "(if\n"
-                "\t;;Compiling the condition of if-branching: " +
-                children[0].getLispExpression() + "\n" +
-                convertToInteger32(children[0], context).indentBy(1) +
-                "\n\t(then\n" + children[1].compile(context).indentBy(2) +
-                "\n\t)" +
-                ((children.size() == 3)
-                     ? "\n\t(else\n" +
-                           children[2].compile(context).indentBy(2) + "\n\t)\n)"
-                     : AssemblyCode("\n)"));
+    auto newContext = context;
+    newContext.distanceInBlocksToTheNearestLoop++;
+    assembly +=
+        "(if\n"
+        "\t;;Compiling the condition of if-branching: " +
+        children[0].getLispExpression() + "\n" +
+        convertToInteger32(children[0], context).indentBy(1) + "\n\t(then\n" +
+        children[1].compile(newContext).indentBy(2) + "\n\t)" +
+        ((children.size() == 3)
+             ? "\n\t(else\n" + children[2].compile(newContext).indentBy(2) +
+                   "\n\t)\n)"
+             : AssemblyCode("\n)"));
   } else if (text == "While") {
     if (children.size() < 2 or children[1].text != "Loop") {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -1189,6 +1191,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << std::endl;
       exit(1);
     }
+    auto newContext = context;
+    newContext.areWeInsideOfALoop = true;
+    newContext.distanceInBlocksToTheNearestLoop = 0;
     assembly +=
         "(block\n\t(loop ;;Now, in x86 assembly, the \"loop\" directive loops "
         "by itself, decrementing ecx by one and jumping to some label if it is "
@@ -1201,11 +1206,26 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         "\t\t\t;; Compiling the condition of the while-loop: " +
         children[0].getLispExpression() + "\n" +
         convertToInteger32(children[0], context).indentBy(4) +
-        "\n\t\t\t)\n\t\t)\n" + children[1].compile(context).indentBy(2) +
+        "\n\t\t\t)\n\t\t)\n" + children[1].compile(newContext).indentBy(2) +
         "\n\t\t(br 0) ;;So, we are breaking to a \"loop\", and breaking to a "
         "\"loop\" makes the instruction pointer (or the program counter) jump "
         "the the beginning of that \"block\", effectively like \"continue\" in "
         "JavaScript and C++.\n\t)\n)";
+  } else if (text == "Break" or text == "Continue") {
+    if (not(context.areWeInsideOfALoop)) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Compiler error: The directive \"" << text
+                << "\" may only be used inside of a loop!" << std::endl;
+      std::exit(1);
+    }
+    if (text == "Continue")
+      assembly += "(br " +
+                  std::to_string(context.distanceInBlocksToTheNearestLoop) +
+                  ")";
+    else
+      assembly += "(br " +
+                  std::to_string(context.distanceInBlocksToTheNearestLoop + 1) +
+                  ")";
   } else if (isInteger(text))
     assembly += "(i64.const " + text + ")";
   else if (isDecimalNumber(text))

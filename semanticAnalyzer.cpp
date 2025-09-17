@@ -188,9 +188,10 @@ std::string TreeNode::getType(const CompilationContext &context) const {
                            children[1].getType(context));
   }
   if (text == "If" or text == "Then" or text == "Else" or text == "While" or
-      text == "Loop" or text == "Does" or
-      text == "Return") // Or else the compiler will claim those
-                        // tokens are undeclared variables.
+      text == "Loop" or text == "Does" or text == "Return" or text == "Break" or
+      text == "Continue")
+    // Or else the compiler will claim those
+    // tokens are undeclared variables.
     return "Nothing";
   if (isValidVariableName(text)) {
     std::cerr << "Line " << lineNumber << ", Column " << columnNumber

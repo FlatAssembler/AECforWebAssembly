@@ -1,6 +1,6 @@
 #target WASI
 Function test() Which Returns Integer32 Does //Should return 124
-	Integer32 ret := 0;
+	Integer32 ret := 0, i := 0;
 	While i < 7 Loop
 		i += 1;
 		If i = 3 Then
