@@ -13,3 +13,12 @@ Function test() Which Returns Integer32 Does //Should return 124
 	EndWhile
 	Return ret;
 EndFunction
+
+Function issue25() Which Returns Integer32 Does //Should return 1.
+  Integer32 a := 1;
+  While 1 Loop
+    Integer32 b := 2;
+    Break;
+  EndWhile
+  Return a;
+EndFunction
