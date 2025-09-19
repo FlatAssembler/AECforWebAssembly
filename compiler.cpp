@@ -341,6 +341,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 isPointerType(childNode.text)
                     ? 4
                     : basicDataTypeSizes.at(childNode.text);
+            context.stackSizeOfThisLoop +=
+                isPointerType(childNode.text)
+                    ? 4
+                    : basicDataTypeSizes.at(
+                          childNode
+                              .text); // https://github.com/FlatAssembler/AECforWebAssembly/issues/25
             assembly +=
                 "(global.set $stack_pointer\n\t(i32.add (global.get "
                 "$stack_pointer) (i32.const " +
@@ -391,6 +397,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 childNode.lineNumber;
             context.stackSizeOfThisFunction += arraySizeInBytes;
             context.stackSizeOfThisScope += arraySizeInBytes;
+            context.stackSizeOfThisLoop +=
+                arraySizeInBytes; // https://github.com/FlatAssembler/AECforWebAssembly/issues/25
             assembly += "(global.set $stack_pointer\n\t(i32.add (global.get "
                         "$stack_pointer) (i32.const " +
                         std::to_string(arraySizeInBytes) +
@@ -597,6 +605,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             pair.second += arraySizeInBytes;
           context.stackSizeOfThisFunction += arraySizeInBytes;
           context.stackSizeOfThisScope += arraySizeInBytes;
+          context.stackSizeOfThisLoop += arraySizeInBytes;
           assembly +=
               "(global.set $stack_pointer\n\t(i32.add (global.get "
               "$stack_pointer) (i32.const " +
@@ -1194,6 +1203,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     auto newContext = context;
     newContext.areWeInsideOfALoop = true;
     newContext.distanceInBlocksToTheNearestLoop = 0;
+    newContext.stackSizeOfThisLoop =
+        0; // https://github.com/FlatAssembler/AECforWebAssembly/issues/25
     assembly +=
         "(block\n\t(loop ;;Now, in x86 assembly, the \"loop\" directive loops "
         "by itself, decrementing ecx by one and jumping to some label if it is "
@@ -1210,7 +1221,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         "\n\t\t(br 0) ;;So, we are breaking to a \"loop\", and breaking to a "
         "\"loop\" makes the instruction pointer (or the program counter) jump "
         "the the beginning of that \"block\", effectively like \"continue\" in "
-        "JavaScript and C++.\n\t)\n)";
+        "JavaScript and C++.\n\t)\n)"; // Joe Zbiciak on Quora claims that this
+                                       // core is actually incorrect:
+                                       // https://www.quora.com/How-do-you-implement-a-while-loop-in-WebAssembly-Using-loop-and-putting-br_if-at-the-end-of-that-loop-makes-a-do-while-loop-rather-than-a-while-loop-Can-you-somehow-jump-to-the-end-of-a-loop-from-near-the-beginning/answer/Joe-Zbiciak?comment_id=486547728&comment_type=2
   } else if (text == "Break" or text == "Continue") {
     if (not(context.areWeInsideOfALoop)) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
@@ -1218,10 +1231,24 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 << "\" may only be used inside of a loop!" << std::endl;
       std::exit(1);
     }
+    assembly +=
+        "(global.set $stack_pointer (i32.sub (global.get $stack_pointer) "
+        "(i32.const " +
+        std::to_string(context.stackSizeOfThisLoop) +
+        "))) ;; If we don't do this, we will end up with this error: "
+        "https://github.com/FlatAssembler/AECforWebAssembly/issues/25\n";
     if (text == "Continue")
-      assembly += "(br " +
-                  std::to_string(context.distanceInBlocksToTheNearestLoop) +
-                  ")";
+      assembly +=
+          "(br " +
+          std::to_string(
+              context
+                  .distanceInBlocksToTheNearestLoop) + // We cannot simply
+                                                       // output `(br 0)` because
+                                                       // of this technical
+                                                       // detail from
+                                                       // WebAssembly:
+                                                       // https://langdev.stackexchange.com/q/4616/330
+          ")";
     else
       assembly += "(br " +
                   std::to_string(context.distanceInBlocksToTheNearestLoop + 1) +

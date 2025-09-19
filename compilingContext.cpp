@@ -79,6 +79,9 @@ struct CompilationContext {
              // "Break" or "Continue" outside of a loop, rather than outputting
              // invalid assembly code.
   int distanceInBlocksToTheNearestLoop = 0; // For "Break" and "Continue"...
+  int stackSizeOfThisLoop =
+      0; // Necessary because of this:
+         // https://github.com/FlatAssembler/AECforWebAssembly/issues/25
   std::string currentFunctionName;
   std::vector<structure> structures;
   std::map<std::string, unsigned>
@@ -108,6 +111,7 @@ struct CompilationContext {
         ",\n\"areWeInsideOfALoop\":" + std::to_string(areWeInsideOfALoop) +
         ",\n\"distanceInBlocksToTheNearestLoop\":" +
         std::to_string(distanceInBlocksToTheNearestLoop) +
+        ",\n\"stackSizeOfThisLoop\":" + std::to_string(stackSizeOfThisLoop) +
         ",\n\"structures\":[\n";
     for (size_t i = 0; i < structures.size(); i++)
       if (i == structures.size() - 1)
