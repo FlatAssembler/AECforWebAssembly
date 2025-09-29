@@ -369,7 +369,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfCharacter(
                         assignment.interpretAsACompileTimeIntegerConstant()) +
-                    ")\n";
+                    ") ;; Hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeIntegerConstant()) +
+                    "\n";
               else if (childNode.text == "Integer16")
                 globalDeclarations +=
                     "\t(data 0 (i32.const " +
@@ -377,7 +380,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfInteger16(
                         assignment.interpretAsACompileTimeIntegerConstant()) +
-                    ")\n";
+                    ") ;; Hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeIntegerConstant()) +
+                    "\n";
               else if (childNode.text == "Integer32")
                 globalDeclarations +=
                     "\t(data 0 (i32.const " +
@@ -385,7 +391,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfInteger32(
                         assignment.interpretAsACompileTimeIntegerConstant()) +
-                    ")\n";
+                    ") ;; Hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeIntegerConstant()) +
+                    "\n";
               else if (childNode.text == "Integer64")
                 globalDeclarations +=
                     "\t(data 0 (i32.const " +
@@ -393,7 +402,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfInteger64(
                         assignment.interpretAsACompileTimeIntegerConstant()) +
-                    ")\n";
+                    ") ;; Hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeIntegerConstant()) +
+                    "\n";
               else if (childNode.text == "Decimal32")
                 globalDeclarations +=
                     "\t(data 0 (i32.const " +
@@ -401,7 +413,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfDecimal32(
                         assignment.interpretAsACompileTimeDecimalConstant()) +
-                    ")\n";
+                    ") ;; IEEE754 hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeDecimalConstant()) +
+                    "\n";
               else if (childNode.text == "Decimal64")
                 globalDeclarations +=
                     "\t(data 0 (i32.const " +
@@ -409,7 +424,10 @@ public:
                     ") " +
                     getCharVectorRepresentationOfDecimal64(
                         assignment.interpretAsACompileTimeDecimalConstant()) +
-                    ")\n";
+                    ") ;; IEEE754 hex of " +
+                    std::to_string(
+                        assignment.interpretAsACompileTimeDecimalConstant()) +
+                    "\n";
               else {
                 std::cerr << "Line " << assignment.lineNumber << ", Column "
                           << assignment.columnNumber
@@ -780,6 +798,22 @@ In the meantime, you can try modifying your program to use ")"
                         << std::endl;
               exit(1);
             }
+            if (compilation_target == "WASI") {
+              int size_of_the_type = 0;
+              if (isPointerType(typeName.text))
+                size_of_the_type = 4;
+              else if (basicDataTypeSizes.count(typeName.text))
+                size_of_the_type = basicDataTypeSizes.at(typeName.text);
+              else
+                size_of_the_type = 8;
+              while (currentStructure.sizeInBytes % size_of_the_type) {
+                globalDeclarations += "\t;;Leaving an empty byte here in order "
+                                      "for the access to " +
+                                      typeName.text + " to be aligned by " +
+                                      std::to_string(size_of_the_type) + "\n";
+                currentStructure.sizeInBytes++;
+              }
+            }
             currentStructure.memberNames.push_back(memberName.text);
             currentStructure.memberTypes[memberName.text] = typeName.text;
             currentStructure.memberOffsetInBytes[memberName.text] =
@@ -901,6 +935,14 @@ In the meantime, you can try modifying your program to use ")"
           context.variableTypes[instanceName.text] = structureName.text;
           context.placesOfVariableDeclarations[instanceName.text] =
               instanceName.lineNumber;
+          if (compilation_target == "WASI") {
+            while (context.globalVariablePointer % 8) {
+              globalDeclarations +=
+                  "\t;;Leaving an empty byte here so that the access to the "
+                  "global structure will be aligned by 8.\n";
+              context.globalVariablePointer++;
+            }
+          }
           context.globalVariables[instanceName.text] =
               context.globalVariablePointer;
           globalDeclarations +=
