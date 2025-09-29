@@ -1,6 +1,6 @@
 # https://discord.com/channels/172018499005317120/172018499005317120/807727805080010804
 cmake_minimum_required(VERSION 3.10)
-project(AECForWebAssembly VERSION 3.3.1)
+project(AECForWebAssembly VERSION 3.3.2)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -91,12 +91,12 @@ add_test(NAME HuffmanCodingAssembles
 add_test(NAME HuffmanCodingRuns
 	      COMMAND node automaticTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/HuffmanCodingInAEC)
-      add_test(NAME breakAndContinueTestCompiles
+add_test(NAME breakAndContinueTestCompiles
 	      COMMAND aec break_and_continue_test.aec
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      add_test(NAME breakAndContinueTestAssembles
+add_test(NAME breakAndContinueTestAssembles
 	      COMMAND npx -q -p wabt wat2wasm break_and_continue_test.wat
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      add_test(NAME breakAndContinueTestRuns
+add_test(NAME breakAndContinueTestRuns
 	      COMMAND node break_and_continue_test.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
