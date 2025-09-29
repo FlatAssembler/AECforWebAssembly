@@ -1,0 +1,14 @@
+#target WASI
+
+Structure MyStructure Consists Of
+	Character char;
+	Integer32 int;
+	Character secondChar;
+EndStructure
+
+InstantiateStructure MyStructure first, second;
+
+Function test() Which Returns Integer32 Does // Should return 1.
+	Return SizeOf(MyStructure) = 9 and
+		mod(Integer32(AddressOf(second)), 8) = 0;
+EndFunction

@@ -100,3 +100,12 @@ add_test(NAME breakAndContinueTestAssembles
 add_test(NAME breakAndContinueTestRuns
 	      COMMAND node break_and_continue_test.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME alignedAccessTestCompiles
+	      COMMAND aec alignedAccessTest.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME alignedAccessTestAssembles
+	      COMMAND npx -q -p wabt wat2wasm alignedAccessTest.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME alignedAccessTestRuns
+	      COMMAND node alignedAccessTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
