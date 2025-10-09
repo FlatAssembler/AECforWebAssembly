@@ -77,4 +77,21 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
     console.log("The AEC program has failed the test!");
     process.exit(1);
   }
+  text = "NO MAN IS AS BLOODTHIRSTY AS CAT";
+  console.log("Testing with the text: " + text);
+  exports.main();
+  console.log("The AEC program has finished its execution!");
+  str = "";
+  ptr = exports.getAddressOfTheOutput();
+  while (buffer[ptr]) {
+    str += String.fromCharCode(buffer[ptr]);
+    ptr++;
+  }
+  if (str ===
+      "10000001111010001010001111001011111010011111101011011000000010111001110001001110010110011101011101001111111011010001\n") {
+    console.log("The AEC program has passed the test!");
+  } else {
+    console.log("The AEC program has failed the test!");
+    process.exit(1);
+  }
 });
