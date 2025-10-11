@@ -50,7 +50,8 @@ else {
   }
   let broj_obrnuto_poredanih_podniza, broj_vec_poredanih_podniza,
       broj_pokretanja_QuickSorta, broj_pokretanja_MergeSorta,
-      broj_pokretanja_SelectSorta;
+      broj_pokretanja_SelectSorta, broj_usporedbi_u_AECu;
+  function izvijesti_o_broju_usporedbi(n) { broj_usporedbi_u_AECu = n; }
   function izvijesti_o_obrnuto_poredanim_nizovima(n) {
     broj_obrnuto_poredanih_podniza = n;
   }
@@ -102,6 +103,7 @@ else {
       izvijesti_o_pokretanju_QuickSorta : izvijesti_o_pokretanju_QuickSorta,
       izvijesti_o_pokretanju_MergeSorta : izvijesti_o_pokretanju_MergeSorta,
       izvijesti_o_pokretanju_SelectSorta : izvijesti_o_pokretanju_SelectSorta,
+      izvijesti_o_broju_usporedbi : izvijesti_o_broju_usporedbi,
       izvijesti_JavaScript_o_nedostatku_memorije :
           izvijesti_JavaScript_o_nedostatku_memorije,
       printFloat : printFloat
@@ -116,19 +118,24 @@ else {
             const izvozi_iz_AECa = pokazivac_na_AEC_program.instance.exports;
             const pocetna_AEC_funkcija = izvozi_iz_AECa.pocetna_AEC_funkcija;
             console.log(
-                "Logaritam veličine niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
+                "Logaritam veličine niza\tVrijeme potrebno AEC-u\tVrijeme potrebno JavaScriptu\tKoliko je usporedbi napravio JavaScript\tKoliko je usporedbi napravio AEC\tBroj obrnuto poredanih podniza\tBroj već poredanih podniza\tBroj izvođenja MergeSorta\tBroj izvođenja QuickSorta\tBroj izvođenja SelectSorta");
             for (let logaritam_velicine_niza = 0; logaritam_velicine_niza <= 20;
                  logaritam_velicine_niza +=
                  logaritam_velicine_niza >= 10 && logaritam_velicine_niza < 13
                      ? 1 / 5
-                     : logaritam_velicine_niza >= 13 ? 2 / 5 : 1 / 2) {
+                 : logaritam_velicine_niza >= 13 ? 2 / 5
+                                                 : 1 / 2) {
               velicina_niza = Math.pow(2, logaritam_velicine_niza);
               niz = new Int32Array(velicina_niza);
               for (let i = 0; i < velicina_niza; i++)
                 niz[i] = (Math.random() - 1 / 2) * velicina_niza * 2;
               pocetna_AEC_funkcija();
+              let kolikoJeUsporedbiNapravioJavascript = 0;
               vrijemePocetkaSortiranja = performance.now();
-              niz.sort();
+              niz.sort(function(first, second) {
+                kolikoJeUsporedbiNapravioJavascript++;
+                return first - second;
+              });
               let AEC_niz = new Int32Array(memory.buffer, gdje_se_nalazi_niz,
                                            velicina_niza);
               for (let i = 0; i < velicina_niza; i++)
@@ -142,6 +149,8 @@ else {
               console.log(logaritam_velicine_niza + "\t" +
                           Math.log2(trajanjeSortiranja + 1) + "\t" +
                           Math.log2(vrijemePotrebnoJavaScriptu + 1) + "\t" +
+                          Math.log2(kolikoJeUsporedbiNapravioJavascript + 1) +
+                          "\t" + Math.log2(broj_usporedbi_u_AECu + 1) + "\t" +
                           Math.log2(broj_obrnuto_poredanih_podniza + 1) + "\t" +
                           Math.log2(broj_vec_poredanih_podniza + 1) + "\t" +
                           Math.log2(broj_pokretanja_MergeSorta + 1) + "\t" +
