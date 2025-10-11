@@ -349,7 +349,7 @@ razvrstanost:
     printString("Kraj relevantnog dijela niza!");
   }
   EndIf;
-  If je_li_niz_vec_poredan and not(razvrstanost = 1 or razvrstanost > 1) Then {
+  If je_li_niz_vec_poredan and not(razvrstanost = 1) Then {
     // Opet ne smije biti...
     printString("Niz je poredan, a razvrstanost nije 1.");
     printString("Relevantni dio niza iznosi:");
@@ -363,7 +363,7 @@ razvrstanost:
     printString("Kraj relevantnog dijela niza!");
   }
   EndIf;
-  If not(je_li_niz_vec_poredan) and (razvrstanost = 1 or razvrstanost > 1)
+  If not(je_li_niz_vec_poredan) and razvrstanost >= 1
                                         Then {
     // Open ne smije biti...
     printString("Razvrstanost je 1, a niz nije poredan!");
@@ -434,11 +434,11 @@ i:
           prirodni_logaritam(gornja_granica - donja_granica) /
           prirodni_logaritam(2);
   // I sada kreće grananje na temelju izračunatog...
-  If razvrstanost = 1 or razvrstanost > 1 Then {
+  If razvrstanost >= 1 Then {
     broj_vec_poredanih_podniza += 1;
     Return;
   }
-  ElseIf razvrstanost = -1 or razvrstanost < -1 Then {
+  ElseIf razvrstanost <= -1 Then {
     broj_obrnuto_poredanih_podniza += 1;
     Integer32 i : = donja_granica;
     Integer32 j : = gornja_granica - 1;
