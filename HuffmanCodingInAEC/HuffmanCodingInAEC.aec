@@ -558,25 +558,25 @@ i:
     }
     EndWhile;
     lengthOfTheArray -= 1;
-
-    If MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION Then {
-      // Delete the first minimum from the array...
-      If minimum >
-          secondMinimum Then { // If the first minimum moved while we were
-                               // deleting the second minimum from the array.
-        minimum -= 1;
-      }
-      EndIf;
-    i:
-      = minimum;
-      While i < lengthOfTheArray - 1 Loop {
-        array[i] : = array[i + 1];
-        i += 1;
-      }
-      EndWhile;
-      array[lengthOfTheArray - 1] : = sumOfTheTwoMostFrequent;
+    If not(MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION) Then {
+      Continue;
     }
     EndIf;
+    // Delete the first minimum from the array...
+    If minimum >
+        secondMinimum Then { // If the first minimum moved while we were
+                             // deleting the second minimum from the array.
+      minimum -= 1;
+    }
+    EndIf;
+  i:
+    = minimum;
+    While i < lengthOfTheArray - 1 Loop {
+      array[i] : = array[i + 1];
+      i += 1;
+    }
+    EndWhile;
+    array[lengthOfTheArray - 1] : = sumOfTheTwoMostFrequent;
   }
   EndWhile;
 
@@ -642,7 +642,7 @@ i:
   strcat(AddressOf(stringToBePrinted[0]), "Decoding the output...\n");
   printString(AddressOf(stringToBePrinted[0]));
 
-  Integer16 j : = 0;
+  Integer16 j : = 0, k : = 0;
   While j < strlen(AddressOf(output[0])) - 1 Loop {
   i:
     = 0;
@@ -686,6 +686,12 @@ i:
     strcat(AddressOf(stringToBePrinted[0]), AddressOf(stringToBeAdded[0]));
     printString(AddressOf(stringToBePrinted[0]));
     j += strlen(mapOfCodes[i]);
+    If not(i = getCharacterOfTheInput(k)) Then {
+      printString("ERROR: The decoded output does not match the input!\n");
+      Break;
+    }
+    EndIf;
+    k += 1;
   }
   EndWhile;
 }
