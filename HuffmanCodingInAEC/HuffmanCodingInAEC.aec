@@ -804,12 +804,7 @@ minimumX:
     stringToBePrinted[0] : = 0;
     strcat(AddressOf(stringToBePrinted[0]), mapOfCodes[i]);
     strcat(AddressOf(stringToBePrinted[0]), "=>");
-    Character stringToBeAdded[5];
-    stringToBeAdded[0] : = '\'';
-    stringToBeAdded[1] : = i;
-    stringToBeAdded[2] : = '\'';
-    stringToBeAdded[3] : = '\n';
-    stringToBeAdded[4] : = 0;
+    Character stringToBeAdded[5] : = {'\'', i, '\'', '\n', 0};
     strcat(AddressOf(stringToBePrinted[0]), AddressOf(stringToBeAdded[0]));
     printString(AddressOf(stringToBePrinted[0]));
     j += strlen(mapOfCodes[i]);
