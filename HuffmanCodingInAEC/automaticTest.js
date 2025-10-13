@@ -39,6 +39,11 @@ let importObject = {
     segmentationFault : segmentationFault,
     getLengthOfTheInput : getLengthOfTheInput,
     getCharacterOfTheInput : getCharacterOfTheInput,
+    drawRectangle : function() {},
+    drawLine : function() {},
+    drawText : function() {},
+    setDiagramWidth : function() {},
+    setDiagramHeight : function() {},
   },
 };
 WebAssembly.instantiate(buffer, importObject).then((result) => {

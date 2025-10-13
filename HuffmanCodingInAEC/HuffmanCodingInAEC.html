@@ -29,6 +29,9 @@
         font-family: Times;
         padding: 3px;
       }
+      #div_with_svg {
+        overflow-x: scroll;
+      }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
@@ -57,8 +60,12 @@
     </form>
     <button onclick="invokeAECfunctions()">Invoke AEC program!</button
     ><br /><br />
-    AEC program output:<br />
+    AEC program console output:<br />
     <span id="format_as_code"></span>
+    AEC program graphics output:<br />
+    <div id="div_with_svg">
+      <svg id="diagram"></svg>
+    </div>
     <br />
     You can see the source code of the AEC program
     <a href="HuffmanCodingInAEC.aec.html">here</a>.<br /><br />
@@ -90,9 +97,9 @@
       čvora u nizu. Naime, može se desiti situacija da više podataka može imati
       vrijednost najmanjeg, pa je pitanje kojeg odabrati. Optimalan algoritam
       traženja najmanjeg će uvijek odabrati prvu pojavu najmanjeg čvora. Znači
-      ja bih najprije pogledao da li se u oba slučaja radi na isti način. Primjer
-      za niz 5,1,3,7,2,1,4, bila bi odabrana jedinica na 2. mjestu, a ne ona
-      jedinica koja je na predzadnjem mjestu!
+      ja bih najprije pogledao da li se u oba slučaja radi na isti način.
+      Primjer za niz 5,1,3,7,2,1,4, bila bi odabrana jedinica na 2. mjestu, a ne
+      ona jedinica koja je na predzadnjem mjestu!
       <br /><br />
       Druga stvar koja može dovesti do više verzija stabla je kada dva najmanja
       odabrana čvora imaju jednaku vrijednost. Kako mi imamo pravilo da zbog
@@ -127,6 +134,7 @@
       testing.</ins
     >
     <script type="text/javascript">
+      const svgNS = document.getElementById("diagram").namespaceURI;
       const stack_pointer = new WebAssembly.Global(
         { value: "i32", mutable: true },
         0,
@@ -144,6 +152,7 @@
       }
       function clearScreen() {
         document.getElementById("format_as_code").innerHTML = "";
+        document.getElementById("diagram").innerHTML = "";
       }
       function noMoreFreeMemory() {
         alert("The AEC program reports to have run out of memory!");
@@ -159,6 +168,43 @@
       function getCharacterOfTheInput(i) {
         return text.charCodeAt(i);
       }
+      function drawRectangle(x, y, width, height) {
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("fill", "lightGray");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", width);
+        rect.setAttribute("height", height);
+        document.getElementById("diagram").appendChild(rect);
+      }
+      function drawLine(x1, y1, x2, y2) {
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("stroke", "black");
+        line.setAttribute("x1", x1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y1", y1);
+        line.setAttribute("y2", y2);
+        document.getElementById("diagram").appendChild(line);
+      }
+      function drawText(x, y, ptr) {
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
+        while (buffer[ptr]) {
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
+        }
+        const svgText = document.createElementNS(svgNS, "text");
+        svgText.appendChild(document.createTextNode(str));
+        svgText.setAttribute("x", x);
+        svgText.setAttribute("y", y);
+        document.getElementById("diagram").appendChild(svgText);
+      }
+      function setDiagramWidth(width) {
+        document.getElementById("diagram").setAttribute("width", width);
+      }
+      function setDiagramHeight(height) {
+        document.getElementById("diagram").setAttribute("height", height);
+      }
       let importObject = {
         JavaScript: {
           stack_pointer: stack_pointer,
@@ -169,6 +215,11 @@
           segmentationFault: segmentationFault,
           getLengthOfTheInput: getLengthOfTheInput,
           getCharacterOfTheInput: getCharacterOfTheInput,
+          drawRectangle: drawRectangle,
+          drawLine: drawLine,
+          drawText: drawText,
+          setDiagramWidth: setDiagramWidth,
+          setDiagramHeight: setDiagramHeight,
         },
       };
       let nQueensPuzzle;

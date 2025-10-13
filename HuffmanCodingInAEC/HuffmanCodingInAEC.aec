@@ -6,6 +6,14 @@ Function clearScreen() Which Returns Nothing Is External;
 Function getLengthOfTheInput() Which Returns Integer16 Is External;
 Function
 getCharacterOfTheInput(Integer16 index) Which Returns Character Is External;
+Function setDiagramWidth(Integer32 width) Which Returns Nothing Is External;
+Function setDiagramHeight(Integer32 height) Which Returns Nothing Is External;
+Function drawLine(Integer32 x1, Integer32 y1, Integer32 x2,
+                  Integer32 y2) Which Returns Nothing Is External;
+Function drawRectangle(Integer32 x, Integer32 y, Integer32 width,
+                       Integer32 height) Which Returns Nothing Is External;
+Function drawText(Integer32 x, Integer32 y,
+                  PointerToCharacter text) Which Returns Nothing Is External;
 
 Integer32 NDEBUG : = 1,
                  MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION : = 1;
@@ -17,6 +25,7 @@ Structure TreeNode Consists Of {
   Integer16 frequencyOfCharacter;
   PointerToTreeNode leftChild, rightChild;
   Character code[16];
+  Integer32 x, y;
 }
 EndStructure;
 
@@ -85,6 +94,24 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does {
   }
   EndIf;
   isTreeNodeUsed[(treeNode - AddressOf(treeNodes[0])) / SizeOf(TreeNode)] : = 0;
+}
+EndFunction;
+
+Function getHeight(PointerToTreeNode node) Which Returns Integer32 Does {
+  If not(node) Then { Return 0; }
+  EndIf;
+  Integer32 max : = 0;
+  If getHeight(node->leftChild) > max Then {
+  max:
+    = getHeight(node->leftChild);
+  }
+  EndIf;
+  If getHeight(node->rightChild) > max Then {
+  max:
+    = getHeight(node->rightChild);
+  }
+  EndIf;
+  Return max + 1;
 }
 EndFunction;
 
@@ -322,6 +349,85 @@ Function getAddressOfTheOutput() Which Returns PointerToCharacter
            // the Huffman coding stored in `output` with the known good
            // encodings for test strings.
   Return AddressOf(output[0]);
+}
+EndFunction;
+
+Function setCoordinates(PointerToTreeNode node, Integer32 x, Integer32 y,
+                        Integer32 space) Which Returns Nothing Does {
+  node->x : = x;
+  node->y : = y;
+  If node->leftChild Then {
+    setCoordinates(node->leftChild, x - space, y + 75, space / 2);
+  }
+  EndIf;
+  If node->rightChild Then {
+    setCoordinates(node->rightChild, x + space, y + 75, space / 2);
+  }
+  EndIf;
+}
+EndFunction;
+
+Integer32 minimumX, maximumX;
+
+Function
+findMinimumAndMaximumX(PointerToTreeNode node) Which Returns Nothing Does {
+  If node->x < minimumX Then {
+  minimumX:
+    = node->x;
+  }
+  EndIf;
+  If node->x > maximumX Then {
+  maximumX:
+    = node->x;
+  }
+  EndIf;
+
+  If node->rightChild Then { findMinimumAndMaximumX(node->rightChild); }
+  EndIf;
+  If node->leftChild Then { findMinimumAndMaximumX(node->leftChild); }
+  EndIf;
+}
+EndFunction;
+
+Function shl(Integer32 x, Integer32 y) Which Returns Integer32 Does {
+  Return asm_i32(R"WebAssembly(
+(i32.shl
+	(i32.load %x)
+	(i32.load %y)
+)
+)WebAssembly");
+}
+EndFunction;
+
+Function drawTree(PointerToTreeNode node) Which Returns Nothing Does {
+  drawRectangle(node->x - minimumX, node->y, 50, 50);
+  If node->character Then {
+    Character output[4];
+    output[0] : = '\'';
+    output[1] : = node->character;
+    output[2] : = '\'';
+    output[3] : = 0;
+    drawText(node->x + 5 - minimumX, node->y + 20, AddressOf(output[0]));
+  }
+  EndIf;
+  Character output[4];
+  output[0] : = 0;
+  convertIntegerToString(AddressOf(output[0]), node->frequencyOfCharacter);
+  drawText(node->x + 5 - minimumX, node->y + 40, AddressOf(output[0]));
+  If node->leftChild Then {
+    drawText(node->x - minimumX - 10, node->y + 70, "0");
+    drawLine(node->x + 25 - minimumX, node->y + 50,
+             node->leftChild->x + 25 - minimumX, node->leftChild->y);
+    drawTree(node->leftChild);
+  }
+  EndIf;
+  If node->rightChild Then {
+    drawText(node->x - minimumX + 50, node->y + 70, "1");
+    drawLine(node->x + 25 - minimumX, node->y + 50,
+             node->rightChild->x + 25 - minimumX, node->rightChild->y);
+    drawTree(node->rightChild);
+  }
+  EndIf;
 }
 EndFunction;
 
@@ -635,6 +741,14 @@ i:
   strcat(AddressOf(output[0]), "\n");
   printString("The Huffman code of the input is:\n");
   printString(AddressOf(output[0]));
+
+  setCoordinates(array[0], 0, 0, 10 * shl(1, getHeight(array[0])));
+minimumX:
+  = maximumX : = 0;
+  findMinimumAndMaximumX(array[0]);
+  drawTree(array[0]);
+  setDiagramWidth(maximumX - minimumX + 55);
+  setDiagramHeight(getHeight(array[0]) * 75);
 
   freeUpTheTree(array[0]);
 
