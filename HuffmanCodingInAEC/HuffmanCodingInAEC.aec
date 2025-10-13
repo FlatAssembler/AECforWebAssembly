@@ -352,16 +352,28 @@ Function getAddressOfTheOutput() Which Returns PointerToCharacter
 }
 EndFunction;
 
+Function shl(Integer32 x, Integer32 y) Which Returns Integer32 Does {
+  Return asm_i32(R"WebAssembly(
+(i32.shl
+	(i32.load %x)
+	(i32.load %y)
+)
+)WebAssembly");
+}
+EndFunction;
+
 Function setCoordinates(PointerToTreeNode node, Integer32 x, Integer32 y,
                         Integer32 space) Which Returns Nothing Does {
   node->x : = x;
   node->y : = y;
   If node->leftChild Then {
-    setCoordinates(node->leftChild, x - space, y + 75, space / 2);
+    setCoordinates(node->leftChild, x - space, y + 75,
+                   20 * shl(1, getHeight(node->leftChild) - 1));
   }
   EndIf;
   If node->rightChild Then {
-    setCoordinates(node->rightChild, x + space, y + 75, space / 2);
+    setCoordinates(node->rightChild, x + space, y + 75,
+                   20 * shl(1, getHeight(node->rightChild) - 1));
   }
   EndIf;
 }
@@ -389,16 +401,6 @@ findMinimumAndMaximumX(PointerToTreeNode node) Which Returns Nothing Does {
 }
 EndFunction;
 
-Function shl(Integer32 x, Integer32 y) Which Returns Integer32 Does {
-  Return asm_i32(R"WebAssembly(
-(i32.shl
-	(i32.load %x)
-	(i32.load %y)
-)
-)WebAssembly");
-}
-EndFunction;
-
 Function drawTree(PointerToTreeNode node) Which Returns Nothing Does {
   drawRectangle(node->x - minimumX, node->y, 50, 50);
   If node->character Then {
@@ -410,20 +412,31 @@ Function drawTree(PointerToTreeNode node) Which Returns Nothing Does {
     drawText(node->x + 5 - minimumX, node->y + 20, AddressOf(output[0]));
   }
   EndIf;
-  Character output[4];
+  Character output[8];
   output[0] : = 0;
   convertIntegerToString(AddressOf(output[0]), node->frequencyOfCharacter);
+  strcat(AddressOf(output[0]), "/");
+  convertIntegerToString(AddressOf(output[0]) + strlen(AddressOf(output[0])),
+                         getLengthOfTheInput());
   drawText(node->x + 5 - minimumX, node->y + 40, AddressOf(output[0]));
   If node->leftChild Then {
-    drawText(node->x - minimumX - 10, node->y + 70, "0");
-    drawLine(node->x + 25 - minimumX, node->y + 50,
+    drawText(node->x - minimumX - 10, node->y + 60, "0");
+    drawLine(node->x + 25 - minimumX, node->y + 50, node->x + 25 - minimumX,
+             node->y + 50 + 13);
+    drawLine(node->x + 25 - minimumX, node->y + 50 + 13,
+             node->leftChild->x + 25 - minimumX, node->y + 50 + 13);
+    drawLine(node->leftChild->x + 25 - minimumX, node->y + 50 + 13,
              node->leftChild->x + 25 - minimumX, node->leftChild->y);
     drawTree(node->leftChild);
   }
   EndIf;
   If node->rightChild Then {
-    drawText(node->x - minimumX + 50, node->y + 70, "1");
-    drawLine(node->x + 25 - minimumX, node->y + 50,
+    drawText(node->x - minimumX + 50, node->y + 60, "1");
+    drawLine(node->x + 25 - minimumX, node->y + 50, node->x + 25 - minimumX,
+             node->y + 50 + 13);
+    drawLine(node->x + 25 - minimumX, node->y + 50 + 13,
+             node->rightChild->x + 25 - minimumX, node->y + 50 + 13);
+    drawLine(node->rightChild->x + 25 - minimumX, node->y + 50 + 13,
              node->rightChild->x + 25 - minimumX, node->rightChild->y);
     drawTree(node->rightChild);
   }
