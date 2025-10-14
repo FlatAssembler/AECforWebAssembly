@@ -99,4 +99,21 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
     console.log("The AEC program has failed the test!");
     process.exit(1);
   }
+  text = "KARASICA DOLAZI OD ILIRSKOG *KURR-URR-ISSIA (TECI-VODA-SUFIKS)";
+  console.log("Testing with the text: " + text);
+  exports.main();
+  console.log("The AEC program has finished its execution!");
+  str = "";
+  ptr = exports.getAddressOfTheOutput();
+  while (buffer[ptr]) {
+    str += String.fromCharCode(buffer[ptr]);
+    ptr++;
+  }
+  if (str ===
+      "100011110001111001011010111111110111101100110110111110111001111011001111011101011101100110000011000100110111111011100001000010000000010100100000000101001100100101111111101110001110010110011010110111010111000100111101111110100010100111001011100000101010\n") {
+    console.log("The AEC program has passed the test!");
+  } else {
+    console.log("The AEC program has failed the test!");
+    process.exit(1);
+  }
 });
