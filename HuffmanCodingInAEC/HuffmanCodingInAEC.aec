@@ -339,7 +339,7 @@ Function log2(Decimal32 x) Which Returns Decimal32 Does {
 }
 EndFunction;
 
-Character input[32];
+Character input[64];
 Character output[256];
 
 Function getAddressOfTheOutput() Which Returns PointerToCharacter
