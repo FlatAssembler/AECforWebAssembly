@@ -362,41 +362,58 @@ Function shl(Integer32 x, Integer32 y) Which Returns Integer32 Does {
 }
 EndFunction;
 
+Structure Maxima Consists Of { Integer32 minimumX, maximumX; }
+EndStructure;
+Integer32 minimumX, maximumX;
+
+Function
+findMinimumAndMaximumX(PointerToTreeNode node,
+                       PointerToMaxima maxima) Which Returns Nothing Does {
+  If node->x < maxima->minimumX Then { maxima->minimumX : = node->x; }
+  EndIf;
+  If node->x > maxima->maximumX Then { maxima->maximumX : = node->x; }
+  EndIf;
+
+  If node->rightChild Then { findMinimumAndMaximumX(node->rightChild, maxima); }
+  EndIf;
+  If node->leftChild Then { findMinimumAndMaximumX(node->leftChild, maxima); }
+  EndIf;
+}
+EndFunction;
+
 Function setCoordinates(PointerToTreeNode node, Integer32 x, Integer32 y,
                         Integer32 space) Which Returns Nothing Does {
   node->x : = x;
   node->y : = y;
   If node->leftChild Then {
-    setCoordinates(node->leftChild, x - space, y + 75,
-                   20 * shl(1, getHeight(node->leftChild) - 1));
+    Integer32 newX : = x - space - 10;
+    While 1 Loop {
+      newX += 10;
+      setCoordinates(node->leftChild, newX, y + 75,
+                     20 * shl(1, getHeight(node->leftChild) - 1));
+      InstantiateStructure Maxima localMaxima;
+      localMaxima.maximumX : = localMaxima.minimumX : = newX;
+      findMinimumAndMaximumX(node->leftChild, AddressOf(localMaxima));
+      If x - localMaxima.maximumX <= 60 Then { Break; }
+      EndIf;
+    }
+    EndWhile;
   }
   EndIf;
   If node->rightChild Then {
-    setCoordinates(node->rightChild, x + space, y + 75,
-                   20 * shl(1, getHeight(node->rightChild) - 1));
+    Integer32 newX : = x + space + 10;
+    While 1 Loop {
+      newX -= 10;
+      setCoordinates(node->rightChild, newX, y + 75,
+                     20 * shl(1, getHeight(node->rightChild) - 1));
+      InstantiateStructure Maxima localMaxima;
+      localMaxima.maximumX : = localMaxima.minimumX : = newX;
+      findMinimumAndMaximumX(node->rightChild, AddressOf(localMaxima));
+      If localMaxima.minimumX - x <= 40 Then { Break; }
+      EndIf;
+    }
+    EndWhile;
   }
-  EndIf;
-}
-EndFunction;
-
-Integer32 minimumX, maximumX;
-
-Function
-findMinimumAndMaximumX(PointerToTreeNode node) Which Returns Nothing Does {
-  If node->x < minimumX Then {
-  minimumX:
-    = node->x;
-  }
-  EndIf;
-  If node->x > maximumX Then {
-  maximumX:
-    = node->x;
-  }
-  EndIf;
-
-  If node->rightChild Then { findMinimumAndMaximumX(node->rightChild); }
-  EndIf;
-  If node->leftChild Then { findMinimumAndMaximumX(node->leftChild); }
   EndIf;
 }
 EndFunction;
@@ -756,9 +773,13 @@ i:
   printString(AddressOf(output[0]));
 
   setCoordinates(array[0], 0, 0, 10 * shl(1, getHeight(array[0])));
+  InstantiateStructure Maxima globalMaxima;
+  globalMaxima.minimumX : = globalMaxima.maximumX : = 0;
+  findMinimumAndMaximumX(array[0], AddressOf(globalMaxima));
 minimumX:
-  = maximumX : = 0;
-  findMinimumAndMaximumX(array[0]);
+  = globalMaxima.minimumX;
+maximumX:
+  = globalMaxima.maximumX;
   drawTree(array[0]);
   setDiagramWidth(maximumX - minimumX + 55);
   setDiagramHeight(getHeight(array[0]) * 75);
