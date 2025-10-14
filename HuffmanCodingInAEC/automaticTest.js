@@ -49,6 +49,7 @@ let importObject = {
 WebAssembly.instantiate(buffer, importObject).then((result) => {
   let exports = result.instance.exports;
   console.log("The AEC program has been loaded successfully!");
+
   text = "TEO SAMARZIJA";
   console.log("Testing with the text: " + text);
   exports.main();
@@ -66,6 +67,7 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
     console.log("The AEC program has failed the test!");
     process.exit(1);
   }
+
   text = "HENDRIK WADE BODE";
   console.log("Testing with the text: " + text);
   exports.main();
@@ -82,6 +84,7 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
     console.log("The AEC program has failed the test!");
     process.exit(1);
   }
+
   text = "NO MAN IS AS BLOODTHIRSTY AS CAT";
   console.log("Testing with the text: " + text);
   exports.main();
@@ -99,6 +102,25 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
     console.log("The AEC program has failed the test!");
     process.exit(1);
   }
+
+  text = "NIJEDAN COVJEK NIJE BAS TOLIKO KRVOLOCAN KAO STO JE MACKA";
+  console.log("Testing with the text: " + text);
+  exports.main();
+  console.log("The AEC program has finished its execution!");
+  str = "";
+  ptr = exports.getAddressOfTheOutput();
+  while (buffer[ptr]) {
+    str += String.fromCharCode(buffer[ptr]);
+    ptr++;
+  }
+  if (str ===
+      "1000010010011010110100001100011101010111011010011010000111100001001001101011111010100110111111110000111100101000000111110001101101011001111001011010100110001110000010111111011111000011111100110101111101110010101000001\n") {
+    console.log("The AEC program has passed the test!");
+  } else {
+    console.log("The AEC program has failed the test!");
+    process.exit(1);
+  }
+
   text = "KARASICA DOLAZI OD ILIRSKOG *KURR-URR-ISSIA (TECI-VODA-SUFIKS)";
   console.log("Testing with the text: " + text);
   exports.main();
