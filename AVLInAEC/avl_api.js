@@ -7,7 +7,7 @@
 //   api.pushKey(15); api.render();
 //   api.deleteKey(20); api.render();
 
-export default class AVLAPI {
+class AVLAPI {
   static async init(wasmSource, importObject = {}) {
     let instantiateResult;
     if (typeof wasmSource === 'string') {
@@ -91,5 +91,9 @@ export default class AVLAPI {
   setKeysAndRender(keysArray) {
     this.setKeys(keysArray);
     this.render();
+  }
+  
+  getMemory() {
+    return this.mem;
   }
 }

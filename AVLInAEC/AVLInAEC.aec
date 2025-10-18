@@ -2,6 +2,8 @@
 // AVL demo with JavaScript API: expose keys buffer + setters/getters + render()
 // Uses same externals as Huffman demo for drawing.
 
+#target WASI
+
 Function noMoreFreeMemory() Which Returns Nothing Is External;
 Function segmentationFault() Which Returns Nothing Is External;
 Function printString(PointerToCharacter string) Which Returns Nothing Is External;
@@ -378,27 +380,36 @@ Function drawAVL(PointerToAVLNode node, Integer32 offsetX) Which Returns Nothing
   EndIf;
   Integer32 drawX : = node->x - offsetX;
   Integer32 drawY : = node->y;
-  drawRectangle(drawX, drawY, 60, 40);
+  drawRectangle(drawX, drawY, 120, 60);
 
   // key text
   Character keyStr[16];
   keyStr[0] : = 0;
-  convertIntegerToString(AddressOf(keyStr[0]), node->key);
-  drawText(drawX + 6, drawY + 12, AddressOf(keyStr[0]));
+  strcat(AddressOf(keyStr[0]), "Key: ");
+  convertIntegerToString(AddressOf(keyStr[0]) + strlen(AddressOf(keyStr[0])), node->key);
+  drawText(drawX + 6, drawY + 14, AddressOf(keyStr[0]));
 
   // height text
-  Character heightStr[8];
+  Character heightStr[16];
   heightStr[0] : = 0;
-  convertIntegerToString(AddressOf(heightStr[0]), node->height);
-  drawText(drawX + 6, drawY + 28, AddressOf(heightStr[0]));
+  strcat(AddressOf(heightStr[0]), "Height: ");
+  convertIntegerToString(AddressOf(heightStr[0]) + strlen(AddressOf(heightStr[0])), node->height);
+  drawText(drawX + 6, drawY + 30, AddressOf(heightStr[0]));
+  
+  // BalanceFactor text
+  Character balanceFactorStr[16];
+  balanceFactorStr[0] : = 0;
+  strcat(AddressOf(balanceFactorStr[0]), "BF: ");
+  convertIntegerToString(AddressOf(balanceFactorStr[0]) + strlen(AddressOf(balanceFactorStr[0])), balanceFactor(node));
+  drawText(drawX + 6, drawY + 30 + (30 - 14), AddressOf(balanceFactorStr[0]));
 
   If node->leftChild Then {
-    drawLine(drawX + 30, drawY + 40, node->leftChild->x - offsetX + 30, node->leftChild->y);
+    drawLine(drawX + 60, drawY + 60, node->leftChild->x - offsetX + 60, node->leftChild->y);
     drawAVL(node->leftChild, offsetX);
   }
   EndIf;
   If node->rightChild Then {
-    drawLine(drawX + 30, drawY + 40, node->rightChild->x - offsetX + 30, node->rightChild->y);
+    drawLine(drawX + 60, drawY + 60, node->rightChild->x - offsetX + 60, node->rightChild->y);
     drawAVL(node->rightChild, offsetX);
   }
   EndIf;
@@ -442,7 +453,7 @@ Function render() Which Returns Nothing Does {
   EndIf;
 
   Integer32 margin : = 20;
-  Integer32 diagramWidth : = (globalMax.maximumX - globalMax.minimumX) + 60 + margin * 2;
+  Integer32 diagramWidth : = (globalMax.maximumX - globalMax.minimumX) + 120 + margin * 2;
   Integer32 diagramHeight : = (nodeHeight(root) + 1) * 90 + margin;
 
   setDiagramWidth(diagramWidth);
