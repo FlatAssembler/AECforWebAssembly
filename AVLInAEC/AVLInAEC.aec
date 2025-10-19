@@ -452,7 +452,7 @@ Function render() Which Returns Nothing Does {
   PointerToAVLNode root : = PointerToAVLNode(0);
   Integer32 i : = 0;
   While i < numberOfKeys Loop {
-    If insert_or_delete[i]='I' Then {
+    If insert_or_delete[i] = 'I' Then {
       Character stringToBePrinted[32] := {0};
       strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
@@ -461,7 +461,7 @@ Function render() Which Returns Nothing Does {
 
       root : = avlInsert(root, keys[i]);
     }
-    Else {
+    ElseIf insert_or_delete[i] = 'D' Then {
       Character stringToBePrinted[32] := {0};
       strcat(AddressOf(stringToBePrinted[0]), "Deleting ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
@@ -469,6 +469,10 @@ Function render() Which Returns Nothing Does {
       printString(AddressOf(stringToBePrinted[0]));
 
       root : = avlDelete(root, keys[i]);
+    }
+    Else {
+      printString("The character array \"insert_or_delete\" can only contain characters 'I' and 'D'!\n");
+      asm("unreachable");
     }
     EndIf;
     i += 1;

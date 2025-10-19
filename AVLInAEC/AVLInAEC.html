@@ -53,7 +53,11 @@
       for="delete"
       >Delete</label
     ><br />
-    <button id="myButton">Invoke AEC program</button><br/><button id="reset_button">Reset the AEC program</button><br /><br />
+    <button id="myButton">Invoke AEC program</button><br /><button
+      id="reset_button"
+    >
+      Reset the AEC program</button
+    ><br /><br />
     AEC program graphics output:<br />
     <div id="div_with_svg">
       <svg id="diagram"></svg>
@@ -149,11 +153,11 @@
       window.onload = async function () {
         const api = await AVLAPI.init("AVLInAEC.wasm", importObject);
         memory = api.getMemory();
-	document.getElementById("reset_button").onclick = () => {
+        document.getElementById("reset_button").onclick = () => {
           api.clearKeys();
-	  document.getElementById("format_as_code").innerHTML = "";
-	  clearScreen();
-	};
+          document.getElementById("format_as_code").innerHTML = "";
+          clearScreen();
+        };
         document.getElementById("myButton").onclick = () => {
           document.getElementById("format_as_code").innerHTML = "";
           const number_to_be_inserted_or_deleted = document.getElementById(
