@@ -17,484 +17,426 @@ Function drawRectangle(Integer32 x, Integer32 y, Integer32 width, Integer32 heig
 Function drawText(Integer32 x, Integer32 y, PointerToCharacter text)
     Which Returns Nothing Is External;
 
-Integer32 NDEBUG : = 1;
+Integer32 NDEBUG := 1;
 
 // --- String helpers (small set copied/adapted from Huffman demo) ---
-Function strlen(PointerToCharacter str) Which Returns Integer32 Does {
-  If str = 0 Then { Return 0; }
-  EndIf;
-  Integer32 length : = 0;
-  While ValueAt(str + length) Loop { length += 1; }
-  EndWhile;
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does
+  If str = 0 Then Return 0;
+  EndIf
+  Integer32 length := 0;
+  While ValueAt(str + length) Loop length += 1;
+  EndWhile
   Return length;
-}
-EndFunction;
+EndFunction
 
-Function strcpy(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does {
-  While ValueAt(src) Loop {
-    ValueAt(dest) : = ValueAt(src);
+Function strcpy(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does
+  While ValueAt(src) Loop
+    ValueAt(dest) := ValueAt(src);
     dest += 1;
     src += 1;
-  }
-  EndWhile;
-  ValueAt(dest) : = 0;
-}
-EndFunction;
+  EndWhile
+  ValueAt(dest) := 0;
+EndFunction
 
-Function strcat(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does {
+Function strcat(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does
   strcpy(dest + strlen(dest), src);
-}
-EndFunction;
+EndFunction
 
-Function reverseString(PointerToCharacter string) Which Returns Nothing Does {
-  PointerToCharacter pointerToLastCharacter : = string + strlen(string) - 1;
-  While pointerToLastCharacter - string > 0 Loop {
-    Character tmp : = ValueAt(string);
-    ValueAt(string) : = ValueAt(pointerToLastCharacter);
-    ValueAt(pointerToLastCharacter) : = tmp;
+Function reverseString(PointerToCharacter string) Which Returns Nothing Does
+  PointerToCharacter pointerToLastCharacter := string + strlen(string) - 1;
+  While pointerToLastCharacter - string > 0 Loop
+    Character tmp := ValueAt(string);
+    ValueAt(string) := ValueAt(pointerToLastCharacter);
+    ValueAt(pointerToLastCharacter) := tmp;
     string += 1;
     pointerToLastCharacter -= 1;
-  }
-  EndWhile;
-}
-EndFunction;
+  EndWhile
+EndFunction
 
-Function convertIntegerToString(PointerToCharacter string, Integer32 number) Which Returns Nothing Does {
-  Integer32 isNumberNegative : = 0;
-  If number < 0 Then {
-    number : = -number;
-    isNumberNegative : = 1;
-  }
-  EndIf;
-  Integer32 i : = 0;
-  While number >= 10 Loop {
-    ValueAt(string + i) : = '0' + mod(number, 10);
+Function convertIntegerToString(PointerToCharacter string, Integer32 number) Which Returns Nothing Does
+  Integer32 isNumberNegative := 0;
+  If number < 0 Then
+    number := -number;
+    isNumberNegative := 1;
+  EndIf
+  Integer32 i := 0;
+  While number >= 10 Loop
+    ValueAt(string + i) := '0' + mod(number, 10);
     number /= 10;
     i += 1;
-  }
-  EndWhile;
-  ValueAt(string + i) : = '0' + number;
+  EndWhile
+  ValueAt(string + i) := '0' + number;
   i += 1;
-  If isNumberNegative Then { ValueAt(string + i) : = '-'; i += 1; }
-  EndIf;
-  ValueAt(string + i) : = 0;
+  If isNumberNegative Then ValueAt(string + i) := '-'; i += 1;
+  EndIf
+  ValueAt(string + i) := 0;
   reverseString(string);
-}
-EndFunction;
+EndFunction
 
 // --- AVL node pool and helpers (pool like Huffman demo) ---
-Structure AVLNode Consists Of {
+Structure AVLNode Consists Of
   Integer32 key;
   PointerToAVLNode leftChild, rightChild;
   Integer32 height;
   Integer32 x, y;
-}
-EndStructure;
+EndStructure
 
 InstantiateStructure AVLNode avlNodes[128];
 Integer16 isAVLNodeUsed[128];
 
-Function isAVLNodeWithinBounds(PointerToAVLNode node) Which Returns Integer32 Does {
+Function isAVLNodeWithinBounds(PointerToAVLNode node) Which Returns Integer32 Does
   Return AddressOf(avlNodes[0]) <= node <= AddressOf(avlNodes[128 - 1]) and
       mod(node - AddressOf(avlNodes[0]), SizeOf(AVLNode)) = 0;
-}
-EndFunction;
+EndFunction
 
-Function newAVLNode() Which Returns PointerToAVLNode Does {
-  Integer16 i : = 0;
-  While i < 128 Loop {
-    If not(isAVLNodeUsed[i]) Then {
-      avlNodes[i].key : = 0;
-      avlNodes[i].leftChild : = avlNodes[i].rightChild : = PointerToAVLNode(0);
-      avlNodes[i].height : = 1;
-      avlNodes[i].x : = avlNodes[i].y : = 0;
-      isAVLNodeUsed[i] : = 1;
+Function newAVLNode() Which Returns PointerToAVLNode Does
+  Integer16 i := 0;
+  While i < 128 Loop
+    If not(isAVLNodeUsed[i]) Then
+      avlNodes[i].key := 0;
+      avlNodes[i].leftChild := avlNodes[i].rightChild := PointerToAVLNode(0);
+      avlNodes[i].height := 1;
+      avlNodes[i].x := avlNodes[i].y := 0;
+      isAVLNodeUsed[i] := 1;
       Return AddressOf(avlNodes[i]);
-    }
-    EndIf;
+    EndIf
     i += 1;
-  }
-  EndWhile;
+  EndWhile
   noMoreFreeMemory();
-}
-EndFunction;
+EndFunction
 
-Function freeAVLNode(PointerToAVLNode node) Which Returns Nothing Does {
-  If not(isAVLNodeWithinBounds(node)) Then { segmentationFault(); }
-  EndIf;
-  isAVLNodeUsed[(node - AddressOf(avlNodes[0])) / SizeOf(AVLNode)] : = 0;
-}
-EndFunction;
+Function freeAVLNode(PointerToAVLNode node) Which Returns Nothing Does
+  If not(isAVLNodeWithinBounds(node)) Then segmentationFault();
+  EndIf
+  isAVLNodeUsed[(node - AddressOf(avlNodes[0])) / SizeOf(AVLNode)] := 0;
+EndFunction
 
 // --- Height and rotation helpers ---
-Function nodeHeight(PointerToAVLNode node) Which Returns Integer32 Does {
-  If not(node) Then { Return 0; }
-  EndIf;
+Function nodeHeight(PointerToAVLNode node) Which Returns Integer32 Does
+  If not(node) Then Return 0;
+  EndIf
   Return node->height;
-}
-EndFunction;
+EndFunction
 
-Function max(Integer32 a, Integer32 b) Which Returns Integer32 Does {
-  If a > b Then { Return a; }
-  EndIf;
+Function max(Integer32 a, Integer32 b) Which Returns Integer32 Does
+  If a > b Then Return a;
+  EndIf
   Return b;
-}
-EndFunction;
+EndFunction
 
-Function updateHeight(PointerToAVLNode node) Which Returns Nothing Does {
-  If not(node) Then { Return; }
-  EndIf;
-  node->height : = max(nodeHeight(node->leftChild), nodeHeight(node->rightChild)) + 1;
-}
-EndFunction;
+Function updateHeight(PointerToAVLNode node) Which Returns Nothing Does
+  If not(node) Then Return;
+  EndIf
+  node->height := max(nodeHeight(node->leftChild), nodeHeight(node->rightChild)) + 1;
+EndFunction
 
-Function balanceFactor(PointerToAVLNode node) Which Returns Integer32 Does {
-  If not(node) Then { Return 0; }
-  EndIf;
+Function balanceFactor(PointerToAVLNode node) Which Returns Integer32 Does
+  If not(node) Then Return 0;
+  EndIf
   Return nodeHeight(node->leftChild) - nodeHeight(node->rightChild);
-}
-EndFunction;
+EndFunction
 
-Function rotateRight(PointerToAVLNode y) Which Returns PointerToAVLNode Does {
-  Character stringToBePrinted[32] : = {0};
+Function rotateRight(PointerToAVLNode y) Which Returns PointerToAVLNode Does
+  Character stringToBePrinted[32] := {0};
   strcat(AddressOf(stringToBePrinted[0]), "Right-rotate around ");
   convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), y->key);
   strcat(AddressOf(stringToBePrinted[0]), ".\n");
   printString(AddressOf(stringToBePrinted[0]));
 
-  PointerToAVLNode x : = y->leftChild;
-  PointerToAVLNode T2 : = x->rightChild;
-  x->rightChild : = y;
-  y->leftChild : = T2;
+  PointerToAVLNode x := y->leftChild;
+  PointerToAVLNode T2 := x->rightChild;
+  x->rightChild := y;
+  y->leftChild := T2;
   updateHeight(y);
   updateHeight(x);
   Return x;
-}
-EndFunction;
+EndFunction
 
-Function rotateLeft(PointerToAVLNode x) Which Returns PointerToAVLNode Does {
-  Character stringToBePrinted[32] : = {0};
+Function rotateLeft(PointerToAVLNode x) Which Returns PointerToAVLNode Does
+  Character stringToBePrinted[32] := {0};
   strcat(AddressOf(stringToBePrinted[0]), "Left-rotate around ");
   convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), x->key);
   strcat(AddressOf(stringToBePrinted[0]), ".\n");
   printString(AddressOf(stringToBePrinted[0]));
 
-  PointerToAVLNode y : = x->rightChild;
-  PointerToAVLNode T2 : = y->leftChild;
-  y->leftChild : = x;
-  x->rightChild : = T2;
+  PointerToAVLNode y := x->rightChild;
+  PointerToAVLNode T2 := y->leftChild;
+  y->leftChild := x;
+  x->rightChild := T2;
   updateHeight(x);
   updateHeight(y);
   Return y;
-}
-EndFunction;
+EndFunction
 
 // --- AVL insert (no duplicates) ---
-Function avlInsert(PointerToAVLNode node, Integer32 key) Which Returns PointerToAVLNode Does {
-  If not(node) Then {
-    PointerToAVLNode n : = newAVLNode();
-    n->key : = key;
-    n->leftChild : = n->rightChild : = PointerToAVLNode(0);
-    n->height : = 1;
+Function avlInsert(PointerToAVLNode node, Integer32 key) Which Returns PointerToAVLNode Does
+  If not(node) Then
+    PointerToAVLNode n := newAVLNode();
+    n->key := key;
+    n->leftChild := n->rightChild := PointerToAVLNode(0);
+    n->height := 1;
     Return n;
-  }
-  EndIf;
+  EndIf
 
-  If key < node->key Then {
-    node->leftChild : = avlInsert(node->leftChild, key);
-  }
-  ElseIf key > node->key Then {
-    node->rightChild : = avlInsert(node->rightChild, key);
-  }
-  Else { // equal -> ignore duplicate
+  If key < node->key Then
+    node->leftChild := avlInsert(node->leftChild, key);
+  ElseIf key > node->key Then
+    node->rightChild := avlInsert(node->rightChild, key);
+  Else // equal -> ignore duplicate
     Return node;
-  }
-  EndIf;
+  EndIf
 
   updateHeight(node);
-  Integer32 bf : = balanceFactor(node);
+  Integer32 bf := balanceFactor(node);
 
   // LL
-  If bf > 1 and key < node->leftChild->key Then {
+  If bf > 1 and key < node->leftChild->key Then
     Return rotateRight(node);
-  }
-  EndIf;
+  EndIf
 
   // RR
-  If bf < -1 and key > node->rightChild->key Then {
+  If bf < -1 and key > node->rightChild->key Then
     Return rotateLeft(node);
-  }
-  EndIf;
+  EndIf
 
   // LR
-  If bf > 1 and key > node->leftChild->key Then {
-    node->leftChild : = rotateLeft(node->leftChild);
+  If bf > 1 and key > node->leftChild->key Then
+    node->leftChild := rotateLeft(node->leftChild);
     Return rotateRight(node);
-  }
-  EndIf;
+  EndIf
 
   // RL
-  If bf < -1 and key < node->rightChild->key Then {
-    node->rightChild : = rotateRight(node->rightChild);
+  If bf < -1 and key < node->rightChild->key Then
+    node->rightChild := rotateRight(node->rightChild);
     Return rotateLeft(node);
-  }
-  EndIf;
+  EndIf
 
   Return node;
-}
-EndFunction;
+EndFunction
 
 // --- AVL delete (new) ---
-Function minValueNode(PointerToAVLNode node) Which Returns PointerToAVLNode Does {
-  PointerToAVLNode current : = node;
-  While current->leftChild Loop {
-    current : = current->leftChild;
-  }
-  EndWhile;
+Function minValueNode(PointerToAVLNode node) Which Returns PointerToAVLNode Does
+  PointerToAVLNode current := node;
+  While current->leftChild Loop
+    current := current->leftChild;
+  EndWhile
   Return current;
-}
-EndFunction;
+EndFunction
 
-Function avlDelete(PointerToAVLNode root, Integer32 key) Which Returns PointerToAVLNode Does {
-  If not(root) Then { Return root; }
-  EndIf;
+Function avlDelete(PointerToAVLNode root, Integer32 key) Which Returns PointerToAVLNode Does
+  If not(root) Then Return root;
+  EndIf
 
   // Standard BST delete
-  If key < root->key Then {
-    root->leftChild : = avlDelete(root->leftChild, key);
-  }
-  ElseIf key > root->key Then {
-    root->rightChild : = avlDelete(root->rightChild, key);
-  }
-  Else {
+  If key < root->key Then
+    root->leftChild := avlDelete(root->leftChild, key);
+  ElseIf key > root->key Then
+    root->rightChild := avlDelete(root->rightChild, key);
+  Else
     // Node with only one child or no child
-    If not(root->leftChild) Then {
-      PointerToAVLNode temp : = root->rightChild;
+    If not(root->leftChild) Then
+      PointerToAVLNode temp := root->rightChild;
       // free root
       freeAVLNode(root);
       Return temp;
-    }
-    ElseIf not(root->rightChild) Then {
-      PointerToAVLNode temp : = root->leftChild;
+    ElseIf not(root->rightChild) Then
+      PointerToAVLNode temp := root->leftChild;
       freeAVLNode(root);
       Return temp;
-    }
-    EndIf;
+    EndIf
 
     // Node with two children: Get inorder successor (smallest in the right subtree)
-    PointerToAVLNode temp : = minValueNode(root->rightChild);
+    PointerToAVLNode temp := minValueNode(root->rightChild);
     // Copy the inorder successor's key to this node
-    root->key : = temp->key;
+    root->key := temp->key;
     // Delete the inorder successor
-    root->rightChild : = avlDelete(root->rightChild, temp->key);
-  }
-  EndIf;
+    root->rightChild := avlDelete(root->rightChild, temp->key);
+  EndIf
 
   // If the tree had only one node then return
-  If not(root) Then { Return root; }
-  EndIf;
+  If not(root) Then Return root;
+  EndIf
 
   // Update height
   updateHeight(root);
 
   // Get balance factor
-  Integer32 bf : = balanceFactor(root);
+  Integer32 bf := balanceFactor(root);
 
   // If unbalanced, there are 4 cases
   // Left Left
-  If bf > 1 and balanceFactor(root->leftChild) >= 0 Then {
+  If bf > 1 and balanceFactor(root->leftChild) >= 0 Then
     Return rotateRight(root);
-  }
-  EndIf;
+  EndIf
 
   // Left Right
-  If bf > 1 and balanceFactor(root->leftChild) < 0 Then {
-    root->leftChild : = rotateLeft(root->leftChild);
+  If bf > 1 and balanceFactor(root->leftChild) < 0 Then
+    root->leftChild := rotateLeft(root->leftChild);
     Return rotateRight(root);
-  }
-  EndIf;
+  EndIf
 
   // Right Right
-  If bf < -1 and balanceFactor(root->rightChild) <= 0 Then {
+  If bf < -1 and balanceFactor(root->rightChild) <= 0 Then
     Return rotateLeft(root);
-  }
-  EndIf;
+  EndIf
 
   // Right Left
-  If bf < -1 and balanceFactor(root->rightChild) > 0 Then {
-    root->rightChild : = rotateRight(root->rightChild);
+  If bf < -1 and balanceFactor(root->rightChild) > 0 Then
+    root->rightChild := rotateRight(root->rightChild);
     Return rotateLeft(root);
-  }
-  EndIf;
+  EndIf
 
   Return root;
-}
-EndFunction;
+EndFunction
 
 // --- Keys buffer (exposed to JS) ---
 Integer32 keys[128];
-Integer32 numberOfKeys : = 0;
+Integer32 numberOfKeys := 0;
 Character insert_or_delete[128];
 
-Function getAddressOfKeys() Which Returns PointerToInteger32 Does {
+Function getAddressOfKeys() Which Returns PointerToInteger32 Does
   Return AddressOf(keys[0]);
-}
-EndFunction;
+EndFunction
 
-Function getAddressOfInsertOrDelete() Which Returns PointerToCharacter Does {
+Function getAddressOfInsertOrDelete() Which Returns PointerToCharacter Does
   Return AddressOf(insert_or_delete[0]);
-}
-EndFunction;
+EndFunction
 
-Function setNumberOfKeys(Integer32 n) Which Returns Nothing Does {
-  If n < 0 Then { numberOfKeys : = 0; Return; }
-  EndIf;
-  If n > 128 Then { numberOfKeys : = 128; Return; }
-  EndIf;
-  numberOfKeys : = n;
-}
-EndFunction;
+Function setNumberOfKeys(Integer32 n) Which Returns Nothing Does
+  If n < 0 Then numberOfKeys := 0; Return;
+  EndIf
+  If n > 128 Then numberOfKeys := 128; Return;
+  EndIf
+  numberOfKeys := n;
+EndFunction
 
-Function getNumberOfKeys() Which Returns Integer32 Does {
+Function getNumberOfKeys() Which Returns Integer32 Does
   Return numberOfKeys;
-}
-EndFunction;
+EndFunction
 
-Function clearKeys() Which Returns Nothing Does {
-  numberOfKeys : = 0;
-}
-EndFunction;
+Function clearKeys() Which Returns Nothing Does
+  numberOfKeys := 0;
+EndFunction
 
 // --- Layout & drawing helpers (in-order X, depth-based Y) ---
-Integer32 inorderCounter : = 0;
+Integer32 inorderCounter := 0;
 
-Function assignCoordinatesInorder(PointerToAVLNode node, Integer32 depth, Integer32 horizontalSpacing, Integer32 verticalSpacing) Which Returns Nothing Does {
-  If not(node) Then { Return; }
-  EndIf;
+Function assignCoordinatesInorder(PointerToAVLNode node, Integer32 depth, Integer32 horizontalSpacing, Integer32 verticalSpacing) Which Returns Nothing Does
+  If not(node) Then Return;
+  EndIf
   assignCoordinatesInorder(node->leftChild, depth + 1, horizontalSpacing, verticalSpacing);
-  node->x : = inorderCounter * horizontalSpacing;
-  node->y : = depth * verticalSpacing;
+  node->x := inorderCounter * horizontalSpacing;
+  node->y := depth * verticalSpacing;
   inorderCounter += 1;
   assignCoordinatesInorder(node->rightChild, depth + 1, horizontalSpacing, verticalSpacing);
-}
-EndFunction;
+EndFunction
 
-Structure Maxima Consists Of { Integer32 minimumX, maximumX; } EndStructure;
+Structure Maxima Consists Of Integer32 minimumX, maximumX; EndStructure
 
-Function findMinMaxX(PointerToAVLNode node, PointerToMaxima m) Which Returns Nothing Does {
-  If not(node) Then { Return; }
-  EndIf;
-  If node->x < m->minimumX Then { m->minimumX : = node->x; }
-  EndIf;
-  If node->x > m->maximumX Then { m->maximumX : = node->x; }
-  EndIf;
+Function findMinMaxX(PointerToAVLNode node, PointerToMaxima m) Which Returns Nothing Does
+  If not(node) Then Return;
+  EndIf
+  If node->x < m->minimumX Then m->minimumX := node->x;
+  EndIf
+  If node->x > m->maximumX Then m->maximumX := node->x;
+  EndIf
   findMinMaxX(node->leftChild, m);
   findMinMaxX(node->rightChild, m);
-}
-EndFunction;
+EndFunction
 
-Function drawAVL(PointerToAVLNode node, Integer32 offsetX) Which Returns Nothing Does {
-  If not(node) Then { Return; }
-  EndIf;
-  Integer32 drawX : = node->x - offsetX;
-  Integer32 drawY : = node->y;
+Function drawAVL(PointerToAVLNode node, Integer32 offsetX) Which Returns Nothing Does
+  If not(node) Then Return;
+  EndIf
+  Integer32 drawX := node->x - offsetX;
+  Integer32 drawY := node->y;
   drawRectangle(drawX, drawY, 120, 60);
 
   // key text
   Character keyStr[16];
-  keyStr[0] : = 0;
+  keyStr[0] := 0;
   strcat(AddressOf(keyStr[0]), "Key: ");
   convertIntegerToString(AddressOf(keyStr[0]) + strlen(AddressOf(keyStr[0])), node->key);
   drawText(drawX + 6, drawY + 14, AddressOf(keyStr[0]));
 
   // height text
   Character heightStr[16];
-  heightStr[0] : = 0;
+  heightStr[0] := 0;
   strcat(AddressOf(heightStr[0]), "Height: ");
   convertIntegerToString(AddressOf(heightStr[0]) + strlen(AddressOf(heightStr[0])), node->height);
   drawText(drawX + 6, drawY + 30, AddressOf(heightStr[0]));
   
   // BalanceFactor text
   Character balanceFactorStr[16];
-  balanceFactorStr[0] : = 0;
+  balanceFactorStr[0] := 0;
   strcat(AddressOf(balanceFactorStr[0]), "BF: ");
   convertIntegerToString(AddressOf(balanceFactorStr[0]) + strlen(AddressOf(balanceFactorStr[0])), balanceFactor(node));
   drawText(drawX + 6, drawY + 30 + (30 - 14), AddressOf(balanceFactorStr[0]));
 
-  If node->leftChild Then {
+  If node->leftChild Then
     drawLine(drawX + 60, drawY + 60, node->leftChild->x - offsetX + 60, node->leftChild->y);
     drawAVL(node->leftChild, offsetX);
-  }
-  EndIf;
-  If node->rightChild Then {
+  EndIf
+  If node->rightChild Then
     drawLine(drawX + 60, drawY + 60, node->rightChild->x - offsetX + 60, node->rightChild->y);
     drawAVL(node->rightChild, offsetX);
-  }
-  EndIf;
-}
-EndFunction;
+  EndIf
+EndFunction
 
 // --- Free tree ---
-Function freeAVLTree(PointerToAVLNode node) Which Returns Nothing Does {
-  If not(node) Then { Return; }
-  EndIf;
-  If node->leftChild Then { freeAVLTree(node->leftChild); }
-  EndIf;
-  If node->rightChild Then { freeAVLTree(node->rightChild); }
-  EndIf;
+Function freeAVLTree(PointerToAVLNode node) Which Returns Nothing Does
+  If not(node) Then Return;
+  EndIf
+  If node->leftChild Then freeAVLTree(node->leftChild);
+  EndIf
+  If node->rightChild Then freeAVLTree(node->rightChild);
+  EndIf
   freeAVLNode(node);
-}
-EndFunction;
+EndFunction
 
 // --- render() exposed to JS: build tree from keys[] and draw it ---
-Function render() Which Returns Nothing Does {
+Function render() Which Returns Nothing Does
   clearScreen();
-  PointerToAVLNode root : = PointerToAVLNode(0);
-  Integer32 i : = 0;
-  While i < numberOfKeys Loop {
-    If insert_or_delete[i] = 'I' Then {
+  PointerToAVLNode root := PointerToAVLNode(0);
+  Integer32 i := 0;
+  While i < numberOfKeys Loop
+    If insert_or_delete[i] = 'I' Then
       Character stringToBePrinted[32] := {0};
       strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
       strcat(AddressOf(stringToBePrinted[0]), "...\n");
       printString(AddressOf(stringToBePrinted[0]));
 
-      root : = avlInsert(root, keys[i]);
-    }
-    ElseIf insert_or_delete[i] = 'D' Then {
+      root := avlInsert(root, keys[i]);
+    ElseIf insert_or_delete[i] = 'D' Then
       Character stringToBePrinted[32] := {0};
       strcat(AddressOf(stringToBePrinted[0]), "Deleting ");
       convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
       strcat(AddressOf(stringToBePrinted[0]), "...\n");
       printString(AddressOf(stringToBePrinted[0]));
 
-      root : = avlDelete(root, keys[i]);
-    }
-    Else {
+      root := avlDelete(root, keys[i]);
+    Else
       printString("The character array \"insert_or_delete\" can only contain characters 'I' and 'D'!\n");
       asm("unreachable");
-    }
-    EndIf;
+    EndIf
     i += 1;
-  }
-  EndWhile;
+  EndWhile
 
   // Layout with some spacing; adjust constants as you prefer
-  inorderCounter : = 1;
+  inorderCounter := 1;
   assignCoordinatesInorder(root, 0, 110, 90);
 
   InstantiateStructure Maxima globalMax;
-  globalMax.minimumX : = globalMax.maximumX : = 0;
-  If root Then {
-    globalMax.minimumX : = root->x;
-    globalMax.maximumX : = root->x;
+  globalMax.minimumX := globalMax.maximumX := 0;
+  If root Then
+    globalMax.minimumX := root->x;
+    globalMax.maximumX := root->x;
     findMinMaxX(root, AddressOf(globalMax));
-  }
-  EndIf;
+  EndIf
 
-  Integer32 margin : = 20;
-  Integer32 diagramWidth : = (globalMax.maximumX - globalMax.minimumX) + 120 + margin * 2;
-  Integer32 diagramHeight : = (nodeHeight(root) + 1) * 90 + margin;
+  Integer32 margin := 20;
+  Integer32 diagramWidth := (globalMax.maximumX - globalMax.minimumX) + 120 + margin * 2;
+  Integer32 diagramHeight := (nodeHeight(root) + 1) * 90 + margin;
 
   setDiagramWidth(diagramWidth);
   setDiagramHeight(diagramHeight);
@@ -503,11 +445,9 @@ Function render() Which Returns Nothing Does {
 
   freeAVLTree(root);
   printString("AVL rendered.\n");
-}
-EndFunction;
+EndFunction
 
 // Keep main for compatibility (just calls render), but JS can call render() directly.
-Function main() Which Returns Nothing Does {
+Function main() Which Returns Nothing Does
   render();
-}
-EndFunction;
+EndFunction
