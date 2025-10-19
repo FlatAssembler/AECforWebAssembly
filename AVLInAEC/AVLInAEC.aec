@@ -156,6 +156,12 @@ Function balanceFactor(PointerToAVLNode node) Which Returns Integer32 Does {
 EndFunction;
 
 Function rotateRight(PointerToAVLNode y) Which Returns PointerToAVLNode Does {
+  Character stringToBePrinted[32] : = {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Right-rotate around ");
+  convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), y->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
   PointerToAVLNode x : = y->leftChild;
   PointerToAVLNode T2 : = x->rightChild;
   x->rightChild : = y;
@@ -167,6 +173,12 @@ Function rotateRight(PointerToAVLNode y) Which Returns PointerToAVLNode Does {
 EndFunction;
 
 Function rotateLeft(PointerToAVLNode x) Which Returns PointerToAVLNode Does {
+  Character stringToBePrinted[32] : = {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Left-rotate around ");
+  convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), x->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
   PointerToAVLNode y : = x->rightChild;
   PointerToAVLNode T2 : = y->leftChild;
   y->leftChild : = x;
@@ -434,6 +446,13 @@ Function render() Which Returns Nothing Does {
   PointerToAVLNode root : = PointerToAVLNode(0);
   Integer32 i : = 0;
   While i < numberOfKeys Loop {
+    
+    Character stringToBePrinted[32] := {0};
+    strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
+    convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
+    strcat(AddressOf(stringToBePrinted[0]), "...\n");
+    printString(AddressOf(stringToBePrinted[0]));
+
     root : = avlInsert(root, keys[i]);
     i += 1;
   }

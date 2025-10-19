@@ -77,7 +77,7 @@
         document.getElementById("format_as_code").innerHTML += str;
       }
       function clearScreen() {
-        document.getElementById("format_as_code").innerHTML = "";
+        // document.getElementById("format_as_code").innerHTML = "";
         document.getElementById("diagram").innerHTML = "";
       }
       function noMoreFreeMemory() {
@@ -150,6 +150,7 @@
         const api = await AVLAPI.init("AVLInAEC.wasm", importObject);
         memory = api.getMemory();
         document.getElementById("myButton").onclick = () => {
+          document.getElementById("format_as_code").innerHTML = "";
           const number_to_be_inserted_or_deleted = document.getElementById(
             "number_to_be_inserted_or_deleted",
           ).value;
