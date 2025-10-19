@@ -334,9 +334,15 @@ EndFunction;
 // --- Keys buffer (exposed to JS) ---
 Integer32 keys[128];
 Integer32 numberOfKeys : = 0;
+Character insert_or_delete[128];
 
 Function getAddressOfKeys() Which Returns PointerToInteger32 Does {
   Return AddressOf(keys[0]);
+}
+EndFunction;
+
+Function getAddressOfInsertOrDelete() Which Returns PointerToCharacter Does {
+  Return AddressOf(insert_or_delete[0]);
 }
 EndFunction;
 
@@ -446,14 +452,25 @@ Function render() Which Returns Nothing Does {
   PointerToAVLNode root : = PointerToAVLNode(0);
   Integer32 i : = 0;
   While i < numberOfKeys Loop {
-    
-    Character stringToBePrinted[32] := {0};
-    strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
-    convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
-    strcat(AddressOf(stringToBePrinted[0]), "...\n");
-    printString(AddressOf(stringToBePrinted[0]));
+    If insert_or_delete[i]='I' Then {
+      Character stringToBePrinted[32] := {0};
+      strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
+      strcat(AddressOf(stringToBePrinted[0]), "...\n");
+      printString(AddressOf(stringToBePrinted[0]));
 
-    root : = avlInsert(root, keys[i]);
+      root : = avlInsert(root, keys[i]);
+    }
+    Else {
+      Character stringToBePrinted[32] := {0};
+      strcat(AddressOf(stringToBePrinted[0]), "Deleting ");
+      convertIntegerToString(AddressOf(stringToBePrinted[0]) + strlen(AddressOf(stringToBePrinted[0])), keys[i]);
+      strcat(AddressOf(stringToBePrinted[0]), "...\n");
+      printString(AddressOf(stringToBePrinted[0]));
+
+      root : = avlDelete(root, keys[i]);
+    }
+    EndIf;
     i += 1;
   }
   EndWhile;

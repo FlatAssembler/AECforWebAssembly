@@ -36,6 +36,7 @@ class AVLAPI {
     this.instance = instance;
     this.mem = wasmExports.memory;
     this.keysPtr = Number(this.exports.getAddressOfKeys()); // pointer in bytes
+    this.insertOrDeletePtr = Number(this.exports.getAddressOfInsertOrDelete());
     this.capacity = 128; // matches AEC buffer
   }
 
@@ -44,6 +45,8 @@ class AVLAPI {
     const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
     for (let i = 0; i < n; i++) int32View[i] = keysArray[i] | 0;
     for (let i = n; i < this.capacity; i++) int32View[i] = 0;
+    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    for (let i= 0; i < n; i++) int8View[i] = 'I'.charCodeAt(0);
     this.exports.setNumberOfKeys(n);
   }
 
@@ -52,27 +55,19 @@ class AVLAPI {
     if (n >= this.capacity) throw new Error('keys buffer full');
     const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
     int32View[n] = key | 0;
+    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    int8View[n] = 'I'.charCodeAt(0);
     this.exports.setNumberOfKeys(n + 1);
   }
 
-  // Remove the first occurrence of key from the keys[] buffer (shift remaining)
-  // and update the wasm numberOfKeys. Returns true if a key was removed.
   deleteKey(key) {
     const n = this.exports.getNumberOfKeys();
-    if (n === 0) return false;
+    if (n >= this.capacity) throw new Error('keys buffer full');
     const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
-    let foundIndex = -1;
-    for (let i = 0; i < n; i++) {
-      if (int32View[i] === (key | 0)) { foundIndex = i; break; }
-    }
-    if (foundIndex === -1) return false;
-    // shift left
-    for (let i = foundIndex; i < n - 1; i++) {
-      int32View[i] = int32View[i + 1];
-    }
-    int32View[n - 1] = 0;
-    this.exports.setNumberOfKeys(n - 1);
-    return true;
+    int32View[n] = key | 0;
+    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    int8View[n] = 'D'.charCodeAt(0);
+    this.exports.setNumberOfKeys(n + 1);
   }
 
   clearKeys() {
