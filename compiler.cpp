@@ -287,14 +287,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
   {
 #ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
     std::string JSON = context.JSONify();
-    std::string commentedJSON = ";;\t";
-    for (size_t i = 0; i < JSON.length(); i++)
-      if (JSON[i] == '\n')
-        commentedJSON += "\n;;\t";
-      else
-        commentedJSON += JSON[i];
-    assembly += ";;The JSON of the current compilation context is:\n" +
-                commentedJSON + "\n";
+    assembly += ";;The JSON of the current compilation context is:\n(;\n" +
+                JSON + "\n;)\n";
 #endif
     if (text != "Does")
       context.stackSizeOfThisScope =
@@ -443,15 +437,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             "\n"; //"\n" is added to make the output more comprehensible in case
                   // the next assembly directive is also a comment, to put an
                   // empty line between the two comments.
-        std::string commentedJSON = ";;\t";
-        for (size_t i = 0; i < JSON.length(); i++)
-          if (JSON[i] == '\n')
-            commentedJSON += "\n;;\t";
-          else
-            commentedJSON += JSON[i];
         assembly += ";;The JSON of the new \"localVariables\" object in the "
-                    "current compilation context is:\n" +
-                    commentedJSON + "\n";
+                    "current compilation context is:\n(;\n" +
+                    JSON + "\n;)\n";
 #endif
       } else if (childNode.text == "InstantiateStructure") {
         if (childNode.children.size() != 1) {
@@ -769,15 +757,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         }
 #ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
         std::string JSON = JSONifyMapOfInts(context.localVariables) + "\n";
-        std::string commentedJSON = ";;\t";
-        for (size_t i = 0; i < JSON.length(); i++)
-          if (JSON[i] == '\n')
-            commentedJSON += "\n;;\t";
-          else
-            commentedJSON += JSON[i];
         assembly += ";;The JSON of the new \"localVariables\" object in the "
-                    "current compilation context is:\n" +
-                    commentedJSON + "\n";
+                    "current compilation context is:\n(;\n" +
+                    JSON + "\n;)\n";
 #endif
       } else if (childNode.text == ":=" and
                  context.structureSizes.count(
@@ -1243,9 +1225,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           std::to_string(
               context
                   .distanceInBlocksToTheNearestLoop) + // We cannot simply
-                                                       // output `(br 0)` because
-                                                       // of this technical
-                                                       // detail from
+                                                       // output `(br 0)`
+                                                       // because of this
+                                                       // technical detail from
                                                        // WebAssembly:
                                                        // https://langdev.stackexchange.com/q/4616/330
           ")";
