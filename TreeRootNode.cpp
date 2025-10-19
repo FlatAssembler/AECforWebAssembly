@@ -17,9 +17,10 @@ instantiateGlobalStructure(const structure str, const int offset,
                              str.name + "\" at memory address " +
                              std::to_string(offset) + ".\n";
   for (auto memberName : str.memberNames) {
-    if (!TreeNode().basicDataTypeSizes.count(str.memberTypes.at(memberName)) &&
-        !isPointerType(
-            str.memberTypes.at(memberName))) { // Nested global structures.
+    if (not(TreeNode().basicDataTypeSizes.count(
+            str.memberTypes.at(memberName))) and
+        not(isPointerType(
+            str.memberTypes.at(memberName)))) { // Nested global structures.
       auto iteratorPointingToTheStructure = std::find_if(
           structures.begin(), structures.end(), [=](structure innerStructure) {
             return str.memberTypes.at(memberName) == innerStructure.name;
@@ -173,7 +174,7 @@ public:
       if (basicDataTypeSizes.count(childNode.text) or
           isPointerType(childNode.text)) { // Global variable declaration
         for (auto variableName : childNode.children) {
-          if (!isValidVariableName(variableName.text) or
+          if (not(isValidVariableName(variableName.text)) or
               AECkeywords.count(variableName.text)) {
             std::cerr
                 << "Line " << variableName.lineNumber << ", Column "
@@ -341,7 +342,7 @@ public:
                           << std::endl;
                 exit(1);
               }
-              if (!context.globalVariables.count(assignment.text)) {
+              if (not(context.globalVariables.count(assignment.text))) {
                 std::cerr << "Line " << assignment.lineNumber << ", Column "
                           << assignment.columnNumber
                           << ", Internal compiler error: Memory for the string "
@@ -533,13 +534,13 @@ public:
             if (isPointerType(functionDeclaration.returnType))
               globalDeclarations += "(result i32)";
             else {
-              if (!mappingOfAECTypesToWebAssemblyTypes.count(
-                      functionDeclaration.returnType) and
-                  !std::count_if(context.structures.begin(),
-                                 context.structures.end(), [=](structure str) {
-                                   return str.name ==
-                                          functionDeclaration.returnType;
-                                 })) {
+              if (not(mappingOfAECTypesToWebAssemblyTypes.count(
+                      functionDeclaration.returnType)) and
+                  not(std::count_if(
+                      context.structures.begin(), context.structures.end(),
+                      [=](structure str) {
+                        return str.name == functionDeclaration.returnType;
+                      }))) {
                 std::cerr << "Line " << childNode.children.at(1).lineNumber
                           << ", Column " << childNode.children[1].columnNumber
                           << ", Compiler error: Unknown type name \""
@@ -610,13 +611,13 @@ In the meantime, you can try modifying your program to use ")"
                                                             // isn't going to
                                                             // happen.
             else {
-              if (!mappingOfAECTypesToWebAssemblyTypes.count(
-                      functionDeclaration.returnType) and
-                  !std::count_if(context.structures.begin(),
-                                 context.structures.end(), [=](structure str) {
-                                   return str.name ==
-                                          functionDeclaration.returnType;
-                                 })) {
+              if (not(mappingOfAECTypesToWebAssemblyTypes.count(
+                      functionDeclaration.returnType)) and
+                  not(std::count_if(
+                      context.structures.begin(), context.structures.end(),
+                      [=](structure str) {
+                        return str.name == functionDeclaration.returnType;
+                      }))) {
                 std::cerr << "Line " << childNode.children[1].lineNumber
                           << ", Column " << childNode.children[1].columnNumber
                           << ", Compiler error: Unknown type name \""
@@ -750,9 +751,9 @@ In the meantime, you can try modifying your program to use ")"
               << " children instead of 2. Quitting now!" << std::endl;
           exit(1);
         }
-        if (!isValidVariableName(childNode.children[0].text) or
+        if (not(isValidVariableName(childNode.children.at(0).text)) or
             childNode.children[0].text.back() == '[' or
-            AECkeywords.count(childNode.children[0].text)) {
+            AECkeywords.count(childNode.children.at(0).text)) {
           std::cerr << "Line " << childNode.lineNumber << ", Column "
                     << childNode.columnNumber << ", Compiler error: The name \""
                     << childNode.children[0].text
@@ -777,11 +778,11 @@ In the meantime, you can try modifying your program to use ")"
                 std::to_string(typeName.columnNumber) +
                 ": Sorry about that, but this compiler does not support "
                 "nested structures yet!");
-          if (!isPointerType(typeName.text) and
-              !basicDataTypeSizes.count(typeName.text) and
-              !std::count_if(
+          if (not(isPointerType(typeName.text)) and
+              not(basicDataTypeSizes.count(typeName.text)) and
+              not(std::count_if(
                   context.structures.begin(), context.structures.end(),
-                  [=](structure str) { return str.name == typeName.text; })) {
+                  [=](structure str) { return str.name == typeName.text; }))) {
             std::cerr << "Line " << typeName.lineNumber << ", Column "
                       << typeName.columnNumber
                       << ", Compiler error: The type named \"" << typeName.text
@@ -789,7 +790,7 @@ In the meantime, you can try modifying your program to use ")"
             exit(1);
           }
           for (TreeNode memberName : typeName.children) {
-            if (!isValidVariableName(memberName.text) or
+            if (not(isValidVariableName(memberName.text)) or
                 AECkeywords.count(memberName.text)) {
               std::cerr << "Line " << memberName.lineNumber << ", Column "
                         << memberName.columnNumber << ", Compiler error: \""
@@ -848,10 +849,10 @@ In the meantime, you can try modifying your program to use ")"
                       .interpretAsACompileTimeIntegerConstant();
             } else { // A member that's not an array...
               if (memberName.children.size() == 1 and
-                  memberName.children[0].text == ":=")
+                  memberName.children.at(0).text == ":=")
                 currentStructure.defaultValuesOfMembers[memberName.text] =
-                    memberName.children[0]
-                        .children[0]
+                    memberName.children.at(0)
+                        .children.at(0)
                         .interpretAsACompileTimeDecimalConstant();
               else if (memberName.children.size())
                 std::cerr << "Line " << memberName.children[0].lineNumber
@@ -887,10 +888,10 @@ In the meantime, you can try modifying your program to use ")"
           exit(1);
         }
         TreeNode structureName = childNode.children.front();
-        if (!std::count_if(context.structures.begin(), context.structures.end(),
-                           [=](structure str) {
-                             return str.name == structureName.text;
-                           })) {
+        if (not(std::count_if(context.structures.begin(),
+                              context.structures.end(), [=](structure str) {
+                                return str.name == structureName.text;
+                              }))) {
           std::cerr << "Line " << structureName.lineNumber << ", Column "
                     << structureName.columnNumber
                     << ", Compiler error: The structure named \""
@@ -962,7 +963,7 @@ In the meantime, you can try modifying your program to use ")"
                         << ". Aborting the compilation." << std::endl;
               exit(1);
             }
-            int arraySize = instanceName.children[0]
+            int arraySize = instanceName.children.at(0)
                                 .interpretAsACompileTimeIntegerConstant();
             for (int i = 0; i < arraySize; i++) {
               AssemblyCode initialization = instantiateGlobalStructure(
