@@ -3,12 +3,8 @@
 // that for me.
 const fs = require("fs");
 const buffer = fs.readFileSync("HuffmanCodingInAEC.wasm");
-const stack_pointer = new WebAssembly.Global(
-    {value : "i32", mutable : true},
-    0,
-);
 let text = "";
-let memory = new WebAssembly.Memory({initial : 1});
+let memory;
 function printString(ptr) {
   let buffer = new Uint8Array(memory.buffer);
   let str = "";
@@ -30,9 +26,7 @@ function segmentationFault() {
 function getLengthOfTheInput() { return text.length; }
 function getCharacterOfTheInput(i) { return text.charCodeAt(i); }
 let importObject = {
-  JavaScript : {
-    stack_pointer : stack_pointer,
-    memory : memory,
+  wasi_unstable : {
     printString : printString,
     clearScreen : clearScreen,
     noMoreFreeMemory : noMoreFreeMemory,
@@ -48,6 +42,7 @@ let importObject = {
 };
 WebAssembly.instantiate(buffer, importObject).then((result) => {
   let exports = result.instance.exports;
+  memory = exports.memory;
   console.log("The AEC program has been loaded successfully!");
 
   text = "TEO SAMARZIJA";

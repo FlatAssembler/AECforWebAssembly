@@ -1,3 +1,5 @@
+#target WASI // So that we can target Firefox 52.
+
 Function noMoreFreeMemory() Which Returns Nothing Is External;
 Function segmentationFault() Which Returns Nothing Is External;
 Function

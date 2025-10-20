@@ -42,12 +42,19 @@
     years ago, I implemented it in JavaScript, you can see it
     <a href="huffman.html">here</a>.
     <br />
-    <b>This only works in very modern browsers.</b> I'm not too interested in
-    targeting archaic browsers here. This only works in Firefox 62 and newer or
-    Chrome 69 and newer (those with support for
-    <code>WebAssembly.Global</code>). After a few years (if not months), all
-    JavaScript environments will become as capable as they are, rather than like
-    Internet Explorer.<br /><br />
+    <b>This only works in very modern browsers.</b>
+    <del
+      >I'm not too interested in targeting archaic browsers here. This only
+      works in Firefox 62 and newer or Chrome 69 and newer (those with support
+      for <code>WebAssembly.Global</code>). After a few years (if not months),
+      all JavaScript environments will become as capable as they are, rather
+      than like Internet Explorer.</del
+    ><br />
+    After fiddeling with the WebAssembly and JavaScript a bit, I believe I've
+    found a way to make this work in Firefox 52 (the last version of Firefox to
+    run on Windows XP) so long as one goes to <code>about:config</code> and
+    explicitly enables WebAssembly (by setting <code>javascript.wasm</code> to
+    <code>true</code>).<br /><br />
     <form>
       <label for="enterTheText">Enter the text you want to compress:</label
       ><br />
@@ -135,12 +142,8 @@
     >
     <script type="text/javascript">
       const svgNS = document.getElementById("diagram").namespaceURI;
-      const stack_pointer = new WebAssembly.Global(
-        { value: "i32", mutable: true },
-        0,
-      );
       let text = "";
-      let memory = new WebAssembly.Memory({ initial: 1 });
+      let memory;
       function printString(ptr) {
         let buffer = new Uint8Array(memory.buffer);
         let str = "";
@@ -206,9 +209,7 @@
         document.getElementById("diagram").setAttribute("height", height);
       }
       let importObject = {
-        JavaScript: {
-          stack_pointer: stack_pointer,
-          memory: memory,
+        wasi_unstable: {
           printString: printString,
           clearScreen: clearScreen,
           noMoreFreeMemory: noMoreFreeMemory,
@@ -228,6 +229,7 @@
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           const exports = results.instance.exports;
+          memory = exports.memory;
           main = exports.main;
         });
       function invokeAECfunctions() {
