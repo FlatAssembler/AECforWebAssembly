@@ -30,17 +30,13 @@ WebAssembly dynamic-link library with which this JavaScript code can link,
 quitting now!`);
     process.exit(1);
   }
-  const stack_pointer =
-      new WebAssembly.Global({value : 'i32', mutable : true}, 0);
-  let memory = new WebAssembly.Memory({initial : 1});
+  let memory;
   function logString(ptr) {} // Let's not implement the logging
                              // functionality here, we've already tested
                              // the code in the browser.
   function logInteger(integer) {}
   let importObject = {
-    JavaScript : {
-      stack_pointer : stack_pointer,
-      memory : memory,
+    "wasi_unstable" : {
       logString : logString,   // If you don't provide those functions,
       logInteger : logInteger, // AEC program will crash when trying to
                                // call them.
@@ -51,6 +47,7 @@ quitting now!`);
     // compatible with NodeJS JavaScript Virtual Machine Machine and
     // stored in memory where the pointer "results" points to.
     const exports = results.instance.exports;
+    memory = exports.memory;
     // Now, let's import functions declared in the AEC program into
     // JavaScript. AEC compiler automatically "extern"s them, so that
     // they can be imported.

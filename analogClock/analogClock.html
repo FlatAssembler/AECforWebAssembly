@@ -88,12 +88,20 @@
     to WebAssembly, using my new
     <a href="https://github.com/FlatAssembler/AECforWebAssembly">compiler</a
     >.<br />
-    <b>This only works in very modern browsers.</b> I'm not too interested in
-    targeting archaic browsers here. This only works in Firefox 62 and newer or
-    Chrome 69 and newer (that is, those that support
-    <code>WebAssembly.Global</code>). After a few years (if not months), all
-    JavaScript environments will become as capable as they are, rather than like
-    Internet Explorer.<br /><br />
+    <b>This only works in very modern browsers.</b>
+    <del
+      >I'm not too interested in targeting archaic browsers here. This only
+      works in Firefox 62 and newer or Chrome 69 and newer (that is, those that
+      support <code>WebAssembly.Global</code>). After a few years (if not
+      months), all JavaScript environments will become as capable as they are,
+      rather than like Internet Explorer.</del
+    ><br />
+    After tweaking WebAssembly and JavaScript a bit, I've managed to make it so
+    that this program can be run in Firefox 52 (the last version of Firefox
+    runnable on Windows XP) by going to <code>about:config</code> and enabling
+    the experimental WebAssembly feature with setting
+    <code>javascript.wasm</code> to <code>true</code>. However, it is very slow
+    in firefox 52.<br /><br />
     <div id="center">
       AEC program output:<br />
       <svg
@@ -156,11 +164,7 @@ node_version<span class="Operator">=$</span><span class="Parenthesis">((</span><
 node analogClock
         </pre>
     <script type="text/javascript">
-      const stack_pointer = new WebAssembly.Global(
-        { value: "i32", mutable: true },
-        0,
-      );
-      let memory = new WebAssembly.Memory({ initial: 1 });
+      let memory;
       function getStringAtAddress(ptr) {
         let bytes = new Uint8Array(memory.buffer);
         let str = "";
@@ -182,9 +186,7 @@ node analogClock
         stringToBeLogged += integer + "";
       }
       let importObject = {
-        JavaScript: {
-          stack_pointer: stack_pointer,
-          memory: memory,
+        wasi_unstable: {
           logString: logString,
           logInteger: logInteger,
         },
@@ -195,6 +197,7 @@ node analogClock
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           exports = results.instance.exports;
+          memory = exports.memory;
           getAddressOfOutput = exports.getAddressOfOutput;
           getAddressOfColors = exports.getAddressOfColors;
           updateClockToTime = exports.updateClockToTime;
@@ -206,7 +209,7 @@ node analogClock
         let addressOfOutput = getAddressOfOutput();
         let addressOfColors = getAddressOfColors();
         let bytes = new Uint8Array(memory.buffer, addressOfOutput, 80 * 23);
-        let dataView = new DataView(memory.buffer);
+        let colors = new Int32Array(memory.buffer, addressOfColors, 80 * 23);
         let str = "";
         for (let i = 0; i < 80 * 23; i++)
           str +=
@@ -215,9 +218,7 @@ node analogClock
             " y=" +
             Math.floor(i / 80) * 14.5 +
             ' fill="' +
-            getStringAtAddress(
-              dataView.getUint32(addressOfColors + 4 * i, true),
-            ) +
+            getStringAtAddress(colors[i]) +
             '">' +
             String.fromCharCode(bytes[i]) +
             "<\/text>";

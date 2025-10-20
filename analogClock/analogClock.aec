@@ -3,6 +3,9 @@
  * for Linux and DOS, to WebAssembly.
  */
 
+#target WASI // Not really, but then the compiler outputs the code compatible
+             // with Firefox 52.
+
 // Let's import some functions useful for debugging from JavaScript...
 Function logString(PointerToCharacter str) Which Returns Nothing Is External;
 Function logInteger(Integer32 int) Which Returns Nothing Is External;
