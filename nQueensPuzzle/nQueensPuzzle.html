@@ -34,11 +34,16 @@
     on an <i>n</i>-times-<i>n</i> chessboard without breaking the rules that no
     two chess queens can be in the same row, column or diagonal.
     <br />
-    <b>This only works in very modern browsers.</b> I'm not too interested in
+    <b>This only works in very modern browsers.</b> <del>I'm not too interested in
     targeting archaic browsers here. This only works in Firefox 62 and newer or
     Chrome 69 and newer (those with support <code>WebAssembly.Global</code>).
     After a few years (if not months), all JavaScript environments will become
-    as capable as they are, rather than like Internet Explorer.<br /><br />
+    as capable as they are, rather than like Internet Explorer.</del><br/>
+    I've fiddled with WebAssembly a bit, and this should now work in Firefox 52 
+    (the last version of Firefox running on Windows XP) as long as one has
+    WebAssembly enabled (by going to <code>about:config</code> and setting
+    <code>javascript.wasm</code> to <code>true</code>).
+    <br /><br />
     <form>
       <label for="enterTheNumber"
         >Enter the number <i>n</i> (between 1 and 12):</label
@@ -98,12 +103,8 @@
       >
       requires its solution to output.</ins
     >
-    <script type="text/javascript">
-      const stack_pointer = new WebAssembly.Global(
-        { value: "i32", mutable: true },
-        0,
-      );
-      let memory = new WebAssembly.Memory({ initial: 1 });
+    <script type="text/javascript"> 
+      let memory;
       function printString(ptr) {
         let buffer = new Uint8Array(memory.buffer);
         let str = "";
@@ -120,9 +121,7 @@
         return document.getElementById("printChessBoards").checked;
       }
       let importObject = {
-        JavaScript: {
-          stack_pointer: stack_pointer,
-          memory: memory,
+        wasi_unstable: {
           printString: printString,
           clearScreen: clearScreen,
           shouldWePrintChessBoards: shouldWePrintChessBoards,
@@ -134,6 +133,7 @@
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           const exports = results.instance.exports;
+	  memory = exports.memory;
           nQueensPuzzle = exports.nQueensPuzzle;
         });
       function invokeAECfunctions() {

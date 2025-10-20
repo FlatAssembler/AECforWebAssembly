@@ -5,6 +5,8 @@
  * chess queens can be in the same row, column or diagonal.
  */
 
+#target WASI // So that we can target Firefox 52
+
 // Import some functions we need to communicate with the outside world from
 // JavaScript...
 Function printString(PointerToCharacter str)
