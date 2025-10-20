@@ -54,7 +54,8 @@
     found a way to make this work in Firefox 52 (the last version of Firefox to
     run on Windows XP) so long as one goes to <code>about:config</code> and
     explicitly enables WebAssembly (by setting <code>javascript.wasm</code> to
-    <code>true</code>).<br /><br />
+    <code>true</code>). It will not be nearly as fast as modern browsers are
+    when they execute WebAssembly, but it will work.<br /><br />
     <form>
       <label for="enterTheText">Enter the text you want to compress:</label
       ><br />
@@ -139,7 +140,9 @@
     <ins
       >It looks as though it does work, that I just screwed something up while
       testing.</ins
-    >
+    ><br /><br />
+    UPDATE on 21/10/2025: I've implemented
+    <a href="AVLInAEC.html">another tree-based algorithm in AEC</a>.
     <script type="text/javascript">
       const svgNS = document.getElementById("diagram").namespaceURI;
       let text = "";
