@@ -40,7 +40,14 @@
     self-balancing binary trees, in
     <a href="AEC_specification.html">the AEC programming language</a>. Just a
     few days ago, I implemented it
-    <a href="tree-avl.html">in JavaScript</a>.<br /><br />
+    <a href="tree-avl.html">in JavaScript</a>.<br />
+    This program uses WebAssembly, but, as far as I know, works in all browsers
+    which support WebAssembly, including Firefox 52. If you are running this
+    program in Firefox 52 (the last version of Firefox to run on Windows XP), go
+    to <code>about:config</code> and then set the
+    <code>javascript.wasm</code> option to <code>true</code> (it is
+    <code>false</code> by default). It will not be as fast for large AVL trees
+    as modern browsers are, but it does work.<br /><br />
     <label for="number_to_be_inserted_or_deleted"
       >Number to be inserted or deleted:</label
     ><br />
