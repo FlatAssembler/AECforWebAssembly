@@ -1,3 +1,6 @@
+#target WASI // We are not really targetting WASI, but this way the compiler will output
+             // WebAssembly code compatible with Firefox 52.
+
 Function get_length_of_the_first_number() Which Returns Integer32 Is External;
 Function get_digit_of_the_first_number_at(Integer32 index) Which Returns Character Is External;
 Function get_length_of_the_second_number() Which Returns Integer32 Is External;
@@ -59,11 +62,7 @@ Function multiply() Which Returns Nothing Does
 				carry;
 			matrix[f(pointer_to_the_digit_in_the_second_number, pointer_to_the_matrix_column)]
 				:= mod(product, 10) + '0';
-			If product >= 10 Then
-				carry := product / 10;
-			Else
-				carry := 0;
-			EndIf
+			carry := product / 10;
 			pointer_to_the_matrix_column -= 1;
 			pointer_to_the_digit_in_the_first_number -= 1;
 		EndWhile
