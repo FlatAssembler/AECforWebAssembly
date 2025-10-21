@@ -4,6 +4,9 @@
  * bugs as possible by implementing the permutations algorithm.
  */
 
+#target WASI // We are not really targetting WASI, but this way the compiler
+             // will output WebAssembly code compatible with Firefox 52.
+
 // So, those are JavaScript functions which I am planning to call from AEC:
 Function printInt(Integer32 int) Which Returns Nothing Is External;
 Function printString(PointerToCharacter ptr) Which Returns Nothing Is External;

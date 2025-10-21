@@ -42,11 +42,15 @@
     (but, if my computer is infected with malware, that ZIP archive will
     probably be as well).
     <br />
-    <b>This only works in very modern browsers.</b> I'm not too interested in
+    <b>This only works in very modern browsers.</b> <del>I'm not too interested in
     targeting archaic browsers here. This only works in Firefox 62 and newer or
     Chrome 69 and newer. After a few years (if not months), all JavaScript
     environments will become as capable as they are, rather than like Internet
-    Explorer.<br /><br />
+    Explorer.</del><br />
+    I've tweaked the WebAssembly a bit, and it should now be compatible with Firefox 52,
+    so long as you go to <code>about:config</code> and set 
+    <code>javascript.options.wasm</code> to <code>true</code>. If you are using Windows XP,
+    you are probably using Firefox 52.<br /><br />
     <form>
       <label for="enterTheNumber">Enter the number:</label><br />
       <input type="text" id="enterTheNumber" name="enterTheNumber" /><br />
@@ -64,12 +68,8 @@
     href="https://picoblaze-simulator.sourceforge.io/PicoBlaze.html?id=99"
     >a similar program
     in the PicoBlaze assembly language</a>.
-    <script type="text/javascript">
-      const stack_pointer = new WebAssembly.Global(
-        { value: "i32", mutable: true },
-        0,
-      );
-      let memory = new WebAssembly.Memory({ initial: 1 });
+    <script type="text/javascript"> 
+      let memory;
       function printInt(integer) {
         document.getElementById("format_as_code").innerHTML += integer;
       }
@@ -86,9 +86,7 @@
         document.getElementById("format_as_code").innerHTML = "";
       }
       let importObject = {
-        JavaScript: {
-          stack_pointer: stack_pointer,
-          memory: memory,
+        wasi_unstable: {
           printString: printString,
           clearScreen: clearScreen,
           printInt: printInt,
@@ -100,6 +98,7 @@
         .then((bytes) => WebAssembly.instantiate(bytes, importObject))
         .then((results) => {
           exports = results.instance.exports;
+	  memory = exports.memory;
           printPermutationsOfDigits = exports.printPermutationsOfDigits;
         });
       function invokeAECfunctions() {
