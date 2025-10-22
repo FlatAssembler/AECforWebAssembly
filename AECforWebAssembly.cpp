@@ -26,6 +26,9 @@ std::string compilation_target; // WASI (WebAssembly System Interface) or
 #include <fstream>
 #include <iostream>
 #include <typeinfo>
+#ifdef WIN32
+#include <windows.h>
+#endif
 using namespace std;
 
 int main(int argc, char **argv) {
@@ -33,7 +36,7 @@ int main(int argc, char **argv) {
   using namespace std::chrono;
   try {
     if (argc < 2 or
-        !regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase))) {
+        not(regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase)))) {
       if (argc >= 2 and
           (ends_with(argv[1], ".aec") or
            ends_with(argv[1],
@@ -87,6 +90,48 @@ will not work.)"
            high_resolution_clock::period::num * 1000 /
            high_resolution_clock::period::den)
        << " milliseconds." << endl;
+  string rawInput;
+#ifdef WIN32
+  cout
+      << "We will try to load the entire AEC file into RAM using Windows API..."
+      << endl;
+  auto beginningOfReading = chrono::high_resolution_clock::now();
+  HANDLE inputFile = CreateFileA(argv[1], GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                                 FILE_ATTRIBUTE_NORMAL, NULL);
+  if (inputFile == INVALID_HANDLE_VALUE) {
+    cerr << "Can't open the file \"" << argv[1]
+         << "\" for reading! Error code: " << GetLastError() << endl;
+    return -1;
+  }
+  LARGE_INTEGER fileSize;
+  if (!GetFileSizeEx(inputFile, &fileSize)) {
+    cerr << "Fetching the size of the file \"" << argv[1]
+         << "\" failed! Did you try to open a device file such as CON? Error "
+            "code: "
+         << GetLastError() << endl;
+    CloseHandle(inputFile);
+    return -1;
+  }
+  HANDLE hMap = CreateFileMappingA(inputFile, NULL, PAGE_READONLY, 0, 0, NULL);
+  if (hMap == NULL) {
+    cerr << "The function \"CreateFileMappingA\" failed with the error code "
+         << GetLastError() << "!" << endl;
+    CloseHandle(inputFile);
+    return -1;
+  }
+  LPVOID lpBasePtr = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+  if (lpBasePtr == NULL) {
+    cerr << "The function \"MapViewOfFile\" failed with the error code "
+         << GetLastError() << "!" << endl;
+    CloseHandle(hMap);
+    CloseHandle(inputFile);
+  }
+  char *charPtr = (char *)lpBasePtr;
+  rawInput = string(charPtr, fileSize.LowPart);
+  UnmapViewOfFile(lpBasePtr);
+  CloseHandle(hMap);
+  CloseHandle(inputFile);
+#else
   ifstream input(argv[1]);
   if (!input) {
     cerr << "Can't open the file \"" << argv[1] << "\" for reading!" << endl;
@@ -94,7 +139,6 @@ will not work.)"
   }
   cout << "Reading the file \"" << argv[1] << "\"..." << endl;
   auto beginningOfReading = chrono::high_resolution_clock::now();
-  string rawInput;
   while (true) {
     char currentCharacter;
     input.get(currentCharacter);
@@ -105,6 +149,7 @@ will not work.)"
                                     // "\r\n" instead of '\n'.
   }
   input.close();
+#endif
   auto endOfReading = chrono::high_resolution_clock::now();
   cout << "All characters read in "
        << ((endOfReading - beginningOfReading).count() *

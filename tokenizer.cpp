@@ -24,6 +24,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
   bool areWeInAString = false, areWeInAComment = false;
   string stringDelimiter, commentDelimiter;
   for (unsigned int i = 0; i < input.size(); i++) {
+    if (input[i] == '\r')
+      continue;
 #ifndef NDEBUG
     std::cerr << "DEBUG: Now we are tokenizing the character #" << i << ": '"
               << input[i] << "'." << std::endl;
