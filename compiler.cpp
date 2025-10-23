@@ -1538,8 +1538,10 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     else
       strongerType =
           getStrongerType(lineNumber, columnNumber, firstType, secondType);
-    AssemblyCode::AssemblyType assemblyType =
-        mappingOfAECTypesToWebAssemblyTypes.at(strongerType);
+    AssemblyCode::AssemblyType assemblyType;
+    assemblyType = mappingOfAECTypesToWebAssemblyTypes.count(strongerType)
+                       ? mappingOfAECTypesToWebAssemblyTypes.at(strongerType)
+                       : AssemblyCode::AssemblyType::i32;
     assembly +=
         "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) + ".eq\n" +
         convertTo(children[0], strongerType, context).indentBy(1) + "\n" +

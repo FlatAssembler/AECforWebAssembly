@@ -1,0 +1,679 @@
+#target WASI // Because we want to make sure all accesses are aligned.
+
+Function noMoreFreeMemory() Which Returns Nothing Is External;
+Function segmentationFault() Which Returns Nothing Is External;
+Function printString(PointerToCharacter string) Which Returns Nothing Is External;
+Function clearScreen() Which Returns Nothing Is External;
+Function setDiagramWidth(Integer32 width) Which Returns Nothing Is External;
+Function setDiagramHeight(Integer32 height) Which Returns Nothing Is External;
+Function drawLine(Integer32 x1, Integer32 y1, Integer32 x2, Integer32 y2)
+    Which Returns Nothing Is External;
+Function drawRectangle(Integer32 x, Integer32 y,
+                       Integer32 width, Integer32 height,
+		       PointerToCharacter color)
+    Which Returns Nothing Is External;
+Function drawText(Integer32 x, Integer32 y, PointerToCharacter text)
+    Which Returns Nothing Is External;
+
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does
+  If str = 0 Then
+    Return 0;
+  EndIf
+  Integer32 length := 0;
+  While ValueAt(str + length) Loop
+    length += 1;
+  EndWhile
+  Return length;
+EndFunction
+
+Function strcpy(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does
+  While ValueAt(src) Loop
+    ValueAt(dest) := ValueAt(src);
+    dest += 1;
+    src += 1;
+  EndWhile
+  ValueAt(dest) := 0;
+EndFunction
+
+Function strcat(PointerToCharacter dest, PointerToCharacter src) Which Returns Nothing Does
+  strcpy(dest + strlen(dest), src);
+EndFunction
+
+Function reverseString(PointerToCharacter string) Which Returns Nothing Does
+  PointerToCharacter pointerToLastCharacter := string + strlen(string) - 1;
+  While pointerToLastCharacter - string > 0 Loop
+    Character tmp := ValueAt(string);
+    ValueAt(string) := ValueAt(pointerToLastCharacter);
+    ValueAt(pointerToLastCharacter) := tmp;
+    string += 1;
+    pointerToLastCharacter -= 1;
+  EndWhile
+EndFunction
+
+Function convertIntegerToString(PointerToCharacter string, Integer32 number) 
+    Which Returns Nothing Does
+  Integer32 isNumberNegative := 0;
+  If number < 0 Then
+    number := -number;
+    isNumberNegative := 1;
+  EndIf
+  Integer32 i := 0;
+  While number >= 10 Loop
+    ValueAt(string + i) := '0' + mod(number, 10);
+    number /= 10;
+    i += 1;
+  EndWhile
+  ValueAt(string + i) := '0' + number;
+  i += 1;
+  If isNumberNegative Then 
+    ValueAt(string + i) := '-';
+    i += 1;
+  EndIf
+  ValueAt(string + i) := 0;
+  reverseString(string);
+EndFunction
+
+Function appendIntegerToString(PointerToCharacter string, Integer32 number)
+    Which Returns Nothing Does
+  convertIntegerToString(string + strlen(string), number);
+EndFunction
+
+Structure RedBlackTreeNode Consists Of
+  Integer32 key;
+  PointerToRedBlackTreeNode leftChild, rightChild, parent;
+  Character color;
+  Integer32 x, y;
+EndStructure
+
+InstantiateStructure RedBlackTreeNode redBlackTreeNodes[128];
+Integer16 isRedBlackTreeNodeUsed[128];
+
+Function isRedBlackTreeNodeWithinBounds(
+         PointerToRedBlackTreeNode node) Which Returns Integer32 Does
+  Return AddressOf(redBlackTreeNodes[0]) <= node <= AddressOf(redBlackTreeNodes[128 - 1]) and
+      mod(node - AddressOf(redBlackTreeNodes[0]), SizeOf(RedBlackTreeNode)) = 0;
+EndFunction
+
+Function newRedBlackTreeNode() Which Returns PointerToRedBlackTreeNode Does
+  Integer16 i := 0;
+  While i < 128 Loop
+    If not(isRedBlackTreeNodeUsed[i]) Then
+      redBlackTreeNodes[i].key := 0;
+      redBlackTreeNodes[i].leftChild :=
+         redBlackTreeNodes[i].rightChild :=
+	   PointerToRedBlackTreeNode(0);
+      redBlackTreeNodes[i].color := 'R';
+      redBlackTreeNodes[i].x := redBlackTreeNodes[i].y := 0;
+      isRedBlackTreeNodeUsed[i] := 1;
+      Return AddressOf(redBlackTreeNodes[i]);
+    EndIf
+    i += 1;
+  EndWhile
+  noMoreFreeMemory();
+EndFunction
+
+Function freeRedBlackTreeNode(
+    PointerToRedBlackTreeNode node) Which Returns Nothing Does
+  If not(isRedBlackTreeNodeWithinBounds(node)) Then
+    segmentationFault();
+  EndIf
+  isRedBlackTreeNodeUsed[
+    (node - AddressOf(redBlackTreeNodes[0])) / SizeOf(RedBlackTreeNode)] := 0;
+EndFunction
+
+Function RRotate(PointerToRedBlackTreeNode y)
+    Which Returns PointerToRedBlackTreeNode Does
+  Character stringToBePrinted[32] := {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Right-rotate around ");
+  appendIntegerToString(
+    AddressOf(stringToBePrinted[0]),
+    y->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
+  PointerToRedBlackTreeNode x := y->leftChild;
+  PointerToRedBlackTreeNode T2 := x->rightChild;
+  x->rightChild := y;
+  y->leftChild := T2;
+  y->parent := x;
+  If T2 Then
+    T2->parent := y;
+  EndIf
+  Return x;
+EndFunction
+
+Function LRotate(PointerToRedBlackTreeNode x)
+    Which Returns PointerToRedBlackTreeNode Does
+  Character stringToBePrinted[32] := {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Left-rotate around ");
+  appendIntegerToString(
+    AddressOf(stringToBePrinted[0]),
+    x->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
+  PointerToRedBlackTreeNode y := x->rightChild;
+  PointerToRedBlackTreeNode T2 := y->leftChild;
+  y->leftChild := x;
+  x->rightChild := T2;
+  x->parent := y;
+  If T2 Then
+    T2->parent := x;
+  EndIf
+  Return y;
+EndFunction
+
+PointerToRedBlackTreeNode root;
+Integer32 ll := 0, rr := 0, lr := 0, rl := 0;
+
+Function Insert(PointerToRedBlackTreeNode node, Integer32 X)
+  Which Returns PointerToRedBlackTreeNode Is Declared;
+
+Function InsertRBT(PointerToRedBlackTreeNode node, Integer32 X)
+    Which Returns PointerToRedBlackTreeNode Does
+  PointerToRedBlackTreeNode newnode;
+  If not(node) Then
+    newnode := newRedBlackTreeNode();
+    newnode->key := X;
+    newnode->color := 'B';
+    Return newnode;
+  EndIf
+  newnode := Insert(node, X);
+  newnode->parent := PointerToRedBlackTreeNode(0);
+  Return newnode;
+EndFunction
+
+Function Insert(PointerToRedBlackTreeNode node, Integer32 X)
+    Which Returns PointerToRedBlackTreeNode Does
+  Integer32 flag := 0;
+    If node = 0 Then
+      PointerToRedBlackTreeNode ret := newRedBlackTreeNode();
+      ret->key := X;
+      Return ret;
+    EndIf
+    If X < node->key Then
+        node->leftChild := Insert(node->leftChild, X);
+        node->leftChild->parent := node;
+        If not(node=root) Then
+          If node->color = 'R' and node->leftChild->color = 'R' Then
+	    flag := 1;
+	  EndIf
+	EndIf
+    ElseIf X > node->key Then
+        node->rightChild := Insert(node->rightChild, X);
+        node->rightChild->parent := node;
+        If not(node=root) Then
+           If node->color = 'R' and node->rightChild->color = 'R' Then
+	     flag := 1;
+	   EndIf
+	EndIf
+    Else
+      Return node;
+    EndIf
+ 
+    If ll Then
+        node := LRotate( node );
+        node->color := 'B';
+        node->leftChild->color := 'R';
+        ll := 0;
+    ElseIf rr Then
+        node := RRotate( node );
+        node->color := 'B';
+        node->rightChild->color := 'R';
+        rr  := 0;
+    ElseIf rl Then
+        node->rightChild := RRotate( node->rightChild );
+        node->rightChild->parent := node;
+        node := LRotate( node );
+        node->color := 'B';
+        node->leftChild->color := 'R';
+        rl := 0;
+    ElseIf lr Then
+        node->leftChild := LRotate( node->leftChild );
+        node->leftChild->parent := node;
+        node := RRotate( node );
+        node->color := 'B';
+        node->rightChild->color := 'R';
+        lr := 0;
+    EndIf
+
+    If flag Then  // RED-RED conflict
+        If node->parent->rightChild = node Then
+            If node->parent->leftChild = 0 or node->parent->leftChild->color = 'B' Then
+                If not(node->leftChild = 0) and node->leftChild->color = 'R' Then
+		  rl := 1;
+                ElseIf not(node->rightChild = 0) and node->rightChild->color = 'R' Then
+		  ll := 1;
+		EndIf
+            Else
+                node->parent->leftChild->color := 'B';
+                node->color := 'B';
+                If not(node->parent = root) Then
+		  node->parent->color := 'R';
+		EndIf
+            EndIf
+        Else
+            If node->parent->rightChild = 0 or node->parent->rightChild->color = 'B' Then
+                If not(node->leftChild = 0) and node->leftChild->color = 'R' Then
+		  rr := 1;
+                ElseIf not(node->rightChild = 0) and node->rightChild->color = 'R' Then
+		  lr := 1;
+		EndIf
+            Else
+                node->parent->rightChild->color := 'B';
+                node->color := 'B';
+                If not(node->parent = root) Then
+		  node->parent->color := 'R';
+		EndIf
+            EndIf
+        EndIf
+        flag := 0;
+    EndIf
+    Return node; 
+EndFunction
+
+Function leftRotate(PointerToRedBlackTreeNode t) Which Returns Nothing Does
+  Character stringToBePrinted[32] := {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Left-rotate around ");
+  appendIntegerToString(
+    AddressOf(stringToBePrinted[0]),
+    t->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
+  PointerToRedBlackTreeNode tParent := t->rightChild;
+  If t = root Then
+    root := tParent;
+  EndIf
+  If t->parent Then
+    If t = t->parent->leftChild Then
+      t->parent->leftChild := tParent;
+    Else
+      t->parent->rightChild := tParent;
+    EndIf
+  EndIf
+  tParent->parent := t->parent;
+  t->parent := tParent;
+  t->rightChild := tParent->leftChild;
+  If tParent->leftChild Then
+    tParent->leftChild->parent := t;
+  EndIf
+  tParent->leftChild := t;
+EndFunction
+
+Function rightRotate(PointerToRedBlackTreeNode t) Which Returns Nothing Does
+  Character stringToBePrinted[32] := {0};
+  strcat(AddressOf(stringToBePrinted[0]), "Right-rotate around ");
+  appendIntegerToString(
+    AddressOf(stringToBePrinted[0]),
+    t->key);
+  strcat(AddressOf(stringToBePrinted[0]), ".\n");
+  printString(AddressOf(stringToBePrinted[0]));
+
+  PointerToRedBlackTreeNode tParent := t->leftChild;
+  If t = root Then
+    root := tParent;
+  EndIf
+  If t->parent Then
+    If t = t->parent->leftChild Then
+      t->parent->leftChild := tParent;
+    Else
+      t->parent->rightChild := tParent;
+    EndIf
+  EndIf
+  tParent->parent := t->parent;
+  t->parent := tParent;
+  t->leftChild := tParent->rightChild;
+  If tParent->rightChild Then
+    tParent->rightChild->parent := t;
+  EndIf
+  tParent->rightChild := t;
+EndFunction
+
+Function Sibling(PointerToRedBlackTreeNode v)
+    Which Returns PointerToRedBlackTreeNode Does
+  If not(v->parent) Then
+    Return 0;
+  EndIf
+  If v = v->parent->leftChild Then
+    Return v->parent->rightChild;
+  EndIf
+  Return v->parent->leftChild;
+EndFunction
+
+Function FixDoubleBlack(PointerToRedBlackTreeNode x) Which Returns Nothing Does
+   If x = root Then
+     Return;
+   EndIf
+   PointerToRedBlackTreeNode sibling := Sibling( x ), parent := x->parent;
+   If not(sibling) Then
+     FixDoubleBlack(parent);
+   Else
+     If sibling->color = 'R' Then
+       parent->color := 'R';
+       sibling->color := 'B';
+       If sibling = sibling->parent->leftChild Then
+         rightRotate(parent);
+       Else 
+	   leftRotate(parent);
+       EndIf
+       FixDoubleBlack(x); 
+     Else
+       If not(sibling->leftChild = 0) and sibling->leftChild->color = 'R' Then
+         If sibling = sibling->parent->leftChild Then
+           sibling->leftChild->color := sibling->color;
+           sibling->color := parent->color;
+           rightRotate(parent); 
+         Else
+           sibling->leftChild->color := parent->color;
+           rightRotate(sibling);
+           leftRotate(parent);
+         EndIf
+         parent->color := 'B'; 
+       ElseIf not(sibling->rightChild = 0) and sibling->rightChild->color='R' Then
+         If sibling = sibling->parent->leftChild Then
+           sibling->rightChild->color := parent->color;
+           leftRotate(sibling);
+           rightRotate(parent); 
+         Else
+           sibling->rightChild->color := sibling->color;
+           sibling->color := parent->color;
+           leftRotate(parent);
+         EndIf
+         parent->color := 'B';
+       Else
+         sibling->color := 'R';
+         If parent->color = 'B' Then
+	   FixDoubleBlack(parent);
+         Else
+	   parent->color := 'B';
+         EndIf
+       EndIf
+    EndIf
+  EndIf
+EndFunction
+
+Function SmallestNode(PointerToRedBlackTreeNode node) Which Returns
+    PointerToRedBlackTreeNode Does
+  PointerToRedBlackTreeNode t := node;
+  While t -> leftChild Loop
+    t := t->leftChild;
+  EndWhile
+  Return t;
+EndFunction
+
+Function ReplaceRBT(PointerToRedBlackTreeNode t)
+    Which Returns PointerToRedBlackTreeNode Does
+  If not(t->leftChild = 0) and not(t->rightChild = 0) Then
+    Return SmallestNode(t->rightChild);
+  ElseIf not(t->leftChild) and not(t->rightChild) Then
+    Return 0;
+  ElseIf t->leftChild Then
+    Return t->leftChild;
+  Else
+    Return t->rightChild;
+  EndIf
+  asm("unreachable");
+EndFunction
+
+Function DeleteNode(PointerToRedBlackTreeNode v)
+    Which Returns Nothing Does
+  PointerToRedBlackTreeNode u := ReplaceRBT(v);
+  Integer32 uvBothBlack := (not(u) or u->color = 'B') and v->color = 'B';
+  PointerToRedBlackTreeNode parent := v->parent;
+  If not(u) Then
+    If v = root Then
+      root := PointerToRedBlackTreeNode(0);
+    Else
+      If uvBothBlack Then
+        FixDoubleBlack(v);
+      Else
+        PointerToRedBlackTreeNode vsib := Sibling(v);
+	If vsib Then
+	  vsib->color := 'R';
+	EndIf
+      EndIf
+      If v = v->parent->leftChild Then
+        parent->leftChild := PointerToRedBlackTreeNode(0);
+      Else
+        parent->rightChild := PointerToRedBlackTreeNode(0);
+      EndIf
+    EndIf
+    freeRedBlackTreeNode(v);
+    Return;
+   EndIf
+   If v->leftChild = 0 or v->rightChild = 0 Then
+     If v = root Then
+       v->key := u->key;
+       v->leftChild := v->rightChild := PointerToRedBlackTreeNode(0);
+       freeRedBlackTreeNode(u);
+     Else
+       If v = v->parent->leftChild Then
+         parent->leftChild := u;
+       Else
+         parent->rightChild := u;
+       EndIf
+       freeRedBlackTreeNode(v);
+       u->parent := parent;
+       If uvBothBlack Then
+         FixDoubleBlack(u);
+       Else
+         u->color := 'B';
+       EndIf
+     EndIf
+     Return;
+    EndIf
+    Integer32 tmp := u->key;
+    u->key := v->key;
+    v->key := tmp;
+    DeleteNode(u);
+EndFunction
+
+Function SearchRBT(
+    PointerToRedBlackTreeNode node,
+    Integer32 X,
+    PointerToPointerToRedBlackTreeNode parent)
+    Which Returns Integer32 Does
+  If not(node) Then
+    Return 0;
+  ElseIf node->key = X Then
+    Return 1;
+  EndIf
+  ValueAt(parent) := node;
+  If node->key > X Then
+    Return SearchRBT(node->leftChild, X, parent);
+  Else
+    Return SearchRBT(node->rightChild, X, parent);
+  EndIf
+  asm("unreachable");
+EndFunction
+
+Function DeleteRBT(PointerToRedBlackTreeNode node, Integer32 X) Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  PointerToRedBlackTreeNode parent := PointerToRedBlackTreeNode(0);
+  If SearchRBT(node,X,AddressOf(parent)) Then
+    If not(parent) Then
+      DeleteNode(node);
+    ElseIf not(parent->leftChild = 0) and parent->leftChild->key = X) Then
+      DeleteNode(parent->leftChild);
+    Else
+      DeleteNode(parent->rightChild);
+    EndIf
+  Else
+    printString("Node to be deleted has not been found.\n");
+  EndIf
+EndFunction
+  
+
+Integer32 keys[128];
+Integer32 numberOfKeys := 0;
+Character insert_or_delete[128];
+
+Function getAddressOfKeys() Which Returns PointerToInteger32 Does
+  Return AddressOf(keys[0]);
+EndFunction
+
+Function getAddressOfInsertOrDelete() Which Returns PointerToCharacter Does
+  Return AddressOf(insert_or_delete[0]);
+EndFunction
+
+Function setNumberOfKeys(Integer32 n) Which Returns Nothing Does
+  numberOfKeys := (n < 0) ? 0 :
+                  (n > 128) ? 128 : n;
+EndFunction
+
+Function getNumberOfKeys() Which Returns Integer32 Does
+  Return numberOfKeys;
+EndFunction
+
+Function clearKeys() Which Returns Nothing Does
+  numberOfKeys := 0;
+EndFunction
+
+Integer32 inorderCounter := 0;
+
+Function assignCoordinatesInorder(PointerToRedBlackTreeNode node,
+                                  Integer32 depth,
+				  Integer32 horizontalSpacing,
+				  Integer32 verticalSpacing)
+    Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  assignCoordinatesInorder(node->leftChild,
+                           depth + 1,
+			   horizontalSpacing,
+			   verticalSpacing);
+  node->x := inorderCounter * horizontalSpacing;
+  node->y := depth * verticalSpacing;
+  inorderCounter += 1;
+  assignCoordinatesInorder(node->rightChild,
+                           depth + 1,
+			   horizontalSpacing,
+			   verticalSpacing);
+EndFunction
+
+Structure Maxima Consists Of
+  Integer32 minimumX, maximumX;
+EndStructure
+
+Function findMinMaxX(PointerToRedBlackTreeNode node,
+                     PointerToMaxima m) 
+    Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  If node->x < m->minimumX Then
+    m->minimumX := node->x;
+  EndIf
+  If node->x > m->maximumX Then
+    m->maximumX := node->x;
+  EndIf
+  findMinMaxX(node->leftChild, m);
+  findMinMaxX(node->rightChild, m);
+EndFunction
+
+Function drawRedBlackTree(PointerToRedBlackTreeNode node, Integer32 offsetX)
+    Which Returns Nothing Does
+  If not(node) Then 
+    Return;
+  EndIf
+  Integer32 drawX := node->x - offsetX;
+  Integer32 drawY := node->y;
+  drawRectangle(drawX, drawY, 120, 60, node->color = 'R' ? "Red" : "Black");
+
+  Character keyStr[8] := {0};
+  convertIntegerToString(AddressOf(keyStr[0]), node->key);
+  drawText(drawX + 6, drawY + 30, AddressOf(keyStr[0]));
+
+  If node->leftChild Then
+    drawLine(drawX + 60, drawY + 60, node->leftChild->x - offsetX + 60, node->leftChild->y);
+    drawRedBlackTree(node->leftChild, offsetX);
+  EndIf
+  If node->rightChild Then
+    drawLine(drawX + 60, drawY + 60, node->rightChild->x - offsetX + 60, node->rightChild->y);
+    drawRedBlackTree(node->rightChild, offsetX);
+  EndIf
+EndFunction
+
+Function freeRedBlackTree(PointerToRedBlackTreeNode node) Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  If node->leftChild Then 
+    freeRedBlackTree(node->leftChild);
+  EndIf
+  If node->rightChild Then 
+    freeRedBlackTree(node->rightChild);
+  EndIf
+  freeRedBlackTreeNode(node);
+EndFunction
+
+Function max(Integer32 x, Integer32 y) Which Returns Integer32 Does
+  Return x > y ? x : y;
+EndFunction
+
+Function nodeHeight(PointerToRedBlackTreeNode node)
+    Which Returns Integer32 Does
+  Return not(node) ? 0 :
+         max(nodeHeight(node->leftChild), nodeHeight(node->rightChild)) + 1;
+EndFunction
+
+Function render() Which Returns Nothing Does
+  clearScreen();
+  root := PointerToRedBlackTreeNode(0);
+  Integer32 i := 0;
+  While i < numberOfKeys Loop
+    If insert_or_delete[i] = 'I' Then
+      Character stringToBePrinted[32] := {0};
+      strcat(AddressOf(stringToBePrinted[0]), "Inserting ");
+      appendIntegerToString(
+        AddressOf(stringToBePrinted[0]),
+	keys[i]);
+      strcat(AddressOf(stringToBePrinted[0]), "...\n");
+      printString(AddressOf(stringToBePrinted[0]));
+
+      root := InsertRBT(root, keys[i]);
+    ElseIf insert_or_delete[i] = 'D' Then
+      Character stringToBePrinted[32] := {0};
+      strcat(AddressOf(stringToBePrinted[0]), "Deleting ");
+      appendIntegerToString(
+        AddressOf(stringToBePrinted[0]),
+	keys[i]);
+      strcat(AddressOf(stringToBePrinted[0]), "...\n");
+      printString(AddressOf(stringToBePrinted[0]));
+
+      DeleteRBT(root, keys[i]);
+    Else
+      printString(R"RawString(The character array "insert_or_delete" can only contain characters 'I' and 'D'!
+)RawString");
+      asm("unreachable");
+    EndIf
+    i += 1;
+  EndWhile
+
+  inorderCounter := 1;
+  assignCoordinatesInorder(root, 0, 110, 90);
+
+  InstantiateStructure Maxima globalMax;
+  globalMax.minimumX := globalMax.maximumX := 0;
+  If root Then
+    globalMax.minimumX := root->x;
+    globalMax.maximumX := root->x;
+    findMinMaxX(root, AddressOf(globalMax));
+  EndIf
+
+  Integer32 margin := 20;
+  Integer32 diagramWidth := (globalMax.maximumX - globalMax.minimumX) + 120 + margin * 2;
+  Integer32 diagramHeight := (nodeHeight(root) + 1) * 90 + margin;
+
+  setDiagramWidth(diagramWidth);
+  setDiagramHeight(diagramHeight);
+
+  drawRedBlackTree(root, globalMax.minimumX - margin);
+
+  freeRedBlackTree(root);
+  printString("Red Black Tree rendered.\n");
+EndFunction
