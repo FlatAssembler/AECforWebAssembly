@@ -1539,6 +1539,17 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       strongerType =
           getStrongerType(lineNumber, columnNumber, firstType, secondType);
     AssemblyCode::AssemblyType assemblyType;
+    if (not(mappingOfAECTypesToWebAssemblyTypes.count(strongerType)))
+      std::cerr << "Compiler warning: "
+                << "Line " << lineNumber << ", Column " << columnNumber
+                << ": The semantic analyzer outputted a type anotation for the "
+                   "AST node \""
+                << text
+                << "\" which the core of the compiler cannot parse. The "
+                   "compilation will continue under the assumption that the "
+                   "type is supposed to be \"Integer32\", but beware it might "
+                   "produce wrong assembly code!"
+                << std::endl;
     assemblyType = mappingOfAECTypesToWebAssemblyTypes.count(strongerType)
                        ? mappingOfAECTypesToWebAssemblyTypes.at(strongerType)
                        : AssemblyCode::AssemblyType::i32;
