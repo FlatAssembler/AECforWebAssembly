@@ -496,6 +496,13 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                                                input.begin() + semicolon);
       nodesThatTheRecursionDealsWith =
           parseVariableDeclaration(nodesThatTheRecursionDealsWith);
+      if (nodesThatTheRecursionDealsWith.empty()) {
+        std::cerr << "Line " << input.at(typeName).lineNumber << ", Column "
+                  << input.at(typeName).columnNumber
+                  << ", Parser error: Malformed InstantiateStructure directive!"
+                  << std::endl;
+        return input;
+      }
       input[typeName].children.push_back(nodesThatTheRecursionDealsWith.at(0));
       input.erase(input.begin() + typeName + 1, input.begin() + semicolon);
     } else if (input.at(i).text == "Function") {
