@@ -186,7 +186,7 @@ EndFunction
 Function Insert(PointerToRedBlackTreeNode node, Integer32 X)
     Which Returns PointerToRedBlackTreeNode Does
   Integer32 flag := 0;
-    If node = 0 Then
+    If not(node) Then
       PointerToRedBlackTreeNode ret := newRedBlackTreeNode();
       ret->key := X;
       Return ret;
@@ -239,10 +239,10 @@ Function Insert(PointerToRedBlackTreeNode node, Integer32 X)
 
     If flag Then  // RED-RED conflict
         If node->parent->rightChild = node Then
-            If node->parent->leftChild = 0 or node->parent->leftChild->color = 'B' Then
-                If not(node->leftChild = 0) and node->leftChild->color = 'R' Then
+            If node->parent->leftChild = PointerToRedBlackTreeNode(0) or node->parent->leftChild->color = 'B' Then
+                If not(node->leftChild = PointerToRedBlackTreeNode(0)) and node->leftChild->color = 'R' Then
                   rl := 1;
-                ElseIf not(node->rightChild = 0) and node->rightChild->color = 'R' Then
+                ElseIf not(node->rightChild = PointerToRedBlackTreeNode(0)) and node->rightChild->color = 'R' Then
                   ll := 1;
                 EndIf
             Else
@@ -253,10 +253,10 @@ Function Insert(PointerToRedBlackTreeNode node, Integer32 X)
                 EndIf
             EndIf
         Else
-            If node->parent->rightChild = 0 or node->parent->rightChild->color = 'B' Then
-                If not(node->leftChild = 0) and node->leftChild->color = 'R' Then
+            If node->parent->rightChild = PointerToRedBlackTreeNode(0) or node->parent->rightChild->color = 'B' Then
+                If not(node->leftChild = PointerToRedBlackTreeNode(0)) and node->leftChild->color = 'R' Then
                   rr := 1;
-                ElseIf not(node->rightChild = 0) and node->rightChild->color = 'R' Then
+                ElseIf not(node->rightChild = PointerToRedBlackTreeNode(0)) and node->rightChild->color = 'R' Then
                   lr := 1;
                 EndIf
             Else
@@ -359,7 +359,7 @@ Function FixDoubleBlack(PointerToRedBlackTreeNode x) Which Returns Nothing Does
        EndIf
        FixDoubleBlack(x); 
      Else
-       If not(sibling->leftChild = 0) and sibling->leftChild->color = 'R' Then
+       If not(sibling->leftChild = PointerToRedBlackTreeNode(0)) and sibling->leftChild->color = 'R' Then
          If sibling = sibling->parent->leftChild Then
            sibling->leftChild->color := sibling->color;
            sibling->color := parent->color;
@@ -370,7 +370,7 @@ Function FixDoubleBlack(PointerToRedBlackTreeNode x) Which Returns Nothing Does
            leftRotate(parent);
          EndIf
          parent->color := 'B'; 
-       ElseIf not(sibling->rightChild = 0) and sibling->rightChild->color='R' Then
+       ElseIf not(sibling->rightChild = PointerToRedBlackTreeNode(0)) and sibling->rightChild->color='R' Then
          If sibling = sibling->parent->leftChild Then
            sibling->rightChild->color := parent->color;
            leftRotate(sibling);
@@ -404,7 +404,8 @@ EndFunction
 
 Function ReplaceRBT(PointerToRedBlackTreeNode t)
     Which Returns PointerToRedBlackTreeNode Does
-  If not(t->leftChild = 0) and not(t->rightChild = 0) Then
+  If not(t->leftChild = PointerToRedBlackTreeNode(0)) and
+     not(t->rightChild = PointerToRedBlackTreeNode(0)) Then
     Return SmallestNode(t->rightChild);
   ElseIf not(t->leftChild) and not(t->rightChild) Then
     Return 0;
@@ -442,7 +443,8 @@ Function DeleteNode(PointerToRedBlackTreeNode v)
     freeRedBlackTreeNode(v);
     Return;
    EndIf
-   If v->leftChild = 0 or v->rightChild = 0 Then
+   If v->leftChild = PointerToRedBlackTreeNode(0)
+      or v->rightChild = PointerToRedBlackTreeNode(0) Then
      If v = root Then
        v->key := u->key;
        v->leftChild := v->rightChild := PointerToRedBlackTreeNode(0);
@@ -493,10 +495,11 @@ Function DeleteRBT(PointerToRedBlackTreeNode node, Integer32 X) Which Returns No
     Return;
   EndIf
   PointerToRedBlackTreeNode parent := PointerToRedBlackTreeNode(0);
-  If SearchRBT(node,X,AddressOf(parent)) Then
+  If SearchRBT(node, X, AddressOf(parent)) Then
     If not(parent) Then
       DeleteNode(node);
-    ElseIf not(parent->leftChild = 0) and parent->leftChild->key = X) Then
+    ElseIf not(parent->leftChild = PointerToRedBlackTreeNode(0)) and
+           parent->leftChild->key = X Then
       DeleteNode(parent->leftChild);
     Else
       DeleteNode(parent->rightChild);
