@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Splay Trees in AEC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      body {
+        font-family: sans-serif;
+      }
+      #format_as_code {
+        font-family: "Lucida Console", monospace;
+        white-space: pre;
+        width: 100%;
+        background: #eeeeee;
+        height: 75vh;
+        display: block;
+        overflow: scroll;
+      }
+      pre {
+        width: 100%;
+        overflow: scroll;
+      }
+      h1 {
+        text-align: center;
+      }
+      blockquote {
+        background: #ffe;
+        font-family: Times;
+        padding: 3px;
+      }
+      #div_with_svg {
+        overflow-x: scroll;
+      }
+    </style>
+    <script src="splay_api.js"></script>
+  </head>
+  <body>
+    <h1>Splay Trees</h1>
+    This is my attempt to implement Splay Trees, a binary tree structure optimized for fast retrieval of recently accessed nodes, in
+    <a href="AEC_specification.html">the AEC programming language</a>.<br />
+    This program uses WebAssembly, but, as far as I know, works in all browsers
+    which support WebAssembly, including Firefox 52. If you are running this
+    program in Firefox 52 (the last version of Firefox to run on Windows XP), go
+    to <code>about:config</code> and then set the
+    <code>javascript.wasm</code> option to <code>true</code> (it is
+    <code>false</code> by default). It will not be as fast for large Red-Black trees
+    as modern browsers are, but it does work.<br /><br />
+    <label for="number_to_be_inserted_or_deleted"
+      >Number to be inserted, deleted, or searched:</label
+    ><br />
+    <input type="number" id="number_to_be_inserted_or_deleted" /><br />
+    <input type="radio" name="insert_or_delete" id="insert" checked /><label
+      for="insert"
+      >Insert</label
+    ><br />
+    <input type="radio" name="insert_or_delete" id="delete" /><label
+      for="delete"
+      >Delete</label
+    ><br />
+    <input type="radio" name="insert_or_delete" id="search"/><label
+						for="search">Seach</label><br/>
+    <input type="radio" name="insert_or_delete" id="insert_as_in_BST"/><label
+						for="insert_as_in_BST">Insert as in Binary Search Tree (use this per the BFS algorithm to construct an already-known tree)</label><br/>
+    <button id="myButton">Invoke AEC program</button><br /><button
+      id="reset_button"
+    >
+      Reset the AEC program</button
+    ><br /><br />
+    AEC program graphics output:<br />
+    <div id="div_with_svg">
+      <svg id="diagram"></svg>
+    </div>
+    AEC program console output:<br />
+    <span id="format_as_code"></span><br />
+    You can see
+    <a href="SplayTree.aec.html">the syntax-highlighted AEC source code</a>.
+    <script>
+      const svgNS = document.getElementById("diagram").namespaceURI;
+      let text = "";
+      let memory;
+      function printString(ptr) {
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
+        while (buffer[ptr]) {
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
+        }
+        document.getElementById("format_as_code").innerHTML += str;
+      }
+      function clearScreen() {
+        // document.getElementById("format_as_code").innerHTML = "";
+        document.getElementById("diagram").innerHTML = "";
+      }
+      function noMoreFreeMemory() {
+        alert("The AEC program reports to have run out of memory!");
+      }
+      function segmentationFault() {
+        alert(
+          "The AEC program reported to have experienced a segmentation fault!",
+        );
+      }
+      function getLengthOfTheInput() {
+        return text.length;
+      }
+      function getCharacterOfTheInput(i) {
+        return text.charCodeAt(i);
+      }
+      function drawRectangle(x, y, width, height) {
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("fill", "lightGray");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", width);
+        rect.setAttribute("height", height);
+        document.getElementById("diagram").appendChild(rect);
+      }
+      function drawLine(x1, y1, x2, y2) {
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("stroke", "black");
+        line.setAttribute("x1", x1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y1", y1);
+        line.setAttribute("y2", y2);
+        document.getElementById("diagram").appendChild(line);
+      }
+      function drawText(x, y, ptr) {
+        let buffer = new Uint8Array(memory.buffer);
+        let str = "";
+        while (buffer[ptr]) {
+          str += String.fromCharCode(buffer[ptr]);
+          ptr++;
+        }
+        const svgText = document.createElementNS(svgNS, "text");
+        svgText.appendChild(document.createTextNode(str));
+        svgText.setAttribute("x", x);
+        svgText.setAttribute("y", y);
+        document.getElementById("diagram").appendChild(svgText);
+      }
+      function setDiagramWidth(width) {
+        document.getElementById("diagram").setAttribute("width", width);
+      }
+      function setDiagramHeight(height) {
+        document.getElementById("diagram").setAttribute("height", height);
+      }
+      let importObject = {
+        wasi_unstable: {
+          printString: printString,
+          clearScreen: clearScreen,
+          noMoreFreeMemory: noMoreFreeMemory,
+          segmentationFault: segmentationFault,
+          getLengthOfTheInput: getLengthOfTheInput,
+          getCharacterOfTheInput: getCharacterOfTheInput,
+          drawRectangle: drawRectangle,
+          drawLine: drawLine,
+          drawText: drawText,
+          setDiagramWidth: setDiagramWidth,
+          setDiagramHeight: setDiagramHeight,
+        },
+      };
+      window.onload = async function () {
+        const api = await SplayAPI.init("SplayTree.wasm", importObject);
+        memory = api.getMemory();
+        document.getElementById("reset_button").onclick = () => {
+          api.clearKeys();
+          document.getElementById("format_as_code").innerHTML = "";
+          clearScreen();
+        };
+        document.getElementById("myButton").onclick = () => {
+          document.getElementById("format_as_code").innerHTML = "";
+          const number_to_be_inserted_or_deleted = document.getElementById(
+            "number_to_be_inserted_or_deleted",
+          ).value;
+          if (document.getElementById("insert").checked) {
+            api.pushKey(number_to_be_inserted_or_deleted);
+            api.render();
+          } else if (document.getElementById("delete").checked) {
+            api.deleteKey(number_to_be_inserted_or_deleted);
+            api.render();
+	  } else if (document.getElementById("search").checked) {
+	    api.searchKey(number_to_be_inserted_or_deleted);
+	    api.render();
+	  } else if (document.getElementById("insert_as_in_BST").checked) {
+	    api.pushLikeInBST(number_to_be_inserted_or_deleted);
+	    api.render();
+	  }
+        };
+      };
+    </script>
+  </body>
+</html>
