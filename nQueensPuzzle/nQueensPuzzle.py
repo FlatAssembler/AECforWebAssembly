@@ -7,7 +7,7 @@ while len(stack):
         number_of_solutions += 1
         string_to_be_printed = ""
         for i in range(0, size_of_the_chessboard):
-            string_to_be_printed += chr(ord('A') + i) + str(current_attempt[i] + 1) + (" " if i<size_of_the_chessboard - 1 else "")
+            string_to_be_printed += chr(ord('A') + i) + str(current_attempt[i] + 1) + (" " if i < size_of_the_chessboard-1 else "")
         print("Found a solution:", string_to_be_printed)
         string_to_be_printed = ""
         for i in range(0, size_of_the_chessboard):
