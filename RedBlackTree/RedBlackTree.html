@@ -37,15 +37,16 @@
   <body>
     <h1>Red-Black Trees</h1>
     This is my attempt to implement Red-Black Trees, one of the simplest form of
-    self-balancing binary trees (right after <a href="AVLInAEC.html">AVL trees</a>), in
+    self-balancing binary trees (right after
+    <a href="AVLInAEC.html">AVL trees</a>), in
     <a href="AEC_specification.html">the AEC programming language</a>.<br />
     This program uses WebAssembly, but, as far as I know, works in all browsers
     which support WebAssembly, including Firefox 52. If you are running this
     program in Firefox 52 (the last version of Firefox to run on Windows XP), go
     to <code>about:config</code> and then set the
     <code>javascript.wasm</code> option to <code>true</code> (it is
-    <code>false</code> by default). It will not be as fast for large Red-Black trees
-    as modern browsers are, but it does work.<br /><br />
+    <code>false</code> by default). It will not be as fast for large Red-Black
+    trees as modern browsers are, but it does work.<br /><br />
     <label for="number_to_be_inserted_or_deleted"
       >Number to be inserted or deleted:</label
     ><br />
@@ -70,7 +71,13 @@
     AEC program console output:<br />
     <span id="format_as_code"></span><br />
     You can see
-    <a href="RedBlackTree.aec.html">the syntax-highlighted AEC source code</a>.
+    <a href="RedBlackTree.aec.html">the syntax-highlighted AEC source code</a
+    >.<br /><br />
+    UPDATE on 01/11/2025: I've
+    <a href="SplayTree"
+      >implemented the Splay Tree Algorithm in AEC and compiled it to
+      WebAssembly</a
+    >.
     <script>
       const svgNS = document.getElementById("diagram").namespaceURI;
       let text = "";
@@ -103,7 +110,7 @@
         return text.charCodeAt(i);
       }
       function drawRectangle(x, y, width, height, colorPtr) {
-	let buffer = new Uint8Array(memory.buffer);
+        let buffer = new Uint8Array(memory.buffer);
         let str = "";
         while (buffer[colorPtr]) {
           str += String.fromCharCode(buffer[colorPtr]);
@@ -115,8 +122,8 @@
         rect.setAttribute("y", y);
         rect.setAttribute("width", width);
         rect.setAttribute("height", height);
-	rect.setAttribute("stroke", str);
-	rect.setAttribute("stroke-width", 3);
+        rect.setAttribute("stroke", str);
+        rect.setAttribute("stroke-width", 3);
         document.getElementById("diagram").appendChild(rect);
       }
       function drawLine(x1, y1, x2, y2) {
