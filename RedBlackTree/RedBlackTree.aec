@@ -101,7 +101,7 @@ Function newRedBlackTreeNode() Which Returns PointerToRedBlackTreeNode Does
       redBlackTreeNodes[i].key := 0;
       redBlackTreeNodes[i].leftChild :=
         redBlackTreeNodes[i].rightChild :=
-	  redBlackTreeNodes[i].parent :=
+          redBlackTreeNodes[i].parent :=
             PointerToRedBlackTreeNode(0);
       redBlackTreeNodes[i].color := 'R';
       redBlackTreeNodes[i].x := redBlackTreeNodes[i].y := 0;
