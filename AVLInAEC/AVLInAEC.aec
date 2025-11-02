@@ -270,7 +270,8 @@ Function avlDelete(PointerToAVLNode root, Integer32 key)
   EndIf
 
   // If the tree had only one node then return
-  If not(root) Then Return root;
+  If not(root) Then
+    Return root;
   EndIf
 
   // Update height
