@@ -198,13 +198,13 @@ Function Splay(PointerToNode node, Integer32 X)
     If not(node->right) Then
       Return node;
     ElseIf node->right->key > X Then
-      printString("ZAG-ZAG case\n");
+      printString("ZAG-ZIG case\n");
       node->right->left := Splay(node->right->left, X);
       If node->right->left Then
         node->right := RRotate(node->right);
       EndIf
     ElseIf node->right->key < X Then
-      printString("ZAG-ZIG case\n");
+      printString("ZAG-ZAG case\n");
       node->right->right := Splay(node->right->right, X);
       node := LRotate(node);
     EndIf
