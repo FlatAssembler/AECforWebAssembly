@@ -23,6 +23,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
   int currentLine = 1, currentColumn = 1;
   bool areWeInAString = false, areWeInAComment = false;
   string stringDelimiter, commentDelimiter;
+  int stringStartLine = 0,
+      stringStartColumn = 0; // Track where the string starts
   for (unsigned int i = 0; i < input.size(); i++) {
     if (input[i] == '\r')
       continue;
@@ -38,6 +40,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
         i < input.length() - 1 and input[i + 1] == '"') { // Multi-line string
       areWeInAString = true;
       currentColumn++;
+      stringStartLine = currentLine;
+      stringStartColumn = currentColumn;
       stringDelimiter = ")";
       size_t where_is_the_open_paranthesis = i + 2;
       while (where_is_the_open_paranthesis < input.length() and
@@ -95,9 +99,11 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
             TreeNode(string(), currentLine, currentColumn));
         currentColumn++;
         areWeInAString = false;
-      } else if (!areWeInAString) {
+      } else if (not(areWeInAString)) {
         currentColumn++;
         areWeInAString = true;
+        stringStartLine = currentLine;
+        stringStartColumn = currentColumn;
         stringDelimiter = input.substr(i, 1);
         tokenizedExpression.push_back(
             TreeNode(input.substr(i, 1), currentLine, currentColumn));
@@ -186,12 +192,15 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
     }
   }
   if (areWeInAString)
-    std::cerr << "Tokenizer error: String "
-              << tokenizedExpression.back().text.substr(
-                     0,
-                     std::min(12, int(tokenizedExpression.back().text.size())))
-              << "... not terminated before the end of the program!"
-              << std::endl;
+    std::cerr
+        << "Line " << stringStartLine << ", Column " << stringStartColumn
+        << ", Tokenizer error: String "
+        << (tokenizedExpression.empty()
+                ? ""
+                : tokenizedExpression.back().text.substr(
+                      0, std::min(12,
+                                  int(tokenizedExpression.back().text.size()))))
+        << "... not terminated before the end of the program!" << std::endl;
   for (auto bitand treeNode :
        tokenizedExpression) // Convert "PointerToCharacter" to
                             // "CharacterPointer", "PointerToInteger32" to
