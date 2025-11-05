@@ -26,8 +26,15 @@ std::string compilation_target; // WASI (WebAssembly System Interface) or
 #include <fstream>
 #include <iostream>
 #include <typeinfo>
-#ifdef WIN32
+#if defined(WIN32)
 #include <windows.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#endif
+#if defined(_POSIX_MAPPED_FILES)
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #endif
 using namespace std;
 
@@ -91,7 +98,7 @@ will not work.)"
            high_resolution_clock::period::den)
        << " milliseconds." << endl;
   string rawInput;
-#ifdef WIN32
+#if defined(WIN32)
   cout
       << "We will try to load the entire AEC file into RAM using Windows API..."
       << endl;
@@ -131,6 +138,33 @@ will not work.)"
   UnmapViewOfFile(lpBasePtr);
   CloseHandle(hMap);
   CloseHandle(inputFile);
+#elif defined(_POSIX_MAPPED_FILES)
+  cout << "We will try to load the entire AEC file into RAM using the Linux "
+          "mmap directive."
+       << endl;
+  auto beginningOfReading = chrono::high_resolution_clock::now();
+  int file_descriptor = open(argv[1], O_RDONLY);
+  if (file_descriptor == -1) {
+    cerr << "The file \"" << argv[1] << "\" cannot be opened for reading."
+         << endl;
+    return -1;
+  }
+  struct stat sb;
+  if (fstat(file_descriptor, &sb) == -1) {
+    cerr << "Cannot fetch the size of the file \"" << argv[1] << "\"." << endl;
+    close(file_descriptor);
+    return -1;
+  }
+  void *addr =
+      mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
+  if (addr == MAP_FAILED) {
+    cerr << "Mapping the file \"" << argv[1] << "\" into RAM failed!" << endl;
+    close(file_descriptor);
+    return -1;
+  }
+  rawInput = string((char *)addr, sb.st_size);
+  munmap(addr, sb.st_size);
+  close(file_descriptor);
 #else
   ifstream input(argv[1]);
   if (!input) {
