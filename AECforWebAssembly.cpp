@@ -145,20 +145,26 @@ will not work.)"
   auto beginningOfReading = chrono::high_resolution_clock::now();
   int file_descriptor = open(argv[1], O_RDONLY);
   if (file_descriptor == -1) {
-    cerr << "The file \"" << argv[1] << "\" cannot be opened for reading."
-         << endl;
+    cerr << "The file \"" << argv[1]
+         << "\" cannot be opened for reading. Error code: " << errno << endl;
     return -1;
   }
   struct stat sb;
   if (fstat(file_descriptor, &sb) == -1) {
-    cerr << "Cannot fetch the size of the file \"" << argv[1] << "\"." << endl;
+    cerr << "Cannot fetch the size of the file \"" << argv[1]
+         << "\". Error code: " << errno << endl;
     close(file_descriptor);
+    return -1;
+  }
+  if (not(sb.st_size)) {
+    cerr << "The file \"" << argv[1] << "\" is empty!" << endl;
     return -1;
   }
   void *addr =
       mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0);
   if (addr == MAP_FAILED) {
-    cerr << "Mapping the file \"" << argv[1] << "\" into RAM failed!" << endl;
+    cerr << "Mapping the file \"" << argv[1]
+         << "\" into RAM failed! Error code: " << errno << endl;
     close(file_descriptor);
     return -1;
   }
