@@ -118,6 +118,7 @@ void simpleParserTests() {
 }
 
 void interpreterTests() {
+  // Again, an integration test that is in the form of a data provider.
   std::vector<test> tests(
       {{"1+2*3", "7"},
        {"(1+2)*3", "9"},
@@ -176,6 +177,7 @@ void interpreterTests() {
 }
 
 void parsingVariableDeclarationsTests() {
+  // We probably cannot design the test suite such that *all* parser tests are in one data provider, as the parser is a recursive descent parser, and different types of constructs in the language are being parsed by different functions in the parser.
   std::vector<test> tests(
       {{"Integer32 some_array[80*23],array_width:=80,array_height:=23",
         "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
@@ -195,6 +197,7 @@ void parsingVariableDeclarationsTests() {
 }
 
 void parserTests() {
+  // So, this data provider is testing the root function of the recursive descent parser as an integration test (invoking the tokenizer as well).
   std::vector<test> tests(
       {{"Integer32 some_array[80*23],array_width:=80,array_height:=23;",
         "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
