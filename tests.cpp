@@ -4,7 +4,11 @@
  * it's not nearly as easy to implement automated tests for the core of
  * the compiler.
  *
- * UPDATE: The core of the compiler (which generates the assembly code) is being tested by CMAKE invoking the compiler, the assembler `wabt wat2wasm`, and then invoking NodeJS to see whether the assembled WebAssembly code outputs the expected result. That is being run on every push on GitHub (but not every time the compiler is being started).
+ * UPDATE: The core of the compiler (which generates the assembly code) is being
+ * tested by CMAKE invoking the compiler, the assembler `wabt wat2wasm`, and
+ * then invoking NodeJS to see whether the assembled WebAssembly code outputs
+ * the expected result. That is being run on every push on GitHub (but not every
+ * time the compiler is being started).
  */
 
 #include "CorruptCompilationContextException.cpp"
@@ -20,7 +24,10 @@ struct test { // When the debugger doesn't work (and I can't get it to
 };
 
 void tokenizerTests() {
-  // This would be a form of a test that's not in the form arrange-and-assert, but in the form called "data provider". Data provider is when a test has many inputs and many outputs stored into some array. This would be a unit test.
+  // This would be a form of a test that's not in the form arrange-and-assert,
+  // but in the form called "data provider". Data provider is when a test has
+  // many inputs and many outputs stored into some array. This would be a unit
+  // test.
   std::vector<test> tests(
       {{"\"/*Comment inside a string*/\"",
         "['\"/*Comment inside a string*/\"']"},
@@ -76,7 +83,9 @@ Hello world!
 }
 
 void simpleParserTests() {
-  // This would again be a "data provider"-type test, but this would not be a unit test, since we are invoking two modules here: the parser and the tokenizer. This would be an integration test.
+  // This would again be a "data provider"-type test, but this would not be a
+  // unit test, since we are invoking two modules here: the parser and the
+  // tokenizer. This would be an integration test.
   std::vector<test> tests(
       {{"5+3", "(+ 5 3)"},
        {"2+3*4", "(+ 2 (* 3 4))"},
@@ -177,7 +186,10 @@ void interpreterTests() {
 }
 
 void parsingVariableDeclarationsTests() {
-  // We probably cannot design the test suite such that *all* parser tests are in one data provider, as the parser is a recursive descent parser, and different types of constructs in the language are being parsed by different functions in the parser.
+  // We probably cannot design the test suite such that *all* parser tests are
+  // in one data provider, as the parser is a recursive descent parser, and
+  // different types of constructs in the language are being parsed by different
+  // functions in the parser.
   std::vector<test> tests(
       {{"Integer32 some_array[80*23],array_width:=80,array_height:=23",
         "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
@@ -197,7 +209,8 @@ void parsingVariableDeclarationsTests() {
 }
 
 void parserTests() {
-  // So, this data provider is testing the root function of the recursive descent parser as an integration test (invoking the tokenizer as well).
+  // So, this data provider is testing the root function of the recursive
+  // descent parser as an integration test (invoking the tokenizer as well).
   std::vector<test> tests(
       {{"Integer32 some_array[80*23],array_width:=80,array_height:=23;",
         "(Integer32 (some_array (* 80 23)) (array_width (:= 80)) (array_height "
