@@ -18,10 +18,10 @@ bool isHexadecimalNumber(std::string str) {
   // std::regex("^(\\d|[a-f])+$"), some C++ compilers (GCC when targeting
   // FreeDOS and CLANG when targeting Oracle Linux) produce wrong code for
   // that regex.
-  if (!str.size())
+  if (not(str.size()))
     return false;
   for (unsigned i = 0; i < str.size(); i++)
-    if (!std::isdigit(str[i]) and !(str[i] >= 'a' and str[i] <= 'f'))
+    if (!std::isdigit(str[i]) and not(str[i] >= 'a' and str[i] <= 'f'))
       return false;
   return true;
 }
@@ -30,8 +30,8 @@ std::string
 reverseOrderOfBytes(std::string hexadecimal) // Because the JavaScript Virtual
                                              // Machine is little-endian
 {
-  if (hexadecimal.size() % 2 != 0 || hexadecimal.size() < 2 ||
-      !isHexadecimalNumber(hexadecimal)) {
+  if (hexadecimal.size() % 2 != 0 or hexadecimal.size() < 2 or
+      not(isHexadecimalNumber(hexadecimal))) {
     std::cerr << "Internal compiler error: Some part of the compiler has "
                  "attempted to reverse the bytes of \""
               << hexadecimal << "\", which doesn't make sense." << std::endl;
