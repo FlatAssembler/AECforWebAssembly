@@ -152,3 +152,11 @@ If you don't know about compiler theory and don't want to read about such compli
 **UPDATE** on 23/07/2025: To support the Latina Rediviva movement (which seeks to revive the Latin language as a medium of international communication), I made [a video about the basics of how compilers work in the Latin language](https://youtu.be/hlw72oFlKZA). There is [an MP4 file](https://flatassembler.github.io/compiler-theory-latin.mp4) as well.
 
 To format the code, I generally prefer to use [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) for languages that it supports (JavaScript, C++), because I find the code it produces nicer. For languages it doesn't support (HTML, CSS), I use [Prettier](https://prettier.io/). The code Prettier outputs isn't particularly nice, but something is better than nothing. It's also interesting that `clang-format`, if you supply it with code in this version of AEC and tell it to format the code, it will format the code assuming it's a C-like language, but (as far as I can tell) it won't break it. The result isn't particularly nice, but maybe some automated formatting is better than nothing.
+
+## McAfee false positive
+
+I am aware that McAfee antivirus claims that this program, if compiled with TDM-GCC, is an instance of the virus called `PUP:Win/Titirez.HK`:
+
+![McAfee screenshot](mcafee-screenshot.png)
+
+I see every reason to think this is a false positive.
