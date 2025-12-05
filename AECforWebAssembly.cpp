@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
   using namespace std::regex_constants;
   using namespace std::chrono;
   try {
-    if (argc < 2 or
-        not(regex_search(argv[1], regex(R"(\.AEC$)", ECMAScript | icase)))) {
+    if (argc < 2 or not(regex_search(
+                        argv[1], regex(R"(\.AEC$)", ECMAScript bitor icase)))) {
       if (argc >= 2 and
           (ends_with(argv[1], ".aec") or
            ends_with(argv[1],
