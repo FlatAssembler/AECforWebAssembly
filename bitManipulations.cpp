@@ -21,7 +21,7 @@ bool isHexadecimalNumber(std::string str) {
   if (not(str.size()))
     return false;
   for (unsigned i = 0; i < str.size(); i++)
-    if (!std::isdigit(str[i]) and not(str[i] >= 'a' and str[i] <= 'f'))
+    if (not(std::isdigit(str[i])) and not(str[i] >= 'a' and str[i] <= 'f'))
       return false;
   return true;
 }
