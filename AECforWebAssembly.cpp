@@ -11,6 +11,11 @@
 #define NDEBUG // If deleted, the tokenizer and parser will output verbose
                // output.
 #endif
+
+#if defined(_WIN32) && !defined(WIN32) // https://stackoverflow.com/a/5080453
+#define WIN32
+#endif
+
 #include <string>
 std::string compilation_target; // WASI (WebAssembly System Interface) or
                                 // browser (default).
