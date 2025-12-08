@@ -174,7 +174,14 @@ will not work.)"
     return -1;
   }
   rawInput = string((char *)addr, sb.st_size);
-  munmap(addr, sb.st_size);
+  munmap(addr,
+         sb.st_size); // Kind of weird here that a Linux function takes more
+                      // arguments than a corresponding Windows function that is
+                      // UnmapViewOfFile, isn't it? Especially since the second
+                      // argument seems completely unnecessary (what else could
+                      // the second argument be rather than the size of the file
+                      // that has been mapped into RAM). I've asked a Quora
+                      // question about that: https://qr.ae/pCbILK
   close(file_descriptor);
 #else
   ifstream input(argv[1]);
