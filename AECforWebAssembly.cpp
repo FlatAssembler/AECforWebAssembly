@@ -13,7 +13,8 @@
 #endif
 
 #if defined(_WIN32) && !defined(WIN32) // https://stackoverflow.com/a/5080453
-#define WIN32
+#define WIN32 // Or else CLANG on Windows will read the input files
+              // character-by-character instead of using memory mapping.
 #endif
 
 #include <string>
