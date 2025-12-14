@@ -24,4 +24,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          SonarSource/sonarqube-scan-action --args="--define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}""
+          SonarSource/sonarqube-scan-action --args="--define sonar.cfamily.build-wrapper-output=\"${{ env.BUILD_WRAPPER_OUT_DIR }}\""
