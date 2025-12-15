@@ -472,17 +472,17 @@ void testLongestCommonSubsequence() {
   if (longest_common_subsequence_length(
           "ABCD",
           "ACBAD") // https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-          != 3 ||
-      longest_common_subsequence_length("", "") != 0 ||
-      longest_common_subsequence_length("", "ABC") != 0 ||
+          != 3 or
+      longest_common_subsequence_length("", "") != 0 or
+      longest_common_subsequence_length("", "ABC") != 0 or
       longest_common_subsequence_length("ABC", "") != 0) {
     std::cerr << "Internal compiler error: The function calculating the "
                  "longest common subsequence of strings seems not to work!"
               << std::endl;
     std::exit(1);
   }
-  if (Levenstein_distance("", "") != 0 || Levenstein_distance("", "ABC") != 3 ||
-      Levenstein_distance("ABC", "") != 3 ||
+  if (Levenstein_distance("", "") != 0 or Levenstein_distance("", "ABC") != 3 or
+      Levenstein_distance("ABC", "") != 3 or
       Levenstein_distance(
           "kitten",
           "sitting") // https://en.wikipedia.org/wiki/Levenshtein_distance#Example
