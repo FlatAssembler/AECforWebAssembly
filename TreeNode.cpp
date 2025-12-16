@@ -18,6 +18,8 @@
 #include <regex>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #pragma once
@@ -63,12 +65,12 @@ public:
   // HappySkeptic suggested me to try to make shared parts of TreeNode static to
   // save on stack memory:
   // https://atheistforums.org/thread-63150-post-2053689.html#pid2053689
-  static std::map<std::string, int> basicDataTypeSizes;
-  static std::map<std::string, AssemblyCode::AssemblyType>
+  static std::unordered_map<std::string, int> basicDataTypeSizes;
+  static std::unordered_map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
-  static std::map<AssemblyCode::AssemblyType, std::string>
+  static std::unordered_map<AssemblyCode::AssemblyType, std::string>
       stringRepresentationOfWebAssemblyType;
-  static std::set<std::string> AECkeywords;
+  static std::unordered_set<std::string> AECkeywords;
   static bool staticPropertiesInitialized;
   std::vector<TreeNode> children;
   std::string text;
@@ -90,7 +92,7 @@ public:
                  // the 64-bit mode (which is almost never done).
       basicDataTypeSizes["Nothing"] = 0;
       mappingOfAECTypesToWebAssemblyTypes =
-          std::map<std::string, AssemblyCode::AssemblyType>(
+          std::unordered_map<std::string, AssemblyCode::AssemblyType>(
               {{"Integer32", AssemblyCode::AssemblyType::i32},
                {"Integer64", AssemblyCode::AssemblyType::i64},
                {"Decimal32", AssemblyCode::AssemblyType::f32},
@@ -100,7 +102,8 @@ public:
         if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
           mappingOfAECTypesToWebAssemblyTypes[pair.first] =
               AssemblyCode::AssemblyType::i32;
-      AECkeywords = std::set<std::string>({"Function",  "Which",
+      AECkeywords =
+          std::unordered_set<std::string>({"Function",  "Which",
                                            "Returns",   "Nothing",
                                            "Is",        "External",
                                            "Does",      "EndFunction",
@@ -117,7 +120,7 @@ public:
                                            "Decimal32", "Decimal32Pointer",
                                            "Decimal64", "Decimal64Pointer"});
       stringRepresentationOfWebAssemblyType =
-          std::map<AssemblyCode::AssemblyType, std::string>(
+          std::unordered_map<AssemblyCode::AssemblyType, std::string>(
               {{AssemblyCode::AssemblyType::i32, "i32"},
                {AssemblyCode::AssemblyType::i64, "i64"},
                {AssemblyCode::AssemblyType::f32, "f32"},
@@ -396,10 +399,10 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   return inlineAssembly;
 }
 
-std::map<std::string, int> TreeNode::basicDataTypeSizes;
-std::map<std::string, AssemblyCode::AssemblyType>
+std::unordered_map<std::string, int> TreeNode::basicDataTypeSizes;
+std::unordered_map<std::string, AssemblyCode::AssemblyType>
     TreeNode::mappingOfAECTypesToWebAssemblyTypes;
-std::map<AssemblyCode::AssemblyType, std::string>
+std::unordered_map<AssemblyCode::AssemblyType, std::string>
     TreeNode::stringRepresentationOfWebAssemblyType;
-std::set<std::string> TreeNode::AECkeywords;
+std::unordered_set<std::string> TreeNode::AECkeywords;
 bool TreeNode::staticPropertiesInitialized = false;
