@@ -22,7 +22,7 @@
 
 std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
-                               std::vector<std::string> operators,
+                               std::unordered_set<std::string> operators,
                                Associativity associativity) {
   auto loop_body = [bitand](int bitand i) -> void {
     if ((long unsigned)i >= input.size()) {
@@ -292,17 +292,16 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression[i].children.push_back(parsedExpression[i + 1]);
       parsedExpression.erase(parsedExpression.begin() + i + 1);
     }
-  std::vector<std::vector<std::string>> leftAssociativeBinaryOperators(
+  std::vector<std::unordered_set<std::string>> leftAssociativeBinaryOperators(
       {{".", "->"},
        {"*", "/"},
        {"-", "+"},
        {"<", ">", "=", "<=", ">="},
        {"and"},
        {"or"}});
-  for (unsigned int i = 0; i < leftAssociativeBinaryOperators.size(); i++)
-    parsedExpression = applyBinaryOperators(parsedExpression,
-                                            leftAssociativeBinaryOperators[i],
-                                            Associativity::left);
+  for (auto hashTableWithOperators : leftAssociativeBinaryOperators)
+    parsedExpression = applyBinaryOperators(
+        parsedExpression, hashTableWithOperators, Associativity::left);
   for (int i = parsedExpression.size() - 1; i >= 0;
        i--) // The ternary conditional "?:" operator (it's right-associative).
     if (parsedExpression.at(i).text == ":") {

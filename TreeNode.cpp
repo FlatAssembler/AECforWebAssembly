@@ -28,7 +28,7 @@ class TreeNode {
   enum class Associativity { left, right };
   static std::vector<TreeNode>
   applyBinaryOperators(std::vector<TreeNode> input,
-                       std::vector<std::string> operators,
+                       std::unordered_set<std::string> operators,
                        Associativity associativity);
 
 protected:
