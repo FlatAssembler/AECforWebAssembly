@@ -36,7 +36,8 @@
   </head>
   <body>
     <h1>Splay Trees</h1>
-    This is my attempt to implement Splay Trees, a binary tree structure optimized for fast retrieval of recently accessed nodes, in
+    This is my attempt to implement Splay Trees, a binary tree structure
+    optimized for fast retrieval of recently accessed nodes, in
     <a href="AEC_specification.html">the AEC programming language</a>.<br />
     This program uses WebAssembly, but, as far as I know, works in all browsers
     which support WebAssembly, including Firefox 52. If you are running this
@@ -57,10 +58,15 @@
       for="delete"
       >Delete</label
     ><br />
-    <input type="radio" name="insert_or_delete" id="search"/><label
-						for="search">Seach</label><br/>
-    <input type="radio" name="insert_or_delete" id="insert_as_in_BST"/><label
-						for="insert_as_in_BST">Insert as in Binary Search Tree (use this per the BFS algorithm to construct an already-known tree)</label><br/>
+    <input type="radio" name="insert_or_delete" id="search" /><label
+      for="search"
+      >Seach</label
+    ><br />
+    <input type="radio" name="insert_or_delete" id="insert_as_in_BST" /><label
+      for="insert_as_in_BST"
+      >Insert as in Binary Search Tree (use this per the BFS algorithm to
+      construct an already-known tree)</label
+    ><br />
     <button id="myButton">Invoke AEC program</button><br /><button
       id="reset_button"
     >
@@ -74,6 +80,12 @@
     <span id="format_as_code"></span><br />
     You can see
     <a href="SplayTree.aec.html">the syntax-highlighted AEC source code</a>.
+    <br /><br />
+    UPDATE on 19/12/2025: I've made
+    <a href="https://aecforwebassembly.sourceforge.io/vizualizacija_stabala.ppt"
+      >a LibreOffice presentation about me implementing tree-based algorithms
+      visualization in AEC</a
+    >. The presentation is in our language.
     <script>
       const svgNS = document.getElementById("diagram").namespaceURI;
       let text = "";
@@ -176,13 +188,13 @@
           } else if (document.getElementById("delete").checked) {
             api.deleteKey(number_to_be_inserted_or_deleted);
             api.render();
-	  } else if (document.getElementById("search").checked) {
-	    api.searchKey(number_to_be_inserted_or_deleted);
-	    api.render();
-	  } else if (document.getElementById("insert_as_in_BST").checked) {
-	    api.pushLikeInBST(number_to_be_inserted_or_deleted);
-	    api.render();
-	  }
+          } else if (document.getElementById("search").checked) {
+            api.searchKey(number_to_be_inserted_or_deleted);
+            api.render();
+          } else if (document.getElementById("insert_as_in_BST").checked) {
+            api.pushLikeInBST(number_to_be_inserted_or_deleted);
+            api.render();
+          }
         };
       };
     </script>
