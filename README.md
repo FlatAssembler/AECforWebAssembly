@@ -160,3 +160,7 @@ I am aware that McAfee antivirus claims that this program, if compiled with TDM-
 ![McAfee screenshot](mcafee-screenshot.png)
 
 I see every reason to think this is a false positive.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=FlatAssembler/AECforWebAssembly&type=date&legend=top-left)](https://www.star-history.com/#FlatAssembler/AECforWebAssembly&type=date&legend=top-left)
