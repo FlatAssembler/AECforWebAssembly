@@ -871,7 +871,7 @@
             href="https://github.com/FlatAssembler/ArithmeticExpressionCompiler/raw/master/seminar/PojednostavljeniSeminar.pdf"
             >have</a
           >
-          <a href="PicoBlaze/PicoBlaze.rtf">written</a> I have often made
+          <a href="https://picoblaze-simulator.sourceforge.io/PicoBlaze.doc">written</a> I have often made
           comparisons between human languages and programming languages, I am
           not entirely convinced the similarity between human languages and
           programming languages is anything more than superficial (Look up
@@ -949,7 +949,7 @@
           Architecture classes, and my Computer Architecture professor Ivan
           Aleksi asked me to create it so that laboratory exercises can be done
           from home (in case real laboratory exercises need to be canceled due
-          to the pandemic).</span
+          to the pandemic). It did not fill its original purpose, because physical laboratory exercises were not actually cancelled, but it did grow into an international open-source project.</span
         ><br />
         <br /><b id="Platforms">What platforms can be targeted now</b><br />
         Right now, I've written two compilers for the AEC language. First, I
@@ -1039,7 +1039,7 @@
         doing deep copies of C++ objects (wasting time and memory), and quite a
         few of them being using potentially uninitialized variables in
         JavaScript. If you want to collaborate with me, perhaps one of the first
-        things to do is fix those bugs found by static analysis.<br />
+        things to do is fix those bugs found by static analysis. (<i>UPDATE: Unfortunately, the LGTM Internet service for static analysis is no longer available.</i>)<br />
         <b>UPDATE</b> on 28/08/2021: As a part of a paper I have written in my
         economics class, I have explained why I chose to target WebAssembly and
         why I think WebAssembly will revolutionalize compilers:
@@ -1055,7 +1055,7 @@
               za mašine bazirane na stogu, i mislim da će se svatko tko je
               napravio i najjednostavniji compiler s time složiti. Korištenje
               registara kakvi postoje u fizičkim procesorima zahtijeva
-              komplicirane algoritme. Compilerima nije važno ima li dovoljno
+              komplicirane algoritme, koji uključuju problem bojanja grafova. Compilerima nije važno ima li dovoljno
               registara da se sve varijable pohrane u registar, jer compileri
               lako stave varijable u memoriju i vode računa gdje su. Compilerima
               koji optimiziraju kod smeta postojanje nevažnih instrukcija u
@@ -1602,7 +1602,7 @@ PS E:\My programs\AECforWebAssembly> docker run --rm -v "$($PWD):/usr/src/myapp"
         <span class="inline_code">"^\\d+\\.\\d*$"</span> is of the type
         <span class="inline_code">Decimal64</span> and is also passed unchanged
         to the assembler (or, in case it is to be assigned as an initial value
-        of a global variable, it is converted to IEEE754 hexadecimal). In AEC
+        of a global variable, it is converted to IEEE754 hexadecimal, with the number itself being the single-line comment following the <span class="inline_code">(data 0 (i32.const...</span> declaration). In AEC
         for x86, a token which matches the regular expression
         <span class="inline_code">"^\\d+\\.\\d*$"</span> is, just like all
         numbers, of type <span class="inline_code">Decimal32</span> and is
@@ -1680,7 +1680,7 @@ EndFunction</pre
         <a
           href="https://www.reddit.com/r/ProgrammingLanguages/comments/10oe423/how_does_your_programming_language_implement/?utm_source=share&utm_medium=web2x&context=3"
           >Reddit thread about that</a
-        >.<br />
+        >. And keep in mind that <a href="https://www.reddit.com/r/AskProgramming/s/VQ90WhzS34">JavaScript-type multiline strings are very hard to syntactically highlight properly</a>.<br />
         <b>UPDATE</b> on 23/09/2021: Until the version
         <span class="inline_code">v2.1.2</span> (not released as of the time of
         writing this, but it can be built from source), there was a bug in the
@@ -1877,7 +1877,7 @@ DataType name_of_the_array[size] := {first_element, second_element...};</pre
         <span class="inline_code">*</span> for both of those things). Using the
         same operator for declaring a pointer as for multiplication in fact
         makes C and C++ significantly more difficult to parse in some cases,
-        this is called the <i>typedef problem</i>. In C and C++, the statement
+        this is called the <i>typedef problem</i> or <i>lexer hack</i>. In C and C++, the statement
         <span class="inline_code">first * second;</span> can mean both &quot;<i
           >Declare a pointer to the type named
           <span class="inline_code">first</span>, and name that pointer
@@ -2717,7 +2717,7 @@ EndFunction</pre
         breaking. I've asked
         <a href="https://langdev.stackexchange.com/q/4616"
           >a StackExchange question about that</a
-        >.<br />
+        >, and it is one of my most-well-received StackExchange questions.<br />
         I think I've made the world a better place by making this piece of
         information easily available, so that one does not need to look through
         the source code of an entire compiler to see how a while-loop might be
@@ -2999,7 +2999,7 @@ EndStructure</pre
           structures. If you have trouble understanding the N-Queens Puzzle
           program, I'd suggest you to first look into the
           <a href="permutationsTest.html">Permutations Test</a>, as it is based
-          on the same algorithm.<br />
+          on the same algorithm. You also have <a href="https://github.com/FlatAssembler/PicoBlaze_Simulator_in_JS/blob/master/permutations.psm">the Permutations Algorithm</a> and <a href="https://github.com/FlatAssembler/PicoBlaze_Simulator_in_JS/blob/master/nQueensPuzzle.psm">N-Queens Puzzle</a> as example programs written in the PicoBlaze assembly language, which you can run in <a href="https://picoblaze-simulator.sourceforge.io/">my PicoBlaze assembler and emulator</a>.<br />
           UPDATE on 28/04/2021: I have started a
           <a href="https://www.forum.hr/showthread.php?t=1243515"
             >forum thread</a
@@ -3692,7 +3692,7 @@ EndFunction</pre
             Come on now, I have written a programming language that compiles to
             WebAssembly, I know that stuff [about WebAssembly].
           </div>
-          you've also written a log function that runs in an infinite loop if
+          you've also written a logarithmic function that runs in an infinite loop if
           the input is close to 1<br />
           you're trying to compare sort functions written in an interpreted
           language to those provided by that language in its native VM<br />
@@ -3842,7 +3842,9 @@ EndFunction;
         So, in other words, I think you should make a global array of TreeNode
         structures, and make another array to track which elements of that array
         are actually being used and which ones aren't. And write functions which
-        allow you to allocate a TreeNode and deallocate a TreeNode.<br /><br />
+        allow you to allocate a TreeNode and deallocate a TreeNode.<br/>
+UPDATE on 27/12/2025: I've made <a href="https://aecforwebassembly.sourceforge.io/vizualizacija_stabala.ppt">a PowerPoint presentation about me making visualizations of tree-based algorithms in AEC.</a>
+<br /><br />
         UPDATE on 11/03/2025: One of the things that I was wondering about while
         learning WebAssembly is why is WebAssembly designed to be so
         future-proof in some ways (such as requiring an additional dummy
@@ -3861,7 +3863,8 @@ EndFunction;
         >. In case you cannot open it, try opening
         <a href="https://flatassembler.github.io/compiler-theory-latin.mp4"
           >this MP4 file</a
-        >. This video, for a reason that escapes me, went relatively viral.
+        >. This video, for a reason that escapes me, went relatively viral.<br/><br/>
+UPDATE on 27/12/2025: You know, we computer engineers frequently debate whether there should be more programming languages in common use or less programming languages in common use. The arguments for the thesis that there should be fewer languages in common use are, of course, that useful libraries written in one programming language are often prohibitively difficult to use in another programming language due to interoperability issues. Proponents of the thesis that there should be more programming languages (including me at the time I designed and implemented AEC) generally respond by saying that Artificial Intelligence will soon solve those problems. However, we are more than 3 years into the AI revolution, we have probably already reached the point of diminishing returns, and it seems more and more obvious to me that that argument is false. In <a href="https://aecforwebassembly.sourceforge.io/vizualizacija_stabala.ppt">the presentation</a>, I am talking about how GitHub Copilot, when you attempt to use it for Vibe Coding, is often writing gibberish <b>precisely</b> when it is supposed to write code for the interaction between the JavaScript program and the AEC program. It, for example, set the AEC compiler to think it is targetting a browser (rather than WASI), and then tried to communicate from JavaScript using typed arrays. That will not work, you should use DataView then, because the AEC compiler does not make sure the global variables are aligned when targetting a browser. There was a simple solution: add <span class="inline_code">#target WASI</span> to the beginning of the AEC program, but that's just managing the problem, rather than curing it. Even different dialects of JavaScript can be a problem: the AI tried to do <span class="inline_code">export class</span> from a <span class="inline_code">.js</span>, which it can only do from a <span class="inline_code">.m</span> file. And I seriously doubt the AI would have attempted to delete a key from the AVL tree using <span class="inline_code">Array.splice</span> if everything was written in JavaScript. I think the AI only made such an egregious mistake because a part of the program was written in AEC. That's why I think this &quot;<i>Well, AI will soon fix the interoperability issues.</i>&quot; argument for making new programming languages is wrong.
       </div>
       <script type="text/javascript">
         function highlightedToken(token) {
