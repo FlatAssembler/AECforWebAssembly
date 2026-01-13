@@ -76,7 +76,7 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                  i < input.length() - stringDelimiter.length() and
                  input.substr(i, stringDelimiter.length()) ==
                      stringDelimiter)) and
-               !areWeInAComment) {
+               not(areWeInAComment)) {
       if (areWeInAString and
           stringDelimiter == input.substr(i, stringDelimiter.length()) and
           ((stringDelimiter.length() == 1)
@@ -111,7 +111,7 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
         tokenizedExpression.back().text.push_back(input[i]);
     } else if (input.size() - i > 2 and
                (input.substr(i, 2) == "//" or input.substr(i, 2) == "/*") and
-               !areWeInAString and !areWeInAComment) {
+               not(areWeInAString) and not(areWeInAComment)) {
       areWeInAComment = true;
       commentDelimiter = input.substr(i, 2);
     } else if (input[i] == '\n') { // If we came to the end of a line.
@@ -144,8 +144,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
           TreeNode(string(), currentLine, currentColumn));
     } else if (input[i] > 0 // So that Microsoft Visual C++ does not complain
                             // when a unicode character is passed to "isspace".
-               and std::isspace(input[i]) and !areWeInAString and
-               !areWeInAComment) { // If we came to some other whitespace.
+               and std::isspace(input[i]) and not(areWeInAString) and
+               not(areWeInAComment)) { // If we came to some other whitespace.
       currentColumn++;
       tokenizedExpression.push_back(
           TreeNode(string(), currentLine, currentColumn));
@@ -153,35 +153,36 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                  and std::isalnum(input[i])) or
                 input[i] == '_') and
                isComposedOfAlnumsAndOneDot(tokenizedExpression.back().text) and
-               !areWeInAString and !areWeInAComment) // Names and numbers
+               not(areWeInAString) and
+               not(areWeInAComment)) // Names and numbers
     {
       currentColumn++;
       tokenizedExpression.back().text += input[i];
     } else if (input[i] == '.' and
                isAllDigits(tokenizedExpression.back().text) and
-               !areWeInAString and
-               !areWeInAComment) // If we are currently
-                                 // tokenizing a number, a dot
-                                 // character is a decimal point.
+               not(areWeInAString) and
+               not(areWeInAComment)) // If we are currently
+                                     // tokenizing a number, a dot
+                                     // character is a decimal point.
     {
       currentColumn++;
       tokenizedExpression.back().text += input[i];
-    } else if (!areWeInAString and !areWeInAComment) {
+    } else if (not(areWeInAString or areWeInAComment)) {
       currentColumn++;
       tokenizedExpression.push_back(
           TreeNode(input.substr(i, 1), currentLine, currentColumn));
-    } else if (areWeInAString and !areWeInAComment) {
+    } else if (areWeInAString and not(areWeInAComment)) {
       currentColumn++;
       tokenizedExpression.back().text += input[i];
     } else if (areWeInAComment and commentDelimiter == "/*" and
                input.size() - i > 2 and input.substr(i, 2) == "*/" and
-               !areWeInAString) {
+               not(areWeInAString)) {
       areWeInAComment = false;
       currentColumn += 2;
       tokenizedExpression.push_back(
           TreeNode(string(), currentLine, currentColumn));
       i++;
-    } else if (!areWeInAString and areWeInAComment) {
+    } else if (not(areWeInAString) and areWeInAComment) {
       currentColumn++;
     } else {
       std::cerr << "Line " << currentLine << ", Column " << currentColumn
@@ -304,7 +305,7 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
       tokenizedExpression.erase(tokenizedExpression.begin() + i);
       i--;
     }
-  if (!tokenizedExpression.empty()) {
+  if (tokenizedExpression.size()) {
     for (unsigned int i = 0; i < tokenizedExpression.size() - 1; i++)
       if (tokenizedExpression[i].text == "}" and
           (tokenizedExpression[i + 1].text == "EndFunction" or
