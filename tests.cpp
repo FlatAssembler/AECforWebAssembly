@@ -332,7 +332,15 @@ void parserTests() {
 	       EndFunction
 	       )",
            "(Function (f (Decimal64 (milliard (:= (pow 10 9))))) (Returns "
-           "Nothing) (Does Nothing))"}});
+           "Nothing) (Does Nothing))"},
+       {
+           R"(
+              If(i>=10) Then(
+                i := 0
+              );
+              EndIf
+            )",
+           "(If (>= i 10) (Then (:= i 0)))"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = TreeNode::parse(TreeNode::tokenize(tests[i].input))[0]
                              .getLispExpression();
