@@ -370,6 +370,9 @@ void testAssemblyCodeStructure() {
 }
 
 void testTypeChecking() {
+/*
+A previous version was putting a semicolon `;` at the end of every test string and was using `TreeNode::parse` instead of `TreeNode::parseExpression`. I am not sure why. I changed that into this way, which seems more logical to me now.
+*/
   std::vector<test> tests(
       {{"128", "Integer64"},
        {"'A'", "Integer64"},
