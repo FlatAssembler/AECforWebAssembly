@@ -370,9 +370,12 @@ void testAssemblyCodeStructure() {
 }
 
 void testTypeChecking() {
-/*
-A previous version was putting a semicolon `;` at the end of every test string and was using `TreeNode::parse` instead of `TreeNode::parseExpression`. I am not sure why. I changed that into this way, which seems more logical to me now.
-*/
+  /*
+  A previous version was putting a semicolon `;` at the end of every test string
+  and was using `TreeNode::parse` instead of `TreeNode::parseExpression`. I am
+  not sure why. I changed that into this way, which seems more logical to me
+  now.
+  */
   std::vector<test> tests(
       {{"128", "Integer64"},
        {"'A'", "Integer64"},
@@ -393,8 +396,8 @@ A previous version was putting a semicolon `;` at the end of every test string a
        {"not(2+2=5)", "Integer32"}});
   for (unsigned i = 0; i < tests.size(); i++) {
     std::string result =
-        TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0].getType(
-            CompilationContext());
+        TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
+            .getType(CompilationContext());
     if (result != tests[i].expectedResult) {
       std::cerr << "Internal compiler error: Compiler test failed: \""
                 << tests[i].input << "\" compiles into something of the type "
