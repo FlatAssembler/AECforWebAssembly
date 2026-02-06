@@ -17,6 +17,8 @@
               // character-by-character instead of using memory mapping.
 #endif
 
+bool areWeCurrentlyTesting = false;
+
 #include <string>
 std::string compilation_target; // WASI (WebAssembly System Interface) or
                                 // browser (default).

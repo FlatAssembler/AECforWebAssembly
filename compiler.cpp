@@ -658,11 +658,11 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                   memberNameNode.children.push_back(arrayIndexNode);
                   TreeNode dotOperator(".", instanceName.lineNumber,
                                        instanceName.columnNumber);
-                  dotOperator.children = <% instanceNameNode, memberNameNode %>;
+                  dotOperator.children = <%instanceNameNode, memberNameNode%>;
                   TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                               instanceName.columnNumber);
-                  assignmentOperator.children =
-                      <% dotOperator, innerStructureNameNode %>;
+                  assignmentOperator.children = <%dotOperator,
+                                                  innerStructureNameNode%>;
                   TreeNode fakeInnerFunctionNode(
                       "Does", instanceName.lineNumber,
                       instanceName
@@ -670,8 +670,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                           // hard-to-fix issue in the semantic
                                           // analyzer which causes internal
                                           // compiler errors.
-                  fakeInnerFunctionNode.children =
-                      <% instantiateStructureNode, assignmentOperator %>;
+                  fakeInnerFunctionNode.children = <%instantiateStructureNode,
+                                                     assignmentOperator%>;
                   assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
                 }
                 continue;
@@ -696,14 +696,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                                   instanceName.lineNumber,
                                                   instanceName.columnNumber);
                 nodeWithMemberName.children.push_back(nodeWithMemberArrayIndex);
-                dotOperator.children =
-                    <% nodeWithInstanceName,
-                     nodeWithMemberName %>; // Is this valid in standard C++? I
-                                            // am not sure. GCC (at least as
-                                            // early as 4.8.5) accepts that, and
-                                            // so does CLANG 10, and so does
-                                            // the C++ compiler that comes with
-                                            // Visual Studio 2019.
+                dotOperator.children = <%
+                    nodeWithInstanceName,
+                    nodeWithMemberName%>; // Is this valid in standard C++? I
+                                          // am not sure. GCC (at least as
+                                          // early as 4.8.5) accepts that, and
+                                          // so does CLANG 10, and so does
+                                          // the C++ compiler that comes with
+                                          // Visual Studio 2019.
                 TreeNode assignmentOperator(":=", instanceName.lineNumber,
                                             instanceName.columnNumber);
                 TreeNode nodeRepresentingDefaultValue(
@@ -725,8 +725,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 TreeNode zeroNode("0", instanceName.lineNumber,
                                   instanceName.columnNumber);
                 nodeRepresentingDefaultValue.children.push_back(zeroNode);
-                assignmentOperator.children =
-                    <% dotOperator, nodeRepresentingDefaultValue %>;
+                assignmentOperator.children = <%dotOperator,
+                                                nodeRepresentingDefaultValue%>;
                 // So, finally, now we can compile that S-expression.
                 assembly += assignmentOperator.compile(context) + "\n";
               }
@@ -741,8 +741,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 instanceName.children[0].columnNumber);
             TreeNode leftHandSide(instanceName.text, instanceName.lineNumber,
                                   instanceName.columnNumber);
-            assignmentOperator.children =
-                <% leftHandSide, instanceName.children[0].children[0] %>;
+            assignmentOperator.children = <%
+                leftHandSide, instanceName.children[0].children[0]%>;
             TreeNode nodeWithFakeDoesToken(
                 "Does", instanceName.lineNumber,
                 instanceName.columnNumber); // Let's, for now, avoid the
@@ -811,23 +811,21 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
             nodeWithMemberName.children.push_back(nodeWithMemberArrayIndex);
             TreeNode leftDotOperator(".", childNode.lineNumber,
                                      childNode.columnNumber);
-            leftDotOperator.children =
-                <% temporaryStructureNode, nodeWithMemberName %>;
+            leftDotOperator.children = <%temporaryStructureNode,
+                                         nodeWithMemberName%>;
             TreeNode rightDotOperator(".", childNode.lineNumber,
                                       childNode.columnNumber);
-            rightDotOperator.children =
-                <% childNode.children[1], nodeWithMemberName %>;
+            rightDotOperator.children = <%childNode.children[1],
+                                          nodeWithMemberName%>;
             TreeNode assignmentOperator(":=", childNode.lineNumber,
                                         childNode.columnNumber);
-            assignmentOperator.children =
-                <% leftDotOperator, rightDotOperator %>;
+            assignmentOperator.children = <%leftDotOperator, rightDotOperator%>;
             assignmentsToTemporary.push_back(assignmentOperator);
-            leftDotOperator.children =
-                <% childNode.children[0], nodeWithMemberName %>;
-            rightDotOperator.children =
-                <% temporaryStructureNode, nodeWithMemberName %>;
-            assignmentOperator.children =
-                <% leftDotOperator, rightDotOperator %>;
+            leftDotOperator.children = <%childNode.children[0],
+                                         nodeWithMemberName%>;
+            rightDotOperator.children = <%temporaryStructureNode,
+                                          nodeWithMemberName%>;
+            assignmentOperator.children = <%leftDotOperator, rightDotOperator%>;
             assignmentsFromTemporary.push_back(assignmentOperator);
           }
         fakeInnerFunctionNode.children.insert(
@@ -1539,7 +1537,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
       strongerType =
           getStrongerType(lineNumber, columnNumber, firstType, secondType);
     AssemblyCode::AssemblyType assemblyType;
-    if (not(mappingOfAECTypesToWebAssemblyTypes.count(strongerType)))
+    if (not(mappingOfAECTypesToWebAssemblyTypes.count(strongerType)) and
+        not(areWeCurrentlyTesting))
       std::cerr << "Compiler warning: "
                 << "Line " << lineNumber << ", Column " << columnNumber
                 << ": The semantic analyzer outputted a type anotation for the "
@@ -1934,7 +1933,7 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
     TreeNode dotOperator(".", lineNumber, columnNumber);
     TreeNode valueAtOperator("ValueAt(", lineNumber, columnNumber);
     valueAtOperator.children.push_back(children.at(0));
-    dotOperator.children = <% valueAtOperator, children.at(1) %>;
+    dotOperator.children = <%valueAtOperator, children.at(1)%>;
     return dotOperator.compileAPointer(context);
   }
   std::cerr << "Line " << lineNumber << ", Column " << columnNumber
