@@ -336,9 +336,19 @@ std::string TreeNode::getType(const CompilationContext &context) const {
   }
   if (text == "?:") {
     if (isPointerType(children[1].getType(context)) and
-        isPointerType(children[2].getType(context)))
-      return children[1].getType(context);
-    else
+        isPointerType(children[2].getType(context))) {
+      if (children[1].getType(context) == children[2].getType(context))
+        return children[1].getType(context);
+      else {
+        if (not(areWeCurrentlyTesting))
+          std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                    << ", Semantic analyzer warning: You've put two different "
+                       "pointer types as the second and the third operand of "
+                       "the ternary conditional operator \"?:\"."
+                    << std::endl;
+        return "Integer32";
+      }
+    } else
       return getStrongerType(lineNumber, columnNumber,
                              children[1].getType(context),
                              children[2].getType(context));
@@ -410,7 +420,7 @@ std::string TreeNode::getType(const CompilationContext &context) const {
     TreeNode dotOperator(".", lineNumber, columnNumber);
     TreeNode valueAtOperator("ValueAt(", lineNumber, columnNumber);
     valueAtOperator.children.push_back(children[0]);
-    dotOperator.children = <% valueAtOperator, children[1] %>;
+    dotOperator.children = <%valueAtOperator, children[1]%>;
     return dotOperator.getType(context);
   }
   return "Nothing";
