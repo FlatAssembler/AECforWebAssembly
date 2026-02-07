@@ -389,6 +389,8 @@ void testTypeChecking() {
        {"3.14159265359-1.618033989", "Decimal64"},
        {"CharacterPointer(10)-CharacterPointer(0)", "Integer32"},
        {"PointerToTreeNode(0)=0", "Integer32"},
+       {"1 > 2 ? PointerToTreeNode(0) : PointerToCharacter(0)",
+        "TreeNodePointer"},
        {"3.14159265359*1", "Decimal64"},
        {"1/2", "Integer64"},
        {"(5+5=10 and 2+2=4)?(3.14159265359):(0)", "Decimal64"},
@@ -401,7 +403,7 @@ void testTypeChecking() {
             .getType(CompilationContext());
     if (result != tests[i].expectedResult) {
       std::cerr << "Internal compiler error: Compiler test failed: \""
-                << tests[i].input << "\" compiles into something of the type "
+                << tests[i].input << "\" compiles into something of the type \""
                 << result << "\" instead of into something of the type \""
                 << tests[i].expectedResult << "\"!" << std::endl;
       std::exit(1);
