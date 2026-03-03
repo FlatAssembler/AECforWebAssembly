@@ -405,22 +405,34 @@ Function drawTree(PointerToTreeNode node) Which Returns Nothing Does
   drawText(node->x + 5 - minimumX, node->y + 40, AddressOf(output[0]));
   If node->leftChild Then
     drawText(node->x - minimumX - 10, node->y + 60, "0");
-    drawLine(node->x + 25 - minimumX, node->y + 50, node->x + 25 - minimumX,
-             node->y + 50 + 13);
-    drawLine(node->x + 25 - minimumX, node->y + 50 + 13,
-             node->leftChild->x + 25 - minimumX, node->y + 50 + 13);
-    drawLine(node->leftChild->x + 25 - minimumX, node->y + 50 + 13,
-             node->leftChild->x + 25 - minimumX, node->leftChild->y);
+    drawLine(x1 := node->x + 25 - minimumX,
+             y1 := node->y + 50,
+             x2 := node->x + 25 - minimumX,
+             y2 := node->y + 50 + 13);
+    drawLine(x1 := node->x + 25 - minimumX,
+             y1 := node->y + 50 + 13,
+             x2 := node->leftChild->x + 25 - minimumX,
+             y2 := node->y + 50 + 13);
+    drawLine(x1 := node->leftChild->x + 25 - minimumX,
+             y1 := node->y + 50 + 13,
+             x2 := node->leftChild->x + 25 - minimumX,
+             y2 := node->leftChild->y);
     drawTree(node->leftChild);
   EndIf
   If node->rightChild Then
     drawText(node->x - minimumX + 50, node->y + 60, "1");
-    drawLine(node->x + 25 - minimumX, node->y + 50, node->x + 25 - minimumX,
-             node->y + 50 + 13);
-    drawLine(node->x + 25 - minimumX, node->y + 50 + 13,
-             node->rightChild->x + 25 - minimumX, node->y + 50 + 13);
-    drawLine(node->rightChild->x + 25 - minimumX, node->y + 50 + 13,
-             node->rightChild->x + 25 - minimumX, node->rightChild->y);
+    drawLine(x1 := node->x + 25 - minimumX,
+             y1 := node->y + 50,
+             x2 := node->x + 25 - minimumX,
+             y2 := node->y + 50 + 13);
+    drawLine(x1 := node->x + 25 - minimumX,
+             y1 := node->y + 50 + 13,
+             x2 := node->rightChild->x + 25 - minimumX,
+             y2 := node->y + 50 + 13);
+    drawLine(x1 := node->rightChild->x + 25 - minimumX,
+             y1 := node->y + 50 + 13,
+             x2 := node->rightChild->x + 25 - minimumX,
+             y2 := node->rightChild->y);
     drawTree(node->rightChild);
   EndIf
 EndFunction
