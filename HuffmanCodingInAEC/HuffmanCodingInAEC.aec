@@ -52,7 +52,7 @@ Function strlen(PointerToCharacter string) Which Returns Integer32 Is Declared;
 
 Function newTreeNode() Which Returns PointerToTreeNode Does
   Integer16 i := 0;
-  While i < 64 Loop {
+  While i < 64 Loop 
     If not(isTreeNodeUsed[i]) Then
       treeNodes[i].character := 0;
       treeNodes[i].leftChild := treeNodes[i].rightChild
@@ -272,13 +272,14 @@ Function assignCode(PointerToCharacter currentCode,
 
   If treeNode->character Then
     mapOfCodes[treeNode->character] := AddressOf(treeNode->code[0]);
-    Character codeToPrint[32] := {0};
-    codeToPrint[0] := '\'';
-    codeToPrint[1] := treeNode->character;
-    codeToPrint[2] := '\'';
-    codeToPrint[3] := '=';
-    codeToPrint[4] := '>';
-    codeToPrint[5] := 0;
+    Character codeToPrint[32] := {
+      '\'',
+      treeNode->character,
+      '\'',
+      '=',
+      '>',
+      0,
+    };
     strcat(AddressOf(codeToPrint[0]), AddressOf(treeNode->code[0]));
     strcat(AddressOf(codeToPrint[0]), "\n");
     printString(AddressOf(codeToPrint[0]));
