@@ -7,16 +7,16 @@ bool isAllWhitespace(
                              // on Linux won't miscompile it.
 {
   for (unsigned i = 0; i < token.size(); i++)
-    if (!std::isspace(token[i]))
+    if (not(std::isspace(token[i])))
       return false;
   return true;
 }
 
 bool isAllDigits(const std::string token) {
-  if (!token.size())
+  if (not(token.size()))
     return false;
   for (unsigned i = 0; i < token.size(); i++)
-    if (!std::isdigit(token[i]))
+    if (not(std::isdigit(token[i])))
       return false;
   return true;
 }
@@ -25,38 +25,38 @@ bool isWordCharacterButNotDigit(
     const char c) // No obvious way to do it in REGEX so that CLANG on Linux
                   // won't miscompile it.
 {
-  return (std::isalnum(c) or c == '_') and !std::isdigit(c);
+  return (std::isalnum(c) or c == '_') and not(std::isdigit(c));
 }
 
 bool isInteger(std::string str) {
   // std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)"), so that CLANG on Oracle
   // Linux doesn't miscompile it (as it miscompiles nearly all regexes).
-  if (!str.size())
+  if (not(str.size()))
     return false;
   if (str.substr(0, 2) == "0x") { // Hexadecimal numbers...
     if (str.size() == 2)
       return false;
     for (unsigned i = 2; i < str.size(); i++)
-      if (!std::isdigit(str[i]) and !((str[i] >= 'A' and str[i] <= 'F') or
-                                      (str[i] >= 'a' and str[i] <= 'f')))
+      if (not(std::isdigit(str[i])) and not((str[i] >= 'A' and str[i] <= 'F') or
+                                            (str[i] >= 'a' and str[i] <= 'f')))
         return false;
     return true;
   }
   // Integer decimal numbers...
   for (unsigned i = 0; i < str.size(); i++)
-    if (!std::isdigit(str[i]))
+    if (not(std::isdigit(str[i])))
       return false;
   return true;
 }
 
 bool isDecimalNumber(std::string str) {
-  if (!str.size())
+  if (not(str.size()))
     return false;
   bool haveWePassedOverADecimalPoint = false;
   if (str[0] == '.')
     return false;
   for (unsigned i = 0; i < str.size(); i++)
-    if (str[i] == '.' and !haveWePassedOverADecimalPoint)
+    if (str[i] == '.' and not(haveWePassedOverADecimalPoint))
       haveWePassedOverADecimalPoint = true;
     else if (str[i] == '.')
       return false;
@@ -72,8 +72,8 @@ bool isValidVariableName(std::string str) {
   if (std::isdigit(str[0]))
     return false;
   for (unsigned i = 0; i < str.size(); i++)
-    if (!std::isalnum(str[i]) and str[i] != '_' and
-        !(i == str.size() - 1 and str[i] == '['))
+    if (not(std::isalnum(str[i])) and str[i] != '_' and
+        not(i == str.size() - 1 and str[i] == '['))
       return false;
   return true;
 }
@@ -94,11 +94,11 @@ bool isComposedOfAlnumsAndOneDot(
 {
   bool passedOverADot = false;
   for (unsigned i = 0; i < token.size(); i++)
-    if (token[i] == '.' and !passedOverADot and i != 0)
+    if (token[i] == '.' and not(passedOverADot) and i != 0)
       passedOverADot = true;
     else if (token[i] == '.')
       return false;
-    else if (!std::isalnum(token[i]) and token[i] != '_')
+    else if (not(std::isalnum(token[i])) and token[i] != '_')
       return false;
   return true;
 }
