@@ -557,7 +557,7 @@ public:
           }
           globalDeclarations += "))\n";
         } else if (childNode.children.at(2).text == "Does") {
-          if (!hasStackPointerBeenDeclared) {
+          if (not(hasStackPointerBeenDeclared)) {
             hasStackPointerBeenDeclared = true;
             globalDeclarations +=
                 R"(
