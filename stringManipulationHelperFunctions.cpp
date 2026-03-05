@@ -104,6 +104,8 @@ bool isComposedOfAlnumsAndOneDot(
 }
 
 int longest_common_subsequence_length(std::string first, std::string second) {
+  // Adapted from the Domagoj Kusalić'es book "Napredno programiranje i
+  // algoritmi u C-u i C++-u", chapter 8.4.3, page 331 (in the 2014 edition).
   std::map<int, std::map<int, int>>
       DP; // There are, of course, faster ways to make multi-dimensional arrays
           // in C++, but let's not worry about performance of a function that
