@@ -17,8 +17,8 @@ Function drawRectangle(Integer32 x, Integer32 y, Integer32 width,
 Function drawText(Integer32 x, Integer32 y,
                   PointerToCharacter text) Which Returns Nothing Is External;
 
-Integer32 NDEBUG : = 1,
-                 MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION : = 1;
+Integer32 NDEBUG := 1,
+                 MAINTAIN_COMPATIBILITY_WITH_JAVASCRIPT_IMPLEMENTATION := 1;
 // The JavaScript implementation is available here:
 // https://flatassembler.github.io/huffman.html
 
@@ -81,7 +81,7 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does
     segmentationFault();
   EndIf
   If NDEBUG = 0 Then
-    Character stringToBePrinted[64] : = {0};
+    Character stringToBePrinted[64] := {0};
     strcat(AddressOf(stringToBePrinted[0]), "NDEBUG: Freeing the TreeNode #");
     appendIntegerToString(AddressOf(stringToBePrinted[0]),
                            (treeNode - AddressOf(treeNodes[0])) /
@@ -89,14 +89,14 @@ Function freeTreeNode(PointerToTreeNode treeNode) Which Returns Nothing Does
     strcat(AddressOf(stringToBePrinted[0]), "\n");
     printString(AddressOf(stringToBePrinted[0]));
   EndIf
-  isTreeNodeUsed[(treeNode - AddressOf(treeNodes[0])) / SizeOf(TreeNode)] : = 0;
+  isTreeNodeUsed[(treeNode - AddressOf(treeNodes[0])) / SizeOf(TreeNode)] := 0;
 EndFunction
 
 Function getHeight(PointerToTreeNode node) Which Returns Integer32 Does 
   If not(node) Then 
     Return 0; 
   EndIf
-  Integer32 max : = 0;
+  Integer32 max := 0;
   If getHeight(node->leftChild) > max Then
     max := getHeight(node->leftChild);
   EndIf
@@ -153,7 +153,7 @@ Function reverseString(PointerToCharacter string) Which Returns Nothing Does
   While pointerToLastCharacter - string > 0 Loop
     Character tmp := ValueAt(string);
     ValueAt(string) := ValueAt(pointerToLastCharacter);
-    ValueAt(pointerToLastCharacter) : = tmp;
+    ValueAt(pointerToLastCharacter) := tmp;
     string += 1;
     pointerToLastCharacter -= 1;
   EndWhile
@@ -198,7 +198,7 @@ Function convertDecimalToString(PointerToCharacter string,
     Return;
   EndIf
   strcat(string, ".");
-  Integer16 numberOfDecimals : = 0;
+  Integer16 numberOfDecimals := 0;
   While numberOfDecimals < 3 and number > 0 Loop
     numberOfDecimals += 1;
     number *= 10;
@@ -238,7 +238,7 @@ Function assignCode(PointerToCharacter currentCode,
     strcat(AddressOf(stringToBePrinted[0]), ".\n");
     printString(AddressOf(stringToBePrinted[0]));
 
-    stringToBePrinted[0] : = 0;
+    stringToBePrinted[0] := 0;
     strcat(AddressOf(stringToBePrinted[0]),
            "NDEBUG: Its right child is the TreeNode #");
     If treeNode->leftChild Then
@@ -256,7 +256,7 @@ Function assignCode(PointerToCharacter currentCode,
 
   strcpy(AddressOf(treeNode->code[0]), currentCode);
 
-  Character leftCode[16] : = {0}, rightCode[16] : = {0};
+  Character leftCode[16] := {0}, rightCode[16] := {0};
 
   strcpy(AddressOf(leftCode[0]), currentCode);
   strcat(AddressOf(leftCode[0]), "0");
@@ -300,7 +300,7 @@ EndFunction
 Decimal32 PRECISION := 500;
 Function ln(Decimal32 x) Which Returns Decimal32 Does
   // Natural logarithm is the integral of 1/x from 1 to x, highschool math.
-  Decimal32 sum : = 0, epsilon : = (x - 1) / (5 * PRECISION), i : = 1;
+  Decimal32 sum := 0, epsilon := (x - 1) / (5 * PRECISION), i := 1;
   While epsilon > 0 and i < x or epsilon < 0 and i > x Loop
     sum += epsilon / i;
     i += epsilon;
@@ -405,18 +405,24 @@ Function drawTree(PointerToTreeNode node) Which Returns Nothing Does
   drawText(node->x + 5 - minimumX, node->y + 40, AddressOf(output[0]));
   If node->leftChild Then
     drawText(node->x - minimumX - 10, node->y + 60, "0");
-    drawLine(x1 := node->x + 25 - minimumX,
-             y1 := node->y + 50,
+    drawLine(
+             x1 := node->x + 25 - minimumX,
              x2 := node->x + 25 - minimumX,
-             y2 := node->y + 50 + 13);
-    drawLine(x1 := node->x + 25 - minimumX,
-             y1 := node->y + 50 + 13,
+             y1 := node->y + 50,
+             y2 := node->y + 50 + 13,
+            );
+    drawLine(
+             x1 := node->x + 25 - minimumX,
              x2 := node->leftChild->x + 25 - minimumX,
-             y2 := node->y + 50 + 13);
-    drawLine(x1 := node->leftChild->x + 25 - minimumX,
              y1 := node->y + 50 + 13,
+             y2 := node->y + 50 + 13,
+            );
+    drawLine(
+             x1 := node->leftChild->x + 25 - minimumX,
              x2 := node->leftChild->x + 25 - minimumX,
-             y2 := node->leftChild->y);
+             y1 := node->y + 50 + 13,
+             y2 := node->leftChild->y,
+            );
     drawTree(node->leftChild);
   EndIf
   If node->rightChild Then
@@ -441,7 +447,7 @@ Function main() Which Returns Nothing Does
   clearScreen();
   Integer16 lengthOfInput := getLengthOfTheInput(), i := 0;
   If NDEBUG = 0 Then
-    Character stringToBePrinted[64] : = {0};
+    Character stringToBePrinted[64] := {0};
     strcat(AddressOf(stringToBePrinted[0]),
            "NDEBUG: The length of the input is: ");
     appendIntegerToString(AddressOf(stringToBePrinted[0]),
@@ -467,7 +473,7 @@ Function main() Which Returns Nothing Does
   EndWhile
 
   PointerToTreeNode array[32];
-  Integer16 lengthOfTheArray : = 0;
+  Integer16 lengthOfTheArray := 0;
   i := 0;
   While i < lengthOfInput Loop
     Integer16 j := 0, haveWeFoundTheCharacterInTheArray := 0;
@@ -489,7 +495,7 @@ Function main() Which Returns Nothing Does
 
   i := 0;
   While i < lengthOfTheArray Loop
-    Character stringToBePrinted[64] : = {0};
+    Character stringToBePrinted[64] := {0};
     strcat(AddressOf(stringToBePrinted[0]), "The character '");
     Integer16 indexOfCharacter := strlen(AddressOf(stringToBePrinted[0]));
     stringToBePrinted[indexOfCharacter] := array[i]->character;
@@ -502,7 +508,7 @@ Function main() Which Returns Nothing Does
     i += 1;
   EndWhile
 
-  Decimal32 ShannonEntropy : = 0;
+  Decimal32 ShannonEntropy := 0;
   i := 0;
   While i < lengthOfTheArray Loop
     ShannonEntropy -=
@@ -518,11 +524,11 @@ Function main() Which Returns Nothing Does
   printString(AddressOf(output[0]));
 
   While lengthOfTheArray > 1 Loop
-    Integer16 minimum : = 0, secondMinimum : = 0;
+    Integer16 minimum := 0, secondMinimum := 0;
 
     Integer16 i := 0;
     If NDEBUG = 0 Then
-      Character stringToBePrinted[64] : = {0};
+      Character stringToBePrinted[64] := {0};
       strcat(AddressOf(stringToBePrinted[0]),
              "NDEBUG: The length of the array is ");
       appendIntegerToString(AddressOf(stringToBePrinted[0]),
@@ -532,7 +538,7 @@ Function main() Which Returns Nothing Does
     EndIf
     While i < lengthOfTheArray Loop
       If NDEBUG = 0 Then
-        Character stringToBePrinted[64] : = {0};
+        Character stringToBePrinted[64] := {0};
         strcat(AddressOf(stringToBePrinted[0]),
                "NDEBUG: The tree at the index #");
         appendIntegerToString(AddressOf(stringToBePrinted[0]),
@@ -606,7 +612,7 @@ Function main() Which Returns Nothing Does
     sumOfTheTwoMostFrequent->rightChild := array[secondMinimum];
 
     If NDEBUG = 0 Then
-      Character stringToBePrinted[64] : = {0};
+      Character stringToBePrinted[64] := {0};
       strcat(AddressOf(stringToBePrinted[0]),
              "NDEBUG: The new TreeNode has the frequency of: ");
       appendIntegerToString(AddressOf(stringToBePrinted[0]),
@@ -622,7 +628,7 @@ Function main() Which Returns Nothing Does
     // Delete the second minimum from the array...
     i := secondMinimum;
     While i < lengthOfTheArray - 1 Loop
-      array[i] : = array[i + 1];
+      array[i] := array[i + 1];
       i += 1;
     EndWhile
     lengthOfTheArray -= 1;
@@ -644,7 +650,7 @@ Function main() Which Returns Nothing Does
   EndWhile
 
   If NDEBUG = 0 Then
-    Character stringToBePrinted[128] : = {0};
+    Character stringToBePrinted[128] := {0};
     strcat(AddressOf(stringToBePrinted[0]),
            "NDEBUG: The frequency of the root node is ");
     appendIntegerToString(AddressOf(stringToBePrinted[0]),
@@ -735,7 +741,7 @@ Function main() Which Returns Nothing Does
     stringToBePrinted[0] := 0;
     strcat(AddressOf(stringToBePrinted[0]), mapOfCodes[i]);
     strcat(AddressOf(stringToBePrinted[0]), "=>");
-    Character stringToBeAdded[5] : = {'\'', i, '\'', '\n', 0};
+    Character stringToBeAdded[5] := {'\'', i, '\'', '\n', 0};
     strcat(AddressOf(stringToBePrinted[0]), AddressOf(stringToBeAdded[0]));
     printString(AddressOf(stringToBePrinted[0]));
     j += strlen(mapOfCodes[i]);
