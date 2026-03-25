@@ -149,9 +149,16 @@ int Levenstein_distance(std::string A, std::string B) {
       } else if (A[i - 1] == B[j - 1]) {
         temp[i][j] = temp[i - 1][j - 1];
       } else {
-        temp[i][j] = min(temp[i - 1][j - 1], temp[i - 1][j]);
-        temp[i][j] = min(temp[i][j - 1], temp[i][j]);
-        temp[i][j] = temp[i][j] + 1;
+        temp[i][j] = min(<% temp[i - 1][j - 1],
+                          temp[i - 1][j],
+                          temp[i][j - 1] %>) + 1; // This is valid since C++14
+                                                  // (because std::min accepts
+                                                  // initialization lists as 
+                                                  // arguments and invokes 
+                                                  // std::min_element in that case),
+                                                  // and I guess most C++11 compilers
+                                                  // will accept this code (but I have
+                                                  // not tested that).
       }
     }
   }
