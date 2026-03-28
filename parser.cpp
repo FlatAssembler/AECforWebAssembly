@@ -22,8 +22,12 @@
 
 std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+                               std::set<std::string> operators
+#else
                                std::unordered_set<std::string> operators,
-                               Associativity associativity) {
+#endif
+                                   Associativity associativity) {
   auto loop_body = [bitand](int bitand i) -> void {
     if ((long unsigned)i >= input.size()) {
       std::cerr << "Line " << input[0].lineNumber << ", Column "
@@ -296,13 +300,19 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression[i].children.push_back(parsedExpression[i + 1]);
       parsedExpression.erase(parsedExpression.begin() + i + 1);
     }
-  std::vector<std::unordered_set<std::string>> leftAssociativeBinaryOperators(
-      {{".", "->"},
-       {"*", "/"},
-       {"-", "+"},
-       {"<", ">", "=", "<=", ">="},
-       {"and"},
-       {"or"}});
+  std::vector<
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+      std::set<std::string>
+#else
+      std::unordered_set<std::string>
+#endif
+      >
+      leftAssociativeBinaryOperators({{".", "->"},
+                                      {"*", "/"},
+                                      {"-", "+"},
+                                      {"<", ">", "=", "<=", ">="},
+                                      {"and"},
+                                      {"or"}});
   for (auto hashTableWithOperators : leftAssociativeBinaryOperators)
     parsedExpression = applyBinaryOperators(
         parsedExpression, hashTableWithOperators, Associativity::left);

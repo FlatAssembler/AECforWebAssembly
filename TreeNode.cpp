@@ -18,8 +18,10 @@
 #include <regex>
 #include <set>
 #include <string>
+#if !(defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
 #include <unordered_map>
 #include <unordered_set>
+#endif
 #include <vector>
 
 #pragma once
@@ -28,7 +30,11 @@ class TreeNode {
   enum class Associativity { left, right };
   static std::vector<TreeNode>
   applyBinaryOperators(std::vector<TreeNode> input,
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+                       std::set<std::string> operators,
+#else
                        std::unordered_set<std::string> operators,
+#endif
                        Associativity associativity);
 
 protected:
@@ -65,12 +71,21 @@ public:
   // HappySkeptic suggested me to try to make shared parts of TreeNode static to
   // save on stack memory:
   // https://atheistforums.org/thread-63150-post-2053689.html#pid2053689
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+  static std::map<std::string, int> basicDataTypeSizes;
+  static std::map<std::string, AssemblyCode::AssemblyType>
+      mappingOfAECTypesToWebAssemblyTypes;
+  static std::map<AssemblyCode::AssemblyType, std::string>
+      stringRepresentationOfWebAssemblyType;
+  static std::set<std::string> AECkeywords;
+#else
   static std::unordered_map<std::string, int> basicDataTypeSizes;
   static std::unordered_map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
   static std::unordered_map<AssemblyCode::AssemblyType, std::string>
       stringRepresentationOfWebAssemblyType;
   static std::unordered_set<std::string> AECkeywords;
+#endif
   static bool staticPropertiesInitialized;
   std::vector<TreeNode> children;
   std::string text;
@@ -92,7 +107,12 @@ public:
                  // the 64-bit mode (which is almost never done).
       basicDataTypeSizes["Nothing"] = 0;
       mappingOfAECTypesToWebAssemblyTypes =
-          std::unordered_map<std::string, AssemblyCode::AssemblyType>(
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+          std::map
+#else
+          std::unordered_map
+#endif
+          <std::string, AssemblyCode::AssemblyType>(
               {{"Integer32", AssemblyCode::AssemblyType::i32},
                {"Integer64", AssemblyCode::AssemblyType::i64},
                {"Decimal32", AssemblyCode::AssemblyType::f32},
@@ -102,43 +122,54 @@ public:
         if (!mappingOfAECTypesToWebAssemblyTypes.count(pair.first))
           mappingOfAECTypesToWebAssemblyTypes[pair.first] =
               AssemblyCode::AssemblyType::i32;
-      AECkeywords = std::unordered_set<std::string>({"Function",
-                                                     "Which",
-                                                     "Returns",
-                                                     "Nothing",
-                                                     "Is",
-                                                     "External",
-                                                     "Does",
-                                                     "EndFunction",
-                                                     "If",
-                                                     "Then",
-                                                     "ElseIf",
-                                                     "Else",
-                                                     "EndIf",
-                                                     "While",
-                                                     "Loop",
-                                                     "EndWhile",
-                                                     "Structure",
-                                                     "Consists",
-                                                     "Of",
-                                                     "EndStructure",
-                                                     "Character",
-                                                     "CharacterPointer",
-                                                     "Integer16",
-                                                     "Integer16Pointer",
-                                                     "Integer32",
-                                                     "Integer32Pointer",
-                                                     "Integer64",
-                                                     "Integer64Pointer",
-                                                     "Decimal32",
-                                                     "Decimal32Pointer",
-                                                     "Decimal64",
-                                                     "Decimal64Pointer",
-                                                     "Break",
-                                                     "Continue",
-                                                     "InstantiateStructure"});
-      stringRepresentationOfWebAssemblyType =
-          std::unordered_map<AssemblyCode::AssemblyType, std::string>(
+      AECkeywords = std ::
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+          set
+#else
+          unordered_set
+#endif
+          <std::string>({"Function",
+                         "Which",
+                         "Returns",
+                         "Nothing",
+                         "Is",
+                         "External",
+                         "Does",
+                         "EndFunction",
+                         "If",
+                         "Then",
+                         "ElseIf",
+                         "Else",
+                         "EndIf",
+                         "While",
+                         "Loop",
+                         "EndWhile",
+                         "Structure",
+                         "Consists",
+                         "Of",
+                         "EndStructure",
+                         "Character",
+                         "CharacterPointer",
+                         "Integer16",
+                         "Integer16Pointer",
+                         "Integer32",
+                         "Integer32Pointer",
+                         "Integer64",
+                         "Integer64Pointer",
+                         "Decimal32",
+                         "Decimal32Pointer",
+                         "Decimal64",
+                         "Decimal64Pointer",
+                         "Break",
+                         "Continue",
+                         "InstantiateStructure"});
+      stringRepresentationOfWebAssemblyType = std::
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+          map
+#else
+          unordered_map
+#endif
+          <AssemblyCode::AssemblyType, std::string>(
               {{AssemblyCode::AssemblyType::i32, "i32"},
                {AssemblyCode::AssemblyType::i64, "i64"},
                {AssemblyCode::AssemblyType::f32, "f32"},
@@ -417,10 +448,19 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   return inlineAssembly;
 }
 
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+std::map<std::string, int> TreeNode::basicDataTypeSizes;
+std::map<std::string, AssemblyCode::AssemblyType>
+    TreeNode::mappingOfAECTypesToWebAssemblyTypes;
+std::map<AssemblyCode::AssemblyType, std::string>
+    TreeNode::stringRepresentationOfWebAssemblyType;
+std::set<std::string> TreeNode::AECkeywords;
+#else
 std::unordered_map<std::string, int> TreeNode::basicDataTypeSizes;
 std::unordered_map<std::string, AssemblyCode::AssemblyType>
     TreeNode::mappingOfAECTypesToWebAssemblyTypes;
 std::unordered_map<AssemblyCode::AssemblyType, std::string>
     TreeNode::stringRepresentationOfWebAssemblyType;
 std::unordered_set<std::string> TreeNode::AECkeywords;
+#endif
 bool TreeNode::staticPropertiesInitialized = false;

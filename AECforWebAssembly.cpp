@@ -62,7 +62,16 @@ int main(int argc, char **argv) {
                                // understand how it manages to compile itself,
                                // yet it miscompiles something every now and
                                // then in a 5'500-lines-of-code program.
+
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+        // Please do not modify the code here to try to feature-detect whether
+        // the compiler supports regex_error, as GCC 4.8.5 (the C++ compiler you
+        // get with Oracle Linux 7) compiles regex_error, but the linking fails
+        // then.
+        throw exception();
+#else
         throw regex_error(error_complexity);
+#endif
       cerr << "Please invoke this program as follows, from the command line:\n"
            << argv[0] << " name_of_the_program.aec"
            << R"(
@@ -88,7 +97,11 @@ on "WebAssembly.Global" being available.)"
 #endif // WIN32
       return -1;
     }
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+  } catch (exception &error) {
+#else
   } catch (regex_error &error) {
+#endif
     cerr <<
         R"(The C++ compiler this executable has been compiled
 with doesn't appear to support JavaScript-style regular
