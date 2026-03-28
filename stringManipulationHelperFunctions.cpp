@@ -2,10 +2,9 @@
 #include <string>
 #include <vector>
 
-bool isAllWhitespace(
-    const std::string token) // No obvious way to do it in REGEX so that CLANG
-                             // on Linux won't miscompile it.
-{
+bool isAllWhitespace(const std::string token) {
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(token, std::regex(R"(^\s*$)"));
   for (unsigned i = 0; i < token.size(); i++)
     if (not(std::isspace(token[i])))
       return false;
@@ -13,6 +12,8 @@ bool isAllWhitespace(
 }
 
 bool isAllDigits(const std::string token) {
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(token, std::regex(R"(^\d+$)"));
   if (not(token.size()))
     return false;
   for (unsigned i = 0; i < token.size(); i++)
@@ -21,16 +22,14 @@ bool isAllDigits(const std::string token) {
   return true;
 }
 
-bool isWordCharacterButNotDigit(
-    const char c) // No obvious way to do it in REGEX so that CLANG on Linux
-                  // won't miscompile it.
-{
+bool isWordCharacterButNotDigit(const char c) {
   return (std::isalnum(c) or c == '_') and not(std::isdigit(c));
 }
 
 bool isInteger(std::string str) {
-  // std::regex("(^\\d+$)|(^0x(\\d|[a-f]|[A-F])+$)"), so that CLANG on Oracle
-  // Linux doesn't miscompile it (as it miscompiles nearly all regexes).
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str,
+                             std::regex(R"((^\d+$)|(^0x(\d|[a-f]|[A-F])+$))"));
   if (not(str.size()))
     return false;
   if (str.substr(0, 2) == "0x") { // Hexadecimal numbers...
@@ -50,6 +49,8 @@ bool isInteger(std::string str) {
 }
 
 bool isDecimalNumber(std::string str) {
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str, std::regex(R"(^([+-])?\d+\.\d*$)"));
   if (not(str.size()))
     return false;
   bool haveWePassedOverADecimalPoint = false;
@@ -66,7 +67,8 @@ bool isDecimalNumber(std::string str) {
 }
 
 bool isValidVariableName(std::string str) {
-  // std::regex("^(_|[a-z]|[A-Z])\\w*\\[?$")
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str, std::regex(R"(^(_|[a-z]|[A-Z])\w*\[?$)"));
   if (!str.size())
     return false;
   if (std::isdigit(str[0]))
@@ -79,6 +81,8 @@ bool isValidVariableName(std::string str) {
 }
 
 bool isPointerType(std::string str) {
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str, std::regex("Pointer$"));
   if (str.size() < std::string("Pointer").size())
     return false;
   return str.substr(str.size() - std::string("Pointer").size()) == "Pointer";
@@ -149,16 +153,16 @@ int Levenstein_distance(std::string A, std::string B) {
       } else if (A[i - 1] == B[j - 1]) {
         temp[i][j] = temp[i - 1][j - 1];
       } else {
-        temp[i][j] = min(<% temp[i - 1][j - 1],
-                          temp[i - 1][j],
-                          temp[i][j - 1] %>) + 1; // This is valid since C++14
-                                                  // (because std::min accepts
-                                                  // initialization lists as 
-                                                  // arguments and invokes 
-                                                  // std::min_element in that case),
-                                                  // and I guess most C++11 compilers
-                                                  // will accept this code (but I have
-                                                  // not tested that).
+        temp[i][j] =
+            min(<%temp[i - 1][j - 1], temp[i - 1][j], temp[i][j - 1]%>) +
+            1; // This is valid since C++14
+               // (because std::min accepts
+               // initialization lists as
+               // arguments and invokes
+               // std::min_element in that case),
+               // and I guess most C++11 compilers
+               // will accept this code (but I have
+               // not tested that).
       }
     }
   }

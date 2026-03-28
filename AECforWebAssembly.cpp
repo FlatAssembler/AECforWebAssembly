@@ -22,6 +22,7 @@ bool areWeCurrentlyTesting = false;
 #include <string>
 std::string compilation_target; // WASI (WebAssembly System Interface) or
                                 // browser (default).
+bool the_cpp_runtime_library_supports_regexes = true;
 #include "TreeRootNode.cpp"
 #define OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
 #include "compiler.cpp"
@@ -102,6 +103,7 @@ on "WebAssembly.Global" being available.)"
 #else
   } catch (regex_error &error) {
 #endif
+    the_cpp_runtime_library_supports_regexes = false;
     cerr <<
         R"(The C++ compiler this executable has been compiled
 with doesn't appear to support JavaScript-style regular
