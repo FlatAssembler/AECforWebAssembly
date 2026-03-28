@@ -56,7 +56,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfCharacter(
-                str.defaultValuesOfMembers.at(memberName)) +
+                uint8_t(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -64,7 +64,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfInteger16(
-                str.defaultValuesOfMembers.at(memberName)) +
+                uint16_t(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -73,7 +73,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfInteger32(
-                str.defaultValuesOfMembers.at(memberName)) +
+                uint32_t(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -81,7 +81,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfInteger64(
-                str.defaultValuesOfMembers.at(memberName)) +
+                uint64_t(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -89,7 +89,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfDecimal32(
-                str.defaultValuesOfMembers.at(memberName)) +
+                float(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -97,7 +97,7 @@ instantiateGlobalStructure(const structure str, const int offset,
         assemblyCode +=
             "(data 0 (i32.const " + std::to_string(address) + ") " +
             getCharVectorRepresentationOfInteger16(
-                str.defaultValuesOfMembers.at(memberName)) +
+                uint16_t(str.defaultValuesOfMembers.at(memberName))) +
             ") ;;Hex of " +
             std::to_string(str.defaultValuesOfMembers.at(memberName)) +
             ", the default value of \"" + str.name + "." + memberName + "\"\n";
@@ -168,7 +168,7 @@ public:
       globalDeclarations += "\t(data 0 (i32.const " +
                             std::to_string(context.globalVariablePointer) +
                             ") " + string + ")\n";
-      context.globalVariablePointer += string.size() - 1;
+      context.globalVariablePointer += int(string.size() - 1);
     }
     for (auto childNode : children) {
       if (basicDataTypeSizes.count(childNode.text) or
@@ -297,7 +297,7 @@ public:
                   globalDeclarations +=
                       "\t(data 0 (i32.const " + std::to_string(address) + ") " +
                       getCharVectorRepresentationOfInteger64(
-                          field.interpretAsACompileTimeDecimalConstant()) +
+                          field.interpretAsACompileTimeIntegerConstant()) +
                       ") ;;Hex of " +
                       std::to_string(
                           field.interpretAsACompileTimeIntegerConstant()) +
@@ -305,8 +305,8 @@ public:
                 else if (childNode.text == "Decimal32")
                   globalDeclarations +=
                       "\t(data 0 (i32.const " + std::to_string(address) + ") " +
-                      getCharVectorRepresentationOfDecimal32(
-                          field.interpretAsACompileTimeDecimalConstant()) +
+                      getCharVectorRepresentationOfDecimal32(float(
+                          field.interpretAsACompileTimeDecimalConstant())) +
                       ") ;;IEEE 754 hex of " +
                       std::to_string(
                           field.interpretAsACompileTimeDecimalConstant()) +
@@ -412,8 +412,8 @@ public:
                     "\t(data 0 (i32.const " +
                     std::to_string(context.globalVariables[variableName.text]) +
                     ") " +
-                    getCharVectorRepresentationOfDecimal32(
-                        assignment.interpretAsACompileTimeDecimalConstant()) +
+                    getCharVectorRepresentationOfDecimal32(float(
+                        assignment.interpretAsACompileTimeDecimalConstant())) +
                     ") ;; IEEE754 hex of " +
                     std::to_string(
                         assignment.interpretAsACompileTimeDecimalConstant()) +

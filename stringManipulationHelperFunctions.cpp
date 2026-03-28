@@ -121,12 +121,14 @@ int longest_common_subsequence_length(std::string first, std::string second) {
             // instead of "size_t" here, I am not sure why.
     for (size_t j = 0; j < second.size(); j++)
       if (first[i] == second[j])
-        DP[i][j] = DP[i - 1][j - 1] +
-                   1; // Had we used vectors instead of maps, we could not do
-                      // this so simply (What if 'i' or 'j' are zero?).
+        DP[int(i)][int(j)] =
+            DP[int(i - 1)][int(j - 1)] +
+            1; // Had we used vectors instead of maps, we could not do
+               // this so simply (What if 'i' or 'j' are zero?).
       else
-        DP[i][j] = std::max(DP[i - 1][j], DP[i][j - 1]);
-  return DP[first.size() - 1][second.size() - 1];
+        DP[int(i)][int(j)] =
+            std::max(DP[int(i - 1)][int(j)], DP[int(i)][int(j - 1)]);
+  return DP[int(first.size() - 1)][int(second.size() - 1)];
 }
 
 int Levenstein_distance(std::string A, std::string B) {
@@ -137,8 +139,8 @@ int Levenstein_distance(std::string A, std::string B) {
   using std::min;
   using std::vector;
 
-  int row = A.size();
-  int col = B.size();
+  int row = int(A.size());
+  int col = int(B.size());
 
   vector<vector<int>> temp(row + 1, vector<int>(col + 1));
 
@@ -147,9 +149,9 @@ int Levenstein_distance(std::string A, std::string B) {
               // replace "int" with "size_t" here. I do not know why.
     for (size_t j = 0; j < temp[0].size(); j++) {
       if (j == 0) {
-        temp[i][j] = i;
+        temp[i][j] = int(i);
       } else if (i == 0) {
-        temp[i][j] = j;
+        temp[i][j] = int(j);
       } else if (A[i - 1] == B[j - 1]) {
         temp[i][j] = temp[i - 1][j - 1];
       } else {

@@ -108,8 +108,9 @@ on "WebAssembly.Global" being available.)"
         R"(The C++ compiler this executable has been compiled
 with doesn't appear to support JavaScript-style regular
 expressions. Parts of this program that rely on them
-will not work.)"
-         << endl;
+will not work. The C++ runtime library sends this message when
+attempting to use regexes: )"
+         << error.what() << endl;
   }
   cout << "Running the tests..." << endl;
   auto beginningOfTests = chrono::high_resolution_clock::now();

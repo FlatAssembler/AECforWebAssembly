@@ -1717,7 +1717,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                 .indentBy(1) +
             "\n";
       }
-      for (unsigned int i = children.size();
+      for (unsigned int i = (unsigned int)(children.size());
            i < functionToBeCalled.defaultArgumentValues.size(); i++) {
         if (!functionToBeCalled.defaultArgumentValues[i])
           std::cerr

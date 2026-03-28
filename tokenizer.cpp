@@ -92,8 +92,8 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
                   stringDelimiter.length() + 1,
                   tokenizedExpression.back().text.length() -
                       2 * stringDelimiter.length() - 1));
-          i += stringDelimiter.length() - 1;
-          currentColumn += stringDelimiter.length() - 1;
+          i += (unsigned int)(stringDelimiter.length() - 1);
+          currentColumn += int(stringDelimiter.length() - 1);
         }
         tokenizedExpression.push_back(
             TreeNode(string(), currentLine, currentColumn));

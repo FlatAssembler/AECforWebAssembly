@@ -27,7 +27,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
 #else
                                std::unordered_set<std::string> operators,
 #endif
-                                   Associativity associativity) {
+                               Associativity associativity) {
   auto loop_body = [bitand](int bitand i) -> void {
     if ((long unsigned)i >= input.size()) {
       std::cerr << "Line " << input[0].lineNumber << ", Column "
@@ -78,7 +78,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
     for (int i = 0; i < int(input.size()); i++)
       loop_body(i);
   else if (associativity == Associativity::right)
-    for (int i = input.size() - 1; i >= 0;
+    for (int i = int(input.size() - 1); i >= 0;
          i--) // I received some comments on Internet forums that the "scan
               // backwards" method of parsing right-associative operators (as I
               // am doing here, as well as down below when parsing `?:`) is
@@ -276,7 +276,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                              parsedExpression.begin() + closedCurlyBrace + 1);
       parsedExpression[openCurlyBrace].text = "{}";
     }
-  for (int i = parsedExpression.size() - 1; i >= 0;
+  for (int i = int(parsedExpression.size() - 1); i >= 0;
        i--) // The unary "+" and "-" operators. We need to iterate backwards
             // rather than forward because, if we iterate forward, we will
             // incorrectly parse "--5".
@@ -316,7 +316,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   for (auto hashTableWithOperators : leftAssociativeBinaryOperators)
     parsedExpression = applyBinaryOperators(
         parsedExpression, hashTableWithOperators, Associativity::left);
-  for (int i = parsedExpression.size() - 1; i >= 0;
+  for (int i = int(parsedExpression.size() - 1); i >= 0;
        i--) // The ternary conditional "?:" operator (it's right-associative).
     if (parsedExpression.at(i).text == ":") {
       if (i == int(parsedExpression.size()) - 1) {
@@ -1074,7 +1074,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                                                      // it together with the
                                                      // expression.
       input.insert(input.begin() + i, expression.begin(), expression.end());
-      i += expression.size() - 1;
+      i += (unsigned int)(expression.size() - 1);
     }
   return input;
 }

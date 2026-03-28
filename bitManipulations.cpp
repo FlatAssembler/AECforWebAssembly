@@ -38,7 +38,7 @@ reverseOrderOfBytes(std::string hexadecimal) // Because the JavaScript Virtual
     std::exit(1);
   }
   std::string result = "\"";
-  for (int i = hexadecimal.size() - 2; i >= 0; i -= 2)
+  for (int i = int(hexadecimal.size() - 2); i >= 0; i -= 2)
     result += "\\" + hexadecimal.substr(i, 2);
   result += '"';
   return result;
