@@ -318,7 +318,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                       << "), this "
                          "declaration shadows it."
                       << std::endl;
-          if (variableName.text.back() != '[') { // If it's not an array.
+          if (not(isArray(variableName.text))) {
             context.localVariables[variableName.text] = 0;
             for (auto bitand pair : context.localVariables)
               pair.second += isPointerType(childNode.text)
@@ -453,9 +453,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           exit(1);
         }
         TreeNode nodeWithStructureName = childNode.children[0];
-        if (!isValidVariableName(nodeWithStructureName.text) or
+        if (not(isValidVariableName(nodeWithStructureName.text)) or
             AECkeywords.count(nodeWithStructureName.text) or
-            nodeWithStructureName.text.back() == '[') {
+            isArray(nodeWithStructureName.text)) {
           std::cerr << "Line " << nodeWithStructureName.lineNumber
                     << ", Column " << nodeWithStructureName.columnNumber
                     << ", Compiler error: The name \""
@@ -554,7 +554,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
               instanceName.lineNumber;
           context.localVariables[instanceName.text] = 0;
           int arraySizeInBytes = 0, arraySizeInStructures = 0;
-          if (instanceName.text.back() == '[' and
+          if (isArray(instanceName.text) and
               instanceName.children.size() == 1) {
             arraySizeInStructures =
                 instanceName.children[0]
@@ -563,7 +563,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
                                arraySizeInStructures;
 
           } else {
-            if (instanceName.text.back() == '[') {
+            if (isArray(instanceName.text)) {
               std::cerr
                   << "Line " << instanceName.lineNumber << ", Column "
                   << instanceName.columnNumber
@@ -1066,35 +1066,35 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
              text[0] !=
                  '>') // The assignment operators "+=", "-=", "*=" and "/="...
   {
-    if (children.at(0).text.back() ==
-        '[') { // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
-               // https://discord.com/channels/530598289813536771/847014270922391563/934823770307301416
-               /*
-                * So, what follows is a bit of an ugly and incomprehensible code
-                * that does the following. It rewrites code such as:
-                * ```
-                * array_name[random_generator()] += 1;
-                * ```
-                * to a code such as:
-                * ```
-                * Integer32 temporary_subscriptXXXX;
-                * temporary_subscriptXXXX := random_generator();
-                * array_name[temporary_subscriptXXXX] :=
-                * 	array_name[temporary_subscriptXXXX] + 1;
-                * ```
-                * Notice that simply rewriting it as something like:
-                * ```
-                * array_name[random_generator()] := array_name[random_generator()]
-                * 					+ 1;
-                * ```
-                * would not do the trick, because then the random generator would
-                * have been called twice instead of once, each time presumably
-                * giving a different result.
-                * TODO: Refactor that code to be more legible. I have made a
-                * 	StackExchange question asking how to do that, but it got
-                * 	closed for some reason:
-                * 	https://codereview.stackexchange.com/questions/273535/complicated-ast-manipulation-looks-ugly-in-c-how-to-refactor-it
-                */
+    if (isArray(children.at(0).text)) {
+      // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
+      // https://discord.com/channels/530598289813536771/847014270922391563/934823770307301416
+      /*
+       * So, what follows is a bit of an ugly and incomprehensible code
+       * that does the following. It rewrites code such as:
+       * ```
+       * array_name[random_generator()] += 1;
+       * ```
+       * to a code such as:
+       * ```
+       * Integer32 temporary_subscriptXXXX;
+       * temporary_subscriptXXXX := random_generator();
+       * array_name[temporary_subscriptXXXX] :=
+       * 	array_name[temporary_subscriptXXXX] + 1;
+       * ```
+       * Notice that simply rewriting it as something like:
+       * ```
+       * array_name[random_generator()] := array_name[random_generator()]
+       * 					+ 1;
+       * ```
+       * would not do the trick, because then the random generator would
+       * have been called twice instead of once, each time presumably
+       * giving a different result.
+       * TODO: Refactor that code to be more legible. I have made a
+       * 	StackExchange question asking how to do that, but it got
+       * 	closed for some reason:
+       * 	https://codereview.stackexchange.com/questions/273535/complicated-ast-manipulation-looks-ugly-in-c-how-to-refactor-it
+       */
       TreeNode fakeInnerFunctionNode("Does", lineNumber, columnNumber);
       std::string subscriptName;
       do {
@@ -1813,13 +1813,13 @@ AssemblyCode
 TreeNode::compileAPointer(const CompilationContext &context) const {
   if (text == "ValueAt(")
     return children.at(0).compile(context);
-  if (context.localVariables.count(text) and text.back() != '[')
+  if (context.localVariables.count(text) and not(isArray(text)))
     return AssemblyCode(
         "(i32.sub\n\t(global.get $stack_pointer)\n\t(i32.const " +
             std::to_string(context.localVariables.at(text)) + ") ;;" + text +
             "\n)",
         AssemblyCode::AssemblyType::i32);
-  if (context.localVariables.count(text) and text.back() == '[') {
+  if (context.localVariables.count(text) and isArray(text)) {
     if (children.empty()) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: The array \""
@@ -1855,12 +1855,12 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
             "\n\t)\n)",
         AssemblyCode::AssemblyType::i32);
   }
-  if (context.globalVariables.count(text) and text.back() != '[')
+  if (context.globalVariables.count(text) and not(isArray(text)))
     return AssemblyCode("(i32.const " +
                             std::to_string(context.globalVariables.at(text)) +
                             ") ;;" + text,
                         AssemblyCode::AssemblyType::i32);
-  if (context.globalVariables.count(text) and text.back() == '[') {
+  if (context.globalVariables.count(text) and isArray(text)) {
     if (children.empty()) {
       std::cerr << "Line " << lineNumber << ", Column " << columnNumber
                 << ", Compiler error: The array \""
@@ -1893,8 +1893,8 @@ TreeNode::compileAPointer(const CompilationContext &context) const {
                      [=](structure str) { return str.name == structureName; });
     unsigned offset = iteratorPointingToTheStructure->memberOffsetInBytes.at(
         children.at(1).text);
-    if (children.at(1).text.back() == '[') // If it's an array inside of a
-                                           // structure
+    if (isArray(children.at(1).text)) // If it's an array inside of a
+                                      // structure
       return AssemblyCode(
           "(i32.add\n" + children.at(0).compileAPointer(context).indentBy(1) +
               "\n\t(i32.add\n\t\t(i32.const " + std::to_string(offset) +
