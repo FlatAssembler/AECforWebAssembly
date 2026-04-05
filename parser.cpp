@@ -49,7 +49,7 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
       }
       if (not(isComposedOfAlnumsAndOneDot(input.at(i - 1).text)) and
           not(input[i - 1].children.size()) and
-          input[i - 1].text.back() != '(' and
+          not(isFunction(input[i - 1].text)) and
           input[i - 1].text.front() != '"') {
         std::cerr << "Line " << input[i - 1].lineNumber << ", Column "
                   << input[i - 1].columnNumber
@@ -58,8 +58,8 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
       }
       if (not(isComposedOfAlnumsAndOneDot(input.at(i + 1).text)) and
           not(input[i + 1].children.size()) and
-          input[i - 1].text.back() != '(' and
-          input[i + 1].text.back() != '(' and
+          not(isFunction(input[i - 1].text)) and
+          not(isFunction(input[i + 1].text)) and
           input[i + 1].text.front() != '"') {
         std::cerr << "Line " << input[i + 1].lineNumber << ", Column "
                   << input[i + 1].columnNumber
@@ -104,31 +104,30 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
 #endif
   auto parsedExpression = input;
   for (unsigned int i = 0; i < parsedExpression.size(); i++)
-    if (parsedExpression.at(i).text.back() == '(' and
-        !parsedExpression[i].children.size()) {
+    if (isFunction(parsedExpression.at(i).text) and
+        parsedExpression[i].children.empty()) {
       unsigned int firstParenthesis = i;
-      unsigned int nextParenthesis = i + 1;
       unsigned int counterOfOpenParentheses = 1;
-      while (counterOfOpenParentheses) {
-        if (nextParenthesis >= parsedExpression.size()) {
-          std::cerr << "Line " << parsedExpression.at(i).lineNumber
-                    << ", Column " << parsedExpression[i].columnNumber
-                    << ", Parser error: The parenthesis is not closed!"
-                    << std::endl;
-          break;
-        }
-        if (parsedExpression.at(nextParenthesis).text.back() == '(')
-          counterOfOpenParentheses++;
-        if (parsedExpression[nextParenthesis].text == ")")
-          counterOfOpenParentheses--;
-        nextParenthesis++;
-      }
-      std::vector<TreeNode> nodesThatTheRecursionDealsWith;
-      for (unsigned int i = firstParenthesis + 1; i < nextParenthesis - 1;
-           i++) // Don't include the parentheses in the expression passed to
-                // the recursion, otherwise you will end up in an infinite
-                // loop.
-        nodesThatTheRecursionDealsWith.push_back(parsedExpression.at(i));
+      auto iteratorToTheNextParenthesis =
+          std::find_if(parsedExpression.begin() + firstParenthesis,
+                       parsedExpression.end(), [&](TreeNode node) {
+                         if (isFunction(node.text))
+                           counterOfOpenParentheses++;
+                         if (node.text == ")")
+                           counterOfOpenParentheses--;
+                         return counterOfOpenParentheses == 0;
+                       });
+      if (iteratorToTheNextParenthesis == parsedExpression.end())
+        std::cerr << "Line " << parsedExpression.at(i).lineNumber << ", Column "
+                  << parsedExpression[i].columnNumber
+                  << ", Parser error: The parenthesis is not closed!"
+                  << std::endl;
+      unsigned int nextParenthesis =
+          (unsigned int)(iteratorToTheNextParenthesis -
+                         parsedExpression.begin());
+      std::vector<TreeNode> nodesThatTheRecursionDealsWith(
+          parsedExpression.begin() + firstParenthesis + 1,
+          parsedExpression.begin() + nextParenthesis - 1);
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       if (nodesThatTheRecursionDealsWith.size() > 1 and
@@ -166,7 +165,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       }
     }
   for (unsigned int i = 0; i < parsedExpression.size(); i++)
-    if (parsedExpression.at(i).text.back() == '[' and
+    if (isArray(parsedExpression.at(i).text) and
         parsedExpression[i].children.size() == 0) // Array indices
     {
       unsigned int nameOfTheArray = i;
@@ -184,7 +183,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
         }
         if (parsedExpression.at(closedBracket).text == "]")
           counterOfArrayNames--;
-        if (parsedExpression.at(closedBracket).text.back() == '[')
+        if (isArray(parsedExpression.at(closedBracket).text))
           counterOfArrayNames++;
         closedBracket++;
       }
@@ -292,7 +291,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
         not(parsedExpression[i].children.size()) and
         (not(i) or
          (not(isComposedOfAlnumsAndOneDot(parsedExpression[i - 1].text)) and
-          parsedExpression.at(i - 1).text.back() != '(' and
+          not(isFunction(parsedExpression.at(i - 1).text)) and
           parsedExpression[i - 1].children.size() == 0))) {
       parsedExpression[i].children.push_back(
           TreeNode("0", parsedExpression[i].lineNumber,
@@ -527,7 +526,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
                   << ", Parser error: Unexpected end of file!" << std::endl;
         return input;
       }
-      if (input.at(i + 1).text.back() != '(' or
+      if (not(isFunction(input.at(i + 1).text)) or
           input.at(i + 1).text.size() == 1) {
         std::cerr << "Line " << input.at(i + 1).lineNumber << ", Column "
                   << input.at(i + 1).columnNumber
@@ -549,7 +548,7 @@ std::vector<TreeNode> TreeNode::parse(std::vector<TreeNode> input) {
         }
         if (input.at(endOfFunctionSignature).text == ")")
           counterOfParentheses--;
-        if (input.at(endOfFunctionSignature).text.back() == '(')
+        if (isFunction(input.at(endOfFunctionSignature).text))
           counterOfParentheses++;
         endOfFunctionSignature++;
       }

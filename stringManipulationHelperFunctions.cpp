@@ -96,6 +96,14 @@ bool isArray(std::string str) {
   return str.back() == '[';
 }
 
+bool isFunction(std::string str) {
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str, std::regex(R"(\($)"));
+  if (str.empty())
+    return false;
+  return str.back() == '(';
+}
+
 bool isDecimalType(std::string str) {
   return str == "Decimal32" or str == "Decimal64";
 }

@@ -1587,7 +1587,7 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     assembly += "(i32.or\n" +
                 convertToInteger32(children.at(0), context).indentBy(1) + "\n" +
                 convertToInteger32(children.at(1), context).indentBy(1) + "\n)";
-  else if (text.back() == '(' and
+  else if (isFunction(text) and
            (basicDataTypeSizes.count(text.substr(0, text.size() - 1)) or
             isPointerType(
                 text.substr(0, text.size() - 1)))) // The casting operator.
