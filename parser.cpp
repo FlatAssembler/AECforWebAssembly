@@ -124,7 +124,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                   << std::endl;
       unsigned int nextParenthesis =
           (unsigned int)(iteratorToTheNextParenthesis -
-                         parsedExpression.begin());
+                         parsedExpression.begin()) + 1;
       std::vector<TreeNode> nodesThatTheRecursionDealsWith(
           parsedExpression.begin() + firstParenthesis + 1,
           parsedExpression.begin() + nextParenthesis - 1);
