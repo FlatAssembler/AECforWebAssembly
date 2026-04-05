@@ -109,7 +109,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       unsigned int firstParenthesis = i;
       unsigned int counterOfOpenParentheses = 1;
       auto iteratorToTheNextParenthesis =
-          std::find_if(parsedExpression.begin() + firstParenthesis,
+          std::find_if(parsedExpression.begin() + firstParenthesis + 1,
                        parsedExpression.end(), [&](TreeNode node) {
                          if (isFunction(node.text))
                            counterOfOpenParentheses++;
