@@ -15,6 +15,7 @@
 #include "TreeNode.cpp"
 #include <algorithm>
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <functional>
 
 // TODO: Refactor the parser so that it is more legible. Perhaps we can start by
 // moving functions that deal with the details, such as "applyBinaryOperators",
@@ -319,77 +320,94 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   for (auto hashTableWithOperators : leftAssociativeBinaryOperators)
     parsedExpression = applyBinaryOperators(
         parsedExpression, hashTableWithOperators, Associativity::left);
-  for (int i = int(parsedExpression.size() - 1); i >= 0;
-       i--) // The ternary conditional "?:" operator (it's right-associative).
-    if (parsedExpression.at(i).text == ":") {
-      if (i == int(parsedExpression.size()) - 1) {
-        std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
-                  << parsedExpression[i].columnNumber
-                  << ", Parser error: The ternary operator \"?:\" has less "
-                     "than three operands."
-                  << std::endl;
-        break;
-      }
-      int colon = i;
-      int questionMark = i - 1;
-      int colonCounter = 1;
-      while (colonCounter) {
-        if (questionMark < 0) {
-          std::cerr << "Line " << parsedExpression.at(colon).lineNumber
-                    << ", Column " << parsedExpression[colon].columnNumber
-                    << ", Parser error: Unexpected token \":\"!" << std::endl;
-          break;
-        }
-        if (parsedExpression.at(questionMark).text == "?")
-          colonCounter--;
-        if (parsedExpression[questionMark].text == ":")
-          colonCounter++;
-        questionMark--;
-      }
-      questionMark++;
-      if (not(questionMark)) {
-        std::cerr << "Line " << parsedExpression.at(questionMark).lineNumber
-                  << ", Column " << parsedExpression[questionMark].columnNumber
-                  << ", Parser error: The ternary operator \"?:\" has less "
-                     "than three operands."
-                  << std::endl;
-        break;
-      }
-      std::vector<TreeNode> nodesThatTheRecursionDealsWith;
-      for (int i = questionMark + 1; i < colon; i++)
-        nodesThatTheRecursionDealsWith.push_back(parsedExpression.at(i));
-      nodesThatTheRecursionDealsWith =
-          parseExpression(nodesThatTheRecursionDealsWith);
-      if (nodesThatTheRecursionDealsWith.size() > 1) {
-        std::cerr << "Line " << nodesThatTheRecursionDealsWith.at(1).lineNumber
-                  << ", Column "
-                  << nodesThatTheRecursionDealsWith.at(1).columnNumber
-                  << ", Parser error: Unexpected token \""
-                  << nodesThatTheRecursionDealsWith.at(1).text << "\"!"
-                  << std::endl;
-        break;
-      }
-      if (nodesThatTheRecursionDealsWith.size() == 0) {
-        std::cerr << "Line " << parsedExpression.at(questionMark).lineNumber
-                  << ", Column "
-                  << parsedExpression.at(questionMark).columnNumber
-                  << ", Parser error: The ternary operator \"?:\" has less "
-                     "than three operands!"
-                  << std::endl;
-        break;
-      }
-      parsedExpression[questionMark].text = "?:";
-      parsedExpression[questionMark].children.push_back(
-          parsedExpression[questionMark - 1]); // Condition
-      parsedExpression[questionMark].children.push_back(
-          nodesThatTheRecursionDealsWith[0]); // Then-clause
-      parsedExpression[questionMark].children.push_back(
-          parsedExpression[colon + 1]); // Else-clause
-      parsedExpression.erase(parsedExpression.begin() + questionMark - 1);
-      parsedExpression.erase(parsedExpression.begin() + questionMark,
-                             parsedExpression.begin() + colon + 1);
-      i = questionMark;
+
+  auto findLastIndex = [](std::vector<TreeNode> treeNode,
+                          std::function<bool(TreeNode, int)> funcPtr) {
+    for (int i = int(treeNode.size()) - 1; i >= 0; i--)
+      if (funcPtr(treeNode[i], i))
+        return i;
+    return -1;
+  };
+
+  int lastColon;
+  while ((lastColon =
+              findLastIndex(parsedExpression, [](TreeNode node, int index) {
+                index = 0;
+                return node.text == ":";
+              })) != -1) {
+    if (lastColon == int(parsedExpression.size()) - 1) {
+      std::cerr << "Line " << parsedExpression[lastColon].lineNumber
+                << ", Column " << parsedExpression[lastColon].columnNumber
+                << ", Parser error: The ternary operator \"?:\" has less "
+                   "than three operands."
+                << std::endl;
+      break;
     }
+
+    int colon = lastColon;
+    int colonCounter = 1;
+
+    int questionMark =
+        findLastIndex(parsedExpression, [&](TreeNode node, int index) {
+          if (index >= colon)
+            return false;
+          if (node.text == "?")
+            colonCounter--;
+          if (node.text == ":")
+            colonCounter++;
+          return colonCounter == 0;
+        });
+
+    if (questionMark == -1) {
+      std::cerr << "Line " << parsedExpression.at(colon).lineNumber
+                << ", Column " << parsedExpression[colon].columnNumber
+                << ", Parser error: Unexpected token \":\"!" << std::endl;
+      break;
+    }
+    if (questionMark == 0) {
+      std::cerr << "Line " << parsedExpression.at(questionMark).lineNumber
+                << ", Column " << parsedExpression[questionMark].columnNumber
+                << ", Parser error: The ternary operator \"?:\" has less "
+                   "than three operands."
+                << std::endl;
+      break;
+    }
+
+    std::vector<TreeNode> nodesThatTheRecursionDealsWith(
+        parsedExpression.begin() + questionMark + 1,
+        parsedExpression.begin() + colon);
+
+    nodesThatTheRecursionDealsWith =
+        parseExpression(nodesThatTheRecursionDealsWith);
+
+    if (nodesThatTheRecursionDealsWith.size() > 1) {
+      std::cerr << "Line " << nodesThatTheRecursionDealsWith.at(1).lineNumber
+                << ", Column "
+                << nodesThatTheRecursionDealsWith.at(1).columnNumber
+                << ", Parser error: Unexpected token \""
+                << nodesThatTheRecursionDealsWith.at(1).text << "\"!"
+                << std::endl;
+      break;
+    }
+    if (nodesThatTheRecursionDealsWith.size() == 0) {
+      std::cerr << "Line " << parsedExpression.at(questionMark).lineNumber
+                << ", Column " << parsedExpression.at(questionMark).columnNumber
+                << ", Parser error: The ternary operator \"?:\" has less "
+                   "than three operands!"
+                << std::endl;
+      break;
+    }
+    parsedExpression[questionMark].text = "?:";
+    parsedExpression[questionMark].children.push_back(
+        parsedExpression[questionMark - 1]); // Condition
+    parsedExpression[questionMark].children.push_back(
+        nodesThatTheRecursionDealsWith[0]); // Then-clause
+    parsedExpression[questionMark].children.push_back(
+        parsedExpression[colon + 1]); // Else-clause
+    parsedExpression.erase(parsedExpression.begin() + questionMark - 1);
+    parsedExpression.erase(parsedExpression.begin() + questionMark,
+                           parsedExpression.begin() + colon + 1);
+  }
   parsedExpression = applyBinaryOperators(
       parsedExpression, {":=", "+=", "-=", "*=", "/="}, Associativity::right);
 #ifndef NDEBUG
