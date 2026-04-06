@@ -170,29 +170,28 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
     {
       unsigned int nameOfTheArray = i;
       unsigned int counterOfArrayNames = 1;
-      unsigned int closedBracket = nameOfTheArray + 1;
-      while (counterOfArrayNames) {
-        if (closedBracket >= parsedExpression.size()) {
-          std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
-                    << parsedExpression[i].columnNumber
-                    << ", Parser error: The index of the array \""
-                    << parsedExpression[i].text.substr(
-                           0, parsedExpression[i].text.size() - 1)
-                    << "\" is not closed by \"]\"." << std::endl;
-          break;
-        }
-        if (parsedExpression.at(closedBracket).text == "]")
-          counterOfArrayNames--;
-        if (isArray(parsedExpression.at(closedBracket).text))
-          counterOfArrayNames++;
-        closedBracket++;
-      }
-      closedBracket--;
-      std::vector<TreeNode> nodesThatTheRecursionDealsWith;
-      for (unsigned int i = nameOfTheArray + 1; i < closedBracket;
-           i++) // Again, it's important not to include brackets in the array
-                // that's passed to the recursion.
-        nodesThatTheRecursionDealsWith.push_back(parsedExpression[i]);
+      auto iteratorPointingToTheClosedBracket = std::find_if(
+          parsedExpression.begin() + nameOfTheArray + 1, parsedExpression.end(),
+          [bitand](const TreeNode bitand node) {
+            if (node.text == "]")
+              counterOfArrayNames--;
+            if (isArray(node.text))
+              counterOfArrayNames++;
+            return counterOfArrayNames == 0;
+          });
+      if (iteratorPointingToTheClosedBracket == parsedExpression.end())
+        std::cerr << "Line " << parsedExpression[i].lineNumber << ", Column "
+                  << parsedExpression[i].columnNumber
+                  << ", Parser error: The index of the array \""
+                  << parsedExpression[i].text.substr(
+                         0, parsedExpression[i].text.size() - 1)
+                  << "\" is not closed by \"]\"." << std::endl;
+      unsigned int closedBracket =
+          (unsigned int)(iteratorPointingToTheClosedBracket -
+                         parsedExpression.begin());
+      std::vector<TreeNode> nodesThatTheRecursionDealsWith(
+          parsedExpression.begin() + nameOfTheArray + 1,
+          iteratorPointingToTheClosedBracket);
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
       if (nodesThatTheRecursionDealsWith.size() == 0) {
