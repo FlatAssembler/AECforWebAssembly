@@ -231,31 +231,36 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
     if (parsedExpression.at(i).text == "{") // Array initializer
     {
       unsigned int openCurlyBrace = i;
-      unsigned int closedCurlyBrace = i + 1;
       unsigned int curlyBracesCounter = 1;
-      while (curlyBracesCounter) {
-        if (closedCurlyBrace >= parsedExpression.size()) {
-          std::cerr << "Line " << parsedExpression.at(i).lineNumber
-                    << ", Column " << parsedExpression[i].columnNumber
-                    << ", Parser error: The curly brace \"{\" isn't closed!"
-                    << std::endl;
-          break;
-        }
-        if (parsedExpression.at(closedCurlyBrace).text == "}")
-          curlyBracesCounter--;
-        if (parsedExpression[closedCurlyBrace].text == "{")
-          curlyBracesCounter++;
-        closedCurlyBrace++;
+
+      auto iteratorPointingToTheClosedCurlyBrace =
+          std::find_if(parsedExpression.begin() + openCurlyBrace + 1,
+                       parsedExpression.end(), [&](const TreeNode &node) {
+                         if (node.text == "}")
+                           curlyBracesCounter--;
+                         if (node.text == "{")
+                           curlyBracesCounter++;
+                         return curlyBracesCounter == 0;
+                       });
+
+      if (iteratorPointingToTheClosedCurlyBrace == parsedExpression.end()) {
+        std::cerr << "Line " << parsedExpression.at(i).lineNumber << ", Column "
+                  << parsedExpression[i].columnNumber
+                  << ", Parser error: The curly brace \"{\" isn't closed!"
+                  << std::endl;
+        break;
       }
-      closedCurlyBrace--;
+
+      unsigned int closedCurlyBrace = static_cast<unsigned int>(
+          iteratorPointingToTheClosedCurlyBrace - parsedExpression.begin());
+
       std::vector<TreeNode> nodesThatTheRecursionDealsWith(
           parsedExpression.begin() + openCurlyBrace + 1,
-          parsedExpression.begin() +
-              closedCurlyBrace); // We aren't in JavaScript, let's use the
-                                 // features of C++, such as the iterator
-                                 // range constructors...
+          iteratorPointingToTheClosedCurlyBrace);
+
       nodesThatTheRecursionDealsWith =
           parseExpression(nodesThatTheRecursionDealsWith);
+
       nodesThatTheRecursionDealsWith.erase(
           std::remove_if(nodesThatTheRecursionDealsWith.begin(),
                          nodesThatTheRecursionDealsWith.end(),
