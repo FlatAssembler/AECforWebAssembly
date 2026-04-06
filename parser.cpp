@@ -332,7 +332,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
   int lastColon;
   while ((lastColon =
               findLastIndex(parsedExpression, [](TreeNode node, int index) {
-                index = 0;
+                index = not(index);
                 return node.text == ":";
               })) != -1) {
     if (lastColon == int(parsedExpression.size()) - 1) {
