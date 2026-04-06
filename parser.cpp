@@ -124,7 +124,8 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                   << std::endl;
       unsigned int nextParenthesis =
           (unsigned int)(iteratorToTheNextParenthesis -
-                         parsedExpression.begin()) + 1;
+                         parsedExpression.begin()) +
+          1;
       std::vector<TreeNode> nodesThatTheRecursionDealsWith(
           parsedExpression.begin() + firstParenthesis + 1,
           parsedExpression.begin() + nextParenthesis - 1);
@@ -139,15 +140,14 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
                   << nodesThatTheRecursionDealsWith[1].text << "\"."
                   << std::endl;
       }
-      for (auto iterator = nodesThatTheRecursionDealsWith.begin();
-           iterator < nodesThatTheRecursionDealsWith.end(); iterator++)
-        if (iterator->text == ",") { // Multi-argument function
-          iterator = nodesThatTheRecursionDealsWith.erase(iterator);
-          if (iterator == nodesThatTheRecursionDealsWith.end())
-            break; // Or else the program will crash when compiled using
-                   // Microsoft C++ Compiler with the error message that we are
-                   // iterating past the end of the container.
-        }
+
+      // Remove commas (multi-argument function separators).
+      nodesThatTheRecursionDealsWith.erase(
+          std::remove_if(nodesThatTheRecursionDealsWith.begin(),
+                         nodesThatTheRecursionDealsWith.end(),
+                         [](const TreeNode &node) { return node.text == ","; }),
+          nodesThatTheRecursionDealsWith.end());
+
       if (parsedExpression.at(i).text ==
           "(") { // If it's not a function, but only a parenthesis, delete it.
         parsedExpression.erase(parsedExpression.begin() + firstParenthesis,
