@@ -327,14 +327,20 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       if (funcPtr(treeNode[i], i))
         return i;
     return -1;
-  };
+  }; // The `findLastIndex` function from the JavaScript standard library
+     // really comes useful when parsing the ternary conditional `?:` operator,
+     // so why not make one here in C++?
 
+  // Parsing the ternary conditional `?:` operator, which is right-associative.
+  // We will parse it by "scanning backwards", which is why we are using
+  // `findLastIndex` instead of `std::find_if`.
   int lastColon;
   while ((lastColon =
               findLastIndex(parsedExpression, [](TreeNode node, int index) {
-                index = not(index);
+                index = not(index); // To silence the warning by GCC.
                 return node.text == ":";
               })) != -1) {
+
     if (lastColon == int(parsedExpression.size()) - 1) {
       std::cerr << "Line " << parsedExpression[lastColon].lineNumber
                 << ", Column " << parsedExpression[lastColon].columnNumber
