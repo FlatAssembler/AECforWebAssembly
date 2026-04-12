@@ -23,7 +23,7 @@
 
 std::vector<TreeNode>
 TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
                                std::set<std::string> operators,
 #else
                                std::unordered_set<std::string> operators,
@@ -309,7 +309,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       parsedExpression.erase(parsedExpression.begin() + i + 1);
     }
   std::vector<
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 8)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
       std::set<std::string>
 #else
       std::unordered_set<std::string>
