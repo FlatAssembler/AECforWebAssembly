@@ -39,7 +39,11 @@ TreeNode::applyBinaryOperators(std::vector<TreeNode> input,
                 << TreeNode::JSONifyArrayOfTokens(input) << std::endl;
       std::exit(1);
     }
-    if (std::count(operators.begin(), operators.end(), input.at(i).text) and
+    if (operators.count(
+            input.at(i).text) and // Doing std::count (from the <algorithm>
+                                  // library) instead of std::set::count slows
+                                  // it down by a factor of around O(n) (from
+                                  // O(log(n)) to O(n*log(n)).
         not(input.at(i).children.size())) {
       if (not(i) or i == int(input.size()) - 1) {
         std::cerr << "Line " << input[i].lineNumber << ", Column "
