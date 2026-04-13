@@ -18,7 +18,8 @@
 #include <regex>
 #include <set>
 #include <string>
-#if !(defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9))
+#if !(defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||            \
+                            __GNUC__ == 5 && __GNUC_MINOR__ == 1))
 #include <unordered_map>
 #include <unordered_set>
 #endif
@@ -30,7 +31,8 @@ class TreeNode {
   enum class Associativity { left, right };
   static std::vector<TreeNode>
   applyBinaryOperators(std::vector<TreeNode> input,
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
                        std::set<std::string> operators,
 #else
                        std::unordered_set<std::string> operators,
@@ -71,7 +73,8 @@ public:
   // HappySkeptic suggested me to try to make shared parts of TreeNode static to
   // save on stack memory:
   // https://atheistforums.org/thread-63150-post-2053689.html#pid2053689
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
   static std::map<std::string, int> basicDataTypeSizes;
   static std::map<std::string, AssemblyCode::AssemblyType>
       mappingOfAECTypesToWebAssemblyTypes;
@@ -107,7 +110,8 @@ public:
                  // the 64-bit mode (which is almost never done).
       basicDataTypeSizes["Nothing"] = 0;
       mappingOfAECTypesToWebAssemblyTypes =
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
           std::map
 #else
           std::unordered_map
@@ -123,7 +127,8 @@ public:
           mappingOfAECTypesToWebAssemblyTypes[pair.first] =
               AssemblyCode::AssemblyType::i32;
       AECkeywords = std ::
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
           set
 #else
           unordered_set
@@ -164,7 +169,8 @@ public:
                          "Continue",
                          "InstantiateStructure"});
       stringRepresentationOfWebAssemblyType = std::
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
           map
 #else
           unordered_map
@@ -448,7 +454,8 @@ std::string convertInlineAssemblyToAssembly(TreeNode inlineAssemblyNode) {
   return inlineAssembly;
 }
 
-#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
+                          __GNUC__ == 5 && __GNUC_MINOR__ == 1)
 std::map<std::string, int> TreeNode::basicDataTypeSizes;
 std::map<std::string, AssemblyCode::AssemblyType>
     TreeNode::mappingOfAECTypesToWebAssemblyTypes;
