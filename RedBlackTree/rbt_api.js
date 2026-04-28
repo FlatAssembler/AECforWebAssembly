@@ -82,4 +82,20 @@ class RBTAPI {
   getMemory() {
     return this.mem;
   }
+  
+  setKeysRenderAndGetPreorder(keysArray) {
+    this.setKeys(keysArray);
+    this.render();
+    let pointer = this.exports.getTheAddressOfPreorderTraversal();
+    let characterArray = new Int8Array(this.mem.buffer);
+    let ret = "";
+    while (characterArray[pointer]) {
+	  ret+=String.fromCharCode(characterArray[pointer]);
+          pointer++;
+    }
+    return ret;
+  }
 }
+
+if (typeof module !== "undefined")
+  module.exports = {RBTAPI};

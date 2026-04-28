@@ -109,3 +109,13 @@ add_test(NAME alignedAccessTestAssembles
 add_test(NAME alignedAccessTestRuns
 	      COMMAND node alignedAccessTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME RedBlackTreeCompiles
+	COMMAND aec RedBlackTree/RedBlackTree.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME RedBlackTreeAssembles
+	COMMAND npx -q -p wabt wat2wasm --output RedBlackTree/RedBlackTree.wasm RedBlackTree/RedBlackTree.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME RedBlackTreeRuns
+	      COMMAND node automatedTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/RedBlackTree)
+

@@ -625,6 +625,24 @@ Function nodeHeight(PointerToRedBlackTreeNode node)
     max(nodeHeight(node->leftChild), nodeHeight(node->rightChild)) + 1;
 EndFunction
 
+Character preorderTraversal[128];
+
+Function setUpPreorderTraversal(PointerToRedBlackTreeNode node)
+    Which Returns Nothing Does
+  If node Then
+    appendIntegerToString(AddressOf(preorderTraversal[0]), node->key);
+    strcat(AddressOf(preorderTraversal[0]), " ");
+    setUpPreorderTraversal(node->leftChild);
+    setUpPreorderTraversal(node->rightChild);
+  EndIf
+EndFunction
+
+Function getTheAddressOfPreorderTraversal() // Will be called by the
+                                            // automated testing script.
+    Which Returns PointerToCharacter Does
+  Return AddressOf(preorderTraversal[0]);
+EndFunction
+
 Function render() Which Returns Nothing Does
   clearScreen();
   root := PointerToRedBlackTreeNode(0);
@@ -670,6 +688,9 @@ Function render() Which Returns Nothing Does
   setDiagramHeight(diagramHeight);
 
   drawRedBlackTree(root, globalMax.minimumX - margin);
+
+  preorderTraversal[0] := 0;
+  setUpPreorderTraversal(root);
 
   freeRedBlackTree(root);
   printString("Red Black Tree rendered.\n");
