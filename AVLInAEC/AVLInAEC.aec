@@ -433,6 +433,26 @@ Function freeAVLTree(PointerToAVLNode node) Which Returns Nothing Does
   freeAVLNode(node);
 EndFunction
 
+Character preorderTraversal[128];
+
+Function getAddressOfPreorderTraversal() Which Returns PointerToCharacter Does
+  // This function is supposed to be called by NodeJS during automated testing.
+  Return AddressOf(preorderTraversal[0]);
+EndFunction
+
+Function preorderTraversal(PointerToAVLNode node)
+    Which Returns Nothing Does
+  If node Then
+    convertIntegerToString(
+      AddressOf(preorderTraversal[0])+strlen(AddressOf(preorderTraversal[0])),
+      node->key
+    );
+    strcat(AddressOf(preorderTraversal[0]), " ");
+    preorderTraversal(node->leftChild);
+    preorderTraversal(node->rightChild);
+  EndIf
+EndFunction
+
 // --- render() exposed to JS: build tree from keys[] and draw it ---
 Function render() Which Returns Nothing Does
   clearScreen();
@@ -487,7 +507,10 @@ Function render() Which Returns Nothing Does
   setDiagramHeight(diagramHeight);
 
   drawAVL(root, globalMax.minimumX - margin);
-
+  
+  preorderTraversal[0] := 0;
+  preorderTraversal(root);
+  
   freeAVLTree(root);
   printString("AVL rendered.\n");
 EndFunction

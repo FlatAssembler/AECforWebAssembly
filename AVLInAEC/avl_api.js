@@ -15,7 +15,8 @@ class AVLAPI {
       const bytes = await resp.arrayBuffer();
       instantiateResult = await WebAssembly.instantiate(bytes, importObject);
     } else if (wasmSource instanceof WebAssembly.Module) {
-      instantiateResult = await WebAssembly.instantiate(wasmSource, importObject);
+      instantiateResult =
+          await WebAssembly.instantiate(wasmSource, importObject);
     } else if (wasmSource && wasmSource.instance) {
       instantiateResult = wasmSource;
     } else {
@@ -42,44 +43,54 @@ class AVLAPI {
 
   setKeys(keysArray) {
     const n = Math.min(keysArray.length, this.capacity);
-    const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
-    for (let i = 0; i < n; i++) int32View[i] = keysArray[i] | 0;
-    for (let i = n; i < this.capacity; i++) int32View[i] = 0;
-    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
-    for (let i= 0; i < n; i++) int8View[i] = 'I'.charCodeAt(0);
+    const int32View =
+        new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
+    for (let i = 0; i < n; i++)
+      int32View[i] = keysArray[i] | 0;
+    for (let i = n; i < this.capacity; i++)
+      int32View[i] = 0;
+    const int8View =
+        new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    for (let i = 0; i < n; i++)
+      int8View[i] = 'I'.charCodeAt(0);
     this.exports.setNumberOfKeys(n);
   }
 
   pushKey(key) {
     const n = this.exports.getNumberOfKeys();
-    if (n >= this.capacity) throw new Error('keys buffer full');
-    const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
+    if (n >= this.capacity)
+      throw new Error('keys buffer full');
+    const int32View =
+        new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
     int32View[n] = key | 0;
-    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    const int8View =
+        new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
     int8View[n] = 'I'.charCodeAt(0);
     this.exports.setNumberOfKeys(n + 1);
   }
 
   deleteKey(key) {
     const n = this.exports.getNumberOfKeys();
-    if (n >= this.capacity) throw new Error('keys buffer full');
-    const int32View = new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
+    if (n >= this.capacity)
+      throw new Error('keys buffer full');
+    const int32View =
+        new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
     int32View[n] = key | 0;
-    const int8View = new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
+    const int8View =
+        new Int8Array(this.mem.buffer, this.insertOrDeletePtr, this.capacity);
     int8View[n] = 'D'.charCodeAt(0);
     this.exports.setNumberOfKeys(n + 1);
   }
 
-  clearKeys() {
-    this.exports.clearKeys();
-  }
+  clearKeys() { this.exports.clearKeys(); }
 
   getKeysBuffer() {
     return new Int32Array(this.mem.buffer, this.keysPtr, this.capacity);
   }
 
   render() {
-    if (!this.exports.render) throw new Error('WASM module does not export render()');
+    if (!this.exports.render)
+      throw new Error('WASM module does not export render()');
     this.exports.render();
   }
 
@@ -87,8 +98,9 @@ class AVLAPI {
     this.setKeys(keysArray);
     this.render();
   }
-  
-  getMemory() {
-    return this.mem;
-  }
+
+  getMemory() { return this.mem; }
 }
+
+if (typeof module != "undefined")
+  module.exports = {AVLAPI};

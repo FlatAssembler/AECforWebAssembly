@@ -20,7 +20,7 @@ WebAssembly
     .then((module) => {
       rbt_api.RBTAPI.init(module).then((rbtapi) => {
         let preorder;
-	preorder = rbtapi.setKeysRenderAndGetPreorder([ 1, 2, 3 ]);
+        preorder = rbtapi.setKeysRenderAndGetPreorder([ 1, 2, 3 ]);
         if (preorder == "2 1 3 ") {
           console.log("The test has passed!");
           process.exitCode = 0;
@@ -29,7 +29,7 @@ WebAssembly
           console.log(preorder);
           process.exitCode = 1;
         }
-	preorder = rbtapi.setKeysRenderAndGetPreorder([1, 3, 2, 5, 4, -1, 0]);
+        preorder = rbtapi.setKeysRenderAndGetPreorder([ 1, 3, 2, 5, 4, -1, 0 ]);
         if (preorder == "2 0 -1 1 4 3 5 ") {
           console.log("The test has passed!");
           process.exitCode = 0;
