@@ -68,7 +68,10 @@ Hello world!
            "['\"\\nHello world!\\n\"',';']"},
        {R"(('\"'))", R"(['(',''\"'',')'])"},
        {R"(("\\\"Hello world!\"\\"))", R"(['(','"\\\"Hello world!\"\\"',')'])"},
-       {"2_147_483_647", "['2147483647']"}});
+       {"2_147_483_647", "['2147483647']"},
+       {"node->color != 'R' and node->color != 'B'",
+        "['node','->','color','!=','82','and','node','->','color','!=','66'"
+        "]"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::JSONifyArrayOfTokens(TreeNode::tokenize(tests[i].input));
@@ -111,7 +114,8 @@ void simpleParserTests() {
         "1) 0 (?: (< (+ 2 2) 4) (- 0 1) (- 0 3))))"},
        {"some_array[i+1]", "(some_array (+ i 1))"},
        {"array_pointer:={1,1+1,1+1+1}",
-        "(:= array_pointer ({} 1 (+ 1 1) (+ (+ 1 1) 1)))"}});
+        "(:= array_pointer ({} 1 (+ 1 1) (+ (+ 1 1) 1)))"},
+       {"1 != 0", "(!= 1 0)"}});
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]
@@ -395,7 +399,8 @@ void testTypeChecking() {
        {"(5+5=10 and 2+2=4)?(3.14159265359):(0)", "Decimal64"},
        {"5+5=10 and 2+2=4", "Integer32"},
        {"mod(Integer32(5),2)", "Integer64"},
-       {"not(2+2=5)", "Integer32"}});
+       {"not(2+2=5)", "Integer32"},
+       {"1 != 0", "Integer32"}});
   for (unsigned i = 0; i < tests.size(); i++) {
     std::string result =
         TreeNode::parseExpression(TreeNode::tokenize(tests[i].input))[0]

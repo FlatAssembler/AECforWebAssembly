@@ -839,7 +839,8 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         fakeContext.stackSizeOfThisFunction = 0;
         assembly += fakeInnerFunctionNode.compile(fakeContext) + "\n";
       } else if ((childNode.text.size() == 2 and childNode.text[1] == '=' and
-                  childNode.text[0] != '<' and childNode.text[0] != '>') or
+                  childNode.text[0] != '<' and childNode.text[0] != '>' and
+                  childNode.text[0] != '!') or
                  childNode.getType(context) == "Nothing")
         assembly += std::string(childNode.compile(context)) + "\n";
       else {
@@ -1063,8 +1064,9 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
           << typeOfTheCurrentNode << "\", this is likely an error!"
           << std::endl;
   } else if (text.size() == 2 and text[1] == '=' and text[0] != '<' and
+             text[0] != '>' and
              text[0] !=
-                 '>') // The assignment operators "+=", "-=", "*=" and "/="...
+                 '!') // The assignment operators "+=", "-=", "*=" and "/="...
   {
     if (isArray(children.at(0).text)) {
       // https://github.com/FlatAssembler/AECforWebAssembly/issues/15
@@ -1556,6 +1558,12 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) + ".eq\n" +
         convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
         convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  } else if (text == "!=") {
+    TreeNode notNode = TreeNode("not(", lineNumber, columnNumber);
+    TreeNode equalsNode = TreeNode("=", lineNumber, columnNumber);
+    equalsNode.children = <%children.at(0), children.at(1)%>;
+    notNode.children = <%equalsNode%>;
+    return notNode.compile(context);
   } else if (text == "?:")
     assembly +=
         "(if (result " + stringRepresentationOfWebAssemblyType.at(returnType) +

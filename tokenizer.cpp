@@ -270,8 +270,9 @@ std::vector<TreeNode> TreeNode::tokenize(const std::string input) {
          tokenizedExpression[i - 1].text == "*" or
          tokenizedExpression[i - 1].text == "/" or
          tokenizedExpression[i - 1].text == "<" or
-         tokenizedExpression[i - 1].text == ">")) {
-      tokenizedExpression[i - 1].text = tokenizedExpression[i - 1].text + "=";
+         tokenizedExpression[i - 1].text == ">" or
+         tokenizedExpression[i - 1].text == "!")) {
+      tokenizedExpression[i - 1].text += "=";
       tokenizedExpression.erase(tokenizedExpression.begin() + i);
     }
   for (unsigned int i = 1; i < tokenizedExpression.size(); i++)

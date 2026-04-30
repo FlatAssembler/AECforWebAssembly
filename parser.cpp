@@ -320,7 +320,7 @@ std::vector<TreeNode> TreeNode::parseExpression(std::vector<TreeNode> input) {
       leftAssociativeBinaryOperators({{".", "->"},
                                       {"*", "/"},
                                       {"-", "+"},
-                                      {"<", ">", "=", "<=", ">="},
+                                      {"<", ">", "=", "<=", ">=", "!="},
                                       {"and"},
                                       {"or"}});
   for (auto hashTableWithOperators : leftAssociativeBinaryOperators)

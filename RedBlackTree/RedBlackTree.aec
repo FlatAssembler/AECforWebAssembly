@@ -681,7 +681,7 @@ Function validateRBSubtree(
   EndIf
 
   // Color must be 'R' or 'B'
-  If not(node->color = 'R') and not(node->color = 'B') Then
+  If node->color != 'R' and node->color != 'B' Then
     Return -1;
   EndIf
 
