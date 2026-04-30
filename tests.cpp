@@ -152,7 +152,8 @@ void interpreterTests() {
 	       (3 > 2 > 1)
        )", "1"},
        {"5 + + 1", "6"},
-       {"5*-1", "-5"}
+       {"5*-1", "-5"},
+       {"1 != 0", "1"}
       });
   for (unsigned int i = 0; i < tests.size(); i++) {
     std::string result = std::to_string(

@@ -280,6 +280,9 @@ public:
     if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() ==
              children[1].interpretAsACompileTimeIntegerConstant();
+    if (text == "!=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeIntegerConstant() !=
+             children[1].interpretAsACompileTimeIntegerConstant();
     if (text == "<=" and children.size() == 2)
       return children[0].interpretAsACompileTimeIntegerConstant() <=
              children[1].interpretAsACompileTimeIntegerConstant();
@@ -394,6 +397,9 @@ public:
              children[1].interpretAsACompileTimeDecimalConstant();
     if (text == "=" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() ==
+             children[1].interpretAsACompileTimeDecimalConstant();
+    if (text == "!=" and children.size() == 2)
+      return children[0].interpretAsACompileTimeDecimalConstant() !=
              children[1].interpretAsACompileTimeDecimalConstant();
     if (text == "<=" and children.size() == 2)
       return children[0].interpretAsACompileTimeDecimalConstant() <=
