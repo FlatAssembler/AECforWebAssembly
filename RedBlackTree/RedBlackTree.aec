@@ -643,6 +643,91 @@ Function getTheAddressOfPreorderTraversal() // Will be called by the
   Return AddressOf(preorderTraversal[0]);
 EndFunction
 
+// Returns 1 if node is red, 0 otherwise (null counts as black)
+Function isRed(PointerToRedBlackTreeNode node) Which Returns Integer32 Does
+  If not(node) Then
+    Return 0;
+  EndIf
+  Return node->color = 'R';
+EndFunction
+
+// Returns 1 if node is black, 0 otherwise (null counts as black)
+Function isBlack(PointerToRedBlackTreeNode node) Which Returns Integer32 Does
+  If not(node) Then
+    Return 1;
+  EndIf
+  Return node->color = 'B';
+EndFunction
+
+// Validates RB + BST properties.
+// Returns black-height if valid, -1 if invalid.
+//
+// We use strict BST ordering (no duplicates): minKey < key < maxKey.
+// Your Insert() ignores duplicates (returns node), so strict ordering is correct.
+Function validateRBSubtree(
+  PointerToRedBlackTreeNode node,
+  Integer32 minKey,
+  Integer32 maxKey)
+  Which Returns Integer32 Does
+
+  If not(node) Then
+    // NIL leaves are considered black and contribute 1 to black height.
+    Return 1;
+  EndIf
+
+  // BST property (strict)
+  If node->key <= minKey or node->key >= maxKey Then
+    Return -1;
+  EndIf
+
+  // Color must be 'R' or 'B'
+  If not(node->color = 'R') and not(node->color = 'B') Then
+    Return -1;
+  EndIf
+
+  // Red node cannot have red children
+  If node->color = 'R' Then
+    If isRed(node->leftChild) or isRed(node->rightChild) Then
+      Return -1;
+    EndIf
+  EndIf
+
+  Integer32 leftBH := validateRBSubtree(node->leftChild, minKey, node->key);
+  If leftBH < 0 Then
+    Return -1;
+  EndIf
+
+  Integer32 rightBH := validateRBSubtree(node->rightChild, node->key, maxKey);
+  If rightBH < 0 Then
+    Return -1;
+  EndIf
+
+  // Black-height must match
+  If not(leftBH = rightBH) Then
+    Return -1;
+  EndIf
+
+  // Add 1 if this node is black
+  Return leftBH + (node->color = 'B' ? 1 : 0);
+EndFunction
+
+// Exportable entry point: returns 1 if valid, 0 if invalid.
+Function validateRBTree() Which Returns Integer32 Does
+  If not(root) Then
+    Return 1;
+  EndIf
+
+  // Root must be black
+  If not(root->color = 'B') Then
+    Return 0;
+  EndIf
+
+  // Use wide sentinels. Keys are Integer32, so use min/max int32.
+  // minKey < key < maxKey must hold for all keys.
+  Integer32 bh := validateRBSubtree(root, -2147483648, 2147483647);
+  Return bh > 0 ? 1 : 0;
+EndFunction
+
 Function render() Which Returns Nothing Does
   clearScreen();
   root := PointerToRedBlackTreeNode(0);
@@ -691,6 +776,12 @@ Function render() Which Returns Nothing Does
 
   preorderTraversal[0] := 0;
   setUpPreorderTraversal(root);
+
+  Integer32 ok := validateRBTree();
+  If not(ok) Then
+    printString("validateRBTree() failed!\n");
+    asm("unreachable");
+  EndIf
 
   freeRedBlackTree(root);
   printString("Red Black Tree rendered.\n");
