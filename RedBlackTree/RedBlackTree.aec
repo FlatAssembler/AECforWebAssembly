@@ -703,7 +703,7 @@ Function validateRBSubtree(
   EndIf
 
   // Black-height must match
-  If not(leftBH = rightBH) Then
+  If leftBH != rightBH Then
     Return -1;
   EndIf
 

@@ -52,7 +52,7 @@ function highlightedToken(token) {
       token == "+" || token == "-" || token == "/" || token == "*" ||
       token == "?" || token == ":" || token == "=" || token == "&lt;" ||
       token == "&gt;" || token == "not" || token == "invertBits" ||
-      token == "SizeOf")
+      token == "SizeOf" || token == "!")
     return '<span class="Operator">' + token + "</span>";
   if (token == "{" || token == "}" || token == "(" || token == ")" ||
       token == "[" || token == "]")
