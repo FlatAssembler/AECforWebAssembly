@@ -747,7 +747,7 @@ Function main() Which Returns Nothing Does
     strcat(AddressOf(stringToBePrinted[0]), AddressOf(stringToBeAdded[0]));
     printString(AddressOf(stringToBePrinted[0]));
     j += strlen(mapOfCodes[i]);
-    If not(i = getCharacterOfTheInput(k)) Then
+    If i != getCharacterOfTheInput(k) Then
       printString("ERROR: The decoded output does not match the input!\n");
       Break;
     EndIf

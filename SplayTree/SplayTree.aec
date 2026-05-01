@@ -250,7 +250,7 @@ Function Delete(PointerToNode node, Integer32 X)
     Return node;
   EndIf
   node := Splay(node, X);
-  If not(X = node->key) Then
+  If X != node->key Then
     Return node;
   EndIf
   If not(node->left) Then
