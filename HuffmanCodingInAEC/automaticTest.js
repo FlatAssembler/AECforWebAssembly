@@ -45,6 +45,11 @@ WebAssembly.instantiate(buffer, importObject).then((result) => {
   memory = exports.memory;
   console.log("The AEC program has been loaded successfully!");
 
+  if (Math.abs(exports.log2(27) - Math.log2(27)) > 0.1) {
+    console.log("The function for computing the binary logarithm in AEC does not work!");
+    process.exit(1);
+  }
+
   text = "TEO SAMARZIJA";
   console.log("Testing with the text: " + text);
   exports.main();
