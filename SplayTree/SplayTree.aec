@@ -384,6 +384,86 @@ Function nodeHeight(PointerToNode node)
          max(nodeHeight(node->left), nodeHeight(node->right)) + 1;
 EndFunction
 
+// --- Automated-testing hooks: traversal buffers (null-terminated strings) ---
+Character preorderTraversal[256] := {0};
+Character inorderTraversal[256] := {0};
+Integer32 preorderIndex := 0;
+Integer32 inorderIndex := 0;
+
+Function getAddressOfPreorderTraversal() Which Returns PointerToCharacter Does
+  Return AddressOf(preorderTraversal[0]);
+EndFunction
+
+Function getAddressOfInorderTraversal() Which Returns PointerToCharacter Does
+  Return AddressOf(inorderTraversal[0]);
+EndFunction
+
+Function clearTraversalBuffers() Which Returns Nothing Does
+  preorderIndex := 0;
+  inorderIndex := 0;
+  preorderTraversal[0] := 0;
+  inorderTraversal[0] := 0;
+EndFunction
+
+// Appends an integer and a trailing space to preorderTraversal.
+Function appendToPreorder(Integer32 number) Which Returns Nothing Does
+  Character tmp[16] := {0};
+  convertIntegerToString(AddressOf(tmp[0]), number);
+
+  Integer32 i := 0;
+  While ValueAt(AddressOf(tmp[0]) + i) Loop
+    preorderTraversal[preorderIndex] := ValueAt(AddressOf(tmp[0]) + i);
+    preorderIndex += 1;
+    i += 1;
+  EndWhile
+  preorderTraversal[preorderIndex] := ' ';
+  preorderIndex += 1;
+  preorderTraversal[preorderIndex] := 0;
+EndFunction
+
+// Appends an integer and a trailing space to inorderTraversal.
+Function appendToInorder(Integer32 number) Which Returns Nothing Does
+  Character tmp[16] := {0};
+  convertIntegerToString(AddressOf(tmp[0]), number);
+
+  Integer32 i := 0;
+  While ValueAt(AddressOf(tmp[0]) + i) Loop
+    inorderTraversal[inorderIndex] := ValueAt(AddressOf(tmp[0]) + i);
+    inorderIndex += 1;
+    i += 1;
+  EndWhile
+  inorderTraversal[inorderIndex] := ' ';
+  inorderIndex += 1;
+  inorderTraversal[inorderIndex] := 0;
+EndFunction
+
+Function buildPreorderTraversal(PointerToNode node) Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  appendToPreorder(node->key);
+  buildPreorderTraversal(node->left);
+  buildPreorderTraversal(node->right);
+EndFunction
+
+Function buildInorderTraversal(PointerToNode node) Which Returns Nothing Does
+  If not(node) Then
+    Return;
+  EndIf
+  buildInorderTraversal(node->left);
+  appendToInorder(node->key);
+  buildInorderTraversal(node->right);
+EndFunction
+
+Function computeTraversals() Which Returns Nothing Does
+  clearTraversalBuffers();
+  buildPreorderTraversal(root);
+  buildInorderTraversal(root);
+  // Ensure null terminators are present even if tree is empty:
+  preorderTraversal[preorderIndex] := 0;
+  inorderTraversal[inorderIndex] := 0;
+EndFunction
+
 Function render() Which Returns Nothing Does
   clearScreen();
   root := PointerToNode(0);
@@ -456,6 +536,8 @@ Function render() Which Returns Nothing Does
   setDiagramHeight(diagramHeight);
 
   drawTree(root, globalMax.minimumX - margin);
+
+  computeTraversals();
 
   freeTree(root);
   printString("Splay Tree rendered.\n");

@@ -127,3 +127,12 @@ add_test(NAME AVLTreeAssembles
 add_test(NAME AVLTreeRuns
 	      COMMAND node automatedTest.js
 	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/AVLInAEC)
+add_test(NAME SplayTreeCompiles
+	      COMMAND aec SplayTree/SplayTree.aec
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME SplayTreeAssembles
+	      COMMAND npx -q -p wabt wat2wasm --output SplayTree/SplayTree.wasm SplayTree/SplayTree.wat
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_test(NAME SplayTreeRuns
+	      COMMAND node automatedTest.js
+	      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/SplayTree)

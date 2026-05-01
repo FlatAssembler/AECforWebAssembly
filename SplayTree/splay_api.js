@@ -103,3 +103,8 @@ class SplayAPI {
     return this.mem;
   }
 }
+
+// Node.js compatibility (so automatedTest.js can `require()` this file).
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SplayAPI };
+}
