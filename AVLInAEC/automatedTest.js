@@ -66,7 +66,7 @@ async function main() {
   const result = await WebAssembly.instantiate(bytes, makeImports());
   const instance = result.instance || result; // Node gives { module, instance }
 
-  const avlapi = await avl_api.AVLAPI.init(instance);
+  const avlapi = await avl_api.AVLAPI.init(result);
 
   const keysToInsert = [4, 1, 9, 0, 3, 7, 10, 2, 5, 8, 11, 6];
   for (const k of keysToInsert) avlapi.pushKey(k);
