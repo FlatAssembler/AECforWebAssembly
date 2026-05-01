@@ -308,8 +308,10 @@ Function ln(Decimal32 x) Which Returns Decimal32 Does
   Return sum;
 EndFunction
 
+Decimal32 ln2 := log(2); // A compile-time constant.
+
 Function log2(Decimal32 x) Which Returns Decimal32 Does
-  Return ln(x) / ln(2);
+  Return ln(x) / ln2;
 EndFunction
 
 Character input[64];
@@ -571,7 +573,7 @@ Function main() Which Returns Nothing Does
     While i < lengthOfTheArray Loop
       If array[i]->frequencyOfCharacter <
               array[secondMinimum]->frequencyOfCharacter and
-          not(i = minimum) Then
+          i != minimum Then
         secondMinimum := i;
       EndIf
       i += 1;
