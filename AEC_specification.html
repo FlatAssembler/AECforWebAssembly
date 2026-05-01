@@ -3867,22 +3867,27 @@ UPDATE on 27/12/2025: I've made <a href="https://aecforwebassembly.sourceforge.i
 UPDATE on 27/12/2025: You know, we computer engineers frequently debate whether there should be more programming languages in common use or less programming languages in common use. The arguments for the thesis that there should be fewer languages in common use are, of course, that useful libraries written in one programming language are often prohibitively difficult to use in another programming language due to interoperability issues. Proponents of the thesis that there should be more programming languages (including me at the time I designed and implemented AEC) generally respond by saying that Artificial Intelligence will soon solve those problems. However, we are more than 3 years into the AI revolution, we have probably already reached the point of diminishing returns, and it seems more and more obvious to me that that argument is false. In <a href="https://aecforwebassembly.sourceforge.io/vizualizacija_stabala.ppt">the presentation</a>, I am talking about how GitHub Copilot, when you attempt to use it for Vibe Coding, is often writing gibberish <b>precisely</b> when it is supposed to write code for the interaction between the JavaScript program and the AEC program. It, for example, set the AEC compiler to think it is targetting a browser (rather than WASI), and then tried to communicate from JavaScript using typed arrays. That will not work, you should use DataView then, because the AEC compiler does not make sure the global variables are aligned when targetting a browser. There was a simple solution: add <span class="inline_code">#target WASI</span> to the beginning of the AEC program, but that's just managing the problem, rather than curing it. Even different dialects of JavaScript can be a problem: the AI tried to do <span class="inline_code">export class</span> from a <span class="inline_code">.js</span>, which it can only do from a <span class="inline_code">.m</span> file. And I seriously doubt the AI would have attempted to delete a key from the AVL tree using <span class="inline_code">Array.splice</span> if everything was written in JavaScript. I think the AI only made such an egregious mistake because a part of the program was written in AEC. That's why I think this &quot;<i>Well, AI will soon fix the interoperability issues.</i>&quot; argument for making new programming languages is wrong.
       </div>
       <script type="text/javascript">
+        function escapeHtml(text) {
+          return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        }
         function highlightedToken(token) {
-          if (token == "<") token = "&lt;";
-          if (token == ">") token = "&gt;";
-          if (token.substr(0, 2) == "//" || token.substr(0, 2) == "/*")
-            return '<span class="Comment">' + token + "</span>";
-          if (token.charAt(0) == '"' || token.charAt(0) == "'")
+          var escapedToken = escapeHtml(token);
+          if (escapedToken.substr(0, 2) == "//" || escapedToken.substr(0, 2) == "/*")
+            return '<span class="Comment">' + escapedToken + "</span>";
+          if (escapedToken.charAt(0) == '"' || escapedToken.charAt(0) == "'")
             return (
               '<span class="String">' +
-              token
+              escapedToken
                 .replace(/\\\\/g, "<b>\\<i>\\</i></b>")
                 .replace(/\\n/g, "<b>\\<i>n</i></b>")
                 .replace(/\\t/g, "<b>\\<i>t</i></b>")
                 .replace(/\\\"/g, '<b>\\<i>"</i></b>') +
               "</span>"
             );
-          if (token.substr(0, 2) == 'R"')
+          if (escapedToken.substr(0, 2) == 'R"')
             return (
               '<span class="String">' +
               token.replace(/\n/g, '</span>\n<span class="String">') +
@@ -3967,15 +3972,15 @@ UPDATE on 27/12/2025: You know, we computer engineers frequently debate whether 
           )
             return '<span class="Operator">' + token + "</span>";
           if (
-            token == "{" ||
-            token == "}" ||
-            token == "(" ||
-            token == ")" ||
-            token == "[" ||
-            token == "]"
+            escapedToken == "{" ||
+            escapedToken == "}" ||
+            escapedToken == "(" ||
+            escapedToken == ")" ||
+            escapedToken == "[" ||
+            escapedToken == "]"
           )
-            return '<span class="Parenthesis">' + token + "</span>";
-          return token;
+            return '<span class="Parenthesis">' + escapedToken + "</span>";
+          return escapedToken;
         }
         function highlightAEC(sourceCode) {
           var currentToken = "",
