@@ -185,9 +185,7 @@ public:
     }
     lineNumber = columnNumber = 0;
   }
-  TreeNode(std::string newText, int newLine, int newColumn) {
-    *this = TreeNode(); // For some weird reason, just "TreeNode()" won't do the
-                        // trick.
+  TreeNode(std::string newText, int newLine, int newColumn) : TreeNode() {
     text = newText;
     lineNumber = newLine;
     columnNumber = newColumn;
