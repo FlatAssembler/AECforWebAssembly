@@ -12,6 +12,8 @@
 #include "compilingContext.cpp"
 #include "stringManipulationHelperFunctions.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
+#include <sstream>
+#include <iterator>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -194,14 +196,13 @@ public:
   tokenize(std::string input); // See "tokenizer.cpp" for the implementation.
   static std::string JSONifyArrayOfTokens(
       std::vector<TreeNode> tokenizedString) { // For debugging the tokenizer.
-    std::string ret = "[";
-    if (!tokenizedString.size())
-      return "[]";
-    for (unsigned int i = 0; i < tokenizedString.size(); i++)
-      if (i != tokenizedString.size() - 1)
-        ret += "'" + tokenizedString[i].text + "',";
-      else
-        ret += "'" + tokenizedString[i].text + "']";
+    std::vector<std::string> texts(tokenizedString.size());
+    std::transform(tokenizedString.begin(), tokenizedString.end(), texts.begin(),
+                   [](TreeNode node){return "'" + node.text + "'";});
+    std::stringstream output_stream;
+    std::ostream_iterator<std::string> output_iterator(output_stream, ",");
+    std::copy(text.begin(),texts.end(),output_iterator);
+    std::string ret = "[" + output_stream.str() + "]";
     return ret;
   }
   static std::vector<TreeNode> parse(
