@@ -207,7 +207,7 @@ public:
                                               // to using ostream iterators is the
                                               // fact that I thought they care of
                                               // this trailing comma themselves.
-        str = str.substr(0, str.size() - 2);
+        str = str.substr(0, str.size() - 1);
     std::string ret = "[" + str + "]";
     return ret;
   }
