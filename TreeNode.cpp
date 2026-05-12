@@ -228,9 +228,8 @@ public:
     std::ostream_iterator<std::string> output_iterator(output_stream, " ");
     std::copy(LispExpressions.begin(), LispExpressions.end(), output_iterator);
     std::string childExpressions = output_stream.str();
-    if (childExpressions.size() and
-        childExpressions.substr(childExpressions.size() - 1, 1) == " ")
-      childExpressions = childExpressions.substr(0, childExpressions.size() - 1);
+    if (!childExpressions.empty() and childExpressions.back() == ' ')
+      childExpressions.pop_back();
     return "(" +
            ((text.back() == '(' or text.back() == '[')
                 ? (text.substr(0, text.size() - 1))
