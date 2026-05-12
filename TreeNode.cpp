@@ -12,13 +12,13 @@
 #include "compilingContext.cpp"
 #include "stringManipulationHelperFunctions.cpp"
 #include <ciso646> // Necessary for Microsoft C++ Compiler.
-#include <sstream>
-#include <iterator>
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <string>
 #if !(defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||            \
                             __GNUC__ == 5 && __GNUC_MINOR__ == 1))
@@ -197,18 +197,20 @@ public:
   static std::string JSONifyArrayOfTokens(
       std::vector<TreeNode> tokenizedString) { // For debugging the tokenizer.
     std::vector<std::string> texts(tokenizedString.size());
-    std::transform(tokenizedString.begin(), tokenizedString.end(), texts.begin(),
-                   [](TreeNode node){return "'" + node.text + "'";});
+    std::transform(tokenizedString.begin(), tokenizedString.end(),
+                   texts.begin(), // C++ `std::transform` is the equivalent of
+				  // the JavaScript `Array.map` function.
+                   [](TreeNode node) { return "'" + node.text + "'"; });
     std::stringstream output_stream;
     std::ostream_iterator<std::string> output_iterator(output_stream, ",");
-    std::copy(texts.begin(),texts.end(),output_iterator);
+    std::copy(texts.begin(), texts.end(), output_iterator);
     std::string str = output_stream.str();
-    if (str.size() and
-        str.substr(str.size() - 1, 1) == ",") // And the very reason I switched to
-                                              // to using ostream iterators is the
-                                              // fact that I thought they care of
-                                              // this trailing comma themselves.
-        str = str.substr(0, str.size() - 1);
+    if (str.size() and str.substr(str.size() - 1, 1) ==
+                           ",") // And the very reason I switched to
+                                // to using ostream iterators is the
+                                // fact that I thought they care of
+                                // this trailing comma themselves.
+      str = str.substr(0, str.size() - 1);
     std::string ret = "[" + str + "]";
     return ret;
   }
@@ -222,11 +224,12 @@ public:
     if (children.size() == 0)
       return text;
     std::stringstream output_stream;
-    std::transform(children.begin(), children.end(),
-                   std::ostream_iterator<std::string>(output_stream, " "),
-                   [](const TreeNode &node) { return node.getLispExpression(); });
+    std::transform(
+        children.begin(), children.end(),
+        std::ostream_iterator<std::string>(output_stream, " "),
+        [](const TreeNode &node) { return node.getLispExpression(); });
     std::string childExpressions = output_stream.str();
-    if (!childExpressions.empty() and childExpressions.back() == ' ')
+    if (not(childExpressions.empty()) and childExpressions.back() == ' ')
       childExpressions.pop_back();
     return "(" +
            ((text.back() == '(' or text.back() == '[')
