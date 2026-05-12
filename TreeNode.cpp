@@ -201,7 +201,7 @@ public:
                    [](TreeNode node){return "'" + node.text + "'";});
     std::stringstream output_stream;
     std::ostream_iterator<std::string> output_iterator(output_stream, ",");
-    std::copy(text.begin(),texts.end(),output_iterator);
+    std::copy(texts.begin(),texts.end(),output_iterator);
     std::string ret = "[" + output_stream.str() + "]";
     return ret;
   }
