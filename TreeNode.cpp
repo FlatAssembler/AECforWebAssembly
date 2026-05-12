@@ -221,12 +221,10 @@ public:
               // to compile my language to Lisp).
     if (children.size() == 0)
       return text;
-    std::vector<std::string> LispExpressions(children.size());
-    std::transform(children.begin(), children.end(), LispExpressions.begin(),
-                   [](const TreeNode &node) { return node.getLispExpression(); });
     std::stringstream output_stream;
-    std::ostream_iterator<std::string> output_iterator(output_stream, " ");
-    std::copy(LispExpressions.begin(), LispExpressions.end(), output_iterator);
+    std::transform(children.begin(), children.end(),
+                   std::ostream_iterator<std::string>(output_stream, " "),
+                   [](const TreeNode &node) { return node.getLispExpression(); });
     std::string childExpressions = output_stream.str();
     if (!childExpressions.empty() and childExpressions.back() == ' ')
       childExpressions.pop_back();
