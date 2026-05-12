@@ -103,13 +103,15 @@ public:
       basicDataTypeSizes["Integer64"] = 8;
       basicDataTypeSizes["Decimal64"] = 8;
       basicDataTypeSizes["Integer16"] = 2;
-      for (auto iterator = basicDataTypeSizes.begin();
-           iterator != basicDataTypeSizes.end(); iterator++)
-        if (iterator->first.find("Pointer") == std::string::npos)
-          basicDataTypeSizes[iterator->first + "Pointer"] =
-              4; // JavaScript (WebAssembly) virtual machine is 32-bit (pointers
-                 // being 32 bits or 4 bytes long), unless somebody switches to
-                 // the 64-bit mode (which is almost never done).
+      std::for_each(basicDataTypeSizes.begin(), basicDataTypeSizes.end(),
+                    [&](std::pair<std::string, int> type) {
+                      if (not(isPointerType(type.first)))
+                        basicDataTypeSizes[type.first + "Pointer"] =
+                            4; // JavaScript (WebAssembly) virtual machine is
+                               // 32-bit (pointers being 32 bits or 4 bytes
+                               // long), unless somebody switches to the 64-bit
+                               // mode (which is almost never done).
+                    });
       basicDataTypeSizes["Nothing"] = 0;
       mappingOfAECTypesToWebAssemblyTypes =
 #if defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ <= 9 ||              \
@@ -199,7 +201,7 @@ public:
     std::vector<std::string> texts(tokenizedString.size());
     std::transform(tokenizedString.begin(), tokenizedString.end(),
                    texts.begin(), // C++ `std::transform` is the equivalent of
-				  // the JavaScript `Array.map` function.
+                                  // the JavaScript `Array.map` function.
                    [](TreeNode node) { return "'" + node.text + "'"; });
     std::stringstream output_stream;
     std::ostream_iterator<std::string> output_iterator(output_stream, ",");
