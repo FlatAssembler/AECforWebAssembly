@@ -221,17 +221,21 @@ public:
               // to compile my language to Lisp).
     if (children.size() == 0)
       return text;
-    std::string LispExpression = "(" +
-                                 ((text.back() == '(' or text.back() == '[')
-                                      ? (text.substr(0, text.size() - 1))
-                                      : (text)) +
-                                 " ";
-    for (unsigned int i = 0; i < children.size(); i++)
-      if (i == children.size() - 1)
-        LispExpression += children[i].getLispExpression() + ")";
-      else
-        LispExpression += children[i].getLispExpression() + " ";
-    return LispExpression;
+    std::vector<std::string> LispExpressions(children.size());
+    std::transform(children.begin(), children.end(), LispExpressions.begin(),
+                   [](const TreeNode &node) { return node.getLispExpression(); });
+    std::stringstream output_stream;
+    std::ostream_iterator<std::string> output_iterator(output_stream, " ");
+    std::copy(LispExpressions.begin(), LispExpressions.end(), output_iterator);
+    std::string childExpressions = output_stream.str();
+    if (childExpressions.size() and
+        childExpressions.substr(childExpressions.size() - 1, 1) == " ")
+      childExpressions = childExpressions.substr(0, childExpressions.size() - 1);
+    return "(" +
+           ((text.back() == '(' or text.back() == '[')
+                ? (text.substr(0, text.size() - 1))
+                : (text)) +
+           " " + childExpressions + ")";
   }
   virtual int interpretAsACompileTimeIntegerConstant() const {
     if ((text == "<" or text == ">" or text == "<=" or text == ">=") and
