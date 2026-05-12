@@ -203,7 +203,8 @@ public:
     std::ostream_iterator<std::string> output_iterator(output_stream, ",");
     std::copy(texts.begin(),texts.end(),output_iterator);
     std::string str = output_stream.str();
-    if (str.substr(str.size() - 1, 1) == ",") // And the very reason I switched to
+    if (str.size() and
+        str.substr(str.size() - 1, 1) == ",") // And the very reason I switched to
                                               // to using ostream iterators is the
                                               // fact that I thought they care of
                                               // this trailing comma themselves.
