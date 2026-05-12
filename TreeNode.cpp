@@ -202,7 +202,13 @@ public:
     std::stringstream output_stream;
     std::ostream_iterator<std::string> output_iterator(output_stream, ",");
     std::copy(texts.begin(),texts.end(),output_iterator);
-    std::string ret = "[" + output_stream.str() + "]";
+    std::string str = output_stream.str();
+    if (str.substr(str.size() - 1, 1) == ",") // And the very reason I switched to
+                                              // to using ostream iterators is the
+                                              // fact that I thought they care of
+                                              // this trailing comma themselves.
+        str = str.substr(0, str.size() - 2);
+    std::string ret = "[" + str + "]";
     return ret;
   }
   static std::vector<TreeNode> parse(
