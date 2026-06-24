@@ -290,6 +290,14 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
     if (the_cpp_runtime_library_supports_regexes)
       JSON = std::regex_replace(JSON, std::regex(R"(;\))"),
 #if defined(__GNUC__) && __GNUC__ == 4
+		      // You know, in the world of front-end development, the
+		      // developers doing browser sniffing are often warned to
+		      // make sure that, when testing whether a JavaScript
+		      // environment supports some feature, one needs to make
+		      // sure one does not accidentally **invoke** the very
+		      // feature it is trying to test for. I broke that rule
+		      // here in C++, and my program did not even compile in
+		      // GCC 4.8.5.
 			std::string(
 #endif
 		      ";\\)"
