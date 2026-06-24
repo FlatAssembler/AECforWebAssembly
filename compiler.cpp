@@ -288,7 +288,15 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
 #ifdef OUTPUT_DEBUG_COMMENTS_IN_ASSEMBLY_COMMENTS
     std::string JSON = context.JSONify();
     if (the_cpp_runtime_library_supports_regexes)
-      JSON = std::regex_replace(JSON, std::regex(R"(;\))"), ";\\)");
+      JSON = std::regex_replace(JSON, std::regex(R"(;\))"),
+#if defined(__GNUC__) && __GNUC__ == 4
+			std::string(
+#endif
+		      ";\\)"
+#if defined(__GNUC__) && __GNUC__ == 4
+		      )
+#endif
+		      );
     else {
       std::string tmp;
       for (unsigned int i = 0; i < JSON.size(); i++) {
