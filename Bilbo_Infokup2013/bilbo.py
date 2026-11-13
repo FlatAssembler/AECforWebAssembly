@@ -15,7 +15,7 @@ for permutation in allPermutations:
     currentFirst = permutation[0]*100 + permutation[1]*10 + permutation[2]
     currentSecond = permutation[3]*100 + permutation[4]*10 + permutation[5]
     currentSum = currentFirst + currentSecond
-    if currentSum >= maximum and currentSum < 1000:
+    if currentSum >= maximum and currentSum < 1000 and permutation[0] >= 1 and permutation[3] >= 1:
         maximum = currentSum
         first = currentFirst
         second = currentSecond

@@ -189,7 +189,9 @@ topOfTheStack:
         printString(AddressOf(debugOutput[0]));
       }
       EndIf;
-      If result < sum < 1000 Then {
+      If result < sum < 1000 and
+         currentAttempt.digits[0] != 0 and
+         currentAttempt.digits[3] >= 1 Then {
       result:
         = sum;
       firstNumber:
