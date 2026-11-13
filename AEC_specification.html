@@ -3914,9 +3914,9 @@ UPDATE on 27/12/2025: I've made <a href="https://aecforwebassembly.sourceforge.i
             /Pointer$/.test(token) ||
             /^PointerTo/.test(token)
           )
-            return '<span class="Type">' + token + "</span>";
+            return '<span class="Type">' + escapedToken + "</span>";
           if (token.charAt(0) >= "0" && token.charAt(0) <= "9")
-            return '<span class="Constant">' + token + "</span>";
+            return '<span class="Constant">' + escapedToken + "</span>";
           if (
             token == "Function" ||
             token == "Which" ||
