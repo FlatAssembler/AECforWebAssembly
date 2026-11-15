@@ -1588,13 +1588,88 @@ AssemblyCode TreeNode::compile(CompilationContext context) const {
         "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) + ".eq\n" +
         convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
         convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  }
+  else if (text == "!=" and
+             context.structureSizes.count(children.at(0).getType(context))) {
+    // I am guessing that there is a bug somewhere in the following lines:
+    // https://github.com/FlatAssembler/AECforWebAssembly/issues/20
+    if (children[0].getType(context) != children.at(1).getType(context))
+      std::cerr
+          << "Line " << lineNumber << ", Column " << columnNumber
+          << ", Compiler warning: Comparing structures of different types: \""
+          << children[0].getType(context) << "\" and \""
+          << children[1].getType(context) << "\"!" << std::endl;
+    auto iteratorPointingToTheStructureWeAreComparing =
+        std::find_if(context.structures.begin(), context.structures.end(),
+                     [=](const structure &str) {
+                       return str.name == children[0].getType(context);
+                     });
+    if (iteratorPointingToTheStructureWeAreComparing ==
+        context.structures.end()) {
+      std::cerr << "Line " << lineNumber << ", Column " << columnNumber
+                << ", Internal compiler error: The structure named \""
+                << children[0].getType(context)
+                << "\" is present in \"structureSizes\" array, but not in "
+                   "\"structures\" array!"
+                << std::endl;
+      throw CorruptCompilationContextException(context);
+    }
+    TreeNode structureComparisonConvertedIntoManyOrNodes("0", lineNumber,
+                                                          columnNumber);
+    for (std::string structureMemberName :
+         iteratorPointingToTheStructureWeAreComparing->memberNames)
+      for (int arrayIndex = 0;
+           arrayIndex <
+           (int)iteratorPointingToTheStructureWeAreComparing->arraySize.at(
+               structureMemberName);
+           arrayIndex++) {
+        TreeNode leftHandSide(".", lineNumber, columnNumber),
+            rightHandSide(".", lineNumber, columnNumber);
+        TreeNode nodeWithMemberName(structureMemberName, lineNumber,
+                                    columnNumber);
+        nodeWithMemberName.children.push_back(
+            TreeNode(std::to_string(arrayIndex), lineNumber, columnNumber));
+        leftHandSide.children = {children[0], nodeWithMemberName};
+        rightHandSide.children = {children.at(1), nodeWithMemberName};
+        TreeNode comparisonNode("!=", lineNumber, columnNumber);
+        comparisonNode.children = {leftHandSide, rightHandSide};
+        TreeNode orNode("or", lineNumber, columnNumber);
+        orNode.children = {comparisonNode,
+                            structureComparisonConvertedIntoManyOrNodes};
+        structureComparisonConvertedIntoManyOrNodes = orNode;
+      }
+    assembly += structureComparisonConvertedIntoManyOrNodes.compile(context);
   } else if (text == "!=") {
-    TreeNode notNode = TreeNode("not(", lineNumber, columnNumber);
-    TreeNode equalsNode = TreeNode("=", lineNumber, columnNumber);
-    equalsNode.children = <%children.at(0), children.at(1)%>;
-    notNode.children = <%equalsNode%>;
-    return notNode.compile(context);
-  } else if (text == "?:")
+    std::string firstType = children.at(0).getType(context);
+    std::string secondType = children.at(1).getType(context);
+    std::string strongerType;
+    if (isPointerType(firstType) and isPointerType(secondType))
+      strongerType = "Integer32";
+    else
+      strongerType =
+          getStrongerType(lineNumber, columnNumber, firstType, secondType);
+    AssemblyCode::AssemblyType assemblyType;
+    if (not(mappingOfAECTypesToWebAssemblyTypes.count(strongerType)) and
+        not(areWeCurrentlyTesting))
+      std::cerr << "Compiler warning: "
+                << "Line " << lineNumber << ", Column " << columnNumber
+                << ": The semantic analyzer outputted a type anotation for the "
+                   "AST node \""
+                << text
+                << "\" which the core of the compiler cannot parse. The "
+                   "compilation will continue under the assumption that the "
+                   "type is supposed to be \"Integer32\", but beware it might "
+                   "produce wrong assembly code!"
+                << std::endl;
+    assemblyType = mappingOfAECTypesToWebAssemblyTypes.count(strongerType)
+                       ? mappingOfAECTypesToWebAssemblyTypes.at(strongerType)
+                       : AssemblyCode::AssemblyType::i32;
+    assembly +=
+        "(" + stringRepresentationOfWebAssemblyType.at(assemblyType) + ".ne\n" +
+        convertTo(children[0], strongerType, context).indentBy(1) + "\n" +
+        convertTo(children[1], strongerType, context).indentBy(1) + "\n)";
+  }
+  else if (text == "?:")
     assembly +=
         "(if (result " + stringRepresentationOfWebAssemblyType.at(returnType) +
         ")\n" + convertToInteger32(children[0], context).indentBy(1) +

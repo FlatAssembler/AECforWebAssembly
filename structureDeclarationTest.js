@@ -10,7 +10,8 @@ WebAssembly.instantiate(buffer, importObject).then((results) => {
   if (exports.foo() == 3 && exports.bar() == 12 && exports.spam() == 3 &&
       exports.eggs() == 3 && exports.onion() == 1 &&
       exports.pomegranate() == 12 && exports.spaghetti() == 2 &&
-      exports.elephant() == 1 && exports.arrow() == 2) {
+      exports.elephant() == 1 && exports.arrow() == 2 &&
+      exports.inequalityOperatorTest() == 1) {
     process.exitCode = 0;
     console.log("Structure declaration test succeeded!");
   } else {
@@ -24,7 +25,9 @@ WebAssembly.instantiate(buffer, importObject).then((results) => {
                 "pomegranate()\t12\t" + exports.pomegranate() + "\n" +
                 "spaghetti()\t2\t" + exports.spaghetti() + "\n" +
                 "elephant()\t1\t" + exports.elephant() + "\n" +
-                "arrow()\t2\t" + exports.arrow() + "\n");
+                "arrow()\t2\t" + exports.arrow() + "\n" +
+                "inequalityOperatorTest()\t1\t" +
+	    exports.inequalityOperatorTest() + "\n");
     process.exitCode = 1;
   }
 });

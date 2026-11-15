@@ -159,4 +159,20 @@ Function arrow() Which Returns Integer32 Does {
   ptr += 1;
   Return(ptr->value);
 }
-EndFunction
+EndFunction;
+
+Function inequalityOperatorTest() Which Returns Integer32 Does {
+	// Should return 1.
+	InstantiateStructure Point first, second, third;
+	first.x := 1;
+	first.y := 2;
+	first.z := 3;
+	second.x := 3;
+	second.y := 2;
+	second.z := 1;
+	third.x := 1;
+	third.y := 2;
+	third.z := 3;
+	Return first != second and not(first != third);
+}
+EndFunction;
