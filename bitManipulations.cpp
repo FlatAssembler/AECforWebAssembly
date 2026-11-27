@@ -15,9 +15,8 @@
 #pragma once
 
 bool isHexadecimalNumber(std::string str) {
-  // std::regex("^(\\d|[a-f])+$"), some C++ compilers (GCC when targeting
-  // FreeDOS and CLANG when targeting Oracle Linux) produce wrong code for
-  // that regex.
+  if (the_cpp_runtime_library_supports_regexes)
+    return std::regex_search(str, std::regex(R"(^(\d|[a-f])+$)"));
   if (not(str.size()))
     return false;
   for (unsigned i = 0; i < str.size(); i++)
