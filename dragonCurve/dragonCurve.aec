@@ -83,7 +83,7 @@ EndFunction
 
 // This function is supposed to be periodically called by JavaScript:
 Function step() Which Returns Nothing Does
-    If not(path[currentStep] = 0)
+    If  path[currentStep] != 0
         and 0 < currentX < 500
         and 0 < currentY < 500 Then
         Integer32 nextX : = currentX + directionX[currentDirection] * lineLength,
