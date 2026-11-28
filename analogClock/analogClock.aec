@@ -185,7 +185,7 @@ Function sin(Decimal32 degrees) Which Returns Decimal32 Does {
   EndIf;
   If degrees > 90 Then { Return cos(degrees - 90); }
   EndIf;
-  If not(sineMemoisation[asm_f32("(f32.nearest (f32.load %degrees))")] = 0)
+  If sineMemoisation[asm_f32("(f32.nearest (f32.load %degrees))")] != 0
       Then { // I've used inline assembly here because nothing else I
              // write will output "f32.nearest" (called "round" in most
              // programming languages) WebAssembly directive, and it's way
