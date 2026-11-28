@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Gray Code implemented in the WebAssembly dialect of AEC</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	</head>
+	<body>
+		<h1>Gray Code in AEC</h1>
+		<label for="decimal_number">Enter a decimal number:</label><br/><input type="number" id="decimal_number" /><br/>
+		<button id="myButton">Invoke the AEC program</button><br/>
+		Output of the AEC program:
+		<code id="output">null</code><br/>
+		You can see <a href="gray.aec.html">the source code of the AEC program compiled to WebAssembly</a>.
+		<script>
+		let memory, convertDecimalToBinaryAndGray;
+		fetch("gray.wasm").then(
+			(response)=>
+				response.arrayBuffer()).then((bytes)=>
+				WebAssembly.instantiate(bytes)).then(
+					(module)=>{
+						memory=module.instance.exports.memory;
+						convertDecimalToBinaryAndGray =
+							module.instance.exports.convertDecimalToBinaryAndGray;
+					}
+				);
+		document.getElementById("myButton").onclick=()=>{
+			let decimalNumber = document.getElementById("decimal_number").value;
+			let pointer = convertDecimalToBinaryAndGray(decimalNumber);
+			let arr = new Uint8Array(memory.buffer);
+			let str = "";
+			while (arr[pointer])
+				str += String.fromCharCode(arr[pointer++]);
+			document.getElementById("output").innerText = str;
+		}
+		</script>
+	</body>
+</html>

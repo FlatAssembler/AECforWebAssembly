@@ -1,0 +1,92 @@
+#target WASI
+
+Function reverseString(PointerToCharacter string) Which Returns Nothing Is
+                                                  Declared;
+
+Function convertIntegerToString(PointerToCharacter string,
+                                Integer32 number, Integer32 base := 10)
+                                Which Returns Nothing Does
+  Integer32 isNumberNegative := 0;
+  If number < 0 Then
+    number *= -1;
+    isNumberNegative := 1;
+  EndIf
+  Integer32 i := 0;
+  While number >= base Loop
+    ValueAt(string + i) := '0' + mod(number, base);
+    number /= base;
+    i += 1;
+  EndWhile
+  ValueAt(string + i) := '0' + number;
+  i += 1;
+  If isNumberNegative Then
+    ValueAt(string + i) := '-';
+    i += 1;
+  EndIf
+  ValueAt(string + i) := 0;
+  reverseString(string);
+EndFunction
+
+Function strlen(PointerToCharacter str) Which Returns Integer32 Does
+  If str = 0 Then
+    Return 0;
+  EndIf
+  Integer32 length := 0;
+  While ValueAt(str + length) Loop
+    length += 1;
+  EndWhile
+  Return length;
+EndFunction
+
+Function appendIntegerToString(PointerToCharacter string,
+                               Integer32 number, Integer32 base := 10)
+                              Which Returns Nothing Does
+  convertIntegerToString(string + strlen(string), number, base);
+EndFunction
+
+
+Function reverseString(PointerToCharacter string) Which Returns Nothing Does
+  PointerToCharacter pointerToLastCharacter := string + strlen(string) - 1;
+  While pointerToLastCharacter - string > 0 Loop
+    Character tmp := ValueAt(string);
+    ValueAt(string) := ValueAt(pointerToLastCharacter);
+    ValueAt(pointerToLastCharacter) := tmp;
+    string += 1;
+    pointerToLastCharacter -= 1;
+  EndWhile
+EndFunction
+
+Function strcpy(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
+  While ValueAt(src) Loop
+    ValueAt(dest) := ValueAt(src);
+    dest += 1;
+    src += 1;
+  EndWhile
+  ValueAt(dest) := 0;
+EndFunction
+
+Function strcat(PointerToCharacter dest,
+                PointerToCharacter src) Which Returns Nothing Does
+  strcpy(dest + strlen(dest), src);
+EndFunction
+
+Character output[256];
+
+Function convertDecimalToBinaryAndGray(Integer32 number) Which Returns
+                                                         PointerToCharacter
+                                                         Does
+  output[0] := 0;
+  PointerToCharacter output := AddressOf(output[0]);
+  convertIntegerToString(output, number);
+  strcat(output, "_(10)=");
+  appendIntegerToString(output, number, 2);
+  strcat(output, "_(2)=");
+  Integer32 numberShiftedToRight := number / 2;
+  Integer32 grayCode := (number or numberShiftedToRight) and
+                        invertBits(number and numberShiftedToRight);
+  appendIntegerToString(output, grayCode, 2);
+  strcat(output, "_(Gray)");
+  Return output;
+EndFunction
+
