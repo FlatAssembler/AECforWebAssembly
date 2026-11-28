@@ -23,6 +23,8 @@
  * to WebAssembly to make sense?).
  */
 
+#target WASI // So that we can target Firefox 52.
+
 // Let's import some JavaScript functions...
 Function drawLine(Integer32 x1,
                   Integer32 y1,

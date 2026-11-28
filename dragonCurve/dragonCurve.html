@@ -30,10 +30,13 @@
       >AEC-to-WebAssembly compiler</a
     >.<br />
     <b>This only works in very modern browsers.</b> I'm not too interested in
-    targeting archaic browsers here. This only works in Firefox 62 and newer or
+    targeting archaic browsers here. <del>This only works in Firefox 62 and newer or
     Chrome 69 and newer. After a few years (if not months), all JavaScript
     environments will become as capable as they are, rather than like Internet
-    Explorer.<br /><br />
+    Explorer.</del> After quite a bit of tweaking JavaScript and WebAssembly,
+    I made it work in Firefox 52 (the very last version of Firefox to work on Windows XP and the very first one to support WebAssembly), so long as you go to <code>about:config</code>
+    and explicitly enable WebAssembly. It won't be as fast as it is in modern
+    browsers, but it will work there.<br /><br />
     <svg id="canvas" viewbox="0 0 500 500">
       <g id="triangularTurtle" transform="rotate(90)">
         <path
@@ -59,12 +62,8 @@
     <br />
     You can see the source code of the AEC program
     <a href="dragonCurve.aec.html">here</a>.
-    <script type="text/javascript">
-      const stack_pointer = new WebAssembly.Global(
-        { value: "i32", mutable: true },
-        0
-      );
-      let memory = new WebAssembly.Memory({ initial: 1 });
+    <script type="text/javascript"> 
+      let memory;
       function getStringAtAddress(ptr) {
         let bytes = new Uint8Array(memory.buffer);
         let str = "";
@@ -115,9 +114,7 @@
         );
       }
       let importObject = {
-        JavaScript: {
-          stack_pointer: stack_pointer,
-          memory: memory,
+        wasi_unstable: {
           drawLine: drawLine,
           applyTurtleTransformation: applyTurtleTransformation,
         },
@@ -130,6 +127,7 @@
           exports = results.instance.exports;
           init = exports.init;
           step = exports.step;
+	  memory = exports.memory;
           init();
           setInterval(step, 50);
         });
